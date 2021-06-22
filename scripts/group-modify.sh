@@ -12,24 +12,21 @@ users = $3
 
 while getopts ":ra" opt; do
   case ${opt} in
-    r )
+    r)
         for ID in $(echo $users | sed "s/,/ /g")
         do
             setfacl -Rx u:ID,d:u:ID dest_path
-        done
-        ;;
-    a )
+        done ;;
+    a)
         for ID in $(echo $users | sed "s/,/ /g")
         do
             setfacl -Rm d:u:ID:rwX,u:ID:rwX dest_path
-        done
-        ;;
-    \? ) 
-        echo "Usage: $0 [-r] [-a] </data/path> <user1>,<user2> " 1>&2; exit 1;
-        ;;
+        done ;;
+    \?) 
+        echo "Usage: $0 [-r] [-a] </data/path> <user1>,<user2> " 1>&2; exit 1 ;;
     esac 
   echo "New access list of directory" 
-  getfacl DEST_PATH
+  getfacl dest_path
 done
 
 
