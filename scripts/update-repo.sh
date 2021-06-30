@@ -1,19 +1,15 @@
 #!/bin/bash
-REPOSITORIES=`../..`
-
 IFS=$'\n'
 
-for REPO in `ls "$REPOSITORIES/"`
+for REPO in `ls "/home/data/NDClab/scripts/"`
 do
-  if [ -d "$REPOSITORIES/$REPO" ]
-  then
-    if [ -d "$REPOSITORIES/$REPO/.git" ]
+  echo "Checking $REPO"
+  if [ -e "/home/data/NDClab/scripts/$REPO/.git" ]
     then
-      cd "$REPOSITORIES/$REPO"
+      cd "/home/data/NDClab/scripts/$REPO"
       git fetch
       git pull
     else
       echo "Skipping"
-    fi
   fi
 done
