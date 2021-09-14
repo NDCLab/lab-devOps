@@ -11,6 +11,6 @@ do
       git pull
       git push
     else
-      echo "Skipping"
+      echo "Not a git repo. Skipping."
   fi
 done
