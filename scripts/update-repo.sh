@@ -9,6 +9,7 @@ do
       cd "/home/data/NDClab/scripts/$REPO"
       git fetch
       git pull
+      git push
     else
       echo "Skipping"
   fi
