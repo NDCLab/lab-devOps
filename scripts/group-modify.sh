@@ -12,14 +12,14 @@ while getopts ":ra" opt; do
     r)
         for ID in $(echo $3 | sed "s/,/ /g")
         do
-            echo ID
-            setfacl -Rx u:ID,d:u:ID $2
+            echo $ID
+            setfacl -Rx u:$ID,d:u:$ID $2
         done ;;
     a)
         for ID in $(echo $3 | sed "s/,/ /g")
         do
-            echo ID
-            setfacl -Rm d:u:ID:rwX,u:ID:rwX $2
+            echo $ID
+            setfacl -Rm d:u:$ID:rwX,u:$ID:rwX $2
         done ;;
     \?) 
         echo "Usage: sh group-modify.sh [-r] [-a] </data/path> <user1>,<user2>" 1>&2; exit 1 ;;
