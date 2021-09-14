@@ -10,20 +10,22 @@ usage() { echo "Usage: sh group-modify.sh [-r] [-a] </data/path> <user1>,<user2>
 while getopts ":ra" opt; do
   case ${opt} in
     r)
-        for ID in $(echo $2 | sed "s/,/ /g")
+        for ID in $(echo $3 | sed "s/,/ /g")
         do
-            setfacl -Rx u:ID,d:u:ID $1
+            echo ID
+            setfacl -Rx u:ID,d:u:ID $2
         done ;;
     a)
-        for ID in $(echo $2 | sed "s/,/ /g")
+        for ID in $(echo $3 | sed "s/,/ /g")
         do
-            setfacl -Rm d:u:ID:rwX,u:ID:rwX $1
+            echo ID
+            setfacl -Rm d:u:ID:rwX,u:ID:rwX $2
         done ;;
     \?) 
         echo "Usage: sh group-modify.sh [-r] [-a] </data/path> <user1>,<user2>" 1>&2; exit 1 ;;
     esac 
   echo "New access list of directory" 
-  getfacl $1
+  getfacl $2
 done
 
 
