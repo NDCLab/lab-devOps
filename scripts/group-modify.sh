@@ -5,28 +5,33 @@
 # <OPTIONS>
 #  -r remove to group
 #  -a add to group
-usage() { echo "Usage: $0 [-r] [-a] </data/path> <user1>,<user2> " 1>&2; exit 1; }
+usage() { echo "Usage: sh group-modify.sh [-r] [-a] </data/path> <user1>,<user2>" 1>&2; exit 1; }
 
-dest_path = $2
-users = $3 
+if [ ! -d $2 ] 
+then
+    echo "Directory $2 does not exist. Please check path." 
+    exit 9999 
+fi
 
 while getopts ":ra" opt; do
   case ${opt} in
     r)
-        for ID in $(echo $users | sed "s/,/ /g")
+        for ID in $(echo $3 | sed "s/,/ /g")
         do
-            setfacl -Rx u:ID,d:u:ID dest_path
+            echo "removing $ID"
+            setfacl -Rx u:$ID,d:u:$ID $2
         done ;;
     a)
-        for ID in $(echo $users | sed "s/,/ /g")
+        for ID in $(echo $3 | sed "s/,/ /g")
         do
-            setfacl -Rm d:u:ID:rwX,u:ID:rwX dest_path
+            echo "adding $ID"
+            setfacl -Rm d:u:$ID:rwX,u:$ID:rwX $2
         done ;;
     \?) 
-        echo "Usage: $0 [-r] [-a] </data/path> <user1>,<user2> " 1>&2; exit 1 ;;
+        echo "Usage: sh group-modify.sh [-r] [-a] </data/path> <user1>,<user2>" 1>&2; exit 1 ;;
     esac 
   echo "New access list of directory" 
-  getfacl dest_path
+  getfacl $2
 done
 
 

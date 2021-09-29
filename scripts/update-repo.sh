@@ -9,7 +9,8 @@ do
       cd "/home/data/NDClab/scripts/$REPO"
       git fetch
       git pull
+      git push
     else
-      echo "Skipping"
+      echo "Not a git repo. Skipping."
   fi
 done
