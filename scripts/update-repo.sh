@@ -19,7 +19,7 @@ echo "Checking repos in datasets"
 for REPO in `ls "/home/data/NDClab/datasets"`
 do
   echo "Checking $REPO"
-  if [ -e "/home/data/NDClab/datasets/$REPO/.git" \
+  if [ -e "/home/data/NDClab/datasets/$REPO/.git" ]
     then
       cd "home/data/NDClab/datasets/$REPO"
       git fetch
@@ -33,7 +33,7 @@ echo "Checking repos in analyses"
 for REPO in `ls "/home/data/NDClab/analyses"`
 do
   echo "Checking $REPO"
-  if [ -e "/home/data/NDClab/analyses/$REPO/.git"`
+  if [ -e "/home/data/NDClab/analyses/$REPO/.git" ]
     then
       cd "home/data/NDClab/datasets/$REPO"
       git fetch
@@ -42,3 +42,4 @@ do
       echo "Not a git repo. Skipping."
    fi
 done
+
