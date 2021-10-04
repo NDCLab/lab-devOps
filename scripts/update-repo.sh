@@ -7,7 +7,7 @@ do
   echo "Checking $REPO"
   if [ -e "/home/data/NDClab/tools/$REPO/.git" ]
     then
-      cd "/home/data/NDClab/scripts/$REPO"
+      cd "/home/data/NDClab/tools/$REPO"
       git fetch
       git pull
     else
@@ -21,7 +21,7 @@ do
   echo "Checking $REPO"
   if [ -e "/home/data/NDClab/datasets/$REPO/.git" ]
     then
-      cd "home/data/NDClab/datasets/$REPO"
+      cd "/home/data/NDClab/datasets/$REPO"
       git fetch
       git pull
     else
@@ -35,7 +35,7 @@ do
   echo "Checking $REPO"
   if [ -e "/home/data/NDClab/analyses/$REPO/.git" ]
     then
-      cd "home/data/NDClab/datasets/$REPO"
+      cd "/home/data/NDClab/analyses/$REPO"
       git fetch
       git pull
     else
