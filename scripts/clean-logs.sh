@@ -1,5 +1,11 @@
 #!/bin/bash
-# A script to clean up log files if they surpass a size. Will be run automatically via cron
+# A script to clean up log files if they surpass a size. Will be run automatically via cron.
+
+if [ ! -d $1 ] 
+then
+    echo "Directory $1 does not exist. Please check path." 
+    exit 9999 
+fi
 
 val=$(du -shk $1 | awk '{print $1}')
 declare -i LIMIT=5000000
