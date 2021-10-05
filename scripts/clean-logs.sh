@@ -11,5 +11,5 @@ if [ "$val" -gt "$LIMIT" ]
     find $1 -name "*.log" -type f
     find $1 -name "*.log" -type f -delete
   else
-    echo "Log file disk usage below $LIMIT. Skipping."
+    echo "Log file disk usage is $val. Below $LIMIT. Skipping."
 fi
