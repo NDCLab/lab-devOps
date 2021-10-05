@@ -6,10 +6,10 @@ declare -i LIMIT=5000000
 
 if [ "$val" -gt "$LIMIT" ]
   then
-    echo "Log file disk usage is above $LIMIT. Clearing $1"
+    echo "Log file disk usage is above $LIMIT KB. Clearing $1"
     echo "Deleting the following:"
     find $1 -name "*.log" -type f
     find $1 -name "*.log" -type f -delete
   else
-    echo "Log file disk usage is $val. Below $LIMIT. Skipping."
+    echo "Log file disk usage is $val KB. Below $LIMIT KB. Skipping."
 fi
