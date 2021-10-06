@@ -5,7 +5,7 @@
 # <OPTIONS>
 #  -r remove to group
 #  -a add to group
-usage() { echo "Usage: sh group-modify.sh [-r] [-a] </data/path> <user1>,<user2>" 1>&2; exit 1; }
+usage() { echo "Usage: sh group-modify.sh [-r/a] </data/path> <user1>,<user2>" 1>&2; exit 1; }
 
 if [ ! -d $2 ] 
 then
