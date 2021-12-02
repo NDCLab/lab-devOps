@@ -4,11 +4,12 @@ IFS=$'\n'
 echo "Checking repos in datasets"
 for dir in `ls "/home/data/NDClab/datasets"`
 do
-  echo "Validating $dir encryption"
     if [ -e "/home/data/NDClab/datasets/$dir/sourcedata/raw/zoom/" ]; then
+        echo "Validating $dir encryption"
         cd "/home/data/NDClab/datasets/$dir/sourcedata/raw/zoom/"
         for sub in `ls ./`
         do
+            echo "checking encrypted files of $sub"
             cd "$sub"
             for file in 'ls ./'
             do
