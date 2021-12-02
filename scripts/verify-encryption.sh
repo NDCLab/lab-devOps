@@ -4,7 +4,7 @@ DATA_PATH="/home/data/NDClab/datasets"
 ZOOM_PATH="sourcedata/raw/zoom"
 
 echo "Checking repos in datasets"
-for DIR in `ls $LAB_PATH`
+for DIR in `ls $DATA_PATH`
 do
     if [ -e "$DATA_PATH/$DIR/$ZOOM_PATH" ]; then
         echo "Validating $DIR encryption"
