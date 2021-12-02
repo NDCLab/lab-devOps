@@ -8,16 +8,15 @@ do
         echo "Validating $dir encryption"
         cd "/home/data/NDClab/datasets/$dir/sourcedata/raw/zoom/"
         for sub in `ls ./`; do
-            echo "checking if files of $sub are encrypted"
+            echo "checking if contents of $sub are encrypted"
             cd "$sub"
             for file in *; do
                 if "gpg --list-only $file" grep -q 'gpg: encrypted with \. passphrase'; then
                     echo "file $file encrypted"
                 else
-                    echo "file $file not encrypted, notifying tech"
                     LOC = $(pwd)
-                    echo "${LOC}"
-                    # echo "$file failed encryption-check in ${LOC}" | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
+                    echo "file ${LOC}/$file not encrypted, notifying tech"
+                    # echo "${LOC}\$file failed encryption-check in" | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
                 fi
             done
         done
