@@ -14,8 +14,7 @@ do
                 if "gpg --list-only $file" grep -q 'gpg: encrypted with \. passphrase'; then
                     echo "file $file encrypted"
                 else
-                    LOC = $(pwd)
-                    echo "file ${LOC}/$file not encrypted, notifying tech"
+                    echo "file /home/data/NDClab/datasets/$dir/sourcedata/raw/zoom/$sub/$file not encrypted, notifying tech"
                     # echo "${LOC}\$file failed encryption-check in" | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
                 fi
             done
