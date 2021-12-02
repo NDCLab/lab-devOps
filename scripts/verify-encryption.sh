@@ -1,7 +1,7 @@
 #!/bin/bash
 IFS=$'\n'
-DATA_PATH = "/home/data/NDClab/datasets"
-ZOOM_PATH = "sourcedata/raw/zoom"
+DATA_PATH="/home/data/NDClab/datasets"
+ZOOM_PATH="sourcedata/raw/zoom"
 
 echo "Checking repos in datasets"
 for DIR in `ls $LAB_PATH`
