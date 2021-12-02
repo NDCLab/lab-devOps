@@ -18,7 +18,8 @@ do
                 else
                     echo "file $file not encrypted, notifying tech"
                     LOC = $(pwd)
-                    echo "$file failed encryption-check in ${LOC}" | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
+                    echo "${LOC}"
+                    # echo "$file failed encryption-check in ${LOC}" | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
                 fi
             done
         done
