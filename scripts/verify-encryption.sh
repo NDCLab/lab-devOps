@@ -17,16 +17,18 @@ do
             fi
             cd "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB"
             for FILE in *; do
-                ENCRYPT_MSG=$(eval "gpg --list-only $FILE")
-                if grep -q 'gpg: encrypted with . passphrase' <<< $ENCRYPT_MSG; then
+                ENCRYPT_MSG=$(gpg --list-only $FILE 2>&1)
+                if [[ "$ENCRYPT_MSG" =~ "gpg: encrypted with 1 passphrase" ]]; then
                     echo "$FILE encrypted"
-                elif grep -q 'gpg: no valid OpenPGP data found.' <<< $ENCRYPT_MSG; then
-                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE failed check, notifying tech"
-                    # | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
+                elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
+                    echo "FILE NOT ENCRYPTED. Listing file info below:"
+                    getfacl $FILE
+                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE failed check, notifying tech" | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
                 else 
                     echo "Not applicable. Skipping"
                 fi
             done
         done
+	echo
     fi
 done
