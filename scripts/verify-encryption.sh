@@ -18,9 +18,9 @@ do
             cd "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB"
             for FILE in *; do
                 ENCRYPT_MSG=$(eval "gpg --list-only $FILE")
-                if grep -q 'gpg: encrypted with . passphrase' <<< "$ENCRYPT_MSG"; then
+                if grep -q 'gpg: encrypted with . passphrase' <<< $ENCRYPT_MSG; then
                     echo "$FILE encrypted"
-                elif grep -q 'gpg: no valid OpenPGP data found.' <<< "$ENCRYPT_MSG"; then
+                elif grep -q 'gpg: no valid OpenPGP data found.' <<< $ENCRYPT_MSG; then
                     echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE failed check, notifying tech"
                     # | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
                 else 
