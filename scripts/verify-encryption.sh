@@ -8,7 +8,7 @@ for DIR in `ls $DATA_PATH`
 do
     if [ -e "$DATA_PATH/$DIR/$ZOOM_PATH" ]; then
         echo "Validating $DIR encryption"
-        if [ "cd "$DATA_PATH/$DIR/$ZOOM_PATH"" grep -q 'Permission denied' ]; then
+        if ! [[ -r "$DATA_PATH/$DIR/$ZOOM_PATH" ]]; then
             echo "$DIR is not accessible via your permissions" 
             continue
         fi
