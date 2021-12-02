@@ -1,21 +1,23 @@
 #!/bin/bash
 IFS=$'\n'
+DATA_PATH = "/home/data/NDClab/datasets"
+ZOOM_PATH = "sourcedata/raw/zoom"
 
 echo "Checking repos in datasets"
-for dir in `ls "/home/data/NDClab/datasets"`
+for DIR in `ls $LAB_PATH`
 do
-    if [ -e "/home/data/NDClab/datasets/$dir/sourcedata/raw/zoom/" ]; then
-        echo "Validating $dir encryption"
-        cd "/home/data/NDClab/datasets/$dir/sourcedata/raw/zoom/"
-        for sub in `ls ./`; do
-            echo "checking if contents of $sub are encrypted"
-            cd "$sub"
-            for file in *; do
-                if "gpg --list-only $file" grep -q 'gpg: encrypted with \. passphrase'; then
-                    echo "file $file encrypted"
+    if [ -e "$DATA_PATH/$DIR/$ZOOM_PATH" ]; then
+        echo "Validating $DIR encryption"
+        cd "$DATA_PATH/$DIR/$ZOOM_PATH"
+        for SUB in *; do
+            echo "checking if contents of $SUB are encrypted"
+            cd "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB"
+            for FILE in *; do
+                if "gpg --list-only $FILE" grep -q 'gpg: encrypted with \. passphrase'; then
+                    echo "$FILE encrypted"
                 else
-                    echo "file /home/data/NDClab/datasets/$dir/sourcedata/raw/zoom/$sub/$file not encrypted, notifying tech"
-                    # echo "${LOC}\$file failed encryption-check in" | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
+                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE failed check, notifying tech"
+                    # | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
                 fi
             done
         done
