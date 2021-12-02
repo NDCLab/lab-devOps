@@ -8,13 +8,13 @@ for DIR in `ls $DATA_PATH`
 do
     if [ -e "$DATA_PATH/$DIR/$ZOOM_PATH" ]; then
         echo "Validating $DIR encryption"
-        if ! [[ -x "$DATA_PATH/$DIR/$ZOOM_PATH" ]]; then
-            echo "$DIR is not accessible via your permissions" 
-            continue
-        fi
         cd "$DATA_PATH/$DIR/$ZOOM_PATH"
         for SUB in *; do
             echo "checking if contents of $SUB are encrypted"
+            if ! [[ -x "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB" ]]; then
+                echo "$SUB is not accessible via your permissions" 
+                continue
+            fi
             cd "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB"
             for FILE in *; do
                 ENCRYPT_MSG=$(eval "gpg --list-only $FILE")
