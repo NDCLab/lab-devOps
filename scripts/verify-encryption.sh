@@ -8,7 +8,7 @@ for DIR in `ls $DATA_PATH`
 do
     if [ -e "$DATA_PATH/$DIR/$ZOOM_PATH" ]; then
         echo "Validating $DIR encryption"
-        if ! [[ -r "$DATA_PATH/$DIR/$ZOOM_PATH" ]]; then
+        if ! [[ -x "$DATA_PATH/$DIR/$ZOOM_PATH" ]]; then
             echo "$DIR is not accessible via your permissions" 
             continue
         fi
@@ -17,11 +17,14 @@ do
             echo "checking if contents of $SUB are encrypted"
             cd "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB"
             for FILE in *; do
-                if "gpg --list-only $FILE" grep -q 'gpg: encrypted with \. passphrase'; then
+                ENCRYPT_MSG=$(eval "gpg --list-only $FILE")
+                if grep -q 'gpg: encrypted with \. passphrase' <<< "$ENCRYPT_MSG"; then
                     echo "$FILE encrypted"
-                else
+                elif grep -q 'gpg: no valid OpenPGP data found.' <<< "$ENCRYPT_MSG"; then
                     echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE failed check, notifying tech"
                     # | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
+                else 
+                    echo "Not applicable. Skipping"
                 fi
             done
         done
