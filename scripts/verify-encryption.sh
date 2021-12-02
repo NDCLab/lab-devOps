@@ -5,7 +5,7 @@ echo "Checking repos in datasets"
 for dir in `ls "/home/data/NDClab/datasets"`
 do
   echo "Validating $dir encryption"
-    if [ -e "/home/data/NDClab/datasets/$dir/sourcedata/raw/zoom/" ] then
+    if [ -e "/home/data/NDClab/datasets/$dir/sourcedata/raw/zoom/" ]; then
         cd "/home/data/NDClab/datasets/$dir/sourcedata/raw/zoom/"
         for sub in `ls`
         do
