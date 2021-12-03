@@ -1,13 +1,16 @@
 #!/bin/bash
 IFS=$'\n'
+TOOL_PATH="/home/data/NDClab/tools"
+DATA_PATH="/home/data/NDClab/datasets"
+ANA_PATH="/home/data/NDClab/analyses"
 
 echo "Checking repos in tools"
-for REPO in `ls "/home/data/NDClab/tools/"`
+for REPO in `ls $TOOL_PATH`
 do
   echo "Checking $REPO"
-  if [ -e "/home/data/NDClab/tools/$REPO/.git" ]
+  if [ -e "$TOOL_PATH/$REPO/.git" ]
     then
-      cd "/home/data/NDClab/tools/$REPO"
+      cd "$TOOL_PATH/$REPO"
       git fetch
       git pull
     else
@@ -16,12 +19,12 @@ do
 done
 
 echo "Checking repos in datasets"
-for REPO in `ls "/home/data/NDClab/datasets"`
+for REPO in `ls $DATA_PATH`
 do
   echo "Checking $REPO"
-  if [ -e "/home/data/NDClab/datasets/$REPO/.git" ]
+  if [ -e "$DATA_PATH/$REPO/.git" ]
     then
-      cd "/home/data/NDClab/datasets/$REPO"
+      cd "$DATA_PATH/$REPO"
       git fetch
       git pull
     else
@@ -30,12 +33,12 @@ do
 done
 
 echo "Checking repos in analyses"
-for REPO in `ls "/home/data/NDClab/analyses"`
+for REPO in `ls $ANA_PATH`
 do
   echo "Checking $REPO"
-  if [ -e "/home/data/NDClab/analyses/$REPO/.git" ]
+  if [ -e "$ANA_PATH/$REPO/.git" ]
     then
-      cd "/home/data/NDClab/analyses/$REPO"
+      cd "$ANA_PATH/$REPO"
       git fetch
       git pull
     else
