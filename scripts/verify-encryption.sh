@@ -18,7 +18,7 @@ do
             cd "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB"
             for FILE in *; do
                 # Skip transcript files
-                if ! [[ "$FILE" == "*.vtt" ]]; then
+                if [[ $FILE == *.vtt ]]; then
                     continue
                 fi
                 ENCRYPT_MSG=$(gpg --list-only $FILE 2>&1)
