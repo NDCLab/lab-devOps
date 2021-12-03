@@ -1,5 +1,5 @@
 {
-    "/home/data/NDClab/datasets/social-context-dataset/sourcedata": "emach039", 
-    "/home/data/NDClab/datasets/missing-link-dataset/sourcedata": "apoly003",
-    "/home/data/NDClab/datasets/rwe-dataset/sourcedata": "smaly002"
+    "social-context-dataset": "emach039", 
+    "missing-link-dataset": "apoly003",
+    "rwe-dataset": "smaly002"
 }
