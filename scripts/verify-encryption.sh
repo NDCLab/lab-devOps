@@ -17,13 +17,17 @@ do
             fi
             cd "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB"
             for FILE in *; do
+                # Skip transcript files
+                if ! [[ "$FILE" == "*.vtt"]; then
+                    continue
+                fi
                 ENCRYPT_MSG=$(gpg --list-only $FILE 2>&1)
                 if [[ "$ENCRYPT_MSG" =~ "gpg: encrypted with 1 passphrase" ]]; then
                     echo "$FILE encrypted"
                 elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
                     echo "FILE NOT ENCRYPTED. Listing file info below:"
                     getfacl $FILE
-                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE failed check, notifying tech" | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
+                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE failed check, notifying proj lead" | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
                 else 
                     echo "Not applicable. Skipping"
                 fi
