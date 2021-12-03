@@ -27,7 +27,8 @@ do
                 elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
                     echo "FILE NOT ENCRYPTED. Listing file info below:"
                     getfacl $FILE
-                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE failed check, notifying proj lead" | mail -s "Encrypt validation failed" fsaidmur@fiu.edu
+                    PROJ_LEAD=$(grep -oP "\"$DIR\":\K.*" config-leads.json | tr -d '"",')
+                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE failed check, notifying proj. lead" | mail -s "ENCRYPT CHECK FAILED"  $PROJ_LEAD@fiu.edu
                 else 
                     echo "Not applicable. Skipping"
                 fi
