@@ -4,6 +4,19 @@ DATA_PATH="/home/data/NDClab/datasets"
 ZOOM_PATH="sourcedata/raw/zoom"
 TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts"
 
+function verify_lead
+{
+    b_group=$(getent group hpc_gbuzzell)
+    for i in ${b_group//,/ }
+    do
+        if [ $i == $1 ]; then
+            echo 0
+            return 1
+        fi
+    done
+    echo 1
+}
+
 echo "Checking repos in datasets"
 for DIR in `ls $DATA_PATH`
 do
@@ -29,6 +42,15 @@ do
                     echo "FILE NOT ENCRYPTED. Listing file info below:"
                     getfacl $FILE
                     PROJ_LEAD=$(grep -oP "\"$DIR\":\K.*" $TOOL_PATH/config-leads.json | tr -d '"",'| xargs)
+
+                    # check if listed project lead belongs to group
+                    ver_result=$(verify_lead $PROJ_LEAD)
+                    if [ "$ver_result" == 1 ]; then
+                        echo "$PROJ_LEAD not listed in hpc_gbuzzell. Exiting" 
+                        exit 9999 
+                    fi
+
+                    # email project lead on failed encryption check 
                     email="${PROJ_LEAD}@fiu.edu"
                     echo "emailing $DIR:$email"
                     echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE is not encrypted" | mail -s "ENCRYPT CHECK FAILED" "$email"
