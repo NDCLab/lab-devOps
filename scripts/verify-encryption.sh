@@ -2,6 +2,7 @@
 IFS=$'\n'
 DATA_PATH="/home/data/NDClab/datasets"
 ZOOM_PATH="sourcedata/raw/zoom"
+TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts"
 
 echo "Checking repos in datasets"
 for DIR in `ls $DATA_PATH`
@@ -27,8 +28,10 @@ do
                 elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
                     echo "FILE NOT ENCRYPTED. Listing file info below:"
                     getfacl $FILE
-                    PROJ_LEAD=$(grep -oP "\"$DIR\":\K.*" config-leads.json | tr -d '"",')
-                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE failed check, notifying proj. lead" | mail -s "ENCRYPT CHECK FAILED"  $PROJ_LEAD@fiu.edu
+                    PROJ_LEAD=$(grep -oP "\"$DIR\":\K.*" $TOOL_PATH/config-leads.json | tr -d '"",'| xargs)
+                    email="${PROJ_LEAD}@fiu.edu"
+                    echo "emailing $DIR:$email"
+                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE is not encrypted" | mail -s "ENCRYPT CHECK FAILED" "$email"
                 else 
                     echo "Not applicable. Skipping"
                 fi
