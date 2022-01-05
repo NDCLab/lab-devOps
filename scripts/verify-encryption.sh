@@ -53,7 +53,7 @@ do
                     # email project lead on failed encryption check 
                     email="${PROJ_LEAD}@fiu.edu"
                     echo "emailing $DIR:$email"
-                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE is not encrypted" | mail -s "ENCRYPT CHECK FAILED" "$email"
+                    echo "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB/$FILE is not encrypted" | mail -s "Encrypt Check Failed" "$email"
                 else 
                     echo "Not applicable. Skipping"
                 fi
