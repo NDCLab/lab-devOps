@@ -61,6 +61,8 @@ do
                     echo "emailing $DIR:$email"
                     echo "$DATA_PATH/$DIR/$source_data $monitor_result" | mail -s "Data Monitoring Failed $DIR" "$email"
                 fi
+                echo "emailing $DIR:$email on monitor success"
+                echo "$DATA_PATH/$DIR/$source_data $monitor_result" | mail -s "Data Monitoring Succeeded $DIR" "$email"
             else
                 echo "Unknown changes to dataset. Notifying tech."
             fi
