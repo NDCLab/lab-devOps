@@ -12,11 +12,10 @@ function verify_lead
     for i in ${b_group//,/ }
     do
         if [ $i == $1 ]; then
-            echo 0
-            return 1
+            exit 1
         fi
     done
-    echo 1
+    exit 0
 }
 
 # Run through each dataset available, checking for data monitoring script
@@ -39,7 +38,8 @@ do
         # continue by extracting and verifying project lead
         PROJ_LEAD=$(grep -oP "\"$DIR\":\K.*" $TOOL_PATH/config-leads.json | tr -d '"",'| xargs)
         ver_result=$(verify_lead $PROJ_LEAD)
-        if [ "$ver_result" == 1 ]; then
+        res=$?
+        if [ $res == 1 ]; then
             echo "$PROJ_LEAD not listed in hpc_gbuzzell. Exiting" 
             exit 9999 
         fi
