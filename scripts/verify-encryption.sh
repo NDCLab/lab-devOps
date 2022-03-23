@@ -1,6 +1,7 @@
 #!/bin/bash
 IFS=$'\n'
 DATA_PATH="/home/data/NDClab/datasets"
+# TODO: check check as well
 ZOOM_PATH="sourcedata/raw/zoom"
 TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts"
 
