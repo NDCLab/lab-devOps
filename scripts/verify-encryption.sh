@@ -11,11 +11,10 @@ function verify_lead
     for i in ${b_group//,/ }
     do
         if [ $i == $1 ]; then
-            echo 0
-            return 1
+            exit 1
         fi
     done
-    echo 1
+    exit 0
 }
 
 echo "Checking repos in datasets"

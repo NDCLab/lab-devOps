@@ -1,6 +1,7 @@
 {
     "social-context-dataset": "emach039", 
     "missing-link-dataset": "apoly003",
-    "rwe-dataset": "smaly002",
-    "technician": "fsaidmur"
+    "rwe-dataset": "smaly002"
+    "technician": "fsaidmur",
+    "lab-manager": "jalexand"
 }
