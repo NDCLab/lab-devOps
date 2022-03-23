@@ -36,14 +36,14 @@ do
         fi
 
         # continue by extracting and verifying project lead
-        PROJ_LEAD=$(grep -oP "\"$dir\":\K.*" $tool_path | tr -d '"",'| xargs)
-        ver_result=$(verify_lead $PROJ_LEAD)
+        proj_lead=$(grep -oP "\"$dir\":\K.*" $tool_path | tr -d '"",'| xargs)
+        ver_result=$(verify_lead $proj_lead)
         res=$?
         if [ $res == 1 ]; then
-            echo "$PROJ_LEAD not listed in hpc_gbuzzell. Exiting" 
+            echo "$proj_lead not listed in hpc_gbuzzell. Exiting" 
             exit 9999 
         fi
-        email="${PROJ_LEAD}@fiu.edu"
+        email="${proj_lead}@fiu.edu"
 
         # parse status message
         for item in $STATUS_MSG
@@ -58,14 +58,23 @@ do
                 monitor_result=$(./$monitor_file)
                 exit_code=$?
                 if [[ $exit_code == 9999 ]]; then
-                    echo "emailing $DIR:$email"
-                    echo "$DATA_PATH/$DIR/$source_data $monitor_result" | mail -s "Data Monitoring Failed $DIR" "$email"
+                    echo "emailing $dir:$email"
+                    echo -e "$data_path/$dir/$source_data \\n $monitor_result" | mail -s "Data Monitoring Failed $dir" "$email"
                 else
-                    echo "emailing $DIR:$email on monitor success"
-                    echo "$DATA_PATH/$DIR/$source_data $monitor_result" | mail -s "Data Monitoring Succeeded $DIR" "$email"
+                    echo "emailing $dir:$email on monitor success"
+                    echo -e "$data_path/$dir/$source_data \\n $monitor_result" | mail -s "Data Monitoring Succeeded $dir" "$email"
                 fi
             else
                 echo "Unknown changes to dataset. Notifying tech."
+                techie=$(grep -oP "\"technician\":\K.*" $tool_path | tr -d '"",'| xargs)
+                ver_result=$(verify_lead $techie)
+                res=$?
+                if [ $res == 1 ]; then
+                    echo "$techie not listed in hpc_gbuzzell. Exiting" 
+                    exit 9999 
+                fi
+                email="${techie}@fiu.edu"
+                echo -e "$DATA_PATH/$DIR/$source_data \\n $monitor_result" | mail -s "Error 418 $dir" "$email"
             fi
         done
     fi
