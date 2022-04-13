@@ -26,4 +26,4 @@ echo "Submitting $sub_file as job"
 sbatch $sub_file
 
 # Give confirmation message and instructions
-echo "Job submitted. To rerun again, execute \'sbatch $sub_file \'"
+echo -e "Job submitted. To rerun again, execute \\'sbatch $sub_file \\'"
