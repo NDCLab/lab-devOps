@@ -2,11 +2,11 @@
 # A script to generate a job and submit for some R script
 
 # USAGE: sh /home/data/NDClab/tools/lab-devOps/scripts/rrun.sh <file_name>.R
-usage() { echo "Usage: sh rmat.sh [--parallel] <file_name>.m" 1>&2; exit 1; }
+usage() { echo "Usage: sh rmat.sh [--parallel] <file_name>" 1>&2; exit 1; }
 
 file_name=$1
 
-if [[ ! -f "$file_name" || $file_name =~ *.m ]]; then
+if [[ ! -f "${file_name}.m" ]]; then
     echo "File $file_name does not exist or is not a matlab file." 
     exit 9999 
 fi
