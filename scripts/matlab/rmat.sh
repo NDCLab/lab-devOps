@@ -6,8 +6,7 @@ usage() { echo "Usage: sh rmat.sh [--parallel] <file_name>.m" 1>&2; exit 1; }
 
 file_name=$2
 
-if [ ! -f $2 || "$file_name" == "*.m" ] 
-then
+if [[ ! -f "$file_name" || $file_name =~ *.m ]]; then
     echo "File $2 does not exist or is not a matlab file." 
     exit 9999 
 fi
