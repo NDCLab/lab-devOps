@@ -19,17 +19,14 @@ then
     sed -i 's/HPC login node at normal usage./HPC login node idle CPU-time is less than 60%. Expect slowness./' /home/data/NDClab/tools/wiki/docs/hpc/status.md
     sed -i 's/green/red/' /home/data/NDClab/tools/wiki/docs/hpc/status.md
 else
-    echo "Normal usage, updating."
-    sed -i 's/HPC login naode idle CPU-time is less than 60%. Expect slowness./HPC login node at normal usage./' /home/data/NDClab/tools/wiki/docs/hpc/status.md
+    echo "Normal usage."
+    sed -i 's/HPC login node idle CPU-time is less than 60%. Expect slowness./HPC login node at normal usage./' /home/data/NDClab/tools/wiki/docs/hpc/status.md
     sed -i 's/red/green/' /home/data/NDClab/tools/wiki/docs/hpc/status.md
 fi
 
-# move cpu usage to log file
-mv $file_name /home/data/NDClab/other/logs/cpu-history/
-
-# commit changes in wiki to branch
-
-cd /home/data/NDClab/tools/wiki/docs/hpc
-git add status.md
-git commit -m "Updated hpc status"
-git push
+if [[ `git status --porcelain` ]]; then
+    echo "status.md updated, pushing"
+    sbatch update-wiki.sub
+else
+   echo "nothing to push"
+fi
