@@ -19,7 +19,7 @@ echo -e  "#!/bin/bash\\n
 #SBATCH --ntasks=1\\n
 #SBATCH --time=01:00:00\\n
 module load r-4.0.2-gcc-8.2.0-tf4pnwr\\n
-singularity exec /home/data/NDClab/tools/containers/R-4.1.2/R-con.simg Rscript ${file_name}" >| $sub_file
+Rscript ${file_name}" >| $sub_file
 
 # Submit sub file
 echo "Submitting $sub_file as job"
