@@ -24,9 +24,13 @@ else
     sed -i 's/red/green/' /home/data/NDClab/tools/wiki/docs/hpc/status.md
 fi
 
+# commit changes in wiki to branch if they exist
 if [[ `git status --porcelain` ]]; then
     echo "status.md updated, pushing"
-    sbatch update-wiki.sub
+    cd /home/data/NDClab/tools/wiki/docs/hpc
+    git add status.md
+    git commit -m "Updated hpc status"
+    git push
 else
    echo "nothing to push"
 fi

@@ -6,9 +6,6 @@ backup_list=("sourcedata" "derivatives")
 
 for dir in `ls $dpath`
 do
-  if [[ "$dir" != "test-readAloud-v3" ]]; then
-      continue
-  fi
   echo "Checking $dir"
   if [ ! -d "$backpath/$dir" ]; then
     mkdir $backpath/$dir
