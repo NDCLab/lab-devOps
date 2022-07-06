@@ -1,7 +1,7 @@
 #!/bin/bash
 # A script to set up data monitoring & preprocessing in your project
 
-usage() { echo "Usage: create-monitor.sh <project-path>" 1>&2; exit 1; }
+usage() { echo "Usage: setup-data.sh <project-path>" 1>&2; exit 1; }
 
 project=$1
 datam_path="/data-monitoring"
