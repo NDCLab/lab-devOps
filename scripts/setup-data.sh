@@ -6,7 +6,7 @@ usage() { echo "Usage: setup-data.sh <project-path>" 1>&2; exit 1; }
 project=$1
 datam_path="/data-monitoring"
 code_path="/code"
-labpath = "/home/data/NDClab/tools/lab-devOps/scripts/"
+labpath="/home/data/NDClab/tools/lab-devOps/scripts/"
 
 echo "Setting up hallMonitor helper files"
 cp "${labpath}/monitor-template/rename-cols.py" "${project}/${datam_path}"
