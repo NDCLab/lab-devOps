@@ -6,4 +6,4 @@
 
 # load python modules and execute
 module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg
-./hallMonitor.sh -m sias6:sias6sps6,sps6:sias6sps6
+./hallMonitor.sh
