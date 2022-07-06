@@ -8,13 +8,13 @@ datam_path="/data-monitoring"
 code_path="/code"
 
 echo "Setting up hallMonitor helper files"
-cp monitor-template/rename-cols.py $project
-cp monitor-template/update-tracker.py $project
-cp monitor-template/README.md $project
+cp ./monitor-template/rename-cols.py $project
+cp ./monitor-template/update-tracker.py $project
+cp ./monitor-template/README.md $project
 echo "Setting up hallMonitor.sh"
-cp monitor-template/hallMonitor.sh $project
+cp ./monitor-template/hallMonitor.sh $project
 echo "Setting up hallMonitor.sub"
-cp monitor-template/hallMonitor.sub $project
+cp ./monitor-template/hallMonitor.sub $project
 
 echo "Setting up preprocess.sub"
-cp monitor-template/preprocess.sub $project
+cp ./monitor-template/preprocess.sub $project
