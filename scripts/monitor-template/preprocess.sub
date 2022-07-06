@@ -64,4 +64,4 @@ python inst-tracker.py "${output_path}/202201v0readAloudval_SCRD_2022-06-04_1550
 # run R scripts that require R modules
 singularity exec --bind $project /home/data/NDClab/tools/containers/R-4.1.2/R-con.simg Rscript "${project}/code/preprocPavlovia.R" ; \
                                                                                        Rscript "${project}/code/preprocTimingAndPitch.R" ; \
-										       Rscript "${project}/code/preprocDisfluencies.R"
+										                                               Rscript "${project}/code/preprocDisfluencies.R"

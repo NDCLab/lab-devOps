@@ -86,7 +86,6 @@ function verify_copy_pav_files
 
     for i in "${!data[@]}"; do
         # if last index is accessed (id), exit loop
-        # if last index is accessed (id), exit loop
         if [[ $i == $last_idx ]]; then
             continue
         fi
