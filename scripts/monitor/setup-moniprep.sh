@@ -1,9 +1,12 @@
 #!/bin/bash
 # A script to set up data monitoring & preprocessing in your project
 
-usage() { echo "Usage: setup-data.sh -[f/fd/fn/fdn/dn/n] <project-path>" 1>&2; exit 1; }
+usage() { echo "Usage: setup-data.sh [task1,task2,task3] <project-path>" 1>&2; exit 1; }
 
-project=$1
+# optional tasks arg
+tasks=${1:-0}
+project=$2
+
 datam_path="/data-monitoring"
 code_path="/code"
 labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
@@ -14,19 +17,9 @@ cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
 cp "${labpath}/template/README.md" "${project}/${datam_path}"
 
 echo "Setting up hallMonitor.sh"
-cp "${labpath}/template/hallMonitor.sh" "${project}/${datam_path}"
-# which task existence needs to be checked
-:'
-while getopts ":" opt; do
-    case ${opt} in
-        f)
-            ;;
-        fd)
-             ;;
-        fd)
-    esac 
-done
-'
+# set up hallMonitor sh file with preset tasks instead of simply copying
+sh "${labpath}/constructMonitor.sh.sh" "${project}/${datam_path}" $tasks
+# sets up hallMonitor sub file without any default mapping or replacement
 cp "${labpath}/template/hallMonitor.sub" "${project}/${datam_path}"
 
 echo "Setting up preprocess.sub"
