@@ -16,7 +16,7 @@ check="/home/data/NDClab/datasets/$dataset/sourcedata/checked"
 # A function to update the data monitoring log markdown file. Logfile must be created before running
 function update_log {
     status=$1
-    logfile=$2
+    # logfile=$2
     if [[ ! -f "$logfile" ]]; then
         echo "$logfile does not exist, skipping log."
         exit 0
@@ -80,12 +80,14 @@ function verify_copy_sub
     exit 0
 }
 
-# A function to verify a group of pavlovia and then copy over to respective subject folders. 
+# A function to verify a group of pavlovia files in a subject and then copy over to respective subject folders. 
 # Takes in param id and which flankers to check for
 function verify_copy_pav_files
 {
     elements=(*)
     id=$1
+    # create empty array to collect tasks
+    obs=()
 
     subject="sub-${id}"
 
@@ -133,6 +135,16 @@ function verify_copy_pav_files
                 break
             fi
         done
+        
+        # extract task name if it exists, and assing to obs values
+        # TODO: improve regex, ignore keywords, find discrete tasknames
+        tpat="([a-zA-Z]{4,})"
+        task=$(echo "$file_name" | grep -oP "$tpat")
+        # append
+        obs[${#obs[@]}]=$task
+
+        # copy file to checked if it does not exist already
+        # TODO: replace check/dir with cd 
         if [ ! -f "$check/$dir/$subject/$file_name" ]; then
             echo -e "\\t ${GREEN}Copying $file_name to $check/$dir/$subject ${NC}"
             cp $raw/$dir/$subject/$file_name $check/$dir/$subject
@@ -140,6 +152,16 @@ function verify_copy_pav_files
             echo -e "\\t $subject/$file_name already exists in checked, skipping copy"
         fi
     done
+
+    # split tasks into array and compare if valid param
+    if [ $2 != 0 ]; then
+        tasks=($(echo $2 | tr "," "\n"))
+        if [ "${obs[@]}" == "${tasks[@]}" ] ; then
+            echo -e "\\t ${GREEN}$subject contains all required tasks ${NC}"
+        else
+            echo -e "\\t ${RED}Missing tasks in $subject, please make sure all tasks are included.${NC} "
+        fi 
+    fi
 
     exit 0
 }

@@ -35,9 +35,11 @@ singularity exec --bind $dataset,/home/data/NDClab/tools/instruments \
 
 # update central tracker using instruments data
 # todo: need to programtically get output file
+:'
 python inst-tracker.py "${output_path}/202201v0readAloudval_SCRD_2022-06-04_1550.csv"
 
 # run R scripts that require R modules
-singularity exec --bind $dataset /home/data/NDClab/tools/containers/R-4.1.2/R-con.simg Rscript "${dataset}/code/preprocPavlovia.R" ; \
-                                                                                       Rscript "${dataset}/code/preprocTimingAndPitch.R" ; \
-										                                               Rscript "${dataset}/code/preprocDisfluencies.R"
+singularity exec --bind $dataset /home/data/NDClab/tools/containers/R-4.1.2/R-con.simg Rscript "${dataset}" ; \
+                                                                                       Rscript "${dataset}" ; \
+										                                               Rscript "${dataset}"
+'
