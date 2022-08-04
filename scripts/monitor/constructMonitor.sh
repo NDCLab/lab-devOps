@@ -14,16 +14,16 @@ cat <<EOF >> "${projpath}/hallMonitor.sh"
 IFS=$'\n'
 
 # init proj specific variables
-dataset=$(dirname $(pwd))
+dataset=$projpath
 tasks=$tasks
-filetypes=$filetypes
+filetypes=${filetypes[@]}
 
 # load in functions & variables
 source /home/data/NDClab/tools/lab-devOps/scripts/monitor/tools.sh
 
 usage() { echo "Usage: sh hallMonitor.sh [-m/-r] [string list of replacement or mapping]" 1>&2; exit 1; }
 
-for dir in `ls \$raw`
+for dir in \`ls \$raw\`
 do
     # If pavlovia dataset
     if [ "\$dir" == "\$pavlov" ]; then
@@ -47,11 +47,11 @@ do
             fi
 
             # get sub id
-            id="$(cut -d'-' -f2 <<<\$subject)"
+            id="\$(cut -d'-' -f2 <<<\$subject)"
             id=\${id::-1}
 
             # check if name is properly named and copy if correct
-            sub_check=$(verify_copy_sub \$subject)
+            sub_check=\$(verify_copy_sub \$subject)
             res=\$?
             if [ \$res != 0 ]; then
                 echo -e "\$sub_check"
@@ -63,11 +63,11 @@ do
 
             # store file names in array
             file_names=(*)
-            # files_log=$(verify_copy_pav_files "\${file_names[@]}" \$id)
+            # files_log=\$(verify_copy_pav_files "\${file_names[@]}" \$id)
 
             # check if files contain all tasks, appropriatley named, 
             # and contain correct ID's
-            files_log=$(verify_copy_pav_files \$id \$tasks)
+            files_log=\$(verify_copy_pav_files \$id \$tasks)
             res=\$?
             if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
                 echo -e "\$files_log"
@@ -80,7 +80,7 @@ do
         done
         echo -e "\\n"
         # update tracker for each id
-        output=$( python /home/data/NDClab/datasets/\$dataset/data-monitoring/update-tracker.py \$check"/"\$pavlov "pavlovia" )
+        output=\$( python /home/data/NDClab/datasets/\$dataset/data-monitoring/update-tracker.py \$check"/"\$pavlov "pavlovia" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked pavlovia data.\${NC}"
         fi
@@ -91,7 +91,7 @@ do
     if [ "\$dir" == "\$zoom" ]; then
         echo "Accessing \$raw/\$dir"
         # update tracker for each id
-        output=$( python /home/data/NDClab/datasets/\$dataset/data-monitoring/update-tracker.py \$check"/"\$zoom "zoom" )
+        output=\$( python /home/data/NDClab/datasets/\$dataset/data-monitoring/update-tracker.py \$check"/"\$zoom "zoom" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked zoom data.\${NC}"
             continue
@@ -105,7 +105,7 @@ do
         cd \$raw/\$dir
 
         # store file names in array and get most recent file, check if stem is correct
-        file_name=$( get_new_redcap )
+        file_name=\$( get_new_redcap )
 
         if [[ "\$file_name" =~ "Error:" ]]; then
             echo -e "\$file_name"
@@ -141,7 +141,7 @@ do
         done
 
         # update tracker
-        output=$( python /home/data/NDClab/datasets/\$dataset/data-monitoring/update-tracker.py \$file_name "redcap" )
+        output=\$( python /home/data/NDClab/datasets/\$dataset/data-monitoring/update-tracker.py \$file_name "redcap" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in \$file_name.\${NC}"
             continue
