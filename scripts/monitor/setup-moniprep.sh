@@ -13,10 +13,16 @@ datam_path="/data-monitoring"
 code_path="/code"
 labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 
+#TODO: loop through a list, collect list from dir.
+
 echo "Setting up hallMonitor helper files"
 # delete if previously written
 cp "${labpath}/template/rename-cols.py" "${project}/${datam_path}"
 cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
+
+# give permissions for all copied files
+chmod +x "${project}/${datam_path}/rename-cols.py"
+chmod +x "${project}/${datam_path}/update-tracker.py"
 
 echo "Setting up hallMonitor.sh"
 # delete if previously written
@@ -25,5 +31,11 @@ sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $fil
 # sets up hallMonitor sub file without any default mapping or replacement
 cp "${labpath}/template/hallMonitor.sub" "${project}/${datam_path}"
 
+# give permissions for all copied files
+chmod +x "${project}/${datam_path}/hallMonitor.sh"
+chmod +x "${project}/${datam_path}/hallMonitor.sub"
+
 echo "Setting up preprocess.sub"
 cp "${labpath}/template/preprocess.sub" "${project}/${datam_path}"
+# give permissions for all copied files
+chmod +x "${project}/${datam_path}/preprocess.sub"
