@@ -1,7 +1,7 @@
 #!/bin/bash
 # A script to set up data monitoring & preprocessing in your project
 
-usage() { echo "Usage: setup-data.sh <project-path/data-monitoring> [filetype1,filetype2,filetype3] [task1,task2,task3] " 1>&2; exit 1; }
+usage() { echo "Usage: setup-data.sh <project-path> [filetype1,filetype2,filetype3] [task1,task2,task3] " 1>&2; exit 1; }
 
 # HallMonitor construction args
 project=$1
@@ -20,7 +20,7 @@ cp "${labpath}/template/README.md" "${project}/${datam_path}"
 
 echo "Setting up hallMonitor.sh"
 # set up hallMonitor sh file with preset tasks instead of simply copying
-sh "${labpath}/constructMonitor.sh.sh" "${project}/${datam_path}" $filetypes $tasks
+sh "${labpath}/constructMonitor.sh" "${project}/${datam_path}" $filetypes $tasks
 # sets up hallMonitor sub file without any default mapping or replacement
 cp "${labpath}/template/hallMonitor.sub" "${project}/${datam_path}"
 
