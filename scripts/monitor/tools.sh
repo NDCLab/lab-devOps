@@ -86,7 +86,8 @@ function verify_copy_pav_files
 {
     elements=(*)
     id=$1
-    # create empty array to collect tasks
+    tasks=$2
+    # create empty array to collect tasks observed in pavlovia folder
     obs=()
 
     subject="sub-${id}"
@@ -154,8 +155,8 @@ function verify_copy_pav_files
     done
 
     # split tasks into array and compare if valid param
-    if [ $2 != 0 ]; then
-        tasks=($(echo $2 | tr "," "\n"))
+    if [ $tasks != 0 ]; then
+        tasks=($(echo $tasks | tr "," "\n"))
         if [ "${obs[@]}" == "${tasks[@]}" ] ; then
             echo -e "\\t ${GREEN}$subject contains all required tasks ${NC}"
         else
