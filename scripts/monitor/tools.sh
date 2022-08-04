@@ -9,7 +9,6 @@ pavlov="pavlovia"
 redcap="redcap"
 zoom="zoom"
 
-dataset=$(dirname $(pwd))
 raw="/home/data/NDClab/datasets/$dataset/sourcedata/raw"
 check="/home/data/NDClab/datasets/$dataset/sourcedata/checked"
 
@@ -87,6 +86,7 @@ function verify_copy_pav_files
     elements=(*)
     id=$1
     tasks=$2
+    dir="pavlovia"
     # create empty array to collect tasks observed in pavlovia folder
     obs=()
 
@@ -145,7 +145,6 @@ function verify_copy_pav_files
         obs[${#obs[@]}]=$task
 
         # copy file to checked if it does not exist already
-        # TODO: replace check/dir with cd 
         if [ ! -f "$check/$dir/$subject/$file_name" ]; then
             echo -e "\\t ${GREEN}Copying $file_name to $check/$dir/$subject ${NC}"
             cp $raw/$dir/$subject/$file_name $check/$dir/$subject
