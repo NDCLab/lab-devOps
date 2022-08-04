@@ -17,7 +17,6 @@ echo "Setting up hallMonitor helper files"
 # delete if previously written
 cp "${labpath}/template/rename-cols.py" "${project}/${datam_path}"
 cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
-cp "${labpath}/template/README.md" "${project}/${datam_path}"
 
 echo "Setting up hallMonitor.sh"
 # delete if previously written

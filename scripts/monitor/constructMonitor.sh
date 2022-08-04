@@ -9,7 +9,7 @@ tasks=$3
 filetypes=($(echo $filetypes | tr "," "\n"))
 
 # write out hallMonitor file with template strings
-cat <<EOF >> "${projpath}/hallMonitor.sh"
+cat <<EOF >> "${projpath}/data-monitoring/hallMonitor.sh"
 #!/bin/bash
 IFS=$'\n'
 
