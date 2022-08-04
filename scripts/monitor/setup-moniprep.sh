@@ -21,7 +21,7 @@ cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
 echo "Setting up hallMonitor.sh"
 # delete if previously written
 # set up hallMonitor sh file with preset tasks instead of simply copying
-sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/dataset/${project}" $filetypes $tasks
+sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $filetypes $tasks
 # sets up hallMonitor sub file without any default mapping or replacement
 cp "${labpath}/template/hallMonitor.sub" "${project}/${datam_path}"
 
