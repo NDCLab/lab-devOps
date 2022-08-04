@@ -14,13 +14,15 @@ code_path="/code"
 labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 
 echo "Setting up hallMonitor helper files"
+# delete if previously written
 cp "${labpath}/template/rename-cols.py" "${project}/${datam_path}"
 cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
 cp "${labpath}/template/README.md" "${project}/${datam_path}"
 
 echo "Setting up hallMonitor.sh"
+# delete if previously written
 # set up hallMonitor sh file with preset tasks instead of simply copying
-sh "${labpath}/constructMonitor.sh" "${project}/${datam_path}" $filetypes $tasks
+sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/dataset/${project}" $filetypes $tasks
 # sets up hallMonitor sub file without any default mapping or replacement
 cp "${labpath}/template/hallMonitor.sub" "${project}/${datam_path}"
 

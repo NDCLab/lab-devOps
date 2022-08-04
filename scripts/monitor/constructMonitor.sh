@@ -16,7 +16,7 @@ IFS=$'\n'
 # init proj specific variables
 dataset=$projpath
 tasks=$tasks
-filetypes=${filetypes[@]}
+filetypes="${filetypes[@]}"
 
 # load in functions & variables
 source /home/data/NDClab/tools/lab-devOps/scripts/monitor/tools.sh
@@ -33,7 +33,7 @@ do
         # store dir names in array
         sub_names=(*/)
         for i in "\${!sub_names[@]}"; do
-            subject=\${sub_names[$i]}
+            subject=\${sub_names[\$i]}
 
             # check accessibility of file system
             if ! [[ -x "\$raw/\$dir/\$subject" ]]; then
