@@ -15,6 +15,7 @@ check="${dataset}/sourcedata/checked"
 # A function to update the data monitoring log markdown file. Logfile must be created before running
 function update_log {
     status=$1
+    logfile=$2
     # logfile=$2
     if [[ ! -f "$logfile" ]]; then
         echo "$logfile does not exist, skipping log."
@@ -73,8 +74,8 @@ function verify_copy_sub
     fi
     # copy subject over to checked directory if it doesnt exist yet
     if [ ! -d "${check}/${pavlov}/$name" ]; then
-      echo -e "\\t Creating ${check}/${pavlov}/$name"
-      mkdir ${check}/$name
+      echo -e "\\t Creating ${check}/${pavlov}/${name}"
+      mkdir "${check}/${pavlov}/${name}"
     fi
     exit 0
 }

@@ -17,6 +17,7 @@ IFS=$'\n'
 dataset="${projpath}"
 tasks="${tasks}"
 filetypes="${filetypes[@]}"
+logfile="data-monitoring-log.md"
 
 # load in functions & variables
 source /home/data/NDClab/tools/lab-devOps/scripts/monitor/tools.sh
@@ -159,9 +160,9 @@ do
 done        
 
 if [ \$error_detected = true ]; then
-    update_log "error"
+    update_log "error" \$logfile
 else
-    update_log "success"
+    update_log "success" \$logfile
 fi
 
 EOF
