@@ -9,8 +9,8 @@ pavlov="pavlovia"
 redcap="redcap"
 zoom="zoom"
 
-raw="/home/data/NDClab/datasets/$dataset/sourcedata/raw"
-check="/home/data/NDClab/datasets/$dataset/sourcedata/checked"
+raw="${dataset}/sourcedata/raw"
+check="${dataset}/sourcedata/checked"
 
 # A function to update the data monitoring log markdown file. Logfile must be created before running
 function update_log {

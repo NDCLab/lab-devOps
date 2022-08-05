@@ -14,8 +14,8 @@ cat <<EOF >> "${projpath}/data-monitoring/hallMonitor.sh"
 IFS=$'\n'
 
 # init proj specific variables
-dataset=$projpath
-tasks=$tasks
+dataset="${projpath}"
+tasks="${tasks}"
 filetypes="${filetypes[@]}"
 
 # load in functions & variables
