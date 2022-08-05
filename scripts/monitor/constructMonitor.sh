@@ -23,6 +23,7 @@ source /home/data/NDClab/tools/lab-devOps/scripts/monitor/tools.sh
 
 usage() { echo "Usage: sh hallMonitor.sh [-m/-r] [string list of replacement or mapping]" 1>&2; exit 1; }
 
+error_detected=false
 for dir in \`ls \$raw\`
 do
     # If pavlovia dataset
@@ -56,6 +57,7 @@ do
             if [ \$res != 0 ]; then
                 echo -e "\$sub_check"
                 echo -e "\\t \${RED}Error detected in \$subject. View above.\${NC} \\n" 
+                error_detected=true
                 continue 
             fi
             echo -e "\\t Checking files of \$raw/\$dir/\$subject"
@@ -71,7 +73,8 @@ do
             res=\$?
             if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
                 echo -e "\$files_log"
-                echo -e "\\t \${RED}Error detected in \$subject. View above\${NC} \\n" 
+                echo -e "\\t \${RED}Error detected in \$subject. View above\${NC} \\n"
+                error_detected=true
                 continue 
             else 
                 echo -e "\$files_log"
@@ -83,6 +86,7 @@ do
         output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$pavlov "pavlovia" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked pavlovia data.\${NC}"
+            error_detected=true
         fi
         echo \$output
         echo -e "\\n"             
@@ -94,6 +98,7 @@ do
         output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$zoom "zoom" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked zoom data.\${NC}"
+            error_detected=true
             continue
         fi
         echo \$output
@@ -110,6 +115,7 @@ do
         if [[ "\$file_name" =~ "Error:" ]]; then
             echo -e "\$file_name"
             echo -e "\\t \${RED}Error detected in \$dir. View above\${NC}"
+            error_detected=true
             continue
         fi
         echo -e "\\t Newest file found: \$file_name"
@@ -144,10 +150,18 @@ do
         output=\$( python \${dataset}data-monitoring/update-tracker.py \$file_name "redcap" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in \$file_name.\${NC}"
+            error_detected=true
             continue
         fi
         echo \$output
         echo -e "\\n"
     fi
 done        
+
+if [ \$error_detected = true ]; then
+    update_log "error"
+else
+    update_log "success"
+fi
+
 EOF
