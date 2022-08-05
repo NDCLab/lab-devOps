@@ -13,6 +13,16 @@ datam_path="/data-monitoring"
 code_path="/code"
 labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 
+# TODO: include ndc colors
+echo '
+	.__   __.  _______   ______  __          ___      .______   
+	|  \ |  | |       \ /      ||  |        /   \     |   _  \  
+	|   \|  | |  .--.  |  ,----'|  |       /  ^  \    |  |_)  | 
+	|  . `  | |  |  |  |  |     |  |      /  /_\  \   |   _  <  
+	|  |\   | |  '--'  |  `----.|  `----./  _____  \  |  |_)  | 
+	|__| \__| |_______/ \______||_______/__/     \__\ |______/'
+sleep 2
+
 #TODO: loop through a list, collect list from dir.
 
 echo "Setting up hallMonitor helper files"
