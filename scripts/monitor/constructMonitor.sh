@@ -80,7 +80,7 @@ do
         done
         echo -e "\\n"
         # update tracker for each id
-        output=\$( python /home/data/NDClab/datasets/\$dataset/data-monitoring/update-tracker.py \$check"/"\$pavlov "pavlovia" )
+        output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$pavlov "pavlovia" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked pavlovia data.\${NC}"
         fi
@@ -91,7 +91,7 @@ do
     if [ "\$dir" == "\$zoom" ]; then
         echo "Accessing \$raw/\$dir"
         # update tracker for each id
-        output=\$( python /home/data/NDClab/datasets/\$dataset/data-monitoring/update-tracker.py \$check"/"\$zoom "zoom" )
+        output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$zoom "zoom" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked zoom data.\${NC}"
             continue
@@ -133,15 +133,15 @@ do
         while getopts ":rm" opt; do
             case \${opt} in
                 r)
-                    python /home/data/NDClab/datasets/\$dataset/data-monitoring/rename-cols.py \$check/\$dir/\$file_name "replace" \$2 ;;
+                    python \${dataset}data-monitoring/rename-cols.py \$check/\$dir/\$file_name "replace" \$2 ;;
                 m)
-                    python /home/data/NDClab/datasets/\$dataset/data-monitoring/rename-cols.py \$check/\$dir/\$file_name "map" \$2 ;;
+                    python \${dataset}data-monitoring/rename-cols.py \$check/\$dir/\$file_name "map" \$2 ;;
                 :)
             esac 
         done
 
         # update tracker
-        output=\$( python /home/data/NDClab/datasets/\$dataset/data-monitoring/update-tracker.py \$file_name "redcap" )
+        output=\$( python \${dataset}data-monitoring/update-tracker.py \$file_name "redcap" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in \$file_name.\${NC}"
             continue

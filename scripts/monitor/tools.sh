@@ -64,17 +64,17 @@ function get_new_redcap
 # A function to verify if a pavlovia subject folder is named correctly. If it is, create a folder of the same name in checked.
 function verify_copy_sub
 {
-    path=$1
-    name=$2
+    name=$1
     # check if sub name contains unexpected chars
     segment=$(echo "$name" | grep -oP "sub-[0-9]+")
     if [[ -z "$segment" ]]; then
         echo -e "\\t ${RED}Error: Improper subject name, does not follow sub-#+ convention.${NC}"
         exit 1
     fi
-    if [ ! -d "$path/$name" ]; then
-      echo -e "\\t Creating $path/$name"
-      mkdir $path/$name
+    # copy subject over to checked directory if it doesnt exist yet
+    if [ ! -d "${check}/$name" ]; then
+      echo -e "\\t Creating ${check}/$name"
+      mkdir ${check}/$name
     fi
     exit 0
 }
