@@ -3,8 +3,8 @@ import sys
 import math
 import os
 
+# TODO: Change to path agnostic implement
 data_tracker_file = "/home/data/NDClab/datasets/test-readAloud-v3/data-monitoring/central-tracker_readAloud-valence.csv"
-data_dict = "/home/data/NDClab/datasets/test-readAloud-v3/data-monitoring/datadict_readAloud-valence.csv"
 
 # rhs: data, lhs: tracker
 redcheck_columns = {
