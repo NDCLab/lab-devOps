@@ -72,8 +72,8 @@ function verify_copy_sub
         exit 1
     fi
     # copy subject over to checked directory if it doesnt exist yet
-    if [ ! -d "${check}/$name" ]; then
-      echo -e "\\t Creating ${check}/$name"
+    if [ ! -d "${check}/${pavlov}/$name" ]; then
+      echo -e "\\t Creating ${check}/${pavlov}/$name"
       mkdir ${check}/$name
     fi
     exit 0
