@@ -139,7 +139,7 @@ function verify_copy_pav_files
         
         # extract task name if it exists, and assing to obs values
         # TODO: improve regex, ignore keywords, find discrete tasknames
-        tpat="([a-zA-Z]{4,})"
+        tpat="(?<=_)(.*)(?=_s\d{1}_r\d{1}_e\d{1})"
         task=$(echo "$file_name" | grep -oP "$tpat")
         # append
         obs[${#obs[@]}]=$task
