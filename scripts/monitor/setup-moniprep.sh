@@ -14,7 +14,16 @@ code_path="/code"
 labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 
 # TODO: include ndc colors
-echo -e "NDClab data monitoring setting up ... \\n"
+cat << "EOF"
+.__   __.  _______   ______  __          ___      .______
+> |  \ |  | |       \ /      ||  |        /   \     |   _  \
+> |   \|  | |  .--.  |  ,----'|  |       /  ^  \    |  |_)  |
+> |  . `  | |  |  |  |  |     |  |      /  /_\  \   |   _  <
+> |  |\   | |  '--'  |  `----.|  `----./  _____  \  |  |_)  |
+> |__| \__| |_______/ \______||_______/__/     \__\ |______/
+> EOF
+
+echo -e "data monitoring setting up ... \\n"
 sleep 2
 
 #TODO: loop through a list, collect list from dir.
