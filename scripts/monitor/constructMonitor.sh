@@ -17,7 +17,7 @@ IFS=$'\n'
 dataset="${projpath}"
 tasks="${tasks}"
 filetypes="${filetypes[@]}"
-logfile="data-monitoring-log.md"
+logfile="/home/data/NDClab/datasets/\${dataset}/data-monitoring/data-monitoring-log.md"
 
 # load in functions & variables
 source /home/data/NDClab/tools/lab-devOps/scripts/monitor/tools.sh
