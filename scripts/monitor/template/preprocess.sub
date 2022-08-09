@@ -29,7 +29,7 @@ cd $data_source
 file_name=$( get_new_redcap )
 cd ../../../data-monitoring
 # run instruments to preprocess survey data
-singularity exec --bind $dataset,/home/data/NDClab/tools/instruments \
+outfile=singularity exec --bind $dataset,/home/data/NDClab/tools/instruments \
     $sing_image \
     python3 $json_scorer \
     $data_source/$input_file \
@@ -37,3 +37,4 @@ singularity exec --bind $dataset,/home/data/NDClab/tools/instruments \
     $output_path
 
 # update central tracker using instruments data
+echo $outfile
