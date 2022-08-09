@@ -5,22 +5,7 @@ import math
 # TODO: Change to path agnostic implement
 data_tracker_file = "/home/data/NDClab/datasets/test-readAloud-v4/data-monitoring/central-tracker_readAloud-valence.csv"
 
-check_columns = [
-    "stai5_scrdS_s1_r1_e1",
-    "stai5_scrdT_s1_r1_e1",
-    "bfne_scrdTotal_s1_r1_e1",
-    "aq10_scrdTotal_s1_r1_e1",
-    "bmis_scrdVal_s1_r1_e1",
-    "phq8_scrdTotal_s1_r1_e1",
-    "panasnow_scrdPA_s1_r1_e1",
-    "panasnow_scrdNA_s1_r1_e1",
-    "scaared_scrdTotal_s1_r1_e1",
-    "erq_scrdCogRea_s1_r1_e1",
-    "erq_scrdExpSup_s1_r1_e1",
-    "sias6sps6_scrdSIAS_s1_r1_e1",
-    "sias6sps6_scrdSPS_s1_r1_e1",
-    "ari_scrdRaw_s1_r1_e1",
-    "ari_scrdProrat_s1_r1_e1"]
+check_columns = []
 
 if __name__ == "__main__":
     file = sys.argv[1]

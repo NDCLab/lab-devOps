@@ -7,18 +7,7 @@ import os
 data_tracker_file = "/home/data/NDClab/datasets/test-readAloud-v4/data-monitoring/central-tracker_readAloud-valence.csv"
 
 # rhs: data, lhs: tracker
-redcheck_columns = {
-    "demo_b_s1_r1_e1_timestamp" : "demo_b_s1_r1_e1", 
-    "bfne_b_s1_r1_e1_timestamp" : "bfne_b_s1_r1_e1", 
-    "aq10_s1_r1_e1_timestamp" : "aq10_s1_r1_e1", 
-    "bmis_s1_r1_e1_timestamp" : "bmis_s1_r1_e1", 
-    "phq8_s1_r1_e1_timestamp" : "phq8_s1_r1_e1",
-    "panasnow_s1_r1_e1_timestamp": "panasnow_s1_r1_e1",
-    "scaared_b_s1_r1_e1_timestamp" : "scaared_b_s1_r1_e1", 
-    "erq_s1_r1_e1_timestamp" : "erq_s1_r1_e1", 
-    "sias6sps6_b_s1_r1_e1_timestamp" : "sias6sps6_b_s1_r1_e1", 
-    "ari_s1_r1_e1_timestamp" : "ari_s1_r1_e1",
-    "stai5_s1_r1_e1_timestamp": "stai5_s1_r1_e1"}
+redcheck_columns = {}
 
 preprocess_cols = ["readAloudChallenge_s1_r1_e1", "ldt_s1_r1_e1", "dccs_s1_r1_e1"]
 

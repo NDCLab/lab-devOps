@@ -21,6 +21,7 @@ sleep 2
 
 echo "Setting up hallMonitor helper files"
 # delete if previously written
+if
 cp "${labpath}/template/rename-cols.py" "${project}/${datam_path}"
 cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
 
@@ -30,6 +31,7 @@ chmod +x "${project}/${datam_path}/update-tracker.py"
 
 echo "Setting up hallMonitor.sh"
 # delete if previously written
+if
 # set up hallMonitor sh file with preset tasks instead of simply copying
 sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $filetypes $tasks
 # sets up hallMonitor sub file without any default mapping or replacement
@@ -40,6 +42,8 @@ chmod +x "${project}/${datam_path}/hallMonitor.sh"
 chmod +x "${project}/${datam_path}/hallMonitor.sub"
 
 echo "Setting up preprocess.sub"
+# delete if previously written
+if
 cp "${labpath}/template/preprocess.sub" "${project}/${datam_path}"
 cp "${labpath}/template/inst-tracker.py" "${project}/${datam_path}"
 # give permissions for all copied files
