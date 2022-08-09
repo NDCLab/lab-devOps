@@ -23,7 +23,7 @@ if __name__ == "__main__":
                 continue 
             tracker_df.loc[id, "redcapData_s1_r1_e1"] = "1"
             # check for part. consent
-            tracker_df.loc[id, "consent_s1_r1_e1"] = "1" if file_df.loc[id, "consent_yn"]==1 else "0"
+            tracker_df.loc[id, "consent_s1_r1_e1"] = str(file_df.loc[id, "consent_yn"])
             if id not in tracker_df.index:
                 print(id, "missing in tracker file, skipping")
                 continue
@@ -58,8 +58,9 @@ if __name__ == "__main__":
             if len(dirnames) == 0:
                 sys.exit()
             ids = [int(id) for id in tracker_df.index]
+            dir_ids = [sub[4:] for sub in dirnames]
             for id in ids:
-                tracker_df.loc[id, "zoomData_s1_r1_e1"] = "1"
+                tracker_df.loc[id, "zoomData_s1_r1_e1"] = "1" if id in dir_ids else "0"
             tracker_df["zoomData_s1_r1_e1"] = tracker_df["zoomData_s1_r1_e1"].fillna("0")
             tracker_df.to_csv(data_tracker_file)
             print("Success: zoom data tracker updated.")
