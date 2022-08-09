@@ -45,11 +45,10 @@ if __name__ == "__main__":
         for (_, dirnames, _) in os.walk(file_path):
             if len(dirnames) == 0:
                 sys.exit()
-            print(dirnames)
+            dir_ids = [sub[4:] for sub in dirnames]
             ids = [int(id) for id in tracker_df.index]
-            # refactor to accept only subject ids, and not dirnames
             for id in ids:
-                tracker_df.loc[id, "pavloviaData_s1_r1_e1"] = "1"
+                tracker_df.loc[id, "pavloviaData_s1_r1_e1"] = "1" if id in dir_ids else "0"
             # make remaining empty values equal to 0
             tracker_df["pavloviaData_s1_r1_e1"] = tracker_df["pavloviaData_s1_r1_e1"].fillna("0")
             tracker_df.to_csv(data_tracker_file)
