@@ -21,9 +21,9 @@ if __name__ == "__main__":
             id = row.name
             if id not in tracker_df.index:
                 continue 
-            tracker_df.loc[id, "redcapData_s1_r1_e1"] = "1"
             # check for part. consent
-            tracker_df.loc[id, "consent_s1_r1_e1"] = str(file_df.loc[id, "consent_yn"])
+            tracker_df.loc[id, "consent_s1_r1_e1"] = "1" if file_df.loc[id, "consent_yn"]==1 else "0"
+            tracker_df.loc[id, "redcapData_s1_r1_e1"] = tracker_df.loc[id, "consent_s1_r1_e1"]
             if id not in tracker_df.index:
                 print(id, "missing in tracker file, skipping")
                 continue
@@ -44,9 +44,9 @@ if __name__ == "__main__":
         # If hallMonitor passes "pavlovia" arg, data exists and passed checks
         for (_, dirnames, _) in os.walk(file_path):
             if len(dirnames) == 0:
-                sys.exit()
+                continue
             dir_ids = [sub[4:] for sub in dirnames]
-            ids = [int(id) for id in tracker_df.index]
+            ids = [id for id in tracker_df.index]
             for id in ids:
                 tracker_df.loc[id, "pavloviaData_s1_r1_e1"] = "1" if id in dir_ids else "0"
             # make remaining empty values equal to 0
@@ -57,8 +57,8 @@ if __name__ == "__main__":
         for (_, dirnames, _) in os.walk(file_path):
             if len(dirnames) == 0:
                 sys.exit()
-            ids = [int(id) for id in tracker_df.index]
             dir_ids = [sub[4:] for sub in dirnames]
+            ids = [id for id in tracker_df.index]
             for id in ids:
                 tracker_df.loc[id, "zoomData_s1_r1_e1"] = "1" if id in dir_ids else "0"
             tracker_df["zoomData_s1_r1_e1"] = tracker_df["zoomData_s1_r1_e1"].fillna("0")
