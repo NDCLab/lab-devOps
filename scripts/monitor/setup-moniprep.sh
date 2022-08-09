@@ -10,7 +10,7 @@ filetypes=$2
 tasks=${3:-0}
 
 datam_path="data-monitoring"
-code_path="/code"
+code_path="code"
 labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 
 # TODO: include ndc colors
