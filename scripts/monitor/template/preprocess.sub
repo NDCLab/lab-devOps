@@ -15,6 +15,7 @@ module load r-4.0.2-gcc-8.2.0-tf4pnwr
 module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg
 
 # automatically get project name
+dataset="${projpath}"
 output_path="${dataset}/derivatives/preprocessed"
 data_source="${dataset}/sourcedata/checked/redcap/"
 
@@ -24,7 +25,9 @@ json_scorer="/home/data/NDClab/tools/instruments/scripts/json_scorer.py"
 survey_data="/home/data/NDClab/tools/instruments/scripts/surveys.json"
 
 # get most recent redcap file for processing
-
+cd $data_source
+file_name=$( get_new_redcap )
+cd ../../../data-monitoring
 # run instruments to preprocess survey data
 singularity exec --bind $dataset,/home/data/NDClab/tools/instruments \
     $sing_image \
@@ -34,12 +37,3 @@ singularity exec --bind $dataset,/home/data/NDClab/tools/instruments \
     $output_path
 
 # update central tracker using instruments data
-# todo: need to programtically get output file
-:'
-python inst-tracker.py "${output_path}/202201v0readAloudval_SCRD_2022-06-04_1550.csv"
-
-# run R scripts that require R modules
-singularity exec --bind $dataset /home/data/NDClab/tools/containers/R-4.1.2/R-con.simg Rscript "${dataset}" ; \
-                                                                                       Rscript "${dataset}" ; \
-										                                               Rscript "${dataset}"
-'

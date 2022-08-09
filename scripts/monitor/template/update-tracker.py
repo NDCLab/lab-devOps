@@ -9,8 +9,6 @@ data_tracker_file = "/home/data/NDClab/datasets/test-readAloud-v4/data-monitorin
 # rhs: data, lhs: tracker
 redcheck_columns = {}
 
-preprocess_cols = ["readAloudChallenge_s1_r1_e1", "ldt_s1_r1_e1", "dccs_s1_r1_e1"]
-
 if __name__ == "__main__":
     file_path = sys.argv[1]
     data_type = sys.argv[2]
@@ -47,17 +45,13 @@ if __name__ == "__main__":
         for (_, dirnames, _) in os.walk(file_path):
             if len(dirnames) == 0:
                 sys.exit()
+            print(dirnames)
             ids = [int(id) for id in tracker_df.index]
             # refactor to accept only subject ids, and not dirnames
             for id in ids:
                 tracker_df.loc[id, "pavloviaData_s1_r1_e1"] = "1"
-                # update preprocess pav data
-                for col in preprocess_cols:
-                    tracker_df.loc[id, col] = "10"
             # make remaining empty values equal to 0
             tracker_df["pavloviaData_s1_r1_e1"] = tracker_df["pavloviaData_s1_r1_e1"].fillna("0")
-            for col in preprocess_cols:
-                    tracker_df[col] = tracker_df[col].fillna("0")
             tracker_df.to_csv(data_tracker_file)
             print("Success: pavlovia data tracker updated.")
     if data_type == "zoom":
