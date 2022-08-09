@@ -30,10 +30,10 @@ sleep 2
 
 echo "Setting up hallMonitor helper files"
 # delete if previously written
-if [ -d "${project}/${datam_path}/rename-cols.py" ]; then
+if [ -f "${project}/${datam_path}/rename-cols.py" ]; then
     rm -f "${project}/${datam_path}/rename-cols.py"
 fi
-if [ -d "${project}/${datam_path}/update-tracker.py" ]; then
+if [ -f "${project}/${datam_path}/update-tracker.py" ]; then
     rm -f "${project}/${datam_path}/update-tracker.py"
 fi
 cp "${labpath}/template/rename-cols.py" "${project}/${datam_path}"
@@ -45,10 +45,10 @@ chmod +x "${project}/${datam_path}/update-tracker.py"
 
 echo "Setting up hallMonitor.sh"
 # delete if previously written
-if [ -d "${project}/${datam_path}/hallMonitor.sh" ]; then
+if [ -f "${project}/${datam_path}/hallMonitor.sh" ]; then
     rm -f "${project}/${datam_path}/hallMonitor.sh"
 fi
-if [ -d "${project}/${datam_path}/hallMonitor.sub" ]; then
+if [ -f "${project}/${datam_path}/hallMonitor.sub" ]; then
     rm -f "${project}/${datam_path}/hallMonitor.sub"
 fi
 # set up hallMonitor sh file with preset tasks instead of simply copying
@@ -62,10 +62,10 @@ chmod +x "${project}/${datam_path}/hallMonitor.sub"
 
 echo "Setting up preprocess.sub"
 # delete if previously written
-if [ -d "${project}/${datam_path}/inst-tracker.py" ]; then
+if [ -f "${project}/${datam_path}/inst-tracker.py" ]; then
     rm -f "${project}/${datam_path}/inst-tracker.py"
 fi
-if [ -d "${project}/${datam_path}/preprocess.sub" ]; then
+if [ -f "${project}/${datam_path}/preprocess.sub" ]; then
     rm -f "${project}/${datam_path}/preprocess.sub"
 fi
 cp "${labpath}/template/preprocess.sub" "${project}/${datam_path}"
