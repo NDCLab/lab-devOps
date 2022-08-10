@@ -41,6 +41,8 @@ outfile=$( singularity exec --bind $dataset,/home/data/NDClab/tools/instruments 
 # update central tracker using instruments data
 python inst-tracker.py "${output_path}/${outfile}"
 
+# insert singularity scripts here
+
 if [[ ! -f "$log" ]]; then
     echo "$log does not exist, skipping log."
     exit 0
