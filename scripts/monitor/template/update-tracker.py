@@ -45,7 +45,7 @@ if __name__ == "__main__":
         for (_, dirnames, _) in os.walk(file_path):
             if len(dirnames) == 0:
                 continue
-            dir_ids = [sub[4:] for sub in dirnames]
+            dir_ids = [int(sub[4:]) for sub in dirnames]
             ids = [id for id in tracker_df.index]
             for id in ids:
                 tracker_df.loc[id, "pavloviaData_s1_r1_e1"] = "1" if id in dir_ids else "0"
