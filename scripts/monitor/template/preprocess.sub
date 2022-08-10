@@ -18,7 +18,7 @@ module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg
 dataset=$(dirname $(pwd))
 output_path="${dataset}/derivatives/preprocessed"
 data_source="${dataset}/sourcedata/checked/redcap/"
-log="${dataset}data-monitoring/data-monitoring-log.md"
+log="${dataset}/data-monitoring/data-monitoring-log.md"
 
 # constant paths
 sing_image="/home/data/NDClab/tools/instruments/containers/singularity/inst-container.simg"
