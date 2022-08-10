@@ -26,15 +26,16 @@ survey_data="/home/data/NDClab/tools/instruments/scripts/surveys.json"
 
 # get most recent redcap file for processing
 cd $data_source
-file_name=$( get_new_redcap )
+input_file=$( get_new_redcap )
+echo "Found newest redcap: ${input_file}"
 cd ../../../data-monitoring
 # run instruments to preprocess survey data
 outfile=singularity exec --bind $dataset,/home/data/NDClab/tools/instruments \
     $sing_image \
     python3 $json_scorer \
-    $data_source/$input_file \
-    $survey_data \
-    $output_path
+        "${data_source}/${input_file}" \
+        $survey_data \
+        $output_path
 
 # update central tracker using instruments data
 echo $outfile
