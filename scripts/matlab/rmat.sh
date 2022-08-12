@@ -22,12 +22,12 @@ else
     cpus="1"
 fi
 
-echo -e  "#!/bin/bash\\n
-#SBATCH --nodes=1\\n
-#SBATCH --ntasks=1\\n
-#SBATCH --time=01:00:00\\n
-#SBATCH --cpus-per-task=${cpus}\\n
-module load matlab-2018b\\n
+echo -e  "#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=${cpus} \\n
+module load matlab-2018b
 ${exec_line}" >| $sub_file
 
 # Submit sub file
