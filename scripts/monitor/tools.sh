@@ -122,6 +122,8 @@ function verify_copy_pav_files
         fi
 
         # check if file contains only valid id's
+        output=$( python ${dataset}data-monitoring/check-id.py $check"/"$pavlov "pavlovia" )
+        """
         id_col=$(head -1 $file_name | tr ',' '\n' | cat -n | grep -w "id" | awk '{print $1}')
         mapfile -t ids < <(cat $file_name | cut -d ',' -f$id_col)
         unset ids[0]
@@ -137,9 +139,9 @@ function verify_copy_pav_files
                 break
             fi
         done
+        """
         
         # extract task name if it exists, and assing to obs values
-        # TODO: improve regex, ignore keywords, find discrete tasknames
         tpat="(?<=_)(.*)(?=_s\d{1}_r\d{1}_e\d{1})"
         task=$(echo "$file_name" | grep -oP "$tpat")
         # append

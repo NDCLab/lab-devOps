@@ -1,11 +1,11 @@
 #!/bin/bash
 # A script to set up data monitoring & preprocessing in your project
 
-usage() { echo "Usage: setup-data.sh <project-path> [filetype1,filetype2,filetype3] [task1,task2,task3] " 1>&2; exit 1; }
+usage() { echo "Usage: setup-data.sh [-c] <project-path> [datatype1,datatype2,datatype3] [task1,task2,task3]" 1>&2; exit 1; }
 
 # HallMonitor construction args
 project=$1
-filetypes=$2
+datatypes=$2
 # Optional tasks arg 
 tasks=${3:-0}
 
@@ -52,7 +52,7 @@ if [ -f "${project}/${datam_path}/hallMonitor.sub" ]; then
     rm -f "${project}/${datam_path}/hallMonitor.sub"
 fi
 # set up hallMonitor sh file with preset tasks instead of simply copying
-sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $filetypes $tasks
+sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $datatypes $tasks
 # sets up hallMonitor sub file without any default mapping or replacement
 cp "${labpath}/template/hallMonitor.sub" "${project}/${datam_path}"
 
@@ -73,3 +73,15 @@ cp "${labpath}/template/inst-tracker.py" "${project}/${datam_path}"
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/preprocess.sub"
 chmod +x "${project}/${datam_path}/inst-tracker.py"
+
+# check if central tracker should be written
+echo "Setting up central tracker"
+while getopts ":rm" opt; do
+    case \${opt} in
+        r)
+            python "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $datatypes "150000" \$2 
+            chmod +x "${project}/${datam_path}/central-tracker_${project}.csv"
+            ;;
+        :)
+    esac 
+done
