@@ -26,4 +26,4 @@ EOM
 echo $mycron
 
 # install crontab
-crontab $mycron
+# crontab $mycron
