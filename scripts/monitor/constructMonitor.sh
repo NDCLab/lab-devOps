@@ -86,7 +86,7 @@ do
         # update tracker for each id
         output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$dir" )
         if [[ "\$output" =~ "Error" ]]; then
-            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked pavlovia data.\${NC}"
+            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
             error_detected=true
         fi
         echo \$output
@@ -98,7 +98,7 @@ do
         # update tracker for each id
         output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$dir" )
         if [[ "\$output" =~ "Error" ]]; then
-            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked zoom data.\${NC}"
+            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
             error_detected=true
             continue
         fi
@@ -157,14 +157,18 @@ do
         echo \$output
         echo -e "\\n"
     fi
-    # EEG DATA
-    # Check if file exists, duplicates, if naming convention is upheld, check if subject-id
-    # check if in BIDS format, make standard of data-type stem 
-    # checked needs to be in BIDS format (preprocessing?)
-    # brainvision data, check 3 files (header/markers/data) (Brain Vision: .eeg, .vhdr, .vmrk)
-    # define if egi or brainvision. Check if its looking for brainvision or EGI (3 standard extensions)
-    # IT BIDSIFIES (bidsish)
-    # preprocessing
+    if [[ \${eeg[*]} =~ \$dir ]]; then
+        echo "Accessing \$raw/\$dir"
+        # update tracker for each id
+        output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$dir" )
+        if [[ "\$output" =~ "Error" ]]; then
+            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
+            error_detected=true
+            continue
+        fi
+        echo \$output
+        echo -e "\\n"
+    fi
 done        
 
 if [ \$error_detected = true ]; then
