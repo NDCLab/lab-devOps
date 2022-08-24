@@ -4,10 +4,10 @@
 usage() { echo "Usage: setup-data.sh [-t] <project-path> [datatype1,datatype2,datatype3] [task1,task2,task3]" 1>&2; exit 1; }
 
 # HallMonitor construction args
-project=$1
-datatypes=$2
+project=$2
+datatypes=$3
 # Optional tasks arg 
-tasks=${3:-0}
+tasks=${4:-0}
 
 datam_path="data-monitoring"
 code_path="code"
