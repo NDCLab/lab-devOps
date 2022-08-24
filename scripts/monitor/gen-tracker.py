@@ -9,8 +9,8 @@ if __name__ == "__main__":
     ids = sys.argv[3]
 
     # list and label the available datatypes
-    datalist = [dt + DATA_LAB for dt in datatypes.split(",")]
+    header = list(DEF_COLS) + [dt + DATA_LAB for dt in datatypes.split(",")]
 
     with open(filepath, "w") as file:
         # write columns
-        file.write(','.join(datalist))
+        file.write(','.join(header))
