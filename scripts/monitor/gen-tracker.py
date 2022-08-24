@@ -13,4 +13,4 @@ if __name__ == "__main__":
 
     with open(filepath, "w") as file:
         # write columns
-        file.write(datalist)
+        file.write(','.join(datalist))
