@@ -1,10 +1,16 @@
 import pandas as pd
 import sys
-import math
 import os
 
-# TODO: Change to path agnostic implement
-data_tracker_file = "/home/data/NDClab/datasets/test-readAloud-v4/data-monitoring/central-tracker_readAloud-valence.csv"
+path = os.getcwd()
+dirname = os.path.dirname(path)
+dataset = os.path.basename(dirname)
+data_tracker_file = "/home/data/NDClab/datasets/{dataset}/data-monitoring/central-tracker_{dataset}.csv".format(dataset=dataset)
+
+# list audio-vid data
+audivid = ["zoom", "audio", "video", "digi"]
+# list pav-psy data
+pavpsy = ["pavlovia", "psychopy"]
 
 # rhs: data, lhs: tracker
 redcheck_columns = {}
@@ -40,30 +46,32 @@ if __name__ == "__main__":
             tracker_df[redcheck_columns[key]] = tracker_df[redcheck_columns[key]].fillna("NA") 
         tracker_df.to_csv(data_tracker_file)
         print("Success: redcap data tracker updated.")
-    if data_type == "pavlovia":
+    if data_type in pavpsy:
         # If hallMonitor passes "pavlovia" arg, data exists and passed checks
         for (_, dirnames, _) in os.walk(file_path):
             if len(dirnames) == 0:
                 continue
             dir_ids = [int(sub[4:]) for sub in dirnames]
             ids = [id for id in tracker_df.index]
+            collabel = data_type + "Data_s1_r1_e1"
             for id in ids:
-                tracker_df.loc[id, "pavloviaData_s1_r1_e1"] = "1" if id in dir_ids else "0"
+                tracker_df.loc[id, collabel] = "1" if id in dir_ids else "0"
             # make remaining empty values equal to 0
-            tracker_df["pavloviaData_s1_r1_e1"] = tracker_df["pavloviaData_s1_r1_e1"].fillna("0")
+            tracker_df[collabel] = tracker_df[collabel].fillna("0")
             tracker_df.to_csv(data_tracker_file)
-            print("Success: pavlovia data tracker updated.")
-    if data_type == "zoom":
+            print("Success: {} data tracker updated.".format(data_type))
+    if data_type in audivid:
         for (_, dirnames, _) in os.walk(file_path):
             if len(dirnames) == 0:
                 sys.exit()
             dir_ids = [int(sub[4:]) for sub in dirnames]
             ids = [id for id in tracker_df.index]
+            collabel = data_type + "Data_s1_r1_e1"
             for id in ids:
-                tracker_df.loc[id, "zoomData_s1_r1_e1"] = "1" if id in dir_ids else "0"
-            tracker_df["zoomData_s1_r1_e1"] = tracker_df["zoomData_s1_r1_e1"].fillna("0")
+                tracker_df.loc[id, collabel] = "1" if id in dir_ids else "0"
+            tracker_df[collabel] = tracker_df[collabel].fillna("0")
             tracker_df.to_csv(data_tracker_file)
-            print("Success: zoom data tracker updated.")
+            print("Success: {} data tracker updated.".format(data_type))
 
      
                             
