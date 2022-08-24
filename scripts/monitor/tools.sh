@@ -18,11 +18,9 @@ check="${dataset}/sourcedata/checked"
 function update_log {
     status=$1
     logfile=$2
-    # logfile=$2
     if [[ ! -f "$logfile" ]]; then
-        # TODO: CREATE LOG
-        echo "$logfile does not exist, skipping log."
-        exit 0
+        echo "$logfile does not exist, creating."
+        touch data-monitoring-log.md
     fi
     now=`date '+%Y-%m-%d_%T'`
     echo "${now} Data monitoring status: ${status}" >> $logfile
