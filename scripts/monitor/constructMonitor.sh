@@ -159,16 +159,26 @@ do
     fi
     if [[ "\$dir" == "bidsish" ]]; then
         echo "Accessing \$raw/\$dir"
-        # iterate through filetypes
-        # update tracker for each id
-        # output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$dir" )
-        # if [[ "\$output" =~ "Error" ]]; then
-        #    echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
-        #    error_detected=true
-        #    continue
-        #fi
-        #echo \$output
-        #echo -e "\\n"
+        for type in "\${filetypes[@]}"
+        do
+            if [[ \${eegtype[*]} =~ \$type ]]; then
+                sub_check=\$(verify_copy_sub \$dir \$subject)
+                res=\$?
+                if [ \$res != 0 ]; then
+                    echo -e "\$sub_check"
+                    echo -e "\\t \${RED}Error detected in \$subject. View above.\${NC} \\n" 
+                    error_detected=true
+                    continue 
+                fi
+                output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$type" )
+                if [[ "\$output" =~ "Error" ]]; then
+                    echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
+                    error_detected=true
+                    continue
+                fi
+            fi
+        done
+        echo -e "\\n"
     fi
 done        
 
