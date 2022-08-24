@@ -4,10 +4,10 @@
 usage() { echo "Usage: setup-moniprep.sh [-t] <project-path> [datatype1,datatype2,datatype3] [task1,task2,task3]" 1>&2; exit 1; }
 
 # HallMonitor construction args
-project=$3
-datatypes=$4
+project=$2
+datatypes=$3
 # Optional tasks arg 
-tasks=${5:-0}
+tasks=${4:-0}
 
 datam_path="data-monitoring"
 code_path="code"
