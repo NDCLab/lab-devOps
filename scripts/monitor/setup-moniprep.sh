@@ -77,7 +77,7 @@ chmod +x "${project}/${datam_path}/inst-tracker.py"
 # check if central tracker should be written
 while getopts ":t" opt; do
     case \${opt} in
-        tracker)
+        t)
             echo "Setting up central tracker"
             python "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $datatypes "150000" \$2 
             chmod +x "${project}/${datam_path}/central-tracker_${project}.csv"
