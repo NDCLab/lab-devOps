@@ -7,8 +7,9 @@ NC='\033[0m'
 
 pavpsy=("pavlovia" "psychopy")
 audivid=("zoom" "audio" "video" "digi")
-eeg="bidsish"
+eegtype=("bv" "egi")
 
+eeg="bidsish"
 redcap="redcap"
 
 raw="${dataset}/sourcedata/raw"
@@ -73,7 +74,7 @@ function verify_copy_sub {
         exit 1
     fi
     # copy subject over to checked directory if it doesnt exist yet
-    if [ ! -d "${check}/${pavlov}/$name" ]; then
+    if [ ! -d "${check}/${folder}/$name" ]; then
       echo -e "\\t Creating ${check}/${folder}/${name}"
       mkdir "${check}/${pavlov}/${name}"
     fi

@@ -3,11 +3,21 @@
 
 usage() { echo "Usage: setup-moniprep.sh [-t] <project-path> [datatype1,datatype2,datatype3] [task1,task2,task3]" 1>&2; exit 1; }
 
-# HallMonitor construction args
-project=$2
-datatypes=$3
-# Optional tasks arg 
-tasks=${4:-0}
+# interpret optional t flag to construct tracker
+if [ "$1" = -t ]; then 
+    project=$2
+    datatypes=$3
+    # Optional tasks arg 
+    tasks=${4:-0}
+    echo "Setting up central tracker"
+    python "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $datatypes "150000" \$2 
+    chmod +x "${project}/${datam_path}/central-tracker_${project}.csv"
+else
+    project=$1
+    datatypes=$2
+    # Optional tasks arg 
+    tasks=${3:-0}
+fi
 
 datam_path="data-monitoring"
 code_path="code"
@@ -73,15 +83,3 @@ cp "${labpath}/template/inst-tracker.py" "${project}/${datam_path}"
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/preprocess.sub"
 chmod +x "${project}/${datam_path}/inst-tracker.py"
-
-# check if central tracker should be written
-while getopts ":t" opt; do
-    case ${opt} in
-        t)
-            echo "Setting up central tracker"
-            python "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $datatypes "150000" \$2 
-            chmod +x "${project}/${datam_path}/central-tracker_${project}.csv"
-            ;;
-        :)
-    esac 
-done
