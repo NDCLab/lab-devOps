@@ -11,6 +11,8 @@ data_tracker_file = "/home/data/NDClab/datasets/{dataset}/data-monitoring/centra
 audivid = ["zoom", "audio", "video", "digi"]
 # list pav-psy data
 pavpsy = ["pavlovia", "psychopy"]
+# list eeg systems
+eeg = ["bv", "egi"]
 
 # rhs: data, lhs: tracker
 redcheck_columns = {}
@@ -61,6 +63,18 @@ if __name__ == "__main__":
             tracker_df.to_csv(data_tracker_file)
             print("Success: {} data tracker updated.".format(data_type))
     if data_type in audivid:
+        for (_, dirnames, _) in os.walk(file_path):
+            if len(dirnames) == 0:
+                sys.exit()
+            dir_ids = [int(sub[4:]) for sub in dirnames]
+            ids = [id for id in tracker_df.index]
+            collabel = data_type + "Data_s1_r1_e1"
+            for id in ids:
+                tracker_df.loc[id, collabel] = "1" if id in dir_ids else "0"
+            tracker_df[collabel] = tracker_df[collabel].fillna("0")
+            tracker_df.to_csv(data_tracker_file)
+            print("Success: {} data tracker updated.".format(data_type))
+    if data_type in eeg:
         for (_, dirnames, _) in os.walk(file_path):
             if len(dirnames) == 0:
                 sys.exit()

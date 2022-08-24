@@ -6,8 +6,10 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 pavpsy=("pavlovia" "psychopy")
-redcap="redcap"
 audivid=("zoom" "audio" "video" "digi")
+eeg=("bv" "egi")
+
+redcap="redcap"
 
 raw="${dataset}/sourcedata/raw"
 check="${dataset}/sourcedata/checked"
@@ -18,6 +20,7 @@ function update_log {
     logfile=$2
     # logfile=$2
     if [[ ! -f "$logfile" ]]; then
+        # TODO: CREATE LOG
         echo "$logfile does not exist, skipping log."
         exit 0
     fi
@@ -122,7 +125,7 @@ function verify_copy_pav_files
         fi
 
         # check if file contains only valid id's
-        output=$( python ${dataset}data-monitoring/check-id.py $check"/"$pavlov "pavlovia" )
+        # output=$( python ${dataset}data-monitoring/check-id.py $check"/"$pavlov "pavlovia" )
         """
         id_col=$(head -1 $file_name | tr ',' '\n' | cat -n | grep -w "id" | awk '{print $1}')
         mapfile -t ids < <(cat $file_name | cut -d ',' -f$id_col)
