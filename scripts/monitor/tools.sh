@@ -7,7 +7,7 @@ NC='\033[0m'
 
 pavpsy=("pavlovia" "psychopy")
 audivid=("zoom" "audio" "video" "digi")
-eeg=("bv" "egi")
+eeg="bidsish"
 
 redcap="redcap"
 
@@ -27,8 +27,7 @@ function update_log {
 }
 
 # A function to get the newest redcap file according to redcap timestamp, not file modification date.
-function get_new_redcap
-{
+function get_new_redcap {
     elements=(*)
     time_stamp='\d{4}-\d{2}-\d{2}_\d{4}'
     stem="202201v0readAloudval_DATA_${time_stamp}.csv"
@@ -64,8 +63,7 @@ function get_new_redcap
 }
 
 # A function to verify if a pavlovia subject folder is named correctly. If it is, create a folder of the same name in checked.
-function verify_copy_sub
-{
+function verify_copy_sub {
     folder=$1
     name=$2
     # check if sub name contains unexpected chars
@@ -84,8 +82,7 @@ function verify_copy_sub
 
 # A function to verify a group of pavlovia files in a subject and then copy over to respective subject folders. 
 # Takes in param id and which flankers to check for
-function verify_copy_pavpsy_files
-{
+function verify_copy_pavpsy_files {
     elements=(*)
     dir=$1
     id=$2
@@ -171,4 +168,8 @@ function verify_copy_pavpsy_files
     fi
 
     exit 0
+}
+
+function verify_eeg {
+
 }
