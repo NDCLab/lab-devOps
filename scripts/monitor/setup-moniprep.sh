@@ -1,7 +1,7 @@
 #!/bin/bash
 # A script to set up data monitoring & preprocessing in your project
 
-usage() { echo "Usage: setup-data.sh [-tracker] <project-path> [datatype1,datatype2,datatype3] [task1,task2,task3]" 1>&2; exit 1; }
+usage() { echo "Usage: setup-data.sh [-t] <project-path> [datatype1,datatype2,datatype3] [task1,task2,task3]" 1>&2; exit 1; }
 
 # HallMonitor construction args
 project=$1
@@ -75,7 +75,7 @@ chmod +x "${project}/${datam_path}/preprocess.sub"
 chmod +x "${project}/${datam_path}/inst-tracker.py"
 
 # check if central tracker should be written
-while getopts ":tracker:" opt; do
+while getopts ":t" opt; do
     case \${opt} in
         tracker)
             echo "Setting up central tracker"
