@@ -1,7 +1,7 @@
 #!/bin/bash
 # A script to set up data monitoring & preprocessing in your project
 
-usage() { echo "Usage: setup-data.sh [-c] <project-path> [datatype1,datatype2,datatype3] [task1,task2,task3]" 1>&2; exit 1; }
+usage() { echo "Usage: setup-data.sh [-tracker] <project-path> [datatype1,datatype2,datatype3] [task1,task2,task3]" 1>&2; exit 1; }
 
 # HallMonitor construction args
 project=$1
@@ -15,7 +15,7 @@ labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 
 # TODO: include ndc colors
 cat << "EOF"
-  .__   __.  _______   ______  __          ___      .______
+ .__   __.  _______   ______  __          ___      .______
  |  \ |  | |       \ /      ||  |        /   \     |   _  \
  |   \|  | |  .--.  |  ,----'|  |       /  ^  \    |  |_)  |
  |  . `  | |  |  |  |  |     |  |      /  /_\  \   |   _  <
@@ -75,10 +75,10 @@ chmod +x "${project}/${datam_path}/preprocess.sub"
 chmod +x "${project}/${datam_path}/inst-tracker.py"
 
 # check if central tracker should be written
-echo "Setting up central tracker"
-while getopts ":rm" opt; do
+while getopts ":tracker:" opt; do
     case \${opt} in
-        r)
+        tracker)
+            echo "Setting up central tracker"
             python "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $datatypes "150000" \$2 
             chmod +x "${project}/${datam_path}/central-tracker_${project}.csv"
             ;;

@@ -5,9 +5,9 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-pavlov="pavlovia"
+pavpsy=("pavlovia" "psychopy")
 redcap="redcap"
-zoom="zoom"
+audivid=("zoom" "audio" "video" "digi")
 
 raw="${dataset}/sourcedata/raw"
 check="${dataset}/sourcedata/checked"

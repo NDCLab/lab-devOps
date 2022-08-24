@@ -1,9 +1,12 @@
 import pandas as pd
 import sys
 import math
+import os
 
-# TODO: Change to path agnostic implement
-data_tracker_file = "/home/data/NDClab/datasets/test-readAloud-v4/data-monitoring/central-tracker_readAloud-valence.csv"
+path = os.getcwd()
+dirname = os.path.dirname(path)
+dataset = os.path.basename(dirname)
+data_tracker_file = "/home/data/NDClab/datasets/{dataset}/data-monitoring/central-tracker_{dataset}.csv".format(dataset=dataset)
 
 check_columns = []
 

@@ -27,8 +27,8 @@ usage() { echo "Usage: sh hallMonitor.sh [-m/-r] [string list of replacement or 
 error_detected=false
 for dir in \`ls \$raw\`
 do
-    # If pavlovia dataset
-    if [ "\$dir" == "\$pavlov" ]; then
+    # If psychopy or pavlovia dataset
+    if [[ \${pavpsy[*]} =~ \$dir ]]; then
         echo "Accessing \$raw/\$dir"
         cd \$raw/\$dir
 
@@ -84,7 +84,7 @@ do
         done
         echo -e "\\n"
         # update tracker for each id
-        output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$pavlov "pavlovia" )
+        output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$dir" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked pavlovia data.\${NC}"
             error_detected=true
@@ -92,11 +92,11 @@ do
         echo \$output
         echo -e "\\n"             
     fi
-    # If zoom dataset
-    if [ "\$dir" == "\$zoom" ]; then
+    # If zoom, audio, video, or digi dataset
+    if [[ \${audivid[*]} =~ \$dir ]]; then
         echo "Accessing \$raw/\$dir"
         # update tracker for each id
-        output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$zoom "zoom" )
+        output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$dir" )
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked zoom data.\${NC}"
             error_detected=true
