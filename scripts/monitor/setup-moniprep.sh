@@ -4,7 +4,7 @@
 usage() { echo "Usage: setup-moniprep.sh [-t] <project-path> [datatype1,datatype2,datatype3] [task1,task2,task3]" 1>&2; exit 1; }
 
 # interpret optional t flag to construct tracker
-if [ "$1" = -t ]; then 
+if [ "$1" = "-t" ]; then 
     project=$2
     datatypes=$3
     # Optional tasks arg 
