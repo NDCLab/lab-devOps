@@ -66,7 +66,8 @@ function get_new_redcap
 # A function to verify if a pavlovia subject folder is named correctly. If it is, create a folder of the same name in checked.
 function verify_copy_sub
 {
-    name=$1
+    folder=$1
+    name=$2
     # check if sub name contains unexpected chars
     segment=$(echo "$name" | grep -oP "sub-[0-9]+")
     if [[ -z "$segment" ]]; then
@@ -75,7 +76,7 @@ function verify_copy_sub
     fi
     # copy subject over to checked directory if it doesnt exist yet
     if [ ! -d "${check}/${pavlov}/$name" ]; then
-      echo -e "\\t Creating ${check}/${pavlov}/${name}"
+      echo -e "\\t Creating ${check}/${folder}/${name}"
       mkdir "${check}/${pavlov}/${name}"
     fi
     exit 0
@@ -83,12 +84,12 @@ function verify_copy_sub
 
 # A function to verify a group of pavlovia files in a subject and then copy over to respective subject folders. 
 # Takes in param id and which flankers to check for
-function verify_copy_pav_files
+function verify_copy_pavpsy_files
 {
     elements=(*)
-    id=$1
-    tasks=$2
-    dir="pavlovia"
+    dir=$1
+    id=$2
+    tasks=$3
     # create empty array to collect tasks observed in pavlovia folder
     obs=()
 

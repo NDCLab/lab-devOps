@@ -53,7 +53,7 @@ do
             id=\${id::-1}
 
             # check if name is properly named and copy if correct
-            sub_check=\$(verify_copy_sub \$subject)
+            sub_check=\$(verify_copy_sub \$dir \$subject)
             res=\$?
             if [ \$res != 0 ]; then
                 echo -e "\$sub_check"
@@ -66,11 +66,11 @@ do
 
             # store file names in array
             file_names=(*)
-            # files_log=\$(verify_copy_pav_files "\${file_names[@]}" \$id)
+            # files_log=\$(verify_copy_pav_files \$dir "\${file_names[@]}" \$id)
 
             # check if files contain all tasks, appropriatley named, 
             # and contain correct ID's
-            files_log=\$(verify_copy_pav_files \$id \$tasks)
+            files_log=\$(verify_copy_pavpsy_files \$id \$tasks)
             res=\$?
             if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
                 echo -e "\$files_log"
