@@ -157,17 +157,18 @@ do
         echo \$output
         echo -e "\\n"
     fi
-    if [[ \${eeg[*]} =~ \$dir ]]; then
+    if [[ "\$dir" == "bidsish" ]]; then
         echo "Accessing \$raw/\$dir"
+        # iterate through filetypes
         # update tracker for each id
-        output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$dir" )
-        if [[ "\$output" =~ "Error" ]]; then
-            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
-            error_detected=true
-            continue
-        fi
-        echo \$output
-        echo -e "\\n"
+        # output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$dir" )
+        # if [[ "\$output" =~ "Error" ]]; then
+        #    echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
+        #    error_detected=true
+        #    continue
+        #fi
+        #echo \$output
+        #echo -e "\\n"
     fi
 done        
 
