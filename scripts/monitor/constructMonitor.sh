@@ -181,7 +181,7 @@ do
         echo -e "\\n"
     fi
 done        
-
+cd \${dataset}data-monitoring/
 if [ \$error_detected = true ]; then
     update_log "error" \$logfile
 else
