@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     with open(filepath, "w") as file:
         # write columns
-        file.write(','.join(header))
+        file.write(','.join(header) + "\n")
         for i in range(INCREMENT):
-            file.write(str(ids))
+            file.write(str(ids) + "\n")
             ids += 1
