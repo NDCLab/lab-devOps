@@ -88,6 +88,9 @@ function verify_copy_pavpsy_files {
     dir=$1
     id=$2
     tasks=$3
+    if [ $tasks != 0 ]; then
+        tasks=($(echo $tasks | tr "," "\n"))
+    fi
     # create empty array to collect tasks observed in pavlovia folder
     obs=()
 
@@ -113,39 +116,27 @@ function verify_copy_pavpsy_files {
             continue
         fi
 
-        # select standard portion of file
-        segment=$(echo "$file_name" | grep -oP "^\d+_read-aloud-val-o_s\d+_r\d+_e\d+_\d{4}-\d{2}-\d{2}_\d{2}h\d{2}\.\d{2}")
-        # check if file follows naming conv
-        if [[ -z "$segment" ]]; then
+        # check if file follows naming convention according to available tasks
+        presence=0
+        for taskname in "${tasks[@]}"; do
+            segment=$(echo "$file_name" | grep -oP "^\d+_($taskname)(_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+)?_\d{4}")
+            if [[ "$segment" ]]; then
+                presence=1
+            fi
+        done
+        if [[ "$presence" == 0 ]]; then
             echo -e "\\t ${RED}Error: Improper file name $file_name, does not meet standard${NC}"
             continue
         fi
-
+        
         # check if file contains only valid id's
         # output=$( python ${dataset}data-monitoring/check-id.py $check"/"$pavlov "pavlovia" )
-        """
-        id_col=$(head -1 $file_name | tr ',' '\n' | cat -n | grep -w "id" | awk '{print $1}')
-        mapfile -t ids < <(cat $file_name | cut -d ',' -f$id_col)
-        unset ids[0]
-
-        # ERROR HERE: temp-fix not sufficient
-        for val in "${!ids[@]}"; do
-            # TEMP-FIX: ids getting non-id vals, needs to be consolidated
-            if ! [[ $val =~ '^[0-9]+$' ]] ; then
-                continue
-            fi
-            if [[ ${ids[$val]} != "$id" ]]; then
-                echo -e "\\t ${RED}Error: Improper id value of ${ids[$val]} in $file_name. Must equal $id ${NC}"
-                break
-            fi
-        done
-        """
         
         # extract task name if it exists, and assing to obs values
-        tpat="(?<=_)(.*)(?=_s\d{1}_r\d{1}_e\d{1})"
-        # remove extraneous chars (hardcode)
-        tpat=${tpat#"A_1_1_"}
+        tpat="(?<=_)(.*)(?=_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+)?"
+        # remove extraneous chars (hardcoded)
         task=$(echo "$file_name" | grep -oP "$tpat")
+        task=${task#"A_1_1_"}
         # append
         obs[${#obs[@]}]=$task
 
@@ -160,17 +151,18 @@ function verify_copy_pavpsy_files {
 
     # split tasks into array and compare if valid param
     if [ $tasks != 0 ]; then
-        tasks=($(echo $tasks | tr "," "\n"))
-        if [ "${obs[@]}" == "${tasks[@]}" ] ; then
-            echo -e "\\t ${GREEN}$subject contains all required tasks ${NC}"
-        else
-            echo -e "\\t ${RED}Missing tasks in $subject, please make sure all tasks are included.${NC} "
-        fi 
+        for taskname in "${tasks[@]}"; do
+            if [ "${obs[@]}" == "${tasks[@]}" ] ; then
+                echo -e "\\t ${GREEN}$subject contains all required tasks ${NC}"
+            else
+                echo -e "\\t ${RED}Missing tasks in $subject, please make sure all tasks are included.${NC} "
+            fi 
+        done
     fi
 
     exit 0
 }
 
 function verify_eeg {
-
+    exit 0
 }
