@@ -31,7 +31,7 @@ function update_log {
 function get_new_redcap {
     elements=(*)
     time_stamp='\d{4}-\d{2}-\d{2}_\d{4}'
-    stem="202201v0readAloudval_DATA_${time_stamp}.csv"
+    stem="^.+_DATA_${time_stamp}.csv$"
 
     # return single instance if only one file
     if [[ ${#elements[@]} == 1 ]]; then
@@ -151,13 +151,11 @@ function verify_copy_pavpsy_files {
 
     # split tasks into array and compare if valid param
     if [ $tasks != 0 ]; then
-        for taskname in "${tasks[@]}"; do
-            if [ "${obs[@]}" == "${tasks[@]}" ] ; then
-                echo -e "\\t ${GREEN}$subject contains all required tasks ${NC}"
-            else
-                echo -e "\\t ${RED}Missing tasks in $subject, please make sure all tasks are included.${NC} "
-            fi 
-        done
+        if [ "${obs[@]}" == "${tasks[@]}" ] ; then
+            echo -e "\\t ${GREEN}$subject contains all required tasks ${NC}"
+        else
+            echo -e "\\t ${RED}Missing tasks in $subject, please make sure all tasks are included.${NC} "
+        fi 
     fi
 
     exit 0
