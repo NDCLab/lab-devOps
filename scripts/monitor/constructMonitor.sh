@@ -70,7 +70,7 @@ do
 
             # check if files contain all tasks, appropriatley named, 
             # and contain correct ID's
-            files_log=\$(verify_copy_pavpsy_files \$id \$tasks)
+            files_log=\$(verify_copy_pavpsy_files \$dir \$id \$tasks)
             res=\$?
             if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
                 echo -e "\$files_log"
