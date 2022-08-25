@@ -16,5 +16,5 @@ if __name__ == "__main__":
         # write columns
         file.write(','.join(header))
         for i in range(INCREMENT):
-            file.write(ids)
+            file.write(str(ids))
             ids += 1
