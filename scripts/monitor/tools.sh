@@ -88,7 +88,7 @@ function verify_copy_pavpsy_files {
     dir=$1
     id=$2
     tasks=$3
-    if [ $tasks != 0 ]; then
+    if [[ $tasks != 0 ]]; then
         tasks=($(echo $tasks | tr "," "\n"))
     fi
     # create empty array to collect tasks observed in pavlovia folder
@@ -150,7 +150,7 @@ function verify_copy_pavpsy_files {
     done
 
     # split tasks into array and compare if valid param
-    if [ $tasks != 0 ]; then
+    if [[ $tasks != 0 ]]; then
         if [ "${obs[@]}" == "${tasks[@]}" ] ; then
             echo -e "\\t ${GREEN}$subject contains all required tasks ${NC}"
         else
