@@ -3,15 +3,15 @@ import sys
 import math
 import os
 
-path = os.getcwd()
-dirname = os.path.dirname(path)
-dataset = os.path.basename(dirname)
-data_tracker_file = "/home/data/NDClab/datasets/{dataset}/data-monitoring/central-tracker_{dataset}.csv".format(dataset=dataset)
-
 check_columns = []
 
 if __name__ == "__main__":
     file = sys.argv[1]
+    dataset = sys.argv[3]
+
+    data_tracker_file = "/home/data/NDClab/datasets/{dataset}/data-monitoring/central-tracker_{dataset}.csv".format(dataset=dataset)
+    tracker_df = pd.read_csv(data_tracker_file, index_col="id")
+    
     file_df = pd.read_csv(file, index_col="record_id")
     tracker_df = pd.read_csv(data_tracker_file, index_col="id")
 
