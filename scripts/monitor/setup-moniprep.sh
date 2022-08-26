@@ -29,7 +29,7 @@ if [ "$1" = "-t" ]; then
     tasks=${5:-0}
     echo "Setting up central tracker"
     python "${labpath}/gen-tracker.py" "${project}${datam_path}/central-tracker_${project::-1}.csv" $datatypes $ids \$2 
-    chmod +x "${project}/${datam_path}/central-tracker_${project}.csv"
+    chmod +x "${project}/${datam_path}/central-tracker_${project::-1}.csv"
 else
     project=$1
     datatypes=$2
