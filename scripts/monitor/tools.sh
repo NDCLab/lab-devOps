@@ -88,6 +88,7 @@ function verify_copy_pavpsy_files {
     dir=$1
     id=$2
     tasks=$3
+    # create list of tasks if relevant
     if [[ $tasks != 0 ]]; then
         tasks=($(echo $tasks | tr "," "\n"))
     fi
@@ -96,7 +97,6 @@ function verify_copy_pavpsy_files {
 
     subject="sub-${id}"
 
-    # unset elements[-1]
     # filter according to data file
     data=$(echo "${elements[*]}" | grep -o '.+\.csv')
     len=$(echo "${#data[@]}")
@@ -132,7 +132,7 @@ function verify_copy_pavpsy_files {
         # output=$( python ${dataset}data-monitoring/check-id.py $check"/"$pavlov "pavlovia" )
         
         # extract task name if it exists, and assing to obs values
-        tpat="(?<=_)(.*)(?=_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+)?"
+        tpat="(?<=_)(.*)(?=(_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+|_\d{4}))"
         # remove extraneous chars (hardcoded)
         task=$(echo "$file_name" | grep -oP "$tpat")
         task=${task#"A_1_1_"}
