@@ -105,7 +105,8 @@ function verify_copy_pavpsy_files {
     subject="sub-${id}"
 
     # filter according to data file
-    data=$(echo "${elements[*]}" | grep -o '.csv')
+    data=$(echo "${elements[*]}" | grep '.csv')
+    data=($data)
     len=$(echo "${#data[@]}")
 
     # check if pav folder contains more than necessary
