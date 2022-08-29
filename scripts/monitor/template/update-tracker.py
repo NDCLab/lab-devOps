@@ -17,7 +17,7 @@ if __name__ == "__main__":
     data_type = sys.argv[2]
     dataset = sys.argv[3]
 
-    data_tracker_file = "/home/data/NDClab/datasets/{dataset}/data-monitoring/central-tracker_{dataset}.csv".format(dataset=dataset)
+    data_tracker_file = "/home/data/NDClab/datasets/{dataset}data-monitoring/central-tracker_{dataset}.csv".format(dataset=dataset.strip("/"))
     tracker_df = pd.read_csv(data_tracker_file, index_col="id")
     
     if data_type == "redcap":  

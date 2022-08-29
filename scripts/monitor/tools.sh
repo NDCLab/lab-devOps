@@ -88,22 +88,29 @@ function verify_copy_pavpsy_files {
     dir=$1
     id=$2
     tasks=$3
+
     # create list of tasks if relevant
     if [[ $tasks != 0 ]]; then
         tasks=($(echo $tasks | tr "," "\n"))
+        # get length of tasks
+        tasklen=$(echo "${#tasks[@]}")
+    else
+        echo -e "\\t ${RED}Error: $subject folder does not contain $tasklen data files."
+        exit 1
     fi
+
     # create empty array to collect tasks observed in pavlovia folder
     obs=()
 
     subject="sub-${id}"
 
     # filter according to data file
-    data=$(echo "${elements[*]}" | grep -o '.+\.csv')
+    data=$(echo "${elements[*]}" | grep -o '.csv')
     len=$(echo "${#data[@]}")
 
     # check if pav folder contains more than necessary
-    if [[ $len -gt 2 ]]; then
-        echo -e "\\t ${RED}Error: $subject folder contains more than 2 data files."
+    if [[ $len -ne $tasklen ]]; then
+        echo -e "\\t ${RED}Error: $subject folder does not contain $tasklen data files."
         exit 1
     fi
 
@@ -121,40 +128,32 @@ function verify_copy_pavpsy_files {
             segment=$(echo "$file_name" | grep -oP "^\d+_($taskname)(_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+)?_\d{4}")
             if [[ "$segment" ]]; then
                 presence=1
+                obs+=("$segment")
             fi
         done
         if [[ "$presence" == 0 ]]; then
             echo -e "\\t ${RED}Error: Improper file name $file_name, does not meet standard${NC}"
             continue
         fi
-        
         # check if file contains only valid id's
         # output=$( python ${dataset}data-monitoring/check-id.py $check"/"$pavlov "pavlovia" )
-        
-        # extract task name if it exists, and assing to obs values
-        tpat="(?<=_)(.*)(?=(_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+|_\d{4}))"
-        # remove extraneous chars (hardcoded)
-        task=$(echo "$file_name" | grep -oP "$tpat")
-        task=${task#"A_1_1_"}
-        # append
-        obs[${#obs[@]}]=$task
-
-        # copy file to checked if it does not exist already
-        if [ ! -f "$check/$dir/$subject/$file_name" ]; then
-            echo -e "\\t ${GREEN}Copying $file_name to $check/$dir/$subject ${NC}"
-            cp $raw/$dir/$subject/$file_name $check/$dir/$subject
-        else
-            echo -e "\\t $subject/$file_name already exists in checked, skipping copy"
-        fi
     done
 
-    # split tasks into array and compare if valid param
+    # compare tasks found to tasks required
     if [[ $tasks != 0 ]]; then
-        if [ "${obs[@]}" == "${tasks[@]}" ] ; then
+        if [[ "${obs[@]}" == "${tasks[@]}" ]] ; then
             echo -e "\\t ${GREEN}$subject contains all required tasks ${NC}"
         else
             echo -e "\\t ${RED}Missing tasks in $subject, please make sure all tasks are included.${NC} "
         fi 
+    fi
+
+    # copy file to checked if it does not exist already
+    if [ ! -f "$check/$dir/$subject/$file_name" ]; then
+        echo -e "\\t ${GREEN}Copying $file_name to $check/$dir/$subject ${NC}"
+        cp $raw/$dir/$subject/$file_name $check/$dir/$subject
+    else
+        echo -e "\\t $subject/$file_name already exists in checked, skipping copy"
     fi
 
     exit 0
