@@ -1,6 +1,6 @@
 import pandas as pd
 import sys
-import os
+from os.path import basename, normpath, walk
 
 # list audio-vid data
 audivid = ["zoom", "audio", "video", "digi"]
@@ -10,14 +10,17 @@ pavpsy = ["pavlovia", "psychopy"]
 eeg = ["bv", "egi"]
 
 # rhs: data, lhs: tracker
+# TODO: utilize data dictionary
 redcheck_columns = {}
 
 if __name__ == "__main__":
     file_path = sys.argv[1]
     data_type = sys.argv[2]
     dataset = sys.argv[3]
+    # extract project path from dataset
+    proj_name = basename(normpath(dataset))
 
-    data_tracker_file = "/home/data/NDClab/datasets/{dataset}data-monitoring/central-tracker_{dataset}.csv".format(dataset=dataset.strip("/"))
+    data_tracker_file = "{}data-monitoring/central-tracker_{}.csv".format(dataset, proj_name)
     tracker_df = pd.read_csv(data_tracker_file, index_col="id")
     
     if data_type == "redcap":  
@@ -47,40 +50,47 @@ if __name__ == "__main__":
         tracker_df.to_csv(data_tracker_file)
         print("Success: redcap data tracker updated.")
     if data_type in pavpsy:
+        # TODO: Pavpsy, audivid, and eeg do the exact smae thing
         # If hallMonitor passes "pavlovia" arg, data exists and passed checks
-        for (_, dirnames, _) in os.walk(file_path):
+        for (_, dirnames, _) in walk(file_path):
             if len(dirnames) == 0:
                 continue
+
             dir_ids = [int(sub[4:]) for sub in dirnames]
             ids = [id for id in tracker_df.index]
             collabel = data_type + "Data_s1_r1_e1"
             for id in ids:
                 tracker_df.loc[id, collabel] = "1" if id in dir_ids else "0"
+    
             # make remaining empty values equal to 0
             tracker_df[collabel] = tracker_df[collabel].fillna("0")
             tracker_df.to_csv(data_tracker_file)
             print("Success: {} data tracker updated.".format(data_type))
     if data_type in audivid:
-        for (_, dirnames, _) in os.walk(file_path):
+        for (_, dirnames, _) in walk(file_path):
             if len(dirnames) == 0:
-                sys.exit()
+                continue
+
             dir_ids = [int(sub[4:]) for sub in dirnames]
             ids = [id for id in tracker_df.index]
             collabel = data_type + "Data_s1_r1_e1"
             for id in ids:
                 tracker_df.loc[id, collabel] = "1" if id in dir_ids else "0"
+    
             tracker_df[collabel] = tracker_df[collabel].fillna("0")
             tracker_df.to_csv(data_tracker_file)
             print("Success: {} data tracker updated.".format(data_type))
     if data_type in eeg:
-        for (_, dirnames, _) in os.walk(file_path):
+        for (_, dirnames, _) in walk(file_path):
             if len(dirnames) == 0:
-                sys.exit()
+                continue
+
             dir_ids = [int(sub[4:]) for sub in dirnames]
             ids = [id for id in tracker_df.index]
             collabel = data_type + "Data_s1_r1_e1"
             for id in ids:
                 tracker_df.loc[id, collabel] = "1" if id in dir_ids else "0"
+
             tracker_df[collabel] = tracker_df[collabel].fillna("0")
             tracker_df.to_csv(data_tracker_file)
             print("Success: {} data tracker updated.".format(data_type))
