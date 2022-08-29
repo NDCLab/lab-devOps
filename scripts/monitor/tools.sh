@@ -142,7 +142,9 @@ function verify_copy_pavpsy_files {
 
     # compare tasks found to tasks required
     if [[ $tasks != 0 ]]; then
-        if [[ "${obs[@]}" == "${tasks[@]}" ]] ; then
+        # find difference between two arrays, if 0, contains all tasks
+        diff=(`echo ${obs[@]} ${tasks[@]} | tr ' ' '\n' | sort | uniq -u `)
+        if [[ ${#diff[@]} -eq 0 ]] ; then
             echo -e "\\t ${GREEN}$subject contains all required tasks ${NC}"
         else
             echo -e "\\t ${RED}Error: Missing tasks in $subject, only found ${obs[@]}. ${tasks[@]} required instead. ${NC} "
