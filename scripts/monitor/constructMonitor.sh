@@ -84,7 +84,7 @@ do
         done
         echo -e "\\n"
         # update tracker for each id
-        output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$dir" \$dataset)
+        output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${dir}" \$dir \$dataset)
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
             error_detected=true
@@ -96,7 +96,7 @@ do
     if [[ \${audivid[*]} =~ \$dir ]]; then
         echo "Accessing \$raw/\$dir"
         # update tracker for each id
-        output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$dir" \$dataset)
+        output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${dir}" \$dir \$dataset)
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
             error_detected=true
@@ -170,7 +170,7 @@ do
                     error_detected=true
                     continue 
                 fi
-                output=\$( python \${dataset}data-monitoring/update-tracker.py \$check"/"\$dir "\$type" \$dataset)
+                output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${dir}" \$type \$dataset)
                 if [[ "\$output" =~ "Error" ]]; then
                     echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
                     error_detected=true
