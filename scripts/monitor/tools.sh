@@ -145,7 +145,8 @@ function verify_copy_pavpsy_files {
         if [[ "${obs[@]}" == "${tasks[@]}" ]] ; then
             echo -e "\\t ${GREEN}$subject contains all required tasks ${NC}"
         else
-            echo -e "\\t ${RED}Missing tasks in $subject, please make sure all tasks are included.${NC} "
+            echo -e "\\t ${RED}Error: Missing tasks in $subject, please make sure all tasks are included.${NC} "
+            exit 1
         fi 
     fi
 
