@@ -1,6 +1,7 @@
 import pandas as pd
 import sys
-from os.path import basename, normpath, walk
+from os.path import basename, normpath
+from os import walk
 
 # list audio-vid data
 audivid = ["zoom", "audio", "video", "digi"]
