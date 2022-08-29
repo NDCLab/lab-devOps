@@ -6,8 +6,8 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 pavpsy=("pavlovia" "psychopy")
-audivid=("zoom" "audio" "video" "digi")
-eegtype=("bv" "egi")
+audivid=("zoom" "audio" "video")
+eegtype=("bv" "egi" "digi")
 
 eeg="bidsish"
 redcap="redcap"
