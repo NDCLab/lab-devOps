@@ -162,7 +162,7 @@ do
         for type in "\${filetypes[@]}"
         do
             if [[ \${eegtype[*]} =~ \$type ]]; then
-                sub_check=\$(verify_copy_sub \$dir \$subject)
+                sub_check=\$(verify_copy_sub \$dir \$type)
                 res=\$?
                 if [ \$res != 0 ]; then
                     echo -e "\$sub_check"
