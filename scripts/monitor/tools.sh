@@ -187,7 +187,7 @@ function verify_copy_bids_files {
     subject=$2
     tasks=$3
 
-    # TODO: Are tasks truelly optional?
+    # TODO: Are tasks truly optional?
     # create list of tasks if relevant
     if [[ $tasks != 0 ]]; then
         tasks=($(echo $tasks | tr "," "\n"))
@@ -204,6 +204,7 @@ function verify_copy_bids_files {
     id=$(get_ID $subject)
 
     # filter according to data file
+    """
     data=$(echo "${elements[*]}" | grep '.csv')
     data=($data)
     len=$(echo "${#data[@]}")
@@ -258,6 +259,6 @@ function verify_copy_bids_files {
     else
         echo -e "\\t $subject/$file_name already exists in checked, skipping copy"
     fi
-
+    """
     exit 0
 }
