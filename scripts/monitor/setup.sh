@@ -1,7 +1,7 @@
 #!/bin/bash
 # A script to set up data monitoring & preprocessing in your project
 
-usage() { echo "Usage: setup-moniprep.sh [-t] <project-path> [datatype1,datatype2,datatype3] [id-standard] [task1,task2,task3]" 1>&2; exit 1; }
+usage() { echo "Usage: setup.sh [-t] <project-path> [datatype1,datatype2,datatype3] [id-standard] [task1,task2,task3]" 1>&2; exit 1; }
 
 datam_path="data-monitoring"
 code_path="code"
