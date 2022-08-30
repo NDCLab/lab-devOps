@@ -90,7 +90,7 @@ function verify_copy_sub {
     # copy subject over to checked directory if it doesnt exist yet
     if [ ! -d "${check}/${folder}/$name" ]; then
       echo -e "\\t Creating ${check}/${folder}/${name}"
-      mkdir "${check}/${folder}/${name}"
+      mkdir "${check}${folder}${name}"
     fi
     exit 0
 }
