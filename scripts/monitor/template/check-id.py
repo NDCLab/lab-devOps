@@ -4,7 +4,6 @@ import pandas as pd
 if __name__ == "__main__":
     id = sys.argv[1]
     file = sys.argv[2]
-    sys.exit(file)
     
     # extract id col
     file_df = pd.read_csv(file)
