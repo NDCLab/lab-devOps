@@ -1,15 +1,17 @@
 import pandas as pd
 import sys
 import math
-import os
+from os.path import basename, normpath
 
 check_columns = []
 
 if __name__ == "__main__":
     file = sys.argv[1]
-    dataset = sys.argv[3]
+    dataset = sys.argv[2]
 
-    data_tracker_file = "/home/data/NDClab/datasets/{dataset}/data-monitoring/central-tracker_{dataset}.csv".format(dataset=dataset)
+    proj_name = basename(normpath(dataset))
+
+    data_tracker_file = "{}/data-monitoring/central-tracker_{}.csv".format(dataset, proj_name)
     tracker_df = pd.read_csv(data_tracker_file, index_col="id")
     
     file_df = pd.read_csv(file, index_col="record_id")
