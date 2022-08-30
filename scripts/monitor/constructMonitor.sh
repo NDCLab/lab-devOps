@@ -37,20 +37,10 @@ do
         for i in "\${!sub_names[@]}"; do
             subject=\${sub_names[\$i]}
 
-            # check accessibility of file system
-            if ! [[ -x "\$raw/\$dir/\$subject" ]]; then
-                echo -e "\\t \${RED}\$subject is not accessible via your permissions\${NC} \\n" 
-                continue
-            fi
-
             # if no pavlovia dataset exists in checked, create
             if [ ! -e "\$check/\$dir" ]; then
                 mkdir \$check/\$dir
             fi
-
-            # get sub id
-            id="\$(cut -d'-' -f2 <<<\$subject)"
-            id=\${id::-1}
 
             # check if name is properly named and copy if correct
             sub_check=\$(verify_copy_sub \$dir \$subject)
@@ -64,13 +54,9 @@ do
             echo -e "\\t Checking files of \$raw/\$dir/\$subject"
             cd \$raw/\$dir/\$subject
 
-            # store file names in array
-            file_names=(*)
-            # files_log=\$(verify_copy_pav_files \$dir "\${file_names[@]}" \$id)
-
             # check if files contain all tasks, appropriatley named, 
             # and contain correct ID's
-            files_log=\$(verify_copy_pavpsy_files \$dir \$id \$tasks)
+            files_log=\$(verify_copy_pavpsy_files \$dir \$subject \$tasks)
             res=\$?
             if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
                 echo -e "\$files_log"
@@ -157,25 +143,44 @@ do
         echo \$output
         echo -e "\\n"
     fi
-    if [[ "\$dir" == "bidsish" ]]; then
+    if [[ \${eegtype[*]} =~ \$dir ]]; then
         echo "Accessing \$raw/\$dir"
-        for type in "\${filetypes[@]}"
-        do
-            if [[ \${eegtype[*]} =~ \$type ]]; then
-                sub_check=\$(verify_copy_sub \$dir \$type)
-                res=\$?
-                if [ \$res != 0 ]; then
-                    echo -e "\$sub_check"
-                    echo -e "\\t \${RED}Error detected in \$subject. View above.\${NC} \\n" 
-                    error_detected=true
-                    continue 
-                fi
-                output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${dir}" \$type \$dataset)
-                if [[ "\$output" =~ "Error" ]]; then
-                    echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
-                    error_detected=true
-                    continue
-                fi
+        cd \$raw/\$dir
+        sub_names=(*/)
+        for i in "\${!sub_names[@]}"; do
+            subject=\${sub_names[\$i]}
+
+            # if no bidsish dataset exists in checked, create
+            if [ ! -e "\$check/\$eeg" ]; then
+                mkdir \$check/\$eeg
+            fi
+    
+            sub_check=\$(verify_copy_sub \$eeg/\$dir \$subject)
+            res=\$?
+            if [ \$res != 0 ]; then
+                echo -e "\$sub_check"
+                echo -e "\\t \${RED}Error detected in \$subject. View above.\${NC} \\n" 
+                error_detected=true
+                continue 
+            fi
+    
+            files_log=\$(verify_copy_bids_files \$dir \$subject \$tasks)
+            res=\$?
+            if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
+                echo -e "\$files_log"
+                echo -e "\\t \${RED}Error detected in \$subject. View above\${NC} \\n"
+                error_detected=true
+                continue 
+            else 
+                echo -e "\$files_log"
+                echo -e "\\t \${GREEN}Success. All data passes checks in \$subject.\${NC}"
+            fi
+
+            output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${dir}" \$type \$dataset)
+            if [[ "\$output" =~ "Error" ]]; then
+                echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
+                error_detected=true
+                continue
             fi
         done
         echo -e "\\n"

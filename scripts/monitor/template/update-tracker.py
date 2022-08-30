@@ -50,6 +50,7 @@ if __name__ == "__main__":
             tracker_df[redcheck_columns[key]] = tracker_df[redcheck_columns[key]].fillna("NA") 
         tracker_df.to_csv(data_tracker_file)
         print("Success: redcap data tracker updated.")
+
     if data_type in pavpsy or data_type in audivid or data_type in eeg:
         # TODO: Pavpsy, audivid, and eeg do the exact smae thing
         # If hallMonitor passes "pavlovia" arg, data exists and passed checks
