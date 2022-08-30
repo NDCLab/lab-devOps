@@ -6,7 +6,7 @@ if __name__ == "__main__":
     file = sys.argv[2]
     
     # extract id col
-    file_df = pd.read_csv(file)
+    file_df = pd.read_csv(file, on_bad_lines='skip')
     id_col = file_df["id"]
 
     # check if all ids match vals listed
