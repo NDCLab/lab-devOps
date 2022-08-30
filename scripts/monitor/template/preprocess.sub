@@ -39,7 +39,7 @@ outfile=$( singularity exec --bind $dataset,/home/data/NDClab/tools/instruments 
             $output_path )
 
 # update central tracker using instruments data
-python inst-tracker.py "${outfile}"
+python inst-tracker.py $outfile $dataset
 
 # insert singularity scripts here
 
