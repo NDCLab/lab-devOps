@@ -48,8 +48,12 @@ fi
 if [ -f "${project}/${datam_path}/update-tracker.py" ]; then
     rm -f "${project}/${datam_path}/update-tracker.py"
 fi
+if [ -f "${project}/${datam_path}/check-id.py" ]; then
+    rm -f "${project}/${datam_path}/update-tracker.py"
+fi
 cp "${labpath}/template/rename-cols.py" "${project}/${datam_path}"
 cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
+cp "${labpath}/template/check-id.py" "${project}/${datam_path}"
 
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/rename-cols.py"
