@@ -86,6 +86,8 @@ if [ -f "${project}/${datam_path}/preprocess.sub" ]; then
 fi
 cp "${labpath}/template/preprocess.sub" "${project}/${datam_path}"
 cp "${labpath}/template/inst-tracker.py" "${project}/${datam_path}"
+
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/preprocess.sub"
 chmod +x "${project}/${datam_path}/inst-tracker.py"
+chmod +x "${project}/${datam_path}/check-id.py"
