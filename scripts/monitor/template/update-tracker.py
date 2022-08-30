@@ -50,7 +50,7 @@ if __name__ == "__main__":
             tracker_df[redcheck_columns[key]] = tracker_df[redcheck_columns[key]].fillna("NA") 
         tracker_df.to_csv(data_tracker_file)
         print("Success: redcap data tracker updated.")
-    if data_type in pavpsy:
+    if data_type in pavpsy or data_type in audivid or data_type in eeg:
         # TODO: Pavpsy, audivid, and eeg do the exact smae thing
         # If hallMonitor passes "pavlovia" arg, data exists and passed checks
         for (_, dirnames, _) in walk(file_path):
@@ -67,34 +67,3 @@ if __name__ == "__main__":
             tracker_df[collabel] = tracker_df[collabel].fillna("0")
             tracker_df.to_csv(data_tracker_file)
             print("Success: {} data tracker updated.".format(data_type))
-    if data_type in audivid:
-        for (_, dirnames, _) in walk(file_path):
-            if len(dirnames) == 0:
-                continue
-
-            dir_ids = [int(sub[4:]) for sub in dirnames]
-            ids = [id for id in tracker_df.index]
-            collabel = data_type + "Data_s1_r1_e1"
-            for id in ids:
-                tracker_df.loc[id, collabel] = "1" if id in dir_ids else "0"
-    
-            tracker_df[collabel] = tracker_df[collabel].fillna("0")
-            tracker_df.to_csv(data_tracker_file)
-            print("Success: {} data tracker updated.".format(data_type))
-    if data_type in eeg:
-        for (_, dirnames, _) in walk(file_path):
-            if len(dirnames) == 0:
-                continue
-
-            dir_ids = [int(sub[4:]) for sub in dirnames]
-            ids = [id for id in tracker_df.index]
-            collabel = data_type + "Data_s1_r1_e1"
-            for id in ids:
-                tracker_df.loc[id, collabel] = "1" if id in dir_ids else "0"
-
-            tracker_df[collabel] = tracker_df[collabel].fillna("0")
-            tracker_df.to_csv(data_tracker_file)
-            print("Success: {} data tracker updated.".format(data_type))
-
-     
-                            
