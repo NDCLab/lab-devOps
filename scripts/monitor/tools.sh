@@ -90,7 +90,7 @@ function verify_copy_sub {
     # copy subject over to checked directory if it doesnt exist yet
     if [ ! -d "${check}/${folder}/$name" ]; then
       echo -e "\\t Creating ${check}/${folder}/${name}"
-      mkdir "${check}${folder}${name}"
+      mkdir "${check}/${folder}/${name}"
     fi
     exit 0
 }
@@ -151,7 +151,7 @@ function verify_copy_pavpsy_files {
             continue
         fi
         # check if file contains only valid id's
-        output=$( python ${dataset}data-monitoring/check-id.py $id "${raw}/${dir}/${file_name}" )
+        output=$( python ${dataset}data-monitoring/check-id.py $id "${raw}/${dir}/${subject}/${file_name}" )
         if [[ "\$output" =~ "False" ]]; then
             echo -e "\\t ${RED}Error: ID mismatch in $file_name. Not equal to $id.${NC}"
             continue
