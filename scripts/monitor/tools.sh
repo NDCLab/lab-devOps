@@ -73,7 +73,7 @@ function get_ID {
     subject=$1
     # get sub id
     id="$(cut -d'-' -f2 <<<$subject)"
-    id=\{id::-1}
+    id={id::-1}
     echo $id
 }
 
