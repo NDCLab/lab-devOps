@@ -83,7 +83,7 @@ function get_ID {
 
 # A function to verify if a pavlovia subject folder is named correctly. If it is, create a folder of the same name in checked.
 function verify_copy_sub {
-    folder=${1::-1}
+    folder=$1
     name=$2
     standard=${3:-0}
     # check if sub name contains unexpected chars
