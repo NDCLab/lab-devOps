@@ -143,11 +143,6 @@ function verify_copy_pavpsy_files {
 
     for i in "${!data[@]}"; do
         file_name="${data[$i]}"
-        # check if empty dir
-        if [[ $file_name == "" ]]; then
-            echo -e "\\t ${RED}Folder empty, skipping.${NC}"
-            exit 1
-        fi
 
         # check if file follows naming convention according to available tasks
         presence=0
@@ -168,6 +163,15 @@ function verify_copy_pavpsy_files {
             echo -e "\\t ${RED}Error: ID mismatch in $file_name. Not equal to $id.${NC}"
             continue
         fi
+
+        # copy file to checked if it does not exist already
+        if [ ! -f "$check/$dir/$subject/$file_name" ]; then
+            echo -e "\\t ${GREEN}Copying $file_name to $check/$dir/$subject ${NC}"
+            cp $raw/$dir/$subject/$file_name $check/$dir/$subject
+        else
+            echo -e "\\t $subject/$file_name already exists in checked, skipping copy"
+        fi
+
     done
 
     # compare tasks found to tasks required
@@ -180,14 +184,6 @@ function verify_copy_pavpsy_files {
             echo -e "\\t ${RED}Error: Missing tasks in $subject, only found ${obs[@]}. ${tasks[@]} required instead. ${NC} "
             exit 1
         fi 
-    fi
-
-    # copy file to checked if it does not exist already
-    if [ ! -f "$check/$dir/$subject/$file_name" ]; then
-        echo -e "\\t ${GREEN}Copying $file_name to $check/$dir/$subject ${NC}"
-        cp $raw/$dir/$subject/$file_name $check/$dir/$subject
-    else
-        echo -e "\\t $subject/$file_name already exists in checked, skipping copy"
     fi
 
     exit 0
@@ -221,7 +217,7 @@ function verify_copy_bids_files {
         elif [[ $taskname == "egi" ]]; then
             extensions=$egi
         elif [[ $taskname == "digi" ]]; then
-            # TODO: unravel loop
+            # TODO: unravel loop (function?)
             for ext in "${digi[@]}"; do
                 file=$(echo "${elements[*]}" | grep "\.${ext}")
                 if [[ -z "$file" ]]; then
@@ -250,6 +246,33 @@ function verify_copy_bids_files {
             echo -e "\\t ${RED}Error: $subject folder does not contain $tasklen data files."
             exit 1
         fi
+
+        for i in "${!data[@]}"; do
+            file_name="${data[$i]}"
+
+            # check if file follows naming convention according to available tasks
+            presence=0
+            for taskname in "${tasks[@]}"; do
+                segment=$(echo "$file_name" | grep -oP "(?<=$subject_)($taskname)(?=*_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+)")
+                if [[ "$segment" ]]; then
+                    presence=1
+                    obs+=("$segment")
+                fi
+            done
+            if [[ "$presence" == 0 ]]; then
+                echo -e "\\t ${RED}Error: Improper file name $file_name, does not meet standard${NC}"
+                continue
+            fi
+
+            # copy file to checked if it does not exist already
+            if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
+                echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
+                cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
+            else
+                echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
+            fi
+
+        done
     done
 
     exit 0
