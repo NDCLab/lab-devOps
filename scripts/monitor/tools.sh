@@ -88,7 +88,7 @@ function verify_copy_sub {
     standard=${3:-0}
     # check if sub name contains unexpected chars
     if [[ $standard == "bids" ]]; then
-        segment=$(echo "${folder##*/}" | grep -oP "sub-[0-9]+")
+        segment=$(echo "$folder" | grep -oP "sub-[0-9]+")
     else
         segment=$(echo "$name" | grep -oP "sub-[0-9]+")
     fi
