@@ -8,7 +8,11 @@ NC='\033[0m'
 # arrays containing subsets of data
 pavpsy=("pavlovia" "psychopy")
 audivid=("zoom" "audio" "video")
-eegtype=("bv" "egi" "digi")
+eegtype=("eeg" "digi")
+
+# eeg system files
+bv=("eeg" "vhdr" "vmrk") 
+egi=("mff") 
 
 # singular variable names of data
 eeg="bidsish"
@@ -81,14 +85,21 @@ function get_ID {
 function verify_copy_sub {
     folder=$1
     name=$2
+    standard=${3:-0}
     # check if sub name contains unexpected chars
-    segment=$(echo "$name" | grep -oP "sub-[0-9]+")
+    if [[ $standard == "bids "]]]]; then
+        segment=$(echo "${folder##*/}" | grep -oP "sub-[0-9]+")
+    else
+        segment=$(echo "$name" | grep -oP "sub-[0-9]+")
+    fi
+    
     if [[ -z "$segment" ]]; then
         echo -e "\\t ${RED}Error: Improper subject name, does not follow sub-#+ convention.${NC}"
         exit 1
     fi
+
     # copy subject over to checked directory if it doesnt exist yet
-    if [ ! -d "${check}/${folder}/$name" ]; then
+    if [ ! -d "${check}/${folder}/${name}" ]; then
       echo -e "\\t Creating ${check}/${folder}/${name}"
       mkdir "${check}/${folder}/${name}"
     fi
