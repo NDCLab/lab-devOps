@@ -151,7 +151,7 @@ do
             subject=\${sub_names[\$i]}
 
             # if no bidsish dataset exists in checked, create
-            if [ ! -e "\$check/\$eeg" ]; then
+            if [ ! -e "\${check}/\${eeg}" ]; then
                 mkdir \$check/\$eeg
             fi
 
