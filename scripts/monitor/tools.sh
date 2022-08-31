@@ -198,7 +198,6 @@ function verify_copy_bids_files {
     subject=$2
     tasks=$3
 
-    # TODO: Are tasks truly optional?
     # create list of tasks if relevant
     if [[ $tasks != 0 ]]; then
         tasks=($(echo $tasks | tr "," "\n"))
