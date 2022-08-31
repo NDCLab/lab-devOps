@@ -94,11 +94,10 @@ function verify_copy_sub {
     fi
     
     if [[ -z "$segment" ]]; then
-        echo -e "\\t ${RED}Error: Improper subject name, does not follow sub-#+ convention.${NC}"
+        echo -e "\\t ${RED}Error: Improper subject name ${folder}/${name}, does not follow sub-#+ convention.${NC}"
         exit 1
     fi
-    echo "THIS IS to verify"
-    echo $folder
+
     # copy subject over to checked directory if it doesnt exist yet
     if [ ! -d "${check}/${folder}/${name}" ]; then
       echo -e "\\t Creating ${check}/${folder}/${name}"
