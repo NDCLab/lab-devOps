@@ -154,8 +154,8 @@ do
             if [ ! -e "\$check/\$eeg" ]; then
                 mkdir \$check/\$eeg
             fi
-    
-            sub_check=\$(verify_copy_sub \$eeg/\$dir \$subject)
+
+            sub_check=\$(verify_copy_sub \$eeg/\$subject \$dir "bids")
             res=\$?
             if [ \$res != 0 ]; then
                 echo -e "\$sub_check"
@@ -164,7 +164,7 @@ do
                 continue 
             fi
     
-            # files_log=\$(verify_copy_bids_files \$dir \$subject \$tasks)
+            files_log=\$(verify_copy_bids_files \$dir \$subject \$tasks)
             res=\$?
             if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
                 echo -e "\$files_log"
