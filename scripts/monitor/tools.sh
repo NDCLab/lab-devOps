@@ -211,30 +211,32 @@ function verify_copy_bids_files {
     id=$(get_ID $subject)
 
     # search for eeg system
-    for taskname in "${tasks[@]}"; do
-        if [[ $taskname == "bv" ]]; then
-            extensions=$bv
-        elif [[ $taskname == "egi" ]]; then
-            extensions=$egi
-        elif [[ $taskname == "digi" ]]; then
-            # TODO: unravel loop (function?)
-            for ext in "${digi[@]}"; do
-                file=$(echo "${elements[*]}" | grep "\.${ext}")
-                if [[ -z "$file" ]]; then
-                    echo -e "\\t ${RED}Error: digi folder missing $ext filetype.${NC}"
-                    exit 1
-                fi
-            done
-            # copy file to checked if it does not exist already
-            if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
-                echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
-                cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
-            else
-                echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
+    if [[ $dir == "eeg" ]]; then
+        for taskname in "${tasks[@]}"; do
+            if [[ $taskname == "bv" ]]; then
+                extensions=$bv
+            elif [[ $taskname == "egi" ]]; then
+                extensions=$egi
             fi
+        done
+    elif [[ $dir == "digi" ]]; then
+        # TODO: unravel loop (function?)
+        for ext in "${digi[@]}"; do
+            file=$(echo "${elements[*]}" | grep "\.${ext}")
+            if [[ -z "$file" ]]; then
+                echo -e "\\t ${RED}Error: digi folder missing $ext filetype.${NC}"
+                exit 1
+            fi
+        done
+        # copy file to checked if it does not exist already
+        if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
+            echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
+            cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
+        else
+            echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
         fi
-    done
-
+    else
+    
     # filter according to data file
     for ext in "${extensions[@]}"; do
         data=$(echo "${elements[*]}" | grep "\.${ext}")
