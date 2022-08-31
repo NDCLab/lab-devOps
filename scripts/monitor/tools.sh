@@ -235,8 +235,8 @@ function verify_copy_bids_files {
         else
             echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
         fi
-    else
-    
+    fi
+
     # filter according to data file
     for ext in "${extensions[@]}"; do
         data=$(echo "${elements[*]}" | grep "\.${ext}")
