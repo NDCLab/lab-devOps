@@ -13,6 +13,7 @@ eegtype=("eeg" "digi")
 # eeg system files
 bv=("eeg" "vhdr" "vmrk") 
 egi=("mff") 
+digi=("zip" "png")
 
 # singular variable names of data
 eeg="bidsish"
@@ -125,16 +126,16 @@ function verify_copy_pavpsy_files {
         exit 1
     fi
 
-    # create empty array to collect tasks observed in pavlovia folder
+    # create empty array to collect tasks observed in folder
     obs=()
     id=$(get_ID $subject)
 
     # filter according to data file
-    data=$(echo "${elements[*]}" | grep '.csv')
+    data=$(echo "${elements[*]}" | grep ".csv")
     data=($data)
     len=$(echo "${#data[@]}")
 
-    # check if pav folder contains more than necessary
+    # check if folder contains exact tasks
     if [[ $len -ne $tasklen ]]; then
         echo -e "\\t ${RED}Error: $subject folder does not contain $tasklen data files."
         exit 1
@@ -213,6 +214,43 @@ function verify_copy_bids_files {
     # get sub id
     id=$(get_ID $subject)
 
+    # search for eeg system
+    for taskname in "${tasks[@]}"; do
+        if [[ $taskname == "bv" ]]; then
+            extensions=$bv
+        elif [[ $taskname == "egi" ]]; then
+            extensions=$egi
+        elif [[ $taskname == "digi" ]]; then
+            # TODO: unravel loop
+            for ext in "${digi[@]}"; do
+                file=$(echo "${elements[*]}" | grep "\.${ext}")
+                if [[ -z "$file" ]]; then
+                    echo -e "\\t ${RED}Error: digi folder missing $ext filetype.${NC}"
+                    exit 1
+                fi
+            done
+            # copy file to checked if it does not exist already
+            if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
+                echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
+                cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
+            else
+                echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
+            fi
+        fi
+    done
+
     # filter according to data file
+    for ext in "${extensions[@]}"; do
+        data=$(echo "${elements[*]}" | grep "\.${ext}")
+        data=($data)
+        len=$(echo "${#data[@]}")
+
+        # check if folder contains exact number of tasks
+        if [[ $len -ne $tasklen ]]; then
+            echo -e "\\t ${RED}Error: $subject folder does not contain $tasklen data files."
+            exit 1
+        fi
+    done
+
     exit 0
 }
