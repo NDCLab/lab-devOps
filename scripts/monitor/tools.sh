@@ -222,19 +222,19 @@ function verify_copy_bids_files {
     elif [[ $dir == "digi" ]]; then
         # TODO: unravel loop (function?)
         for ext in "${digi[@]}"; do
-            file=$(echo "${elements[*]}" | grep "\.${ext}")
-            if [[ -z "$file" ]]; then
+            file_name=$(echo "${elements[*]}" | grep "\.${ext}")
+            if [[ -z "$file_name" ]]; then
                 echo -e "\\t ${RED}Error: digi folder missing $ext filetype.${NC}"
                 exit 1
             fi
+            # copy file to checked if it does not exist already
+            if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
+                echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
+                cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
+            else
+                echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
+            fi
         done
-        # copy file to checked if it does not exist already
-        if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
-            echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
-            cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
-        else
-            echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
-        fi
     fi
 
     # filter according to data file
