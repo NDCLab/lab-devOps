@@ -88,13 +88,14 @@ function verify_copy_sub {
     standard=${3:-0}
     # check if sub name contains unexpected chars
     if [[ $standard == "bids" ]]; then
+        echo "${folder##*/}"
         segment=$(echo "${folder##*/}" | grep -oP "sub-[0-9]+")
     else
         segment=$(echo "$name" | grep -oP "sub-[0-9]+")
     fi
     
     if [[ -z "$segment" ]]; then
-        echo -e "\\t ${RED}Error: Improper subject name ${folder}/${name}, does not follow sub-#+ convention.${NC}"
+        echo -e "\\t ${RED}Error: Improper subject name ${folder}${name}, does not follow sub-#+ convention.${NC}"
         exit 1
     fi
 
