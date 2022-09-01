@@ -112,7 +112,7 @@ function verify_copy_sub {
 # TODO: combine with verify_bids_files
 function verify_copy_pavpsy_files {
     elements=(*)
-    dir=$1
+    dir=$1 
     subject=$2
     tasks=$3
 
@@ -251,11 +251,10 @@ function verify_copy_bids_files {
 
         for i in "${!data[@]}"; do
             file_name="${data[$i]}"
-            echo -e "LOOKING FOR $file_name"
             # check if file follows naming convention according to available tasks
             presence=0
             for taskname in "${tasks[@]}"; do
-                segment=$(echo "$file_name" | grep -oP "(?<=$subject_)($taskname)(?=*_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+)")
+                segment=$(echo "$file_name" | grep -oP "(?<=_)($taskname)(?=_eeg_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+)")
                 if [[ "$segment" ]]; then
                     presence=1
                     obs+=("$segment")
