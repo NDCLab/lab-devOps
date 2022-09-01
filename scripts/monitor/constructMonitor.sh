@@ -165,7 +165,7 @@ do
             fi
 
             echo -e "\\t Checking files of \$raw/\$dir/\$subject"
-            cd \$raw/\$dir/\$subject
+            cd \$subject
     
             files_log=\$(verify_copy_bids_files \$dir \$subject \$tasks)
             res=\$?
