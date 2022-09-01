@@ -251,7 +251,7 @@ function verify_copy_bids_files {
 
         for i in "${!data[@]}"; do
             file_name="${data[$i]}"
-
+            echo -e "LOOKING FOR $file_name"
             # check if file follows naming convention according to available tasks
             presence=0
             for taskname in "${tasks[@]}"; do
