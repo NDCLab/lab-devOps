@@ -214,9 +214,9 @@ function verify_copy_bids_files {
     if [[ $dir == "eeg" ]]; then
         for taskname in "${tasks[@]}"; do
             if [[ $taskname == "bv" ]]; then
-                extensions=$bv
+                extensions="${bv[@]}"
             elif [[ $taskname == "egi" ]]; then
-                extensions=$egi
+                extensions="${egi[@]}"
             fi
         done
     elif [[ $dir == "digi" ]]; then
