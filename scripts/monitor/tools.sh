@@ -214,15 +214,15 @@ function verify_copy_bids_files {
     if [[ $dir == "eeg" ]]; then
         for taskname in "${tasks[@]}"; do
             if [[ $taskname == "bv" ]]; then
-                extensions=( "${bv[@]}" )
+                extensions=("${bv[@]}")
             elif [[ $taskname == "egi" ]]; then
-                extensions=( "${egi[@]}" )
+                extensions=("${egi[@]}")
             fi
         done
     elif [[ $dir == "digi" ]]; then
         # TODO: unravel loop (function?)
         for ext in "${digi[@]}"; do
-            file_name=$(echo "${elements[*]}" | grep "\.${ext}")
+            file_name=$(echo "${elements[*]}" | grep "\.${ext}.gpg")
             if [[ -z "$file_name" ]]; then
                 echo -e "\\t ${RED}Error: digi folder missing $ext filetype.${NC}"
                 exit 1
