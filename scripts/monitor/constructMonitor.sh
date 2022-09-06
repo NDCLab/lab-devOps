@@ -144,16 +144,16 @@ do
         echo -e "\\n"
     fi
     if [[ \${eegtype[*]} =~ \$dir ]]; then
+        # if no bidsish dataset exists in checked, create
+        if [ ! -e "\${check}/\${eeg}" ]; then
+            mkdir \$check/\$eeg
+        fi
+
         echo "Accessing \$raw/\$dir"
         cd \$raw/\$dir
         sub_names=(*/)
         for i in "\${!sub_names[@]}"; do
             subject=\${sub_names[\$i]}
-
-            # if no bidsish dataset exists in checked, create
-            if [ ! -e "\${check}/\${eeg}" ]; then
-                mkdir \$check/\$eeg
-            fi
 
             sub_check=\$(verify_copy_sub \$eeg/\$subject \$dir "bids")
             res=\$?
@@ -163,10 +163,9 @@ do
                 error_detected=true
                 continue 
             fi
-
+            
             echo -e "\\t Checking files of \$raw/\$dir/\$subject"
-            cd \$subject
-    
+            cd \$raw/\$dir/\$subject
             files_log=\$(verify_copy_bids_files \$dir \$subject \$tasks)
             res=\$?
             if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
