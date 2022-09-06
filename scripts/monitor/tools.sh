@@ -239,11 +239,11 @@ function verify_copy_bids_files {
     fi
 
     # filter according to data file
+    echo -e "ACCESSING ${extensions[@]}"
     for ext in "${extensions[@]}"; do
         data=$(echo "${elements[*]}" | grep "\.${ext}")
         data=($data)
         len=$(echo "${#data[@]}")
-        echo -e "ACCESSING $len"
 
         # check if folder contains exact number of tasks
         if [[ $len -ne $tasklen ]]; then
