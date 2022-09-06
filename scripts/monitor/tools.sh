@@ -235,7 +235,7 @@ function verify_copy_bids_files {
                 echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
             fi
         done
-        exit 1
+        exit 0
     fi
 
     # filter according to data file
@@ -243,6 +243,7 @@ function verify_copy_bids_files {
         data=$(echo "${elements[*]}" | grep "\.${ext}")
         data=($data)
         len=$(echo "${#data[@]}")
+        echo -e "ACCESSING $len"
 
         # check if folder contains exact number of tasks
         if [[ $len -ne $tasklen ]]; then
