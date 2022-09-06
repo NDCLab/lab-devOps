@@ -235,6 +235,7 @@ function verify_copy_bids_files {
                 echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
             fi
         done
+        exit 1
     fi
 
     # filter according to data file
@@ -251,6 +252,7 @@ function verify_copy_bids_files {
 
         for i in "${!data[@]}"; do
             file_name="${data[$i]}"
+            echo -e "ACCESSING $file_name"
             # check if file follows naming convention according to available tasks
             presence=0
             for taskname in "${tasks[@]}"; do
