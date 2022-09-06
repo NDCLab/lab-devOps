@@ -49,7 +49,7 @@ if [ -f "${project}/${datam_path}/update-tracker.py" ]; then
     rm -f "${project}/${datam_path}/update-tracker.py"
 fi
 if [ -f "${project}/${datam_path}/check-id.py" ]; then
-    rm -f "${project}/${datam_path}/update-tracker.py"
+    rm -f "${project}/${datam_path}/check-id.py"
 fi
 cp "${labpath}/template/rename-cols.py" "${project}/${datam_path}"
 cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
