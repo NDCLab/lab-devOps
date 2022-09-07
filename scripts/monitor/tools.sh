@@ -213,20 +213,32 @@ function verify_copy_bids_files {
     # search for eeg system
     if [[ $dir == "eeg" ]]; then
         for taskname in "${tasks[@]}"; do
+            echo "Searching $taskname"
             if [[ $taskname == "bv" ]]; then
+                echo "Found $taskname"
                 extensions=("${bv[@]}")
             elif [[ $taskname == "egi" ]]; then
                 extensions=("${egi[@]}")
             fi
         done
     elif [[ $dir == "digi" ]]; then
-        # TODO: unravel loop (function?)
+        # search for file with digi extensions
+        presence=0
         for ext in "${digi[@]}"; do
-            file_name=$(echo "${elements[*]}" | grep "\.${ext}.gpg")
-            if [[ -z "$file_name" ]]; then
+            for file in "${elements[@]}"; do
+                file_name=$(echo $file | grep ".${ext}.gpg");
+                if [[ "$file_name" ]]; then
+                    presence=1
+                    break
+                fi
+            done
+
+            # if file with extension hasn't been found after iteration, exit with error
+            if [[ "$presence" == 0 ]]; then
                 echo -e "\\t ${RED}Error: digi folder missing $ext filetype.${NC}"
                 exit 1
             fi
+
             # copy file to checked if it does not exist already
             if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
                 echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"

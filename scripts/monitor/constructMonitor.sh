@@ -154,7 +154,6 @@ do
         sub_names=(*/)
         for i in "\${!sub_names[@]}"; do
             subject=\${sub_names[\$i]}
-
             sub_check=\$(verify_copy_sub \$eeg/\$subject \$dir "bids")
             res=\$?
             if [ \$res != 0 ]; then
@@ -163,7 +162,7 @@ do
                 error_detected=true
                 continue 
             fi
-            
+
             echo -e "\\t Checking files of \$raw/\$dir/\$subject"
             cd \$raw/\$dir/\$subject
             files_log=\$(verify_copy_bids_files \$dir \$subject \$tasks)
