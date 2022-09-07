@@ -1,7 +1,7 @@
 import pandas as pd
 import sys
 from os.path import basename, normpath
-from os import walk
+from os import walk, listdir
 
 # list audio-vid data
 audivid = ["zoom", "audio", "video", "digi"]
@@ -51,20 +51,24 @@ if __name__ == "__main__":
         tracker_df.to_csv(data_tracker_file)
         print("Success: redcap data tracker updated.")
 
-    if data_type in pavpsy or data_type in audivid or data_type in eeg:
-        
-        for (_, dirnames, _) in walk(file_path):
-            if len(dirnames) == 0:
-                continue
-            
-            try:
-                dir_ids = [int(sub[4:]) for sub in dirnames]
-            except:
-                sys.exit(file_path)
+    if data_type in pavpsy or data_type in audivid:
+        for item in listdir(file_path):
+            dir_id = int(item[4:])
             ids = [id for id in tracker_df.index]
             collabel = data_type + "Data_s1_r1_e1"
-            for id in ids:
-                tracker_df.loc[id, collabel] = "1" if id in dir_ids else "0"
+            tracker_df.loc[id, collabel] = "1" if dir_id in id else "0"
+    
+            # make remaining empty values equal to 0
+            tracker_df[collabel] = tracker_df[collabel].fillna("0")
+            tracker_df.to_csv(data_tracker_file)
+            print("Success: {} data tracker updated.".format(data_type))
+    
+    if data_type in eeg:
+        for item in listdir(file_path):
+            dir_id = int(item[4:])
+            ids = [id for id in tracker_df.index]
+            collabel = data_type + "Data_s1_r1_e1"
+            tracker_df.loc[id, collabel] = "1" if dir_id in id else "0"
     
             # make remaining empty values equal to 0
             tracker_df[collabel] = tracker_df[collabel].fillna("0")
