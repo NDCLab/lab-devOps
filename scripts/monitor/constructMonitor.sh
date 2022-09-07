@@ -165,7 +165,7 @@ do
 
             echo -e "\\t Checking files of \$raw/\$dir/\$subject"
             cd \$raw/\$dir/\$subject
-            files_log=\$(verify_copy_bids_files \$dir \$subject \$tasks)
+            files_log=\$(verify_copy_bids_files \$dir \$subject \$tasks \$filetypes)
             res=\$?
             if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
                 echo -e "\$files_log"
