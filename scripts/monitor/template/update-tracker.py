@@ -60,7 +60,7 @@ if __name__ == "__main__":
             try:
                 dir_ids = [int(sub[4:]) for sub in dirnames]
             except:
-                print(file_path)
+                sys.exit(file_path)
             ids = [id for id in tracker_df.index]
             collabel = data_type + "Data_s1_r1_e1"
             for id in ids:
