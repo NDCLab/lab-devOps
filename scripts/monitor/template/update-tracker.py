@@ -52,12 +52,15 @@ if __name__ == "__main__":
         print("Success: redcap data tracker updated.")
 
     if data_type in pavpsy or data_type in audivid or data_type in eeg:
-        print(file_path)
+        
         for (_, dirnames, _) in walk(file_path):
             if len(dirnames) == 0:
                 continue
-
-            dir_ids = [int(sub[4:]) for sub in dirnames]
+            
+            try:
+                dir_ids = [int(sub[4:]) for sub in dirnames]
+            except:
+                print(file_path)
             ids = [id for id in tracker_df.index]
             collabel = data_type + "Data_s1_r1_e1"
             for id in ids:
