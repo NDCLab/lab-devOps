@@ -217,12 +217,9 @@ function verify_copy_bids_files {
     # search for eeg system
     if [[ $dir == "eeg" ]]; then
         for type in "${filetypes[@]}"; do
-            echo "Searching $type"
             if [[ $type == "bv" ]]; then
-                echo "Found $type"
                 extensions=("${bv[@]}")
             elif [[ $type == "egi" ]]; then
-                echo "Found $type"
                 extensions=("${egi[@]}")
             fi
         done
@@ -256,7 +253,6 @@ function verify_copy_bids_files {
     fi
 
     # filter according to data file
-    echo -e "ACCESSING ${extensions[@]}"
     for ext in "${extensions[@]}"; do
         data=$(echo "${elements[*]}" | grep "\.${ext}")
         data=($data)
@@ -270,7 +266,6 @@ function verify_copy_bids_files {
 
         for i in "${!data[@]}"; do
             file_name="${data[$i]}"
-            echo -e "ACCESSING $file_name"
             # check if file follows naming convention according to available tasks
             presence=0
             for taskname in "${tasks[@]}"; do
