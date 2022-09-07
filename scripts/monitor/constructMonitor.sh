@@ -5,9 +5,6 @@ projpath=$1
 filetypes=$2
 tasks=$3
 
-# split filetypes into array
-filetypes=($(echo $filetypes | tr "," "\n"))
-
 # write out hallMonitor file with template strings
 cat <<EOF >> "${projpath}/data-monitoring/hallMonitor.sh"
 #!/bin/bash
@@ -16,7 +13,7 @@ IFS=$'\n'
 # init proj specific variables
 dataset="${projpath}"
 tasks="${tasks}"
-filetypes="${filetypes[@]}"
+filetypes="${filetypes}"
 logfile="\${dataset}data-monitoring/data-monitoring-log.md"
 
 # load in functions & variables
