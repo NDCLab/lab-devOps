@@ -206,6 +206,9 @@ function verify_copy_bids_files {
         exit 1
     fi
 
+    # split filetypes into array
+    filetypes=($(echo $filetypes | tr "," "\n"))
+
     # create empty array to collect tasks observed in pavlovia folder
     obs=()
     # get sub id
