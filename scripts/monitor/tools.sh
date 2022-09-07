@@ -194,6 +194,7 @@ function verify_copy_bids_files {
     dir=$1
     subject=$2
     tasks=$3
+    filetypes=$4
 
     # create list of tasks if relevant
     if [[ $tasks != 0 ]]; then
@@ -212,12 +213,13 @@ function verify_copy_bids_files {
 
     # search for eeg system
     if [[ $dir == "eeg" ]]; then
-        for taskname in "${tasks[@]}"; do
-            echo "Searching $taskname"
-            if [[ $taskname == "bv" ]]; then
-                echo "Found $taskname"
+        for type in "${filetypes[@]}"; do
+            echo "Searching $type"
+            if [[ $type == "bv" ]]; then
+                echo "Found $type"
                 extensions=("${bv[@]}")
-            elif [[ $taskname == "egi" ]]; then
+            elif [[ $type == "egi" ]]; then
+                echo "Found $type"
                 extensions=("${egi[@]}")
             fi
         done
