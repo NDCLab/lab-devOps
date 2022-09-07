@@ -174,13 +174,13 @@ do
                 echo -e "\\t \${GREEN}Success. All data passes checks in \$subject.\${NC}"
             fi
 
-            # output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\$eeg/\${dir}" \$type \$dataset)
-            if [[ "\$output" =~ "Error" ]]; then
-                echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
-                error_detected=true
-                continue
-            fi
         done
+        output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${eeg}" \$dir \$dataset)
+        if [[ "\$output" =~ "Error" ]]; then
+            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
+            error_detected=true
+            continue
+        fi
         echo -e "\\n"
     fi
 done        
