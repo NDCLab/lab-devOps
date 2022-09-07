@@ -52,8 +52,6 @@ if __name__ == "__main__":
         print("Success: redcap data tracker updated.")
 
     if data_type in pavpsy or data_type in audivid or data_type in eeg:
-        # TODO: Pavpsy, audivid, and eeg do the exact smae thing
-        # If hallMonitor passes "pavlovia" arg, data exists and passed checks
         for (_, dirnames, _) in walk(file_path):
             if len(dirnames) == 0:
                 continue
