@@ -8,7 +8,7 @@ if __name__ == "__main__":
     headers = []
     with open(DATA_DICT) as dd:
         for row in dd:
-            headers.append(row.split()[0])
+            headers.append(row.replace(',', '|', 1).split("|")[0])
 
     with open(filepath, "w") as file:
         # write columns
