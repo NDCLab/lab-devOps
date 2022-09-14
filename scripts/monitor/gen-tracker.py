@@ -1,5 +1,4 @@
 import sys
-import csv
 
 DATA_DICT = "/home/data/NDClab/datasets/test-rweeeg-v2/data-monitoring/data-dictionary/central-tracker_datadict.csv"
 
