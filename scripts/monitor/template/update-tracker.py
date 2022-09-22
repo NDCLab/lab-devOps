@@ -40,6 +40,7 @@ if __name__ == "__main__":
 
     data_tracker_file = "{}data-monitoring/central-tracker_{}.csv".format(dataset, proj_name)
     tracker_df = pd.read_csv(data_tracker_file, index_col="id")
+    ids = [id for id in tracker_df.index]
     
     if data_type == "redcap":  
         file_df = pd.read_csv(file_path, index_col="record_id")
@@ -71,10 +72,9 @@ if __name__ == "__main__":
     if data_type in pavpsy or data_type in audivid:
         for item in listdir(file_path):
             dir_id = int(item[4:])
-            ids = [id for id in tracker_df.index]
+            
             collabel = data_type + "Data_s1_r1_e1"
-            for id in ids:
-                tracker_df.loc[id, collabel] = "1" if dir_id in id else "0"
+            tracker_df.loc[dir_id, collabel] = "1" if dir_id in ids else "0"
     
             # make remaining empty values equal to 0
             tracker_df[collabel] = tracker_df[collabel].fillna("0")
@@ -86,8 +86,7 @@ if __name__ == "__main__":
             dir_id = int(item[4:])
             ids = [id for id in tracker_df.index]
             collabel = data_type + "Data_s1_r1_e1"
-            for id in ids:
-                tracker_df.loc[id, collabel] = "1" if dir_id in id else "0"
+            tracker_df.loc[dir_id, collabel] = "1" if dir_id in ids else "0"
     
             # make remaining empty values equal to 0
             tracker_df[collabel] = tracker_df[collabel].fillna("0")
