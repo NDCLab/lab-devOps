@@ -9,15 +9,22 @@ audivid = ["zoom", "audio", "video", "digi"]
 pavpsy = ["pavlovia", "psychopy"]
 # list eeg systems
 eeg = ["bv", "egi"]
+# list hallMonitor key
+provenance = "code-hallMonitor"
 
-# rhs: data, lhs: tracker
-# TODO: utilize data dictionary
-redcheck_columns = {}
+# TODO: Make this occur once during construction
+def get_redcap_columns(datadict):
+
 
 if __name__ == "__main__":
     file_path = sys.argv[1]
     data_type = sys.argv[2]
     dataset = sys.argv[3]
+    
+    DATA_DICT = dataset + "/data-monitoring/data-dictionary/central-tracker_datadict.csv"
+    redcheck_columns = get_redcap_columns(DATA_DICT)
+    
+    redcheck_columns = get_redcap_columns(sys.argv[4])
     # extract project path from dataset
     proj_name = basename(normpath(dataset))
 
