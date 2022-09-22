@@ -48,13 +48,11 @@ if __name__ == "__main__":
         for index, row in file_df.iterrows():
             id = row.name
             if id not in tracker_df.index:
+                print(id, "missing in tracker file, skipping")
                 continue 
             # check for part. consent
             tracker_df.loc[id, "consent_s1_r1_e1"] = "1" if file_df.loc[id, "consent_yn"]==1 else "0"
             tracker_df.loc[id, "redcapData_s1_r1_e1"] = tracker_df.loc[id, "consent_s1_r1_e1"]
-            if id not in tracker_df.index:
-                print(id, "missing in tracker file, skipping")
-                continue
             for key in redcheck_columns.keys():
                 try:
                     val = file_df.loc[id, key]
@@ -62,10 +60,10 @@ if __name__ == "__main__":
                 except Exception as e_msg:
                     tracker_df.loc[id, redcheck_columns[key]] = "0"
         # make remaining empty values equal to 0
-        tracker_df["redcapData_s1_r1_e1"] = tracker_df["redcapData_s1_r1_e1"].fillna("0")
+        # tracker_df["redcapData_s1_r1_e1"] = tracker_df["redcapData_s1_r1_e1"].fillna("0")
         # for measures as well
-        for key in redcheck_columns.keys():
-            tracker_df[redcheck_columns[key]] = tracker_df[redcheck_columns[key]].fillna("NA") 
+        # for key in redcheck_columns.keys():
+        #    tracker_df[redcheck_columns[key]] = tracker_df[redcheck_columns[key]].fillna("NA") 
         tracker_df.to_csv(data_tracker_file)
         print("Success: redcap data tracker updated.")
 
