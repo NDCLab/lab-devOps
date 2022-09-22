@@ -22,7 +22,6 @@ def get_redcap_columns(datadict):
 
     cols = {}
     for index, row in df_dd.iterrows():
-        print(row)
         cols[row["variable"] + completed] = row["variable"]
 
     return cols
@@ -36,7 +35,6 @@ if __name__ == "__main__":
     DATA_DICT = dataset + "/data-monitoring/data-dictionary/central-tracker_datadict.csv"
     redcheck_columns = get_redcap_columns(DATA_DICT)
     
-    redcheck_columns = get_redcap_columns(sys.argv[4])
     # extract project path from dataset
     proj_name = basename(normpath(dataset))
 
