@@ -21,7 +21,8 @@ def get_redcap_columns(datadict):
     df_dd = df_dd.loc[df_dd['provenance'] == provenance]
 
     cols = {}
-    for row, index in df_dd.iterrows():
+    for index, row in df_dd.iterrows():
+        print(row)
         cols[row["variable"] + completed] = row["variable"]
 
     return cols
