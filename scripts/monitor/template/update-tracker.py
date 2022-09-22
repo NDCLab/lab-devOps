@@ -1,7 +1,7 @@
 import pandas as pd
 import sys
 from os.path import basename, normpath
-from os import walk, listdir
+from os import listdir
 
 # list audio-vid data
 audivid = ["zoom", "audio", "video", "digi"]
@@ -21,7 +21,7 @@ def get_redcap_columns(datadict):
     df_dd = df_dd.loc[df_dd['provenance'] == provenance]
 
     cols = {}
-    for index, row in df_dd.iterrows():
+    for _, row in df_dd.iterrows():
         cols[row["variable"] + completed] = row["variable"]
 
     return cols
@@ -73,7 +73,8 @@ if __name__ == "__main__":
             dir_id = int(item[4:])
             ids = [id for id in tracker_df.index]
             collabel = data_type + "Data_s1_r1_e1"
-            tracker_df.loc[id, collabel] = "1" if dir_id in id else "0"
+            for id in ids:
+                tracker_df.loc[id, collabel] = "1" if dir_id in id else "0"
     
             # make remaining empty values equal to 0
             tracker_df[collabel] = tracker_df[collabel].fillna("0")
@@ -85,7 +86,8 @@ if __name__ == "__main__":
             dir_id = int(item[4:])
             ids = [id for id in tracker_df.index]
             collabel = data_type + "Data_s1_r1_e1"
-            tracker_df.loc[id, collabel] = "1" if dir_id in id else "0"
+            for id in ids:
+                tracker_df.loc[id, collabel] = "1" if dir_id in id else "0"
     
             # make remaining empty values equal to 0
             tracker_df[collabel] = tracker_df[collabel].fillna("0")
