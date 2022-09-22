@@ -22,6 +22,8 @@ def get_redcap_columns(datadict):
 
     cols = {}
     for _, row in df_dd.iterrows():
+        if "consent" in row["variable"] or "redcap" in row["variable"]:
+            continue
         cols[row["variable"] + completed] = row["variable"]
 
     return cols
