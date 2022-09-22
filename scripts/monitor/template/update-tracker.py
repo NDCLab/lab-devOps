@@ -14,7 +14,18 @@ provenance = "code-hallMonitor"
 
 # TODO: Make this occur once during construction
 def get_redcap_columns(datadict):
+    completed = "_completed"
+    df_dd = pd.read_csv(datadict)
 
+    # filter for prov
+    df_dd = df_dd.loc[df_dd['provenance'] == provenance]
+
+    cols = {}
+    for row, index in df_dd.iterrows():
+        cols[row["variable"] + completed] = row["variable"]
+
+    return cols
+        
 
 if __name__ == "__main__":
     file_path = sys.argv[1]
