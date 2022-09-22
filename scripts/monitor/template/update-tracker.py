@@ -14,7 +14,7 @@ provenance = "code-hallMonitor"
 
 # TODO: Make this occur once during construction
 def get_redcap_columns(datadict):
-    completed = "_completed"
+    completed = "_complete"
     df_dd = pd.read_csv(datadict)
 
     # filter for prov
@@ -79,7 +79,7 @@ if __name__ == "__main__":
             # make remaining empty values equal to 0
             tracker_df[collabel] = tracker_df[collabel].fillna("0")
             tracker_df.to_csv(data_tracker_file)
-            print("Success: {} data tracker updated.".format(data_type))
+        print("Success: {} data tracker updated.".format(data_type))
     
     if data_type in eeg:
         for item in listdir(file_path):
