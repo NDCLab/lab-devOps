@@ -4,11 +4,11 @@ from os.path import basename, normpath
 from os import listdir
 
 # list audio-vid data
-audivid = ["zoom", "audio", "video", "digi"]
+audivid = ["zoom", "audio", "video"]
 # list pav-psy data
 pavpsy = ["pavlovia", "psychopy"]
 # list eeg systems
-eeg = ["bv", "egi"]
+eeg = ["bv", "egi", "digi"]
 # list hallMonitor key
 provenance = "code-hallMonitor"
 
@@ -56,11 +56,15 @@ if __name__ == "__main__":
             tracker_df.loc[id, "consent_s1_r1_e1"] = "1" if file_df.loc[id, "consent_yn"]==1 else "0"
             tracker_df.loc[id, "redcapData_s1_r1_e1"] = tracker_df.loc[id, "consent_s1_r1_e1"]
             for key in redcheck_columns.keys():
+                val = file_df.loc[id, key]
+                tracker_df.loc[id, redcheck_columns[key]] = "1" if isinstance(val, str) else "0"
+                """
                 try:
                     val = file_df.loc[id, key]
                     tracker_df.loc[id, redcheck_columns[key]] = "1" if isinstance(val, str) else "0"	 
                 except Exception as e_msg:
                     tracker_df.loc[id, redcheck_columns[key]] = "0"
+                """	
         # make remaining empty values equal to 0
         # tracker_df["redcapData_s1_r1_e1"] = tracker_df["redcapData_s1_r1_e1"].fillna("0")
         # for measures as well
