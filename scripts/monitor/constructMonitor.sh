@@ -75,7 +75,7 @@ do
         echo \$output
         echo -e "\\n"             
     fi
-    # If zoom, audio, video, or digi dataset
+    # If zoom, audio, or video dataset
     if [[ \${audivid[*]} =~ \$dir ]]; then
         echo "Accessing \$raw/\$dir"
         # update tracker for each id
