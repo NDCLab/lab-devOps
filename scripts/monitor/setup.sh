@@ -28,7 +28,7 @@ if [ "$1" = "-t" ]; then
     # Optional tasks arg 
     tasks=${5:-0}
     echo "Setting up central tracker"
-    python "${labpath}/gen-tracker.py" "${project}${datam_path}/central-tracker_${project::-1}.csv" $datatypes $id
+    python "${labpath}/gen-tracker.py" "${project}${datam_path}/central-tracker_${project::-1}.csv" $id
     chmod +x "${project}/${datam_path}/central-tracker_${project::-1}.csv"
 else
     project=$1
