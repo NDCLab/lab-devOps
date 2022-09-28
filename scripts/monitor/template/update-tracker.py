@@ -62,7 +62,7 @@ if __name__ == "__main__":
             for key, value in redcheck_columns.items():
                 try:
                     val = file_df.loc[id, key]
-                    tracker_df.loc[id, value] = "1" if isinstance(val, str) else "0"	 
+                    tracker_df.loc[id, value] = "1" if val == 2 else "0"	 
                 except Exception as e_msg:
                     continue
         # make remaining empty values equal to 0
@@ -101,4 +101,4 @@ if __name__ == "__main__":
             # make remaining empty values equal to 0
             # tracker_df[collabel] = tracker_df[collabel].fillna("0")
             tracker_df.to_csv(data_tracker_file)
-            print("Success: {} data tracker updated.".format(data_type))
+        print("Success: {} data tracker updated.".format(data_type))
