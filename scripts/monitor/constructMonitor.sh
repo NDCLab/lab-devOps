@@ -181,6 +181,7 @@ do
             error_detected=true
             continue
         fi
+        echo \$output
         echo -e "\\n"
     fi
 done        
