@@ -221,6 +221,9 @@ function verify_copy_bids_files {
                 extensions=("${bv[@]}")
             elif [[ $type == "egi" ]]; then
                 extensions=("${egi[@]}")
+            else
+                echo -e "\\t ${RED}Error: eeg system not specified in datatype list"
+                exit 1
             fi
         done
     elif [[ $dir == "digi" ]]; then
