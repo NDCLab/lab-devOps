@@ -216,16 +216,18 @@ function verify_copy_bids_files {
 
     # search for eeg system
     if [[ $dir == "eeg" ]]; then
+        extensions=0
         for type in "${filetypes[@]}"; do
             if [[ $type == "bv" ]]; then
                 extensions=("${bv[@]}")
             elif [[ $type == "egi" ]]; then
                 extensions=("${egi[@]}")
-            else
-                echo -e "\\t ${RED}Error: eeg system not specified in datatype list"
-                exit 1
             fi
         done
+        if [ $extensions = 0 ]; then
+            echo -e "\\t ${RED}Error: ${filetypes[@]} does not contain system type."
+            exit 1
+        fi
     elif [[ $dir == "digi" ]]; then
         # search for file with digi extensions
         presence=0
