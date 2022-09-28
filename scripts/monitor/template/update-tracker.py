@@ -22,7 +22,11 @@ def get_redcap_columns(datadict):
 
     cols = {}
     for _, row in df_dd.iterrows():
+        # skip redcap static
         if "consent" in row["variable"] or "redcap" in row["variable"]:
+            continue
+        # skip other data checks
+        if "audio" in row["variable"] or "bv" in row["variable"]:
             continue
         cols[row["variable"] + completed] = row["variable"]
 
@@ -48,23 +52,19 @@ if __name__ == "__main__":
         file_df = pd.read_csv(file_path, index_col="record_id")
         # If hallMonitor passes "redcap" arg, data exists and passed checks 
         for index, row in file_df.iterrows():
-            id = row.name
+            id = int(row.name)
             if id not in tracker_df.index:
                 print(id, "missing in tracker file, skipping")
                 continue 
             # check for part. consent
             tracker_df.loc[id, "consent_s1_r1_e1"] = "1" if file_df.loc[id, "consent_yn"]==1 else "0"
             tracker_df.loc[id, "redcapData_s1_r1_e1"] = tracker_df.loc[id, "consent_s1_r1_e1"]
-            for key in redcheck_columns.keys():
-                val = file_df.loc[id, key]
-                tracker_df.loc[id, redcheck_columns[key]] = "1" if isinstance(val, str) else "0"
-                """
+            for key, value in redcheck_columns.items():
                 try:
                     val = file_df.loc[id, key]
-                    tracker_df.loc[id, redcheck_columns[key]] = "1" if isinstance(val, str) else "0"	 
+                    tracker_df.loc[id, value] = "1" if isinstance(val, str) else "0"	 
                 except Exception as e_msg:
-                    tracker_df.loc[id, redcheck_columns[key]] = "0"
-                """	
+                    continue
         # make remaining empty values equal to 0
         # tracker_df["redcapData_s1_r1_e1"] = tracker_df["redcapData_s1_r1_e1"].fillna("0")
         # for measures as well
