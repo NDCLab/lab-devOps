@@ -81,7 +81,7 @@ if __name__ == "__main__":
             tracker_df.loc[dir_id, collabel] = "1" if dir_id in ids else "0"
     
             # make remaining empty values equal to 0
-            tracker_df[collabel] = tracker_df[collabel].fillna("0")
+            # tracker_df[collabel] = tracker_df[collabel].fillna("0")
             tracker_df.to_csv(data_tracker_file)
         print("Success: {} data tracker updated.".format(data_type))
     
@@ -99,6 +99,6 @@ if __name__ == "__main__":
                 
 
             # make remaining empty values equal to 0
-            tracker_df[collabel] = tracker_df[collabel].fillna("0")
+            # tracker_df[collabel] = tracker_df[collabel].fillna("0")
             tracker_df.to_csv(data_tracker_file)
             print("Success: {} data tracker updated.".format(data_type))
