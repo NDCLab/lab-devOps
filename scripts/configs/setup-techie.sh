@@ -2,9 +2,11 @@
 # A script to set up paths and environment configs to lab technicians environment
 
 # Cron jobs to install. Describes the following:
-# 
-#
-#
+# update-repo: manually update all repositories
+# clean-logs: clean up logs if too large
+# verify-encrpytion: verify that all sensitive data files are encrypted
+# check-hpc-status: check if cpu usage is too high
+# backup: backup all data folders by creating softlinks
 read -r -d '' mycron << EOM
 0 7 * * * /home/data/NDClab/tools/lab-devOps/scripts/updates/update-repo.sh > /home/data/NDClab/other/logs/repo-updates/"`date +"\%m_\%d_\%Y::\%H:\%M:\%S"`".log 2>&1
 0 7 1 1 * /home/data/NDClab/tools/lab-devOps/scripts/backup/clean-logs.sh /home/data/NDClab/other/logs > /home/data/NDClab/other/logs/clean-up/"`date +"\%m_\%d_\%Y::\%H:\%M:\%S"`".log 2>&1
@@ -23,9 +25,13 @@ read -r -d '' mycron << EOM
 0 0 * * 3 /home/data/NDClab/tools/lab-devOps/scripts/backup/backup.sh > /home/data/NDClab/other/logs/backups/"`date +"\%m_\%d_\%Y::\%H:\%M:\%S"`".log 2>&1
 EOM
 
-echo $mycron
+install crontab
+crontab $mycron
 
-# install crontab
-# crontab $mycron
+# add umask
 
-# make sure that rm does not fail
+echo 'umask g+w' >> ~/.bashrc 
+echo 'umask u+x' >> ~/.bashrc 
+
+# make sure that rm confirms before deleting
+alias rm='rm -i'
