@@ -3,6 +3,8 @@ IFS=$'\n'
 DATA_PATH="/home/data/NDClab/datasets"
 # TODO: check check as well
 ZOOM_PATH="sourcedata/raw/zoom"
+AUDIO_PATH="sourcedata/raw/audio"
+VID_PATH="sourcedata/raw/video"
 TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts/configs"
 
 function verify_lead
