@@ -63,4 +63,45 @@ do
         done
 	echo
     fi
+        if [ -e "$DATA_PATH/$DIR/$AUDIO_PATH" ]; then
+        echo "Validating $DIR encryption"
+        cd "$DATA_PATH/$DIR/$AUDIO_PATH"
+        for SUB in *; do
+            echo "checking if contents of $SUB are encrypted"
+            if ! [[ -x "$DATA_PATH/$DIR/$AUDIO_PATH/$SUB" ]]; then
+                echo "$SUB is not accessible via your permissions" 
+                continue
+            fi
+            cd "$DATA_PATH/$DIR/$AUDIO_PATH/$SUB"
+            for FILE in *; do
+                # Skip transcript files
+                if [[ $FILE == *.vtt ]]; then
+                    continue
+                fi
+                ENCRYPT_MSG=$(gpg --list-only $FILE 2>&1)
+                if [[ "$ENCRYPT_MSG" =~ "gpg: encrypted with 1 passphrase" ]]; then
+                    echo "$FILE encrypted"
+                elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
+                    echo "FILE NOT ENCRYPTED. Listing file info below:"
+                    getfacl $FILE
+                    PROJ_LEAD=$(grep -oP "\"$DIR\":\K.*" $TOOL_PATH/config-leads.json | tr -d '"",'| xargs)
+
+                    # check if listed project lead belongs to group
+                    ver_result=$(verify_lead $PROJ_LEAD)
+                    if [ "$ver_result" == 1 ]; then
+                        echo "$PROJ_LEAD not listed in hpc_gbuzzell. Exiting" 
+                        exit 9999 
+                    fi
+
+                    # email project lead on failed encryption check 
+                    email="${PROJ_LEAD}@fiu.edu"
+                    echo "emailing $DIR:$email"
+                    echo "$DATA_PATH/$DIR/$AUDIO_PATH/$SUB/$FILE is not encrypted" | mail -s "Encrypt Check Failed" "$email"
+                else 
+                    echo "Not applicable. Skipping"
+                fi
+            done
+        done
+	echo
+    fi
 done

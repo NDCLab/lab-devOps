@@ -27,3 +27,5 @@ echo $mycron
 
 # install crontab
 # crontab $mycron
+
+# make sure that rm does not fail
