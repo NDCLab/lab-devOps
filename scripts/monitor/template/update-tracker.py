@@ -1,7 +1,8 @@
 import pandas as pd
 import sys
 from os.path import basename, normpath
-from os import listdir
+from os import listdir, walk
+import pathlib
 
 # list audio-vid data
 audivid = ["zoom", "audio", "video"]
@@ -73,7 +74,31 @@ if __name__ == "__main__":
         tracker_df.to_csv(data_tracker_file)
         print("Success: redcap data tracker updated.")
 
-    if data_type in pavpsy or data_type in audivid:
+    if data_type in pavpsy:
+        tasks = sys.argv[4]
+        # TODO: Pipeline checks data already processed. 
+        for (dirpath, dirnames, filenames) in walk(file_path):
+            path = pathlib.PurePath(dirpath)
+    
+            # TODO: need better implementation 
+            if "sub" in path.name:
+                dir_id = int(path.name)
+                if dir_id not in ids:
+                    continue
+            else:
+                continue
+            
+            for task in tasks:
+                if task in ''.join(dirnames):
+                    collabel = task + "Data_s1_r1_e1"
+                    tracker_df.loc[dir_id, collabel] = "1"
+                else: 
+                    tracker_df.loc[dir_id, collabel] = "0"
+
+            tracker_df.to_csv(data_tracker_file)
+        print("Success: {} data tracker updated.".format(data_type))
+    
+    if data_type in audivid:
         for item in listdir(file_path):
             dir_id = int(item[4:])
             
