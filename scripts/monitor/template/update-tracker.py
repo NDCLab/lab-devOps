@@ -92,7 +92,7 @@ if __name__ == "__main__":
             
             for task in tasks:
                 task += "_s1_r1_e1"
-                if task in ''.join(dirnames):
+                if task in ''.join(filenames):
                     tracker_df.loc[dir_id, task] = "1"
                 else: 
                     tracker_df.loc[dir_id, task] = "0"
