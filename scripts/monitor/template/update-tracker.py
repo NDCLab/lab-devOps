@@ -76,6 +76,7 @@ if __name__ == "__main__":
 
     if data_type in pavpsy:
         tasks = sys.argv[4]
+        tasks = tasks.split(",")
         # TODO: Pipeline checks data already processed. 
         for (dirpath, dirnames, filenames) in walk(file_path):
             path = pathlib.PurePath(dirpath)
