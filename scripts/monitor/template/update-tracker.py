@@ -121,6 +121,8 @@ if __name__ == "__main__":
                     tracker_df.loc[dir_id, "bvData_s1_r1_e1"] = "1" if dir_id in ids else "0"
                 elif "egiData_s1_r1_e1" in tracker_df.columns:
                     tracker_df.loc[dir_id, "egiData_s1_r1_e1"] = "1" if dir_id in ids else "0"
+            elif data_type == "digi":
+                tracker_df.loc[dir_id, "digiData_s1_r1_e1"] = "1" if dir_id in ids else "0"
                 
 
             # make remaining empty values equal to 0
