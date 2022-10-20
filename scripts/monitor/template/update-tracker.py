@@ -114,8 +114,6 @@ if __name__ == "__main__":
     if data_type in eeg:
         for item in listdir(file_path):
             dir_id = int(item[4:])
-            collabel = data_type + "Data_s1_r1_e1"
-            tracker_df.loc[dir_id, collabel] = "1" if dir_id in ids else "0"
             # TODO: Need better implementation here
             if data_type == "eeg":
                 if "bvData_s1_r1_e1" in tracker_df.columns:
