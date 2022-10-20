@@ -91,11 +91,10 @@ if __name__ == "__main__":
                 continue
             
             for task in tasks:
-                collabel = task + "Data_s1_r1_e1"
                 if task in ''.join(dirnames):
-                    tracker_df.loc[dir_id, collabel] = "1"
+                    tracker_df.loc[dir_id, task] = "1"
                 else: 
-                    tracker_df.loc[dir_id, collabel] = "0"
+                    tracker_df.loc[dir_id, task] = "0"
 
             tracker_df.to_csv(data_tracker_file)
         print("Success: {} data tracker updated.".format(data_type))
