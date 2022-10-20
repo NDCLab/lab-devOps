@@ -90,8 +90,8 @@ if __name__ == "__main__":
                 continue
             
             for task in tasks:
+                collabel = task + "Data_s1_r1_e1"
                 if task in ''.join(dirnames):
-                    collabel = task + "Data_s1_r1_e1"
                     tracker_df.loc[dir_id, collabel] = "1"
                 else: 
                     tracker_df.loc[dir_id, collabel] = "0"
