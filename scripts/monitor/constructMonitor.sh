@@ -67,7 +67,7 @@ do
         done
         echo -e "\\n"
         # update tracker for each id
-        output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${dir}" \$dir \$dataset)
+        output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${dir}" \$dir \$dataset \$tasks)
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
             error_detected=true
