@@ -80,9 +80,10 @@ if __name__ == "__main__":
         for (dirpath, dirnames, filenames) in walk(file_path):
             path = pathlib.PurePath(dirpath)
     
-            # TODO: need better implementation 
+            # TODO: need better implementation.
+            # Need to apply better engineering principles here
             if "sub" in path.name:
-                dir_id = int(path.name)
+                dir_id = int(path.name[4:])
                 if dir_id not in ids:
                     continue
             else:
