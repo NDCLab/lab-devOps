@@ -78,16 +78,11 @@ chmod +x "${project}/${datam_path}/hallMonitor.sub"
 
 echo "Setting up preprocess.sub"
 # delete if previously written
-if [ -f "${project}/${datam_path}/inst-tracker.py" ]; then
-    rm -f "${project}/${datam_path}/inst-tracker.py"
-fi
 if [ -f "${project}/${datam_path}/preprocess.sub" ]; then
     rm -f "${project}/${datam_path}/preprocess.sub"
 fi
 cp "${labpath}/template/preprocess.sub" "${project}/${datam_path}"
-# cp "${labpath}/template/inst-tracker.py" "${project}/${datam_path}"
 
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/preprocess.sub"
-chmod +x "${project}/${datam_path}/inst-tracker.py"
 chmod +x "${project}/${datam_path}/check-id.py"
