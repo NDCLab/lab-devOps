@@ -85,7 +85,7 @@ if [ -f "${project}/${datam_path}/preprocess.sub" ]; then
     rm -f "${project}/${datam_path}/preprocess.sub"
 fi
 cp "${labpath}/template/preprocess.sub" "${project}/${datam_path}"
-cp "${labpath}/template/inst-tracker.py" "${project}/${datam_path}"
+# cp "${labpath}/template/inst-tracker.py" "${project}/${datam_path}"
 
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/preprocess.sub"
