@@ -19,6 +19,7 @@ dataset=$(dirname $(pwd))
 output_path="${dataset}/derivatives/preprocessed"
 data_source="${dataset}/sourcedata/checked/redcap/"
 log="${dataset}/data-monitoring/data-monitoring-log.md"
+tracker="central-tracker_${dataset}.csv"
 
 # constant paths
 sing_image="/home/data/NDClab/tools/instruments/containers/singularity/inst-container.simg"
@@ -36,10 +37,8 @@ outfile=$( singularity exec --bind $dataset,/home/data/NDClab/tools/instruments 
         python3 $json_scorer \
             "${data_source}/${input_file}" \
             $survey_data \
-            $output_path )
-
-# update central tracker using instruments data
-python inst-tracker.py $outfile $dataset
+            $output_path 
+            $tracker )
 
 # insert singularity scripts here
 
