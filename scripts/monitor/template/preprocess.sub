@@ -39,6 +39,7 @@ outfile=$( singularity exec --bind $dataset,/home/data/NDClab/tools/instruments 
             $survey_data \
             $output_path 
             $tracker )
+echo "$outfile"
 
 # insert singularity scripts here
 
