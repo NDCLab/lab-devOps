@@ -10,7 +10,7 @@ if __name__ == "__main__":
     headers = []
     with open(filepath, "r") as dd:
         reader = csv.DictReader(dd)
-        for row in dd:
+        for row in reader:
             if "task status" in row["description"]:
                 tasks += row["variable"] + ","
 
