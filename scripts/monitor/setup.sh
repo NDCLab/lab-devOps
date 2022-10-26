@@ -35,7 +35,7 @@ else
 fi
 
 # get tasks
-tasks=
+tasks=$(python "${labpath}/get_tasks.py" "${project}${datam_path}/data-dictionary/central-tracker_datadict.csv")
 
 #TODO: loop through a list, collect list from dir.
 
