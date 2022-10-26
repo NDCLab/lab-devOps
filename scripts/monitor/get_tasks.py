@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     # take note of headers
     headers = []
-    with open(filepath) as dd:
+    with open(filepath, "r") as dd:
         reader = csv.DictReader(dd)
         for row in dd:
             if "task status" in row["description"]:
