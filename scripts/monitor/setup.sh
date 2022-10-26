@@ -1,7 +1,7 @@
 #!/bin/bash
 # A script to set up data monitoring & preprocessing in your project
 
-usage() { echo "Usage: setup.sh [-t] <project-path> [datatype1,datatype2,datatype3] [task1,task2,task3]" 1>&2; exit 1; }
+usage() { echo "Usage: setup.sh [-t] <project-path> [datatype1,datatype2,datatype3]" 1>&2; exit 1; }
 
 datam_path="data-monitoring"
 code_path="code"
@@ -25,8 +25,6 @@ if [ "$1" = "-t" ]; then
     project=$2
     datatypes=$3
     id=$4
-    # Optional tasks arg 
-    tasks=${5:-0}
     echo "Setting up central tracker"
     python "${labpath}/gen-tracker.py" "${project}${datam_path}/central-tracker_${project::-1}.csv" $id
     chmod +x "${project}/${datam_path}/central-tracker_${project::-1}.csv"
@@ -34,9 +32,10 @@ else
     project=$1
     datatypes=$2
     id=$3
-    # Optional tasks arg 
-    tasks=${4:-0}
 fi
+
+# get tasks
+tasks=
 
 #TODO: loop through a list, collect list from dir.
 

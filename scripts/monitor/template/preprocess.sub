@@ -20,7 +20,7 @@ output_path="${dataset}/derivatives/preprocessed"
 data_source="${dataset}/sourcedata/checked/redcap/"
 log="${dataset}/data-monitoring/data-monitoring-log.md"
 
-dir="$(basename $(pwd))"
+dir="$(basename $dataset)"
 tracker="${dataset}/central-tracker_${dir}.csv"
 
 # constant paths
