@@ -147,7 +147,7 @@ function verify_copy_pavpsy_files {
         # check if file follows naming convention according to available tasks
         presence=0
         for taskname in "${tasks[@]}"; do
-            segment=$(echo "$file_name" | grep -oP "(?<=_)($taskname)(?=(_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+)?_\d{4})")
+            segment=$(echo "$file_name" | grep -oP "(?<=_)($taskname)_\d{4})")
             if [[ "$segment" ]]; then
                 presence=1
                 obs+=("$segment")
@@ -274,7 +274,7 @@ function verify_copy_bids_files {
             # check if file follows naming convention according to available tasks
             presence=0
             for taskname in "${tasks[@]}"; do
-                segment=$(echo "$file_name" | grep -oP "(?<=_)($taskname)(?=_eeg_s[a-zA-Z0-9]+_r[a-zA-Z0-9]+_e[a-zA-Z0-9]+)")
+                segment=$(echo "$file_name" | grep -oP "(?<=_)($taskname)")
                 if [[ "$segment" ]]; then
                     presence=1
                     obs+=("$segment")
