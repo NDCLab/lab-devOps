@@ -147,7 +147,7 @@ function verify_copy_pavpsy_files {
         # check if file follows naming convention according to available tasks
         presence=0
         for taskname in "${tasks[@]}"; do
-            segment=$(echo "$file_name" | grep -oP "(?<=_)($taskname)_\d{4})")
+            segment=$(echo "$file_name" | grep -oP "(?<=_)($taskname)_\d{4}")
             if [[ "$segment" ]]; then
                 presence=1
                 obs+=("$segment")
