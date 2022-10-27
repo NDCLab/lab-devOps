@@ -26,7 +26,7 @@ if [ "$1" = "-t" ]; then
     datatypes=$3
     id=$4
     echo "Setting up central tracker"
-    python "${labpath}/gen-tracker.py" "${project}${datam_path}/central-tracker_${project::-1}.csv" $id
+    python "${labpath}/gen-tracker.py" "${project}${datam_path}/central-tracker_${project::-1}.csv" $id $project
     chmod +x "${project}/${datam_path}/central-tracker_${project::-1}.csv"
 else
     project=$1
