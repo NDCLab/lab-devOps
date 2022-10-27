@@ -21,7 +21,7 @@ data_source="${dataset}/sourcedata/checked/redcap/"
 log="${dataset}/data-monitoring/data-monitoring-log.md"
 
 dir="$(basename $dataset)"
-tracker="${dataset}/central-tracker_${dir}.csv"
+tracker="${dataset}/data-monitoring/central-tracker_${dir}.csv"
 
 # constant paths
 sing_image="/home/data/NDClab/tools/instruments/containers/singularity/inst-container.simg"
