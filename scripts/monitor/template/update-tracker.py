@@ -59,7 +59,6 @@ if __name__ == "__main__":
                 continue 
             # check for part. consent
             tracker_df.loc[id, "consent_s1_r1_e1"] = "1" if file_df.loc[id, "consent_yn"]==1 else "0"
-            tracker_df.loc[id, "redcapData_s1_r1_e1"] = tracker_df.loc[id, "consent_s1_r1_e1"]
             for key, value in redcheck_columns.items():
                 try:
                     val = file_df.loc[id, key]
