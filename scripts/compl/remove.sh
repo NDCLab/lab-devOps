@@ -12,13 +12,10 @@ apath="/home/data/NDClab/analyses"
 
 for dset in `ls $dpath`
 do
-    setfacl -Rx u:$id,d:u:$id $dset
+    setfacl -Rx u:$id,d:u:$id "${dpath}/${dset}"
 done
 
 for aset in `ls $apath`
 do
-    setfacl -Rx u:$id,d:u:$id $aset
+    setfacl -Rx u:$id,d:u:$id "${apath}/${aset}"
 done
-
-
-echo "Member" 
