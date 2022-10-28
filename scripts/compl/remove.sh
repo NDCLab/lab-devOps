@@ -11,9 +11,9 @@ dpath="/home/data/NDClab/datasets"
 apath="/home/data/NDClab/analyses"
 
 for dset in `ls $dpath`; do
-    setfacl -Rx u:$id,d:u:$id "${dpath}/${dset}"
+    setfacl -Rx u:$id,d:u:$id "${dpath}/${dset}" 2> /dev/null
 done
 
 for aset in `ls $apath`; do
-    setfacl -Rx u:$id,d:u:$id "${apath}/${aset}"
+    setfacl -Rx u:$id,d:u:$id "${apath}/${aset}" 2> /dev/null
 done
