@@ -13,6 +13,8 @@ array=$(grep '^Average' $file_name)
 split_arr=($array)
 percent=${split_arr[${#split_arr[@]}-1]}
 
+rm -f $file_name
+
 if (( $(echo "$percent < $cutoff" |bc -l) ))
 then
     echo "Less than cutoff, updating."
