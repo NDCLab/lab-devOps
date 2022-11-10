@@ -19,7 +19,7 @@ echo -e  "#!/bin/bash\\n
 #SBATCH --ntasks=1\\n
 #SBATCH --time=01:00:00\\n
 module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg\\n
-python ${file_name}.py" >| $sub_file
+python ${file_name}" >| $sub_file
 
 # Submit sub file
 echo "Submitting $sub_file as job"
