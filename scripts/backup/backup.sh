@@ -1,5 +1,5 @@
 #!/bin/bash
-IFS=$'\n'
+
 dpath="/home/data/NDClab/datasets"
 backpath="/home/data/NDClab/other/backups"
 backup_list=("sourcedata" "derivatives")
@@ -34,7 +34,7 @@ do
       echo "creating link $date_name"
 
       # check if last known link to file exists already
-      linked_files=$(ls $backpath/$dir/$backpath_name/$path/$name* 2>/dev/null || echo "empty")
+      linked_files=($(ls $backpath/$dir/$backpath_name/$path/$name* 2>/dev/null || echo "empty"))
       if [[ $linked_files == "empty" ]]; then
           ln $orig_path/$filename $backpath/$dir/$backpath_name/$path/$date_name
           continue
@@ -43,13 +43,13 @@ do
           file_ln="${linked_files[$i]}"
           echo "checking difference of $file_ln"
           # check if it matches the contents of the original file.
-          res=$(cmp --silent $file_ln $orig_path/$filename || echo "true")
-          if [[ "$res" == "true" ]]; then
+          res=$(cmp --silent $file_ln $orig_path/$filename || echo "diff")
+          if [[ "$res" == "" ]]; then
               echo "File exists already, skipping"
               break
           fi
       done
-      if [[ "$res" != "true" ]]; then
+      if [[ "$res" == "diff" ]]; then
           ln $orig_path/$filename $backpath/$dir/$backpath_name/$path/$date_name
       fi
     done
