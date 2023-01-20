@@ -1,33 +1,43 @@
 #!/bin/bash
-# A script to generate a job and submit for some R script
+# A script to generate a job and submit for some matlab script
 
-# USAGE: sh /home/data/NDClab/tools/lab-devOps/scripts/rrun.sh <file_name>.R
-usage() { echo "Usage: sh rmat.sh [--parallel] <file_name>" 1>&2; exit 1; }
+# USAGE: sh /home/data/NDClab/tools/lab-devOps/scripts/rmat.sh <file_name>
+usage() { echo "Usage: sh rmat.sh <file_name> [# nodes] [walltime (in hours)] [--parallel]" 1>&2; exit 1; }
+
+
+[[ $# -eq 0 ]] && usage
 
 file_name=$1
+# use 1 node, 1 hr walltime by default
+NODES=${2:-"1"}
+WALLTIME="${3:-"1"}:00:00"
 
-if [[ ! -f "${file_name}.m" ]]; then
-    echo "File $file_name does not exist or is not a matlab file." 
-    exit 9999 
+if [[ "${file_name##*.}" != "m" ]]; then file_name="${file_name}".m; fi
+
+if [[ ! -f "$file_name" ]]; then
+    echo "File $file_name does not exist."
+    exit 9999
 fi
 
 # Generate sub file
-sub_file="${file_name}.sub"
+sub_file="${file_name%.*}.sub"
 
 if [[ $* == *--parallel* ]]; then
-    exec_line="matlab -nodisplay -nosplash -r ${file_name}"
+    exec_line="matlab -nodisplay -nosplash -r ${file_name%.*}"
     cpus="4"
 else
-    exec_line="matlab -singleCompThread -nodisplay -nosplash -r ${file_name}"
+    exec_line="matlab -singleCompThread -nodisplay -nosplash -r ${file_name%.*}"
     cpus="1"
 fi
 
-echo -e  "#!/bin/bash
-#SBATCH --nodes=1
+MATLAB_VERSION="2019b"
+
+echo -e "#!/bin/bash
+#SBATCH --nodes=$NODES
 #SBATCH --ntasks=1
-#SBATCH --time=01:00:00
+#SBATCH --time=$WALLTIME
 #SBATCH --cpus-per-task=${cpus} \\n
-module load matlab-2018b
+module load matlab-$MATLAB_VERSION
 ${exec_line}" >| $sub_file
 
 # Submit sub file
