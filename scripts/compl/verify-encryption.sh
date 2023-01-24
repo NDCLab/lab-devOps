@@ -1,5 +1,5 @@
 #!/bin/bash
-IFS=$'\n'
+
 DATA_PATH="/home/data/NDClab/datasets"
 # TODO: check check as well
 ZOOM_PATH="sourcedata/raw/zoom"
@@ -13,10 +13,10 @@ function verify_lead
     for i in ${b_group//,/ }
     do
         if [ $i == $1 ]; then
-            exit 1
+            exit 0
         fi
     done
-    exit 0
+    exit 1
 }
 
 echo "Checking repos in datasets"
@@ -43,13 +43,13 @@ do
                 elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
                     echo "FILE NOT ENCRYPTED. Listing file info below:"
                     getfacl $FILE
-                    PROJ_LEAD=$(grep -oP "\"$DIR\":\K.*" $TOOL_PATH/config-leads.json | tr -d '"",'| xargs)
+                    PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
 
                     # check if listed project lead belongs to group
                     ver_result=$(verify_lead $PROJ_LEAD)
                     if [ "$ver_result" == 1 ]; then
-                        echo "$PROJ_LEAD not listed in hpc_gbuzzell. Exiting" 
-                        exit 9999 
+                        echo "$PROJ_LEAD not listed in hpc_gbuzzell. Exiting"
+                        exit 9999
                     fi
 
                     # email project lead on failed encryption check 
@@ -84,7 +84,7 @@ do
                 elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
                     echo "FILE NOT ENCRYPTED. Listing file info below:"
                     getfacl $FILE
-                    PROJ_LEAD=$(grep -oP "\"$DIR\":\K.*" $TOOL_PATH/config-leads.json | tr -d '"",'| xargs)
+                    PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
 
                     # check if listed project lead belongs to group
                     ver_result=$(verify_lead $PROJ_LEAD)
@@ -102,6 +102,5 @@ do
                 fi
             done
         done
-	echo
     fi
 done
