@@ -50,8 +50,8 @@ do
                     # check if listed project lead belongs to group
                     ver_result=$(verify_lead $PROJ_LEAD)
                     if [ "$ver_result" == "false" ]; then
-                        echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $FILE"
-                        continue
+                        echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR"
+                        continue 4
                     fi
 
                     file_arr+=("$FILE")
