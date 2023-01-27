@@ -1,5 +1,5 @@
 #!/bin/bash
-# A script to clean up log files if they surpass a size. Will be run automatically via cron.
+# A script to clean up log files between MM_YYYY and MM_YYYY.
 
 # USAGE: bash /home/data/NDClab/tools/lab-devOps/scripts/backup/clean-logs.sh -r -d MM_YYYY-MM_YYYY
 

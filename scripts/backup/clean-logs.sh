@@ -1,6 +1,7 @@
 #!/bin/bash
 # A script to clean up log files past six months. Will be run automatically via cron.
 # USAGE: bash /home/data/NDClab/tools/lab-devOps/scripts/backup/clean-logs.sh
+usage() { echo "Usage: bash $0"; exit 0; }
 
 log_dir="/home/data/NDClab/other/logs"
 
