@@ -5,6 +5,7 @@ DATA_PATH="/home/data/NDClab/datasets"
 ZOOM_PATH="sourcedata/raw/zoom"
 AUDIO_PATH="sourcedata/raw/audio"
 VID_PATH="sourcedata/raw/video"
+CHECKED_PATH="sourcedata/checked"
 TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts/configs"
 
 function verify_lead
@@ -22,7 +23,7 @@ function verify_lead
 echo "Checking repos in datasets"
 for DIR in `ls $DATA_PATH`
 do
-  for DATA_MOD in "$ZOOM_PATH" "$AUDIO_PATH" "$VID_PATH"
+  for DATA_MOD in "$ZOOM_PATH" "$AUDIO_PATH" "$VID_PATH" "$CHECKED_PATH"
   do
     if [ -e "$DATA_PATH/$DIR/$DATA_MOD" ]; then
         echo "Validating $DIR/$DATA_MOD encryption"
