@@ -1,6 +1,16 @@
 {
+    "casper-dataset": "ostib001",
+    "memory-for-error-dataset": "khoss005",
+    "mfe-online-dataset": "khoss005",
+    "oops-faces-dataset": "emart459",
+    "putt-putt-dataset": "smaly002",
     "social-context-dataset": "emach039", 
-    "missing-link-dataset": "apoly003",
-    "rwe-dataset": "smaly002",
+    "missing-link-dataset": "jalexand",
+    "rwe-dataset": "jalexand",
+    "rwe-eeg-dataset": "jalexand",
+    "readAloud-valence-dataset": "jalexand",
+    "social-flanker-eeg-dataset": "apoly003",
+    "thrive-dataset": "gbuzzell",
+    "technician": "dhunt",
     "lab-manager": "jalexand"
 }
