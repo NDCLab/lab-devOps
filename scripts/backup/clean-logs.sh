@@ -9,4 +9,4 @@ log_dir="/home/data/NDClab/other/logs"
 older_than=`date -d "-6 month" +%y-%m`
 find "$log_dir" -name "*.log" -exec bash -c \
   'timestamp=$(basename $1) && if [[ "${timestamp:8:2}"-"${timestamp:0:2}" < $2 ]]; \
-  then echo "deleting {}" && rm {} 2>&1; fi' bash {} $older_than ';'
+  then echo "deleting $1" && rm $1 2>&1; fi' bash {} $older_than ';'
