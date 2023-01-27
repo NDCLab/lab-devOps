@@ -14,7 +14,7 @@ do
   for backup in "${backup_list[@]}" 
   do
     if [ ! -d "$backpath/$dir/$backup" ]; then
-      cd $dpath/$dir/$backup && find . -type d -exec mkdir -p -- $backpath/$dir/$backup{} \;
+      cd $dpath/$dir/$backup && find * -type d -exec mkdir -p -- $backpath/$dir/$backup/{} \; &>/dev/null
     fi
     for file in $(find "$dpath/$dir/$backup" -type f);
     do
@@ -23,9 +23,8 @@ do
       filename=$(basename $file)
 
       # strip original path
-      backpath_name="${backup}."
       path=$(echo $orig_path | cut -d'/' -f8-)
-      echo "checking file $backpath/$dir/$backpath_name/$path/$filename"
+      echo "checking file $backpath/$dir/$backup/$path/$filename"
 
       # create hardlink using date and filename
       name="${filename}-link-"
@@ -34,9 +33,9 @@ do
       echo "creating link $date_name"
 
       # check if last known link to file exists already
-      linked_files=($(ls $backpath/$dir/$backpath_name/$path/$name* 2>/dev/null || echo "empty"))
+      linked_files=($(ls $backpath/$dir/$backup/$path/$name* 2>/dev/null || echo "empty"))
       if [[ $linked_files == "empty" ]]; then
-          ln $orig_path/$filename $backpath/$dir/$backpath_name/$path/$date_name
+          ln $orig_path/$filename $backpath/$dir/$backup/$path/$date_name
           continue
       fi 
       for i in "${!linked_files[@]}"; do
