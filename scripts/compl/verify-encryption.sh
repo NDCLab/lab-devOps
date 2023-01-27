@@ -26,49 +26,40 @@ do
   do
     if [ -e "$DATA_PATH/$DIR/$DATA_MOD" ]; then
         echo "Validating $DIR/$DATA_MOD encryption"
-        #cd "$DATA_PATH/$DIR/$ZOOM_PATH"
-        for SUB in "$DATA_PATH/$DIR/$DATA_MOD"/*; do
-            echo "checking if contents of $SUB are encrypted"
-            if ! [[ -x "$SUB" ]]; then
-                echo "$SUB is not accessible via your permissions" 
+        file_arr=()
+        for FILE in `find "$DATA_PATH/$DIR/$DATA_MOD" -type f`; do
+            # Skip transcript files
+            if [[ $FILE == *.vtt ]]; then
                 continue
             fi
-            #cd "$DATA_PATH/$DIR/$ZOOM_PATH/$SUB"
-            file_arr=()
-            for FILE in "$SUB"/*; do
-                # Skip transcript files
-                if [[ $FILE == *.vtt ]]; then
-                    continue
+            ENCRYPT_MSG=$(gpg --list-only $FILE 2>&1)
+            if [[ "$ENCRYPT_MSG" =~ "gpg: encrypted with 1 passphrase" ]]; then
+                echo "$FILE encrypted"
+            elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
+                echo "$FILE NOT ENCRYPTED. Listing file info below:"
+                getfacl $FILE
+                PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
+                # check if listed project lead belongs to group
+                ver_result=$(verify_lead $PROJ_LEAD)
+                if [ "$ver_result" == "false" ]; then
+                    echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR"
+                    continue 3
                 fi
-                ENCRYPT_MSG=$(gpg --list-only $FILE 2>&1)
-                if [[ "$ENCRYPT_MSG" =~ "gpg: encrypted with 1 passphrase" ]]; then
-                    echo "$FILE encrypted"
-                elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
-                    echo "$FILE NOT ENCRYPTED. Listing file info below:"
-                    getfacl $FILE
-                    PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
-                    # check if listed project lead belongs to group
-                    ver_result=$(verify_lead $PROJ_LEAD)
-                    if [ "$ver_result" == "false" ]; then
-                        echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR"
-                        continue 4
-                    fi
-                    # email project lead on failed encryption check
-                    email="${PROJ_LEAD}"@fiu.edu
-                    echo "emailing $DIR:$email"
-                    echo "$FILE is not encrypted" | mail -s "Encrypt Check Failed in \"$DIR\"" "$email"
-                    file_arr+=("$FILE")
-                else
-                    echo "Not applicable. Skipping"
-                fi
-            done
-            if [ "${#file_arr[@]}" -gt 0 ]
-                then
-                file_arr+=("The above files in the project \"$DIR\" are not encrypted")
-                # write unencrypted files to log
-                printf "%s\n" "${file_arr[@]}"
+                # email project lead on failed encryption check
+                email="${PROJ_LEAD}"@fiu.edu
+                echo "emailing $DIR:$email"
+                echo "$FILE is not encrypted" | mail -s "Encrypt Check Failed in \"$DIR\"" "$email"
+                file_arr+=("$FILE")
+            else
+                echo "Not applicable (dir may be empty). Skipping"
             fi
         done
+        if [ "${#file_arr[@]}" -gt 0 ]
+            then
+            file_arr+=("The above files in the project \"$DIR\" are not encrypted")
+            # write unencrypted files to log
+            printf "%s\n" "${file_arr[@]}"
+        fi
     fi
   done
 done
