@@ -14,7 +14,9 @@ do
   for backup in "${backup_list[@]}" 
   do
     if [ ! -d "$backpath/$dir/$backup" ]; then
+      WD=$PWD
       cd $dpath/$dir/$backup && find * -type d -exec mkdir -p -- $backpath/$dir/$backup/{} \; &>/dev/null
+      cd $WD
     fi
     for file in $(find "$dpath/$dir/$backup" -type f);
     do
