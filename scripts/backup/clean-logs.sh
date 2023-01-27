@@ -1,21 +1,11 @@
 #!/bin/bash
-# A script to clean up log files if they surpass a size. Will be run automatically via cron.
+# A script to clean up log files past six months. Will be run automatically via cron.
+# USAGE: bash /home/data/NDClab/tools/lab-devOps/scripts/backup/clean-logs.sh
 
-if [ ! -d $1 ] 
-then
-    echo "Directory $1 does not exist. Please check path." 
-    exit 9999 
-fi
+log_dir="/home/data/NDClab/other/logs"
 
-val=$(du -shk $1 | awk '{print $1}')
-declare -i LIMIT=5000000
-
-if [ "$val" -gt "$LIMIT" ]
-  then
-    echo "Log file disk usage is above $LIMIT KB. Clearing $1"
-    echo "Deleting the following:"
-    find $1 -name "*.log" -type f
-    find $1 -name "*.log" -type f -delete
-  else
-    echo "Log file disk usage is $val KB. Below $LIMIT KB. Skipping."
-fi
+# delete logs older than six months
+older_than=`date -d "-6 month" +%y-%m`
+find "$log_dir" -name "*.log" -exec bash -c \
+  'timestamp=$(basename $1) && if [[ "${timestamp:8:2}"-"${timestamp:0:2}" < $2 ]]; \
+  then echo "deleting {}" && rm {} 2>&1; fi' bash {} $older_than ';'
