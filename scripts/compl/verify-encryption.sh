@@ -53,19 +53,18 @@ do
                         echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR"
                         continue 4
                     fi
-
+                    # email project lead on failed encryption check
+                    email="${PROJ_LEAD}"@fiu.edu
+                    echo "emailing $DIR:$email"
+                    echo "$FILE is not encrypted" | mail -s "Encrypt Check Failed in \"$DIR\"" "$email"
                     file_arr+=("$FILE")
-                else 
+                else
                     echo "Not applicable. Skipping"
                 fi
             done
             if [ "${#file_arr[@]}" -gt 0 ]
                 then
-                # email project lead on failed encryption check
-                email="${PROJ_LEAD}"
-                echo "emailing $DIR:$email"
                 file_arr+=("The above files in the project \"$DIR\" are not encrypted")
-                printf "%s\n" "${file_arr[@]}" | mail -s "Encrypt Check Failed" "$email"
                 # write unencrypted files to log
                 printf "%s\n" "${file_arr[@]}"
             fi
