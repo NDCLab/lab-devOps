@@ -11,7 +11,10 @@ TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts/configs"
 function verify_lead
 {
     b_group=$(getent group hpc_gbuzzell)
-    for i in ${b_group//,/ }
+    b_group=(${b_group//,/ })
+    # remove leading "hpc_gbuzzell:*:284:"
+    b_group[0]=$(echo ${b_group[0]} | cut -d":" -f4)
+    for i in "${b_group[@]}"
     do
         if [ $i == $1 ]; then
             echo "true" && return
