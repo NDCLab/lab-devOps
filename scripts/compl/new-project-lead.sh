@@ -41,4 +41,4 @@ for dir in $DATA_PATH $TOOL_PATH $ANA_PATH; do
   done
 done
 
-if [[ $added == "" ]]; then echo "project $project not found, $proj_lead not added" && exit 1
+if [[ $added == "" ]]; then echo "project $project not found, $proj_lead not added" && exit 1; fi
