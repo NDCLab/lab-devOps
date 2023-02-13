@@ -16,7 +16,7 @@ for dir in $DATA_PATH $TOOL_PATH $ANA_PATH
   do
   for repo in $(ls $dir)
     do
-    setfacl -Rm d:u:$ID:r--,u:$ID:r-- $dir/$repo
+    setfacl -Rm d:u:$ID:r-x,u:$ID:r-x $dir/$repo
     if [[ $dir == "$DATA_PATH" ]]; then
       setfacl -Rm d:u:$ID:---,u:$ID:--- $dir/$repo/sourcedata
       setfacl -Rm d:u:$ID:---,u:$ID:--- $dir/$repo/derivatives
