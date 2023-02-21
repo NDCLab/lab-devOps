@@ -28,7 +28,7 @@ function verify_lead
 }
 
 if [[ ! $(verify_lead $proj_lead) == "true" ]]; then
-  echo "User $proj_lead not found in hpc_gbuzzell group" && exit
+  echo "User $proj_lead not found in hpc_gbuzzell group" && exit 1
 fi
 
 for dir in $DATA_PATH $TOOL_PATH $ANA_PATH; do
@@ -36,9 +36,9 @@ for dir in $DATA_PATH $TOOL_PATH $ANA_PATH; do
     if [[ $repo == $project ]]; then
       echo "granting $proj_lead read write access to $(basename $dir)/$project"
       setfacl d:u:$proj_lead:rwx,u:$proj_lead:rwx $dir/$project
-      added=true && break 2
+      added=true
     fi
   done
 done
 
-if [[ $added == "" ]]; then echo "project $project not found, $proj_lead not added" && exit 1; fi
+if [[ $added == "" ]]; then echo "project $project not found, $proj_lead not added" && exit 2; fi
