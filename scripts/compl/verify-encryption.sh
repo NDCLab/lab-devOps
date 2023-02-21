@@ -1,15 +1,22 @@
 #!/bin/bash
 
 DATA_PATH="/home/data/NDClab/datasets"
-# TODO: check check as well
+
 ZOOM_PATH="sourcedata/raw/zoom"
 AUDIO_PATH="sourcedata/raw/audio"
 VID_PATH="sourcedata/raw/video"
 CHECKED_PATH="sourcedata/checked"
 TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts/configs"
+LOG_PATH="/home/data/NDClab/other/logs/encrypt-checks"
+#exts_to_check=("mp3" "mp4" "m4a" "wav" "Model.jpg" "Model.obj" "Model.mtl")
+
+exts_to_check='(.*mp3.*|.*mp4.*|.*m4a.*|.*wav.*|.*[mM]odel\.jpg.*|.*[mM]odel\.obj.*|.*[mM]odel\.mtl.*)'
+LAB_MGR="jalexand"
+all_files=()
 
 function verify_lead
 {
+    if [[ $1 == "" ]]; then echo "false" && return; fi
     b_group=$(getent group hpc_gbuzzell)
     b_group=(${b_group//,/ })
     # remove leading "hpc_gbuzzell:*:284:"
@@ -23,47 +30,117 @@ function verify_lead
     echo "false"
 }
 
+function search_dir
+{
+    local SUBDIR=$1
+    #for FILE in `find $DIR -type f \( -name "*.mp3*" -o -name "*.mp4*" \
+        #-o -name "*.m4a*" -o -name "*.wav*" -o -name "*Model.jpg*" -o -name "*Model.obj*" \
+        #-o -name "*.Model.mtl*" \)`; do
+    for FILE in `find $SUBDIR -type f -regextype posix-extended -regex $exts_to_check`; do
+        check_encryption $FILE
+        if [[ $? == 255 ]]; then return 255; fi
+    done
+}
+
+function check_encryption
+{
+        local FILE=$1
+        if [[ $2 == "" ]]; then FILEPATH=$FILE; else FILEPATH=$2; fi
+        ENCRYPT_MSG=$(gpg --list-only $FILE 2>&1)
+        if [[ "$ENCRYPT_MSG" =~ "gpg: encrypted with 1 passphrase" ]]; then
+            echo "$FILE encrypted"
+        elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
+            echo "$FILE NOT ENCRYPTED. Listing file info below:"
+            getfacl $FILE
+            PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
+            # check if listed project lead belongs to group
+            ver_result=$(verify_lead $PROJ_LEAD)
+            if [ "$ver_result" == "false" ]; then
+              return 255
+            fi
+            # email project lead on failed encryption check
+            email="${PROJ_LEAD}"@fiu.edu
+            echo "emailing $DIR:$email"
+            echo "$FILEPATH is not encrypted" | mail -s "Encrypt Check Failed in \"$DIR\"" "$email"
+            file_arr+=("$FILEPATH")
+        else
+          echo "Not applicable (dir may be empty). Skipping"
+        fi
+}
+
 echo "Checking repos in datasets"
 for DIR in `ls $DATA_PATH`
 do
+  file_arr=()
   for DATA_MOD in "$ZOOM_PATH" "$AUDIO_PATH" "$VID_PATH" "$CHECKED_PATH"
   do
     if [ -e "$DATA_PATH/$DIR/$DATA_MOD" ]; then
         echo "Validating $DIR/$DATA_MOD encryption"
-        file_arr=()
-        for FILE in `find "$DATA_PATH/$DIR/$DATA_MOD" -type f`; do
-            # Skip transcript files
-            if [[ $FILE == *.vtt ]]; then
-                continue
-            fi
-            ENCRYPT_MSG=$(gpg --list-only $FILE 2>&1)
-            if [[ "$ENCRYPT_MSG" =~ "gpg: encrypted with 1 passphrase" ]]; then
-                echo "$FILE encrypted"
-            elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
-                echo "$FILE NOT ENCRYPTED. Listing file info below:"
-                getfacl $FILE
-                PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
-                # check if listed project lead belongs to group
-                ver_result=$(verify_lead $PROJ_LEAD)
-                if [ "$ver_result" == "false" ]; then
-                    echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR"
-                    continue 3
-                fi
-                # email project lead on failed encryption check
-                email="${PROJ_LEAD}"@fiu.edu
-                echo "emailing $DIR:$email"
-                echo "$FILE is not encrypted" | mail -s "Encrypt Check Failed in \"$DIR\"" "$email"
-                file_arr+=("$FILE")
-            else
-                echo "Not applicable (dir may be empty). Skipping"
-            fi
-        done
-        if [ "${#file_arr[@]}" -gt 0 ]
-            then
-            file_arr+=("The above files in the project \"$DIR\" are not encrypted")
-            # write unencrypted files to log
-            printf "%s\n" "${file_arr[@]}"
+        search_dir $DATA_PATH/$DIR/$DATA_MOD
+        if [[ $? -eq 255 ]]; then
+            echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR" && continue 2
         fi
+        for ZIP in `find $DATA_PATH/$DIR/$DATA_MOD -name "*.zip"`; do
+            #tmpdir="$(basename $ZIP)_tmp" # dir to extract files in zip to
+            tmpdir=$(mktemp -d -p $PWD) # dir to extract files in zip to
+            IFS=$'\n' zipfiles=($(unzip -l $ZIP)) && unset IFS
+            arr_len=${#zipfiles[@]}
+            for i in $(seq 3 $(($arr_len-3))); do
+              filename=$(echo ${zipfiles[$i]} | awk '{print $NF}')
+              ext1=$(echo $filename | awk -F. '{print $(NF-1)}')
+              ext2=$(echo $filename | awk -F. '{print $NF}')
+              #if [[ ${exts_to_check[@]} =~ $ext1 || ${exts_to_check[@]} =~ $ext2 ]]; then
+              if [[ $ext1 =~ $exts_to_check || $ext2 =~ $exts_to_check ]]; then
+                unzip $ZIP $filename -d "$tmpdir"
+              fi
+              check_encryption "$tmpdir/$filename" "$ZIP/$filename"
+              if [[ $? -eq 255 ]]; then
+                  echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR" && continue 4
+              fi
+              # check zips inside zip# getting convoluted but should work?
+              if [[ $ext2 == "zip" ]]; then
+                unzip $ZIP $filename -d "$tmpdir"
+                mkdir -p "$tmpdir/${filename%.*}"
+                # extract <firstzip.zip>/<secondzip.zip>/file.mp3 to tmpdir/secondzip folder
+                IFS=$'\n' zipfiles2=($(unzip -l $tmpdir/$filename)) && unset IFS
+                for i in $(seq 3 $((${#zipfiles2[@]}-3))); do
+                  filename2=$(echo ${zipfiles2[$i]} | awk '{print $NF}')
+                  ext1=$(echo $filename2 | awk -F. '{print $(NF-1)}')
+                  ext2=$(echo $filename2 | awk -F. '{print $NF}')
+                  if [[ $ext1 =~ $exts_to_check || $ext2 =~ $exts_to_check ]]; then
+                    unzip $tmpdir/$filename $filename2 -d "$tmpdir/${filename%.*}"
+                    check_encryption "$tmpdir/${filename%.*}/$filename2" "$ZIP/$filename/$filename2"
+                    if [[ $? -eq 255 ]]; then
+                        echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR" && continue 5
+                    fi
+                  fi
+                done
+              fi
+            done
+            rm -r $tmpdir
+        done
     fi
   done
+  if [ "${#file_arr[@]}" -gt 0 ]
+      then
+      #file_arr+=("The above files in the project \"$DIR\" are not encrypted")
+      # write unencrypted files to log
+      printf "UNENCRYPTED: %s\n" "${file_arr[@]}"
+      printf "The above files in the project \"$DIR\" are not encrypted\n"
+      all_files+="${file_arr[@]}"
+  fi
 done
+
+#unencrypted_files=$(echo ${file_arr[@]} | grep "UNENCRYPTED" awk '{print $2}')
+# Check last week's log file
+last_week=`date -d "1 week ago" +%m_%d_%Y`
+for log in $(ls $LOG_PATH/$last_week* 2>/dev/null); do
+    files=$(cat $log | grep "UNENCRYPTED" | awk '{print $2}')
+    for file in $files; do
+        if [[ "${all_files[*]}" =~ "$file" ]]; then
+            # email lab mgr
+            echo "$file has been unencrypted since at least $last_week" | mail -s "File still unencrypted" "$LAB_MGR@fiu.edu"
+        fi
+    done
+done
+    
