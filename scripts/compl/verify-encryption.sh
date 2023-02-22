@@ -9,7 +9,7 @@ CHECKED_PATH="sourcedata/checked"
 TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts/configs"
 LOG_PATH="/home/data/NDClab/other/logs/encrypt-checks"
 #exts_to_check=("mp3" "mp4" "m4a" "wav" "Model.jpg" "Model.obj" "Model.mtl")
-
+paths_to_check='^(raw/([Zz][Oo][Oo][Mm]|[Aa][Uu][Dd][Ii][Oo]|[Vv][Ii][Dd][Ee][Oo])|checked)$'
 exts_to_check='(.*mp3.*|.*mp4.*|.*m4a.*|.*wav.*|.*[mM]odel\.jpg.*|.*[mM]odel\.obj.*|.*[mM]odel\.mtl.*)'
 LAB_MGR="jalexand"
 all_files=()
@@ -72,15 +72,15 @@ echo "Checking repos in datasets"
 for DIR in `ls $DATA_PATH`
 do
   file_arr=()
-  for DATA_MOD in "$ZOOM_PATH" "$AUDIO_PATH" "$VID_PATH" "$CHECKED_PATH"
+  for DATA_MOD in `find $DATA_PATH/$DIR/sourcedata -maxdepth 2 -type d | cut -d"/" -f8-`
   do
-    if [ -e "$DATA_PATH/$DIR/$DATA_MOD" ]; then
-        echo "Validating $DIR/$DATA_MOD encryption"
-        search_dir $DATA_PATH/$DIR/$DATA_MOD
+    if [[ "$DATA_MOD" =~ $paths_to_check ]]; then
+        echo "Validating $DIR/sourcedata/$DATA_MOD encryption"
+        search_dir $DATA_PATH/$DIR/sourcedata/$DATA_MOD
         if [[ $? -eq 255 ]]; then
             echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR" && continue 2
         fi
-        for ZIP in `find $DATA_PATH/$DIR/$DATA_MOD -name "*.zip"`; do
+        for ZIP in `find $DATA_PATH/$DIR/sourcedata/$DATA_MOD -name "*.zip"`; do
             #tmpdir="$(basename $ZIP)_tmp" # dir to extract files in zip to
             tmpdir=$(mktemp -d -p $PWD) # dir to extract files in zip to
             IFS=$'\n' zipfiles=($(unzip -l $ZIP)) && unset IFS
