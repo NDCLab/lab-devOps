@@ -1,12 +1,10 @@
 #!/bin/bash
 # A script to remove id from all datasets & analysis, or if p is specified certain datasets & analyses
 
-# USAGE: remove <id> [ -p <project1,project2,... ]
-usage() { echo "Usage: bash remove.sh <id> [ -p <project1,project2,... ]"; exit 0; }
+# USAGE: remove [ -p <project1,project2,... ] <id>
+usage() { echo "Usage: bash remove.sh [ -p <project1,project2,... ] <id>"; exit 0; }
 
 if [[ $# -eq 0 ]]; then usage; fi
-
-id=$1
 
 while getopts "p:" opt; do
   case "${opt}" in
@@ -19,6 +17,8 @@ while getopts "p:" opt; do
       ;;
   esac
 done
+
+id=${@:$OPTIND:1}
 
 dpath="/home/data/NDClab/datasets"
 apath="/home/data/NDClab/analyses"
