@@ -5,17 +5,18 @@ monitor_path="data-monitoring"
 monitor_file="data-monitor.sh"
 source_data="sourcedata"
 tool_path="/home/data/NDClab/tools/lab-devOps/scripts/config-leads.json"
+LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
 
 function verify_lead
 {
-    b_group=$(getent group hpc_gbuzzell)
+    b_group=$(cat $LAB_USERS_TXT)
     for i in ${b_group//,/ }
     do
         if [ $i == $1 ]; then
-            exit 1
+            exit 0
         fi
     done
-    exit 0
+    exit 1
 }
 
 # Run through each dataset available, checking for data monitoring script
@@ -38,8 +39,7 @@ do
         # continue by extracting and verifying project lead
         proj_lead=$(grep -oP "\"$dir\":\K.*" $tool_path | tr -d '"",'| xargs)
         ver_result=$(verify_lead $proj_lead)
-        res=$?
-        if [ $res == 1 ]; then
+        if [ $ver_result == 1 ]; then
             echo "$proj_lead not listed in hpc_gbuzzell. Exiting" 
             exit 9999 
         fi
@@ -68,8 +68,7 @@ do
                 echo "Unknown changes to dataset. Notifying tech."
                 techie=$(grep -oP "\"technician\":\K.*" $tool_path | tr -d '"",'| xargs)
                 ver_result=$(verify_lead $techie)
-                res=$?
-                if [ $res == 1 ]; then
+                if [ $ver_result == 1 ]; then
                     echo "$techie not listed in hpc_gbuzzell. Exiting" 
                     exit 9999 
                 fi
