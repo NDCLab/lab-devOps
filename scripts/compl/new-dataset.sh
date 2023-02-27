@@ -11,11 +11,10 @@ repo=$1
 dpath="/home/data/NDClab/datasets"
 apath="/home/data/NDClab/analyses"
 tpath="/home/data/NDClab/tools"
+LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
 
-b_group=$(getent group hpc_gbuzzell)
+b_group=$(cat $LAB_USERS_TXT)
 b_group=(${b_group//,/ })
-# remove leading "hpc_gbuzzell:*:284:"
-b_group[0]=$(echo ${b_group[0]} | cut -d":" -f4)
 
 for DIR in $dpath $apath $tpath; do
   if [[ "$DIR" == "$repo" ]]; then

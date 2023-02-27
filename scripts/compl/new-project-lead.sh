@@ -12,12 +12,12 @@ project=$2
 DATA_PATH=/home/data/NDClab/datasets
 TOOL_PATH=/home/data/NDClab/tools
 ANA_PATH=/home/data/NDClab/analyses
+LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
 
 function verify_lead
 {
-    b_group=$(getent group hpc_gbuzzell)
+    b_group=$(cat $LAB_USERS_TXT)
     b_group=(${b_group//,/ })
-    b_group[0]=$(echo ${b_group[0]} | cut -d":" -f4)
     for i in "${b_group[@]}"
     do
         if [ $i == $1 ]; then

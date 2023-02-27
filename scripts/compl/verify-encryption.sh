@@ -11,16 +11,15 @@ LOG_PATH="/home/data/NDClab/other/logs/encrypt-checks"
 #exts_to_check=("mp3" "mp4" "m4a" "wav" "Model.jpg" "Model.obj" "Model.mtl")
 paths_to_check='^(raw/([Zz][Oo][Oo][Mm]|[Aa][Uu][Dd][Ii][Oo]|[Vv][Ii][Dd][Ee][Oo])|checked)$'
 exts_to_check='(.*mp3.*|.*mp4.*|.*m4a.*|.*wav.*|.*[mM]odel\.jpg.*|.*[mM]odel\.obj.*|.*[mM]odel\.mtl.*)'
-LAB_MGR="jalexand"
+LAB_MGR="ndclab"
+LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
 all_files=()
 
 function verify_lead
 {
     if [[ $1 == "" ]]; then echo "false" && return; fi
-    b_group=$(getent group hpc_gbuzzell)
+    b_group=$(cat $LAB_USERS_TXT)
     b_group=(${b_group//,/ })
-    # remove leading "hpc_gbuzzell:*:284:"
-    b_group[0]=$(echo ${b_group[0]} | cut -d":" -f4)
     for i in "${b_group[@]}"
     do
         if [ $i == $1 ]; then
@@ -133,7 +132,7 @@ done
 
 #unencrypted_files=$(echo ${file_arr[@]} | grep "UNENCRYPTED" awk '{print $2}')
 # Check last week's log file
-last_week=`date -d "1 week ago" +%m_%d_%Y`
+last_week=`date -d "3 days ago" +%m_%d_%Y`
 for log in $(ls $LOG_PATH/$last_week* 2>/dev/null); do
     files=$(cat $log | grep "UNENCRYPTED" | awk '{print $2}')
     for file in $files; do
