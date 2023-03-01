@@ -37,7 +37,7 @@ do
       echo "creating link $date_name"
 
       # check if last known link to file exists already
-      linked_files=($(ls "$backpath/$dir/$backup/$path/$name"* 2>/dev/null || echo "empty"))
+      IFS=$'\n' linked_files=($(ls "$backpath/$dir/$backup/$path/$name"* 2>/dev/null || echo "empty")) && unset IFS
       if [[ $linked_files == "empty" ]]; then
           # need parent folder to already exist to ln
           [[ ! -d "$backpath/$dir/$backup/$path" ]] && mkdir -p "$backpath/$dir/$backup/$path"
@@ -55,7 +55,9 @@ do
           fi
       done
       if [[ "$res" == "diff" ]]; then
-          ln "$orig_path/$filename" "$backpath/$dir/$backpath_name/$path/$date_name"
+          # need parent folder to already exist to ln
+          [[ ! -d "$backpath/$dir/$backup/$path" ]] && mkdir -p "$backpath/$dir/$backup/$path"
+          ln "$orig_path/$filename" "$backpath/$dir/$backup/$path/$date_name"
       fi
     done
   done
