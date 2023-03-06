@@ -31,14 +31,21 @@ if [[ ! $(verify_lead $proj_lead) == "true" ]]; then
   echo "User $proj_lead not found in hpc_gbuzzell group" && exit 1
 fi
 
-for dir in $DATA_PATH $TOOL_PATH $ANA_PATH; do
-  for repo in $(ls $dir); do
-    if [[ $repo == $project ]]; then
-      echo "granting $proj_lead read write access to $(basename $dir)/$project"
-      setfacl d:u:$proj_lead:rwx,u:$proj_lead:rwx $dir/$project
-      added=true
-    fi
+if [[ -d `realpath $project` ]]; then #full path provided
+  project=`realpath $project`
+  echo "granting $proj_lead read write access to $project"
+  setfacl d:u:$proj_lead:rwx,u:$proj_lead:rwx $project
+  added=true
+else #search for project name in lab folders
+  for dir in $DATA_PATH $TOOL_PATH $ANA_PATH; do
+    for repo in $(ls $dir); do
+      if [[ $repo == $project ]]; then
+        echo "granting $proj_lead read write access to $(basename $dir)/$project"
+        setfacl d:u:$proj_lead:rwx,u:$proj_lead:rwx $dir/$project
+        added=true
+      fi
+    done
   done
-done
+fi
 
 if [[ $added == "" ]]; then echo "project $project not found, $proj_lead not added" && exit 2; fi
