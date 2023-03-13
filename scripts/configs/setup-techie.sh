@@ -26,9 +26,5 @@ crontab -l | { cat; echo "0 0 * * 3 /home/data/NDClab/tools/lab-devOps/scripts/b
 
 # add umask
 
-echo 'umask g+w' >> ~/.bashrc
 echo 'umask u+x' >> ~/.bashrc
 echo 'cd /home/data/NDClab' >> ~/.bashrc
-
-# make sure that rm confirms before deleting
-alias rm='rm -i'
