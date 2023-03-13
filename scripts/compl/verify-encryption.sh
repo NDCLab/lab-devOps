@@ -1,16 +1,11 @@
 #!/bin/bash
 
 DATA_PATH="/home/data/NDClab/datasets"
-
-ZOOM_PATH="sourcedata/raw/zoom"
-AUDIO_PATH="sourcedata/raw/audio"
-VID_PATH="sourcedata/raw/video"
-CHECKED_PATH="sourcedata/checked"
 TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts/configs"
 LOG_PATH="/home/data/NDClab/other/logs/encrypt-checks"
-#exts_to_check=("mp3" "mp4" "m4a" "wav" "Model.jpg" "Model.obj" "Model.mtl")
-paths_to_check='^(raw/([Zz][Oo][Oo][Mm]|[Aa][Uu][Dd][Ii][Oo]|[Vv][Ii][Dd][Ee][Oo])|checked)$'
-exts_to_check='(.*mp3.*|.*mp4.*|.*m4a.*|.*wav.*|.*[mM]odel\.jpg.*|.*[mM]odel\.obj.*|.*[mM]odel\.mtl.*)'
+
+paths_to_check='^(raw|checked)$'
+exts_to_check='(.*mp3.*|.*mp4.*|.*m4a.*|.*wav.*|.*png.*|.*jpg.*|.*[mM]odel\.obj.*|.*[mM]odel\.mtl.*)'
 LAB_MGR="ndclab"
 LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
 all_files=()
@@ -71,7 +66,7 @@ echo "Checking repos in datasets"
 for DIR in `ls $DATA_PATH`
 do
   file_arr=()
-  for DATA_MOD in `find $DATA_PATH/$DIR/sourcedata -maxdepth 2 -type d | cut -d"/" -f8-`
+  for DATA_MOD in `find $DATA_PATH/$DIR/sourcedata -maxdepth 1 -type d | cut -d"/" -f8-`
   do
     if [[ "$DATA_MOD" =~ $paths_to_check ]]; then
         echo "Validating $DIR/sourcedata/$DATA_MOD encryption"
