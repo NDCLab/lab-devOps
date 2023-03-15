@@ -33,12 +33,17 @@ if [[ $proj == "" ]]; then
     done
   done
 else
-  for dir in $dpath $apath $tpath; do
-    for repo in `ls $dir`; do
-      if [[ "$proj" =~ .*"$repo".* ]]; then
-        echo "removing $id from $repo"
-        setfacl -Rx u:$id,d:u:$id "${dir}/${repo}"
-      fi
+  if [[ -d $proj ]]; then # if full path specified
+    echo "removing $id from $repo"
+    setfacl -Rx u:$id,d:u:$id $proj
+  else
+    for dir in $dpath $apath $tpath; do
+      for repo in `ls $dir`; do
+        if [[ "$proj" =~ .*"$repo".* ]]; then
+          echo "removing $id from $repo"
+          setfacl -Rx u:$id,d:u:$id "${dir}/${repo}"
+        fi
+      done
     done
-  done
+  fi
 fi
