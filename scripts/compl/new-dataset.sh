@@ -16,15 +16,27 @@ LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
 b_group=$(cat $LAB_USERS_TXT)
 b_group=(${b_group//,/ })
 
-for DIR in $dpath $apath $tpath; do
-  if [[ "$DIR" == "$repo" ]]; then
-    for user in ${b_group[@]}; do
-      setfacl -Rm u:$user:r-x,d:u:$user:r-x "$DIR"/"$repo"
-      for priv in "sourcedata" "derivatives"; do
-        if [[ -d $DIR/$repo/$priv ]]; then
-          setfacl -Rm u:$user:---,d:u:$user:--- "$DIR"/"$repo"
-        fi
+if [[ -d $repo ]]; then
+      for user in ${b_group[@]}; do
+        setfacl -Rm u:$user:r-x,d:u:$user:r-x "$repo"
+        for priv in "sourcedata" "derivatives"; do
+          if [[ -d $repo/$priv ]]; then
+            setfacl -Rm u:$user:---,d:u:$user:--- $repo/$priv
+          fi
+        done
       done
-    done
-  fi
-done
+
+else
+  for DIR in $dpath $apath $tpath; do
+    if [[ "$DIR" == "$repo" ]]; then
+      for user in ${b_group[@]}; do
+        setfacl -Rm u:$user:r-x,d:u:$user:r-x $DIR/$repo
+        for priv in "sourcedata" "derivatives"; do
+          if [[ -d $DIR/$repo/$priv ]]; then
+            setfacl -Rm u:$user:---,d:u:$user:--- $DIR/$repo/$priv
+          fi
+        done
+      done
+    fi
+  done
+fi
