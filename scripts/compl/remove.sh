@@ -9,8 +9,8 @@ if [[ $# -eq 0 ]]; then usage; fi
 while getopts "p:" opt; do
   case "${opt}" in
     p)
-      proj=${OPTARG}
-      proj=${proj//,/ }
+      projects=${OPTARG}
+      projects=${projects//,/ }
       ;;
     *)
       usage
@@ -24,7 +24,7 @@ dpath="/home/data/NDClab/datasets"
 apath="/home/data/NDClab/analyses"
 tpath="/home/data/NDClab/tools"
 
-if [[ $proj == "" ]]; then
+if [[ $projects == "" ]]; then
   # remove from all repo ACL's
   for dir in $dpath $apath $tpath; do
     for repo in `ls $dir`; do
@@ -33,17 +33,19 @@ if [[ $proj == "" ]]; then
     done
   done
 else
-  if [[ -d $proj ]]; then # if full path specified
-    echo "removing $id from $repo"
-    setfacl -Rx u:$id,d:u:$id $proj
-  else
-    for dir in $dpath $apath $tpath; do
-      for repo in `ls $dir`; do
-        if [[ "$proj" =~ .*"$repo".* ]]; then
-          echo "removing $id from $repo"
-          setfacl -Rx u:$id,d:u:$id "${dir}/${repo}"
-        fi
+  for proj in $projects; do
+    if [[ -d $proj ]]; then # if full path specified
+      echo "removing $id from $repo"
+      setfacl -Rx u:$id,d:u:$id $proj
+    else
+      for dir in $dpath $apath $tpath; do
+        for repo in `ls $dir`; do
+          if [[ "$proj" =~ .*"$repo".* ]]; then
+            echo "removing $id from $repo"
+            setfacl -Rx u:$id,d:u:$id "${dir}/${repo}"
+          fi
+        done
       done
-    done
-  fi
+    fi
+  done
 fi
