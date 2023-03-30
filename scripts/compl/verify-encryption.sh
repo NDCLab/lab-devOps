@@ -30,22 +30,25 @@ function search_dir
     #for FILE in `find $DIR -type f \( -name "*.mp3*" -o -name "*.mp4*" \
         #-o -name "*.m4a*" -o -name "*.wav*" -o -name "*Model.jpg*" -o -name "*Model.obj*" \
         #-o -name "*.Model.mtl*" \)`; do
-    for FILE in `find $SUBDIR -type f -regextype posix-extended -regex $exts_to_check`; do
-        check_encryption $FILE
+    #for FILE in `find $SUBDIR -type f -regextype posix-extended -regex $exts_to_check`; do
+        #check_encryption "$FILE"
+    find $SUBDIR -type f -regextype posix-extended -regex $exts_to_check -exec sh -c 'for f do \
+        check_encryption "$f"
+        done' sh {} \;
         if [[ $? == 255 ]]; then return 255; fi
-    done
 }
 
 function check_encryption
 {
-        local FILE=$1
-        if [[ $2 == "" ]]; then FILEPATH=$FILE; else FILEPATH=$2; fi
-        ENCRYPT_MSG=$(gpg --list-only $FILE 2>&1)
-        if [[ "$ENCRYPT_MSG" =~ "gpg: encrypted with 1 passphrase" ]]; then
+        local FILE="$1"
+        unset ERR_FLAG
+        if [[ $2 == "" ]]; then FILEPATH="$FILE"; else FILEPATH="$2"; fi
+        ENCRYPT_MSG=$(gpg --list-only "$FILE" 2>&1) || ERR_FLAG=true
+        if [[ "$ENCRYPT_MSG" =~ "gpg: encrypted" ]]; then
             echo "$FILE encrypted"
-        elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" ]]; then
+        elif [[ "$ENCRYPT_MSG" =~ "gpg: no valid OpenPGP data found" || "$ENCRYPT_MSG" =~ .*"packet".*"with unknown version".* ]]; then
             echo "$FILE NOT ENCRYPTED. Listing file info below:"
-            getfacl $FILE
+            getfacl "$FILE"
             PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
             # check if listed project lead belongs to group
             ver_result=$(verify_lead $PROJ_LEAD)
@@ -58,9 +61,10 @@ function check_encryption
             echo "$FILEPATH is not encrypted" | mail -s "Encrypt Check Failed in \"$DIR\"" "$email"
             file_arr+=("$FILEPATH")
         else
-          echo "Not applicable (dir may be empty). Skipping"
+          echo "Not applicable, skipping. Error message: $ENCRYPT_MSG"
         fi
 }
+export -f check_encryption
 
 echo "Checking repos in datasets"
 for DIR in `ls $DATA_PATH`
@@ -86,10 +90,10 @@ do
               #if [[ ${exts_to_check[@]} =~ $ext1 || ${exts_to_check[@]} =~ $ext2 ]]; then
               if [[ $ext1 =~ $exts_to_check || $ext2 =~ $exts_to_check ]]; then
                 unzip $ZIP $filename -d "$tmpdir"
-              fi
-              check_encryption "$tmpdir/$filename" "$ZIP/$filename"
-              if [[ $? -eq 255 ]]; then
-                  echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR" && continue 4
+                check_encryption "$tmpdir/$filename" "$ZIP/$filename"
+                if [[ $? -eq 255 ]]; then
+                    echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR" && continue 4
+                fi
               fi
               # check zips inside zip# getting convoluted but should work?
               if [[ $ext2 == "zip" ]]; then
