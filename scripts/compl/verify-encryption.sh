@@ -78,10 +78,11 @@ do
         if [[ $? -eq 255 ]]; then
             echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR" && continue 2
         fi
-        for ZIP in `find $DATA_PATH/$DIR/sourcedata/$DATA_MOD -name "*.zip"`; do
+        while IFS= read -r -d '' ZIP; do
+        #for ZIP in `find $DATA_PATH/$DIR/sourcedata/$DATA_MOD -name "*.zip"`; do
             #tmpdir="$(basename $ZIP)_tmp" # dir to extract files in zip to
             tmpdir=$(mktemp -d -p $PWD) # dir to extract files in zip to
-            IFS=$'\n' zipfiles=($(unzip -l $ZIP)) && unset IFS
+            IFS=$'\n' zipfiles=($(unzip -l "$ZIP")) && unset IFS
             arr_len=${#zipfiles[@]}
             for i in $(seq 3 $(($arr_len-3))); do
               filename=$(echo ${zipfiles[$i]} | awk '{print $NF}')
@@ -89,7 +90,7 @@ do
               ext2=$(echo $filename | awk -F. '{print $NF}')
               #if [[ ${exts_to_check[@]} =~ $ext1 || ${exts_to_check[@]} =~ $ext2 ]]; then
               if [[ $ext1 =~ $exts_to_check || $ext2 =~ $exts_to_check ]]; then
-                unzip $ZIP $filename -d "$tmpdir"
+                unzip "$ZIP" "$filename" -d "$tmpdir"
                 check_encryption "$tmpdir/$filename" "$ZIP/$filename"
                 if [[ $? -eq 255 ]]; then
                     echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR" && continue 4
@@ -97,16 +98,16 @@ do
               fi
               # check zips inside zip# getting convoluted but should work?
               if [[ $ext2 == "zip" ]]; then
-                unzip $ZIP $filename -d "$tmpdir"
+                unzip "$ZIP" "$filename" -d "$tmpdir"
                 mkdir -p "$tmpdir/${filename%.*}"
                 # extract <firstzip.zip>/<secondzip.zip>/file.mp3 to tmpdir/secondzip folder
-                IFS=$'\n' zipfiles2=($(unzip -l $tmpdir/$filename)) && unset IFS
+                IFS=$'\n' zipfiles2=($(unzip -l "$tmpdir/$filename")) && unset IFS
                 for i in $(seq 3 $((${#zipfiles2[@]}-3))); do
                   filename2=$(echo ${zipfiles2[$i]} | awk '{print $NF}')
                   ext1=$(echo $filename2 | awk -F. '{print $(NF-1)}')
                   ext2=$(echo $filename2 | awk -F. '{print $NF}')
                   if [[ $ext1 =~ $exts_to_check || $ext2 =~ $exts_to_check ]]; then
-                    unzip $tmpdir/$filename $filename2 -d "$tmpdir/${filename%.*}"
+                    unzip "$tmpdir/$filename" "$filename2" -d "$tmpdir/${filename%.*}"
                     check_encryption "$tmpdir/${filename%.*}/$filename2" "$ZIP/$filename/$filename2"
                     if [[ $? -eq 255 ]]; then
                         echo "$PROJ_LEAD not listed in hpc_gbuzzell. Skipping $DIR" && continue 5
@@ -116,7 +117,7 @@ do
               fi
             done
             rm -r $tmpdir
-        done
+        done < <(find $DATA_PATH/$DIR/sourcedata/$DATA_MOD -name "*.zip" -print0)
     fi
   done
   if [ "${#file_arr[@]}" -gt 0 ]
