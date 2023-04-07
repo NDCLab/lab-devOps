@@ -132,7 +132,7 @@ done
 
 #unencrypted_files=$(echo ${file_arr[@]} | grep "UNENCRYPTED" awk '{print $2}')
 # Check last week's log file
-last_week=`date -d "3 days ago" +%m_%d_%Y`
+last_week=`date -d "1 days ago" +%m_%d_%Y`
 for log in $(ls $LOG_PATH/$last_week* 2>/dev/null); do
     files=$(cat $log | grep "UNENCRYPTED" | awk '{print $2}')
     for file in $files; do
