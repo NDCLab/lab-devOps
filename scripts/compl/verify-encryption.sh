@@ -6,8 +6,9 @@ LOG_PATH="/home/data/NDClab/other/logs/encrypt-checks"
 
 paths_to_check='^(raw|checked)$'
 exts_to_check='(.*mp3.*|.*mp4.*|.*m4a.*|.*wav.*|.*png.*|.*jpg.*|.*[mM]odel\.obj.*|.*[mM]odel\.mtl.*)'
-LAB_MGR="ndclab"
 LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
+LAB_MGR="ndclab"
+LAB_TECH=$(grep "technician" $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
 all_files=()
 
 function verify_lead
@@ -56,12 +57,28 @@ function check_encryption
               return 255
             fi
             # email project lead on failed encryption check
-            email="${PROJ_LEAD}"@fiu.edu
-            echo "emailing $DIR:$email"
-            echo "$FILEPATH is not encrypted" | mail -s "Encrypt Check Failed in \"$DIR\"" "$email"
+            email_lead="${PROJ_LEAD}"@fiu.edu
+            echo "emailing $DIR:$email_lead"
+            echo "$FILEPATH is not encrypted. It must be encrypted immediately. Please contact the lab manager once corrected to confirm." | mail -s "Encrypt Check Failed in \"$DIR\"" "$email_lead"
             file_arr+=("$FILEPATH")
         else
-          echo "Not applicable, skipping. Error message: $ENCRYPT_MSG"
+            echo "New encrypt msg seen for $FILEPATH: $ENCRYPT_MSG. Listing file info below:"
+            getfacl "$FILE"
+            PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
+            # check if listed project lead belongs to group
+            ver_result=$(verify_lead $PROJ_LEAD)
+            if [ "$ver_result" == "false" ]; then
+              return 255
+            fi
+            # email project lead on failed encryption check
+            email_lead="${PROJ_LEAD}"@fiu.edu
+            echo "emailing $DIR:$email_lead"
+            echo "$FILEPATH is not encrypted. It must be encrypted immediately. Please contact the lab manager once corrected to confirm. \
+            If the file appears to be properly encrypted, contact the lab manager." | mail -s "Encrypt Check Failed in \"$DIR\"" "$email_lead"
+            echo "emailing $LAB_TECH & $LAB_MGR"
+            echo "New encrypt msg seen for $FILEPATH: $ENCRYPT_MSG" | mail -s "Encrypt Check Failed in \"$DIR\"" "$LAB_TECH"@fiu.edu
+            echo "New encrypt msg seen for $FILEPATH: $ENCRYPT_MSG" | mail -s "Encrypt Check Failed in \"$DIR\"" "$LAB_MGR"@fiu.edu
+            file_arr+=("$FILEPATH")
         fi
 }
 export -f check_encryption
