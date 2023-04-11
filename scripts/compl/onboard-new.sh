@@ -12,6 +12,7 @@ DATA_PATH=/home/data/NDClab/datasets
 TOOL_PATH=/home/data/NDClab/tools
 ANA_PATH=/home/data/NDClab/analyses
 
+setfacl -Rm d:u:$ID:r-x,u:$ID:r-x /home/data/NDClab
 for dir in $DATA_PATH $TOOL_PATH $ANA_PATH
   do
   for repo in $(ls $dir)
