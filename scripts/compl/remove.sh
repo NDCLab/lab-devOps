@@ -23,15 +23,20 @@ id=${@:$OPTIND:1}
 dpath="/home/data/NDClab/datasets"
 apath="/home/data/NDClab/analyses"
 tpath="/home/data/NDClab/tools"
+opath="/home/data/NDClab/other"
+lpath="/home/data/NDClab/legacy"
 
 if [[ $projects == "" ]]; then
   # remove from all repo ACL's
-  for dir in $dpath $apath $tpath; do
+  for dir in $dpath $apath $tpath $opath $lpath; do
     for repo in `ls $dir`; do
       echo "removing $id from $repo"
       setfacl -Rx u:$id,d:u:$id "${dir}/${repo}"
     done
+    setfacl -x u:$id,d:u:$id /home/data/NDClab/$dir
   done
+  setfacl -x u:$id,d:u:$id /home/data/NDClab
+  #setfacl -Rx u:$id,d:u:$id /home/data/NDClab #alternatively
 else
   for proj in $projects; do
     if [[ -d $proj ]]; then # if full path specified
