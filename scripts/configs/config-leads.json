@@ -4,15 +4,15 @@
     "mfe-online-dataset": "khoss005",
     "oops-faces-dataset": "emart459",
     "putt-putt-dataset": "smaly002",
-    "social-context-dataset": "jalexand",
-    "social-context-beta-dataset": "jalexand",
-    "social-context-gamma-dataset": "jalexand",
-    "missing-link-dataset": "jalexand",
-    "rwe-dataset": "jalexand",
-    "rwe-eeg-dataset": "jalexand",
-    "readAloud-valence-dataset": "jalexand",
+    "social-context-dataset": "ndclab",
+    "social-context-beta-dataset": "ndclab",
+    "social-context-gamma-dataset": "ndclab",
+    "missing-link-dataset": "ndclab",
+    "rwe-dataset": "ndclab",
+    "rwe-eeg-dataset": "ndclab",
+    "readAloud-valence-dataset": "ndclab",
     "social-flanker-eeg-dataset": "apoly003",
     "thrive-dataset": "gbuzzell",
     "technician": "dhunt",
-    "lab-manager": "jalexand"
+    "lab-manager": "ndclab"
 }
