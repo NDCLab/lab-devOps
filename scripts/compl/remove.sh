@@ -33,7 +33,7 @@ if [[ $projects == "" ]]; then
       echo "removing $id from $repo"
       setfacl -Rx u:$id,d:u:$id "${dir}/${repo}"
     done
-    setfacl -x u:$id,d:u:$id /home/data/NDClab/$dir
+    setfacl -x u:$id,d:u:$id "${dir}"
   done
   setfacl -x u:$id,d:u:$id /home/data/NDClab
   #setfacl -Rx u:$id,d:u:$id /home/data/NDClab #alternatively
