@@ -55,9 +55,8 @@ function check_encryption
             getfacl "$FILE"
             PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
             # check if project lead listed in json
-
-            # email project lead on failed encryption check
             if [[ ! $PROJ_LEAD == "" ]]; then
+            # email project lead on failed encryption check
                 email_lead="${PROJ_LEAD}"@fiu.edu
                 echo "emailing $DIR:$email_lead"
                 echo "$FILEPATH is not encrypted. It must be encrypted immediately. Please contact the lab manager once corrected to confirm. " \
