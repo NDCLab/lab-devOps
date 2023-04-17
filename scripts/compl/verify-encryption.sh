@@ -11,20 +11,6 @@ LAB_MGR="ndclab"
 LAB_TECH=$(grep "technician" $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
 all_files=()
 
-function verify_lead
-{
-    if [[ $1 == "" ]]; then echo "false" && return; fi
-    b_group=$(cat $LAB_USERS_TXT)
-    b_group=(${b_group//,/ })
-    for i in "${b_group[@]}"
-    do
-        if [ $i == $1 ]; then
-            echo "true" && return
-        fi
-    done
-    echo "false"
-}
-
 function search_dir
 {
     local SUBDIR=$1
@@ -51,33 +37,34 @@ function check_encryption
             echo "$FILE NOT ENCRYPTED. Listing file info below:"
             getfacl "$FILE"
             PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
-            # check if listed project lead belongs to group
-            ver_result=$(verify_lead $PROJ_LEAD)
-            if [ "$ver_result" == "false" ]; then
-              return 255
+            # check if project lead listed in json
+            if [[ ! $PROJ_LEAD == "" ]]; then
+                # email project lead on failed encryption check
+                email_lead="${PROJ_LEAD}"@fiu.edu
+                echo "emailing $DIR:$email_lead"
+                echo "$FILEPATH is not encrypted. It must be encrypted immediately. Please contact the lab manager once corrected to confirm." | mail -s "Encrypt Check Failed in \"$DIR\"" "$email_lead"
+                file_arr+=("$FILEPATH")
+            else
+                # can't find project lead, emailing lab mgr & lab tech
+                echo "emailing $LAB_MGR & $LAB_TECH re:$DIR"
+                echo "$FILEPATH is not encrypted, project lead for $DIR not found in config-leads.json" | mail -s "Encrypt Check failed in \"$DIR\"" "$LAB_MGR@fiu.edu","$LAB_TECH@fiu.edu"
+                file_arr+=("$FILEPATH")
             fi
-            # email project lead on failed encryption check
-            email_lead="${PROJ_LEAD}"@fiu.edu
-            echo "emailing $DIR:$email_lead"
-            echo "$FILEPATH is not encrypted. It must be encrypted immediately. Please contact the lab manager once corrected to confirm." | mail -s "Encrypt Check Failed in \"$DIR\"" "$email_lead"
-            file_arr+=("$FILEPATH")
         else
             echo "New encrypt msg seen for $FILEPATH: $ENCRYPT_MSG. Listing file info below:"
             getfacl "$FILE"
             PROJ_LEAD=$(grep "$DIR"\".* $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
-            # check if listed project lead belongs to group
-            ver_result=$(verify_lead $PROJ_LEAD)
-            if [ "$ver_result" == "false" ]; then
-              return 255
-            fi
+            # check if project lead listed in json
+
             # email project lead on failed encryption check
-            email_lead="${PROJ_LEAD}"@fiu.edu
-            echo "emailing $DIR:$email_lead"
-            echo "$FILEPATH is not encrypted. It must be encrypted immediately. Please contact the lab manager once corrected to confirm. \
-            If the file appears to be properly encrypted, contact the lab manager." | mail -s "Encrypt Check Failed in \"$DIR\"" "$email_lead"
+            if [[ ! $PROJ_LEAD == "" ]]; then
+                email_lead="${PROJ_LEAD}"@fiu.edu
+                echo "emailing $DIR:$email_lead"
+                echo "$FILEPATH is not encrypted. It must be encrypted immediately. Please contact the lab manager once corrected to confirm. " \
+                "If the file appears to be properly encrypted, contact the lab manager." | mail -s "Encrypt Check Failed in \"$DIR\"" "$email_lead"
+            fi
             echo "emailing $LAB_TECH & $LAB_MGR"
-            echo "New encrypt msg seen for $FILEPATH: $ENCRYPT_MSG" | mail -s "Encrypt Check Failed in \"$DIR\"" "$LAB_TECH"@fiu.edu
-            echo "New encrypt msg seen for $FILEPATH: $ENCRYPT_MSG" | mail -s "Encrypt Check Failed in \"$DIR\"" "$LAB_MGR"@fiu.edu
+            echo "New encrypt msg seen for $FILEPATH: $ENCRYPT_MSG. Follow up with project lead: ${PROJ_LEAD:-unknown}" | mail -s "Encrypt Check Failed in \"$DIR\"" "$LAB_MGR"@fiu.edu,"$LAB_TECH"@fiu.edu
             file_arr+=("$FILEPATH")
         fi
 }
