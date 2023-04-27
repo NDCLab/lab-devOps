@@ -1,14 +1,14 @@
 #!/bin/bash
 
 DATA_PATH="/home/data/NDClab/datasets"
-TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts/configs"
+export TOOL_PATH="/home/data/NDClab/tools/lab-devOps/scripts/configs"
 LOG_PATH="/home/data/NDClab/other/logs/encrypt-checks"
 
 paths_to_check='^(raw|checked)$'
 exts_to_check='(.*mp3.*|.*mp4.*|.*m4a.*|.*wav.*|.*png.*|.*jpg.*|.*[mM]odel\.obj.*|.*[mM]odel\.mtl.*)'
 LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
-LAB_MGR="ndclab"
-LAB_TECH=$(grep "technician" $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
+export LAB_MGR="ndclab"
+export LAB_TECH=$(grep "technician" $TOOL_PATH/config-leads.json | cut -d":" -f2 | tr -d '"",')
 all_files=()
 
 function search_dir
@@ -73,6 +73,7 @@ echo "Checking repos in datasets"
 for DIR in `ls $DATA_PATH`
 do
   file_arr=()
+  export DIR
   for DATA_MOD in `find $DATA_PATH/$DIR/sourcedata -maxdepth 1 -type d | cut -d"/" -f8-`
   do
     if [[ "$DATA_MOD" =~ $paths_to_check ]]; then
