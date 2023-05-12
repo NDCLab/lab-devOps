@@ -3,7 +3,7 @@
 # folder into a spreasheet for easy viewing/manipulation in Excel.
 
 IFS=$'\n'
-OUT_CSV="lab_permissions.csv_`date +"%m_%d_%Y::%H:%M:%S"`"
+OUT_CSV="lab_permissions_`date +"%m_%d_%Y::%H:%M:%S"`".csv
 PARENT_DIR=/home/data/NDClab
 
 function write_to_csv
@@ -16,7 +16,8 @@ function write_to_csv
                 user=$(echo $line | cut -d":" -f2)
                 perm=$(echo $line | cut -d":" -f3)
                 #echo "$folder,$user,$perm" >> $OUT_CSV
-                echo "$folder,$user,$perm"
+                #echo "$folder,$user,$perm"
+                echo "\"$folder\",$user,$perm"
             fi
         done
     done
