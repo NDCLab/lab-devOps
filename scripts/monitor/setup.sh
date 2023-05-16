@@ -25,6 +25,7 @@ if [ "$1" = "-t" ]; then
     project=$2
     datatypes=$3
     id=$4
+    ntasksdatamismatch=$5
     echo "Setting up central tracker"
     python "${labpath}/gen-tracker.py" "${project}${datam_path}/central-tracker_${project::-1}.csv" $id $project
     chmod +x "${project}/${datam_path}/central-tracker_${project::-1}.csv"
@@ -32,6 +33,7 @@ else
     project=$1
     datatypes=$2
     id=$3
+    ntasksdatamismatch=$4
 fi
 
 # get tasks
@@ -68,7 +70,7 @@ if [ -f "${project}/${datam_path}/hallMonitor.sub" ]; then
     rm -f "${project}/${datam_path}/hallMonitor.sub"
 fi
 # set up hallMonitor sh file with preset tasks instead of simply copying
-sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $datatypes $tasks
+sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $datatypes $tasks $ntasksdatamismatch
 # sets up hallMonitor sub file without any default mapping or replacement
 cp "${labpath}/template/hallMonitor.sub" "${project}/${datam_path}"
 

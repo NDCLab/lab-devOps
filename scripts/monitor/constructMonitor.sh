@@ -4,6 +4,7 @@
 projpath=$1
 filetypes=$2
 tasks=$3
+ntasksdatamismatch=$4
 
 # write out hallMonitor file with template strings
 cat <<EOF >> "${projpath}/data-monitoring/hallMonitor.sh"
@@ -14,6 +15,8 @@ IFS=$'\n'
 dataset="${projpath}"
 tasks="${tasks}"
 filetypes="${filetypes}"
+ntasksdatamismatch="${ntasksdatamismatch}"
+[[ \$ntasksdatamismatch == "-n" ]] && ignore_mismatch_err="true"
 logfile="\${dataset}data-monitoring/data-monitoring-log.md"
 
 # load in functions & variables
@@ -22,8 +25,11 @@ source /home/data/NDClab/tools/lab-devOps/scripts/monitor/tools.sh
 usage() { echo "Usage: sh hallMonitor.sh [-m/-r] [string list of replacement or mapping]" 1>&2; exit 1; }
 
 error_detected=false
-for dir in \`ls \$raw\`
+dirs=\$(find \$raw -maxdepth 1 -type d -printf "%f ")
+unset IFS
+for dir in \${dirs}
 do
+    IFS=\$'\n' #not sure if this is necessary
     # If psychopy or pavlovia dataset
     if [[ \${pavpsy[*]} =~ \$dir ]]; then
         echo "Accessing \$raw/\$dir"
@@ -65,28 +71,11 @@ do
                 echo -e "\\t \${GREEN}Success. All data passes checks in \$subject.\${NC}"
             fi
         done
-        echo -e "\\n"
-        # update tracker for each id
-        output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${dir}" \$dir \$dataset \$tasks)
-        if [[ "\$output" =~ "Error" ]]; then
-            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
-            error_detected=true
-        fi
-        echo \$output
-        echo -e "\\n"             
+        echo -e "\\n"            
     fi
     # If zoom, audio, or video dataset
     if [[ \${audivid[*]} =~ \$dir ]]; then
-        echo "Accessing \$raw/\$dir"
-        # update tracker for each id
-        output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${dir}" \$dir \$dataset)
-        if [[ "\$output" =~ "Error" ]]; then
-            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
-            error_detected=true
-            continue
-        fi
-        echo \$output
-        echo -e "\\n"
+        :
     fi
     # If redcap dataset
     if [ "\$dir" == "\$redcap" ]; then
@@ -129,16 +118,6 @@ do
                 :)
             esac 
         done
-
-        # update tracker
-        output=\$( python \${dataset}data-monitoring/update-tracker.py \$file_name \$dir \$dataset)
-        if [[ "\$output" =~ "Error" ]]; then
-            echo -e "\\t \$output \\n \\t \${RED}Error detected in \$file_name.\${NC}"
-            error_detected=true
-            continue
-        fi
-        echo \$output
-        echo -e "\\n"
     fi
     if [[ \${eegtype[*]} =~ \$dir ]]; then
         # if no bidsish dataset exists in checked, create
@@ -162,7 +141,7 @@ do
 
             echo -e "\\t Checking files of \$raw/\$dir/\$subject"
             cd \$raw/\$dir/\$subject
-            files_log=\$(verify_copy_bids_files \$dir \$subject \$tasks \$filetypes)
+            files_log=\$(verify_copy_bids_files \$dir \$subject \$tasks \$filetypes \$ignore_mismatch_err)
             res=\$?
             if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
                 echo -e "\$files_log"
@@ -173,18 +152,17 @@ do
                 echo -e "\$files_log"
                 echo -e "\\t \${GREEN}Success. All data passes checks in \$subject.\${NC}"
             fi
-
         done
-        output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/\${eeg}" \$dir \$dataset)
-        if [[ "\$output" =~ "Error" ]]; then
-            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \$dir data.\${NC}"
-            error_detected=true
-            continue
-        fi
-        echo \$output
-        echo -e "\\n"
     fi
-done        
+done
+
+# update trackers
+output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/" \${dirs// /,} \$dataset \$raw/redcap/\$file_name \$tasks)
+        if [[ "\$output" =~ "Error" ]]; then
+            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \${dirs// /,} data.\${NC}"
+            error_detected=true
+        fi
+
 cd \${dataset}data-monitoring/
 if [ \$error_detected = true ]; then
     update_log "error" \$logfile
