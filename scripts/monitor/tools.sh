@@ -22,7 +22,7 @@ redcap="redcap"
 # consts of data required 
 
 # create paths according to dataset
-raw="${dataset}sourcedata/raw"
+raw="${dataset}/sourcedata/raw"
 check="${dataset}/sourcedata/checked"
 
 # A function to update the data monitoring log markdown file. Logfile must be created before running
@@ -158,7 +158,7 @@ function verify_copy_pavpsy_files {
             continue
         fi
         # check if file contains only valid id's
-        output=$( python ${dataset}data-monitoring/check-id.py $id "${raw}/${dir}/${subject}${file_name}" )
+        output=$( python ${dataset}/data-monitoring/check-id.py $id "${raw}/${dir}/${subject}${file_name}" )
         if [[ "\$output" =~ "False" ]]; then
             echo -e "\\t ${RED}Error: ID mismatch in $file_name. Not equal to $id.${NC}"
             continue
