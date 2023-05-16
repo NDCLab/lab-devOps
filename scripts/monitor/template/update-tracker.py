@@ -53,22 +53,22 @@ if __name__ == "__main__":
     ids = [id for id in tracker_df.index]
     subjects = []
     
-    if "redcap" in data_types:  
-        file_df = pd.read_csv(redcap_path, index_col="record_id")
+    if "redcap" in data_types: 
+        rc_df = pd.read_csv(redcap_path, index_col="record_id")
         # If hallMonitor passes "redcap" arg, data exists and passed checks 
-        for index, row in file_df.iterrows():
+        for index, row in rc_df.iterrows():
             id = int(row.name)
             if id not in tracker_df.index:
                 print(id, "missing in tracker file, skipping")
                 continue 
             # check for part. consent
-            if file_df.loc[id, "consent_yn"]==1:
+            if rc_df.loc[id, "consent_yn"]==1:
                 tracker_df.loc[id, "consent_s1_r1_e1"] = "1"
                 subjects.append(id)
             for key, value in redcheck_columns.items():
                 try:
-                    val = file_df.loc[id, key]
-                    tracker_df.loc[id, value] = "1" if val == 2 else "0"	 
+                    val = rc_df.loc[id, key]
+                    tracker_df.loc[id, value] = "1" if val == 2 else "0"
                 except Exception as e_msg:
                     continue
         # make remaining empty values equal to 0
