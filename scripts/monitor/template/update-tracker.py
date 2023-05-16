@@ -48,7 +48,7 @@ if __name__ == "__main__":
     # extract project path from dataset
     proj_name = basename(normpath(dataset))
 
-    data_tracker_file = "{}data-monitoring/central-tracker_{}.csv".format(dataset, proj_name)
+    data_tracker_file = "{}/data-monitoring/central-tracker_{}.csv".format(dataset, proj_name)
     tracker_df = pd.read_csv(data_tracker_file, index_col="id")
     ids = [id for id in tracker_df.index]
     subjects = []

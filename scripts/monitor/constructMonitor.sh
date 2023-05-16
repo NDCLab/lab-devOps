@@ -17,7 +17,7 @@ tasks="${tasks}"
 filetypes="${filetypes}"
 ntasksdatamismatch="${ntasksdatamismatch}"
 [[ \$ntasksdatamismatch == "-n" ]] && ignore_mismatch_err="true"
-logfile="\${dataset}data-monitoring/data-monitoring-log.md"
+logfile="\${dataset}/data-monitoring/data-monitoring-log.md"
 
 # load in functions & variables
 source /home/data/NDClab/tools/lab-devOps/scripts/monitor/tools.sh
@@ -112,9 +112,9 @@ do
         while getopts ":rm" opt; do
             case \${opt} in
                 r)
-                    python \${dataset}data-monitoring/rename-cols.py \$check/\$dir/\$file_name "replace" \$2 ;;
+                    python \${dataset}/data-monitoring/rename-cols.py \$check/\$dir/\$file_name "replace" \$2 ;;
                 m)
-                    python \${dataset}data-monitoring/rename-cols.py \$check/\$dir/\$file_name "map" \$2 ;;
+                    python \${dataset}/data-monitoring/rename-cols.py \$check/\$dir/\$file_name "map" \$2 ;;
                 :)
             esac 
         done
@@ -157,13 +157,13 @@ do
 done
 
 # update trackers
-output=\$( python \${dataset}data-monitoring/update-tracker.py "\${check}/" \${dirs// /,} \$dataset \$raw/redcap/\$file_name \$tasks)
+output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}/" \${dirs// /,} \$dataset \$raw/redcap/\$file_name \$tasks)
         if [[ "\$output" =~ "Error" ]]; then
             echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \${dirs// /,} data.\${NC}"
             error_detected=true
         fi
 
-cd \${dataset}data-monitoring/
+cd \${dataset}/data-monitoring
 if [ \$error_detected = true ]; then
     update_log "error" \$logfile
 else
