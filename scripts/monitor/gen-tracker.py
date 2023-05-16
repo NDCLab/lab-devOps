@@ -14,7 +14,8 @@ if __name__ == "__main__":
         # skip header
         next(dd)
         for row in dd:
-            headers.append(row.replace(',', '|', 1).split("|")[0])
+            headers.append(row.replace(',', '|', 1).split("|")[0]) 
+            # headers.append(row.split(',')[0])
 
     # write id 1000 numbers 
     with open(filepath, "w") as file:

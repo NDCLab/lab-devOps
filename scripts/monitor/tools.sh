@@ -102,7 +102,7 @@ function verify_copy_sub {
     # copy subject over to checked directory if it doesnt exist yet
     if [ ! -d "${check}/${folder}/${name}" ]; then
       echo -e "\\t Creating ${check}/${folder}/${name}"
-      mkdir "${check}/${folder}/${name}"
+      mkdir -p "${check}/${folder}/${name}"
     fi
     exit 0
 }
@@ -195,6 +195,7 @@ function verify_copy_bids_files {
     subject=$2
     tasks=$3
     filetypes=$4
+    ignore_mismatch_err=$5
 
     # create list of tasks if relevant
     if [[ $tasks != 0 ]]; then
@@ -202,7 +203,7 @@ function verify_copy_bids_files {
         # get length of tasks
         tasklen=$(echo "${#tasks[@]}")
     else
-        echo -e "\\t ${RED}Error: $subject folder does not contain $tasklen data files."
+        echo -e "\\t ${RED}Error: No tasks specified."
         exit 1
     fi
 
@@ -244,14 +245,13 @@ function verify_copy_bids_files {
             if [[ "$presence" == 0 ]]; then
                 echo -e "\\t ${RED}Error: digi folder missing $ext filetype.${NC}"
                 exit 1
-            fi
-
-            # copy file to checked if it does not exist already
-            if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
-                echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
-                cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
             else
-                echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
+                if [[ ! "$file_name" == "" && ! -f "$check/$eeg/$subject/$dir/$file_name" ]]; then
+                    echo -e "\\t ${RED}Can't find $file_name in $check/$eeg/$subject/$dir. ${NC}"
+                    exit 1
+                else
+                    echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
+                fi
             fi
         done
         exit 0
@@ -264,33 +264,46 @@ function verify_copy_bids_files {
         len=$(echo "${#data[@]}")
 
         # check if folder contains exact number of tasks
-        if [[ $len -ne $tasklen ]]; then
-            echo -e "\\t ${RED}Error: $subject folder does not contain $tasklen data files."
-            exit 1
+        if [[ $ignore_mismatch_err == "" ]]; then
+            if [[ $len -ne $tasklen ]]; then
+                echo -e "\\t ${RED}Error: $subject folder does not contain $tasklen data files."
+                exit 1
+            fi
+        else
+            echo -e "\\t ${GREEN}Not checking if # tasks and # data runs are 1-to-1."
         fi
-
         for i in "${!data[@]}"; do
             file_name="${data[$i]}"
             # check if file follows naming convention according to available tasks
             presence=0
-            for taskname in "${tasks[@]}"; do
-                segment=$(echo "$file_name" | grep -oP "(?<=_)($taskname)")
-                if [[ "$segment" ]]; then
-                    presence=1
-                    obs+=("$segment")
+            if [[ $ignore_mismatch_err == "" ]]; then
+                for taskname in "${tasks[@]}"; do
+                    segment=$(echo "$file_name" | grep -oP "(?<=_)($taskname)")
+                    if [[ "$segment" ]]; then
+                        presence=1
+                        obs+=("$segment")
+                    fi
+                done
+                if [[ "$presence" == 0 ]]; then
+                    echo -e "\\t ${RED}Error: Improper file name $file_name, does not meet standard${NC}"
+                    continue
                 fi
-            done
-            if [[ "$presence" == 0 ]]; then
-                echo -e "\\t ${RED}Error: Improper file name $file_name, does not meet standard${NC}"
-                continue
-            fi
-
-            # copy file to checked if it does not exist already
-            if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
-                echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
-                cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
+    
+                # copy file to checked if it does not exist already
+                if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
+                    echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
+                    cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
+                else
+                    echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
+                fi
             else
-                echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
+                presence=1
+                if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
+                    echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
+                    cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
+                else
+                    echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
+                fi
             fi
 
         done
