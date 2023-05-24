@@ -11,6 +11,7 @@
     "rwe-dataset": "ndclab",
     "rwe-eeg-dataset": "ndclab",
     "readAloud-valence-dataset": "ndclab",
+    "read-dataset": "ndclab",
     "social-flanker-eeg-dataset": "apoly003",
     "thrive-dataset": "gbuzzell",
     "technician": "dhunt",
