@@ -28,7 +28,7 @@ echo -e  "#!/bin/bash\\n
 #SBATCH --ntasks=1\\n
 #SBATCH --time=$WALLTIME\\n
 module load $SINGULARITY_MODULE\\n
-singularity exec /home/data/NDClab/tools/containers/R-4.2.2A/R-4.2.2A.simg Rscript ${file_name}" >| $sub_file
+singularity exec /home/data/NDClab/tools/containers/R/R-4.2.2B/R-4.2.2B.simg Rscript ${file_name}" >| $sub_file
 
 # Submit sub file
 echo "Submitting $sub_file as job"
