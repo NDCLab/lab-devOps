@@ -11,13 +11,9 @@ audivid=("zoom" "audio" "video")
 eegtype=("eeg" "digi")
 
 # eeg system files
-bv=("eeg" "vhdr" "vmrk") 
-egi=("mff") 
+bv_exts=("eeg" "vhdr" "vmrk") 
+egi_exts=("mff") 
 digi=("zip" "png")
-
-# singular variable names of data
-eeg="bidsish"
-redcap="redcap"
 
 # consts of data required 
 
@@ -31,78 +27,71 @@ function update_log {
     logfile=$2
     if [[ ! -f "$logfile" ]]; then
         echo "$logfile does not exist, creating."
-        touch data-monitoring-log.md
+        touch $logfile
     fi
     now=`date '+%Y-%m-%d_%T'`
     echo "${now} Data monitoring status: ${status}" >> $logfile
 }
 
-# A function to get the newest redcap file according to redcap timestamp, not file modification date.
-function get_new_redcap {
-    elements=(*)
-    time_stamp='\d{4}-\d{2}-\d{2}_\d{4}'
-    stem="^.+_DATA_${time_stamp}.csv$"
+# A function to get array of the newest redcap files according to redcap timestamp, not file modification date.
+function get_new_redcaps {
 
-    # return single instance if only one file
-    if [[ ${#elements[@]} == 1 ]]; then
-        echo ${elements[0]}
-        exit 0
-    elif [[ ${#elements[@]} == 0 ]]; then
-        echo -e "\\t ${RED}Error: Redcap data empty. Exiting.${NC}"
-        exit 1
+dir=$1
+redcaps=($(find $dir -type f -printf "%f\n"))
+time_stamp_re='\d{4}-\d{2}-\d{2}_\d{4}'
+stem_re="_DATA_${time_stamp_re}.csv$"
+
+rc_arr=()
+
+for i in ${redcaps[@]}; do
+  stem=$(echo ${i} | grep -oP $stem_re)
+  rc_arr+=(${i/$stem})
+done
+
+unique_rcs=($(for i in "${rc_arr[@]}"; do echo "$i"; done | sort -u))
+
+for i in ${unique_rcs[@]}; do
+  unset newest_time
+  for j in ${redcaps[@]}; do
+    if [[ "$j" == "$i"* ]]; then
+      file_time=$(echo "${j}" | grep -oP "$time_stamp_re")
+      if [[ $newest_time == "" || "$file_time" > "$newest_time" ]]; then
+        newest_time="$file_time"
+        newest_file="$j"
+      fi
     fi
-
-    # find newest file by comparing timestamp strings
-    newest_file="${elements[0]}"
-    newest_time=$(echo "$newest_file" | grep -oP "$time_stamp")
-    for i in "${!elements[@]}"; do
-        file_name="${elements[$i]}"
-        file_time=$(echo "$file_name" | grep -oP "$time_stamp")
-        if [[ "$file_time" > "$newest_time" ]]; then
-            newest_time=$file_time
-            newest_file=$file_name
-        fi
-    done
-
-    # check if stem is correct
-    segment=$(echo "$newest_file" | grep -oP "$stem")
-    if [[ -z "$segment" ]]; then
-        echo -e "\\t ${RED}Error: Improper stem name, does not follow convention.${NC}"
+  done
+  #echo "$i"_DATA_${newest_time}.csv
+  segment=$(echo "$newest_file" | grep -oP "$stem_re")
+  if [[ -z "$segment" ]]; then
+        echo -e "\\t ${RED}Error: Improper stem name in $newest_file, does not follow convention.${NC}"
         exit 1
-    fi
-    echo $newest_file
+  fi
+  echo "$newest_file"
+done
 }
 
 # function to get ID of NDC subject
 function get_ID {
     subject=$1
-    # get sub id
-    id="$(cut -d'-' -f2 <<<$subject)"
-    id=${id::-1}
-    echo $id
+    echo "$(cut -d'-' -f2 <<<$subject)"
 }
 
 # A function to verify if a pavlovia subject folder is named correctly. If it is, create a folder of the same name in checked.
 function verify_copy_sub {
-    folder=$1
-    name=$2
-    standard=${3:-0}
+    subj=$1
+    folder=$2
     # check if sub name contains unexpected chars
-    if [[ $standard == "bids" ]]; then
-        segment=$(echo "$folder" | grep -oP "sub-[0-9]+")
-    else
-        segment=$(echo "$name" | grep -oP "sub-[0-9]+")
-    fi
-    
+    segment=$(echo "$subj" | grep -oP "sub-[0-9]+")
     if [[ -z "$segment" ]]; then
-        echo -e "\\t ${RED}Error: Improper subject name ${folder}${name}, does not follow sub-#+ convention.${NC}"
+        echo -e "\\t ${RED}Error: Improper subject name ${subj} in ${folder}, does not follow sub-#+ convention.${NC}"
         exit 1
     fi
 
-    # copy subject over to checked directory if it doesnt exist yet
-    if [ ! -d "${check}/${folder}/${name}" ]; then
-      echo -e "\\t Creating ${check}/${folder}/${name}"
-      mkdir -p "${check}/${folder}/${name}"
+    # create subject folder in checked directory if it doesnt exist yet
+    if [ ! -d "${check}/${subj}/${folder}" ]; then
+      echo -e "\\t Creating ${check}/${subj}/${folder}"
+      mkdir -p ${check}/${subj}/${folder}
     fi
     exit 0
 }
@@ -111,18 +100,18 @@ function verify_copy_sub {
 # Takes in param id and which flankers to check for
 # TODO: combine with verify_bids_files
 function verify_copy_pavpsy_files {
-    elements=(*)
     dir=$1 
     subject=$2
     tasks=$3
+    data=($(find $raw/$dir/$subject -type f -name "*.csv" -printf "%f\n"))
 
     # create list of tasks if relevant
     if [[ $tasks != 0 ]]; then
-        tasks=($(echo $tasks | tr "," "\n"))
+        tasks=($(echo ${tasks//,/ }))
         # get length of tasks
-        tasklen=$(echo "${#tasks[@]}")
+        tasklen=${#tasks[@]}
     else
-        echo -e "\\t ${RED}Error: $subject folder does not contain $tasklen data files."
+        echo -e "\\t ${RED}Error: $subject folder does not contain $tasks data files."
         exit 1
     fi
 
@@ -131,8 +120,6 @@ function verify_copy_pavpsy_files {
     id=$(get_ID $subject)
 
     # filter according to data file
-    data=$(echo "${elements[*]}" | grep ".csv")
-    data=($data)
     len=$(echo "${#data[@]}")
 
     # check if folder contains exact tasks
@@ -141,9 +128,7 @@ function verify_copy_pavpsy_files {
         exit 1
     fi
 
-    for i in "${!data[@]}"; do
-        file_name="${data[$i]}"
-
+    for file_name in ${data[@]}; do
         # check if file follows naming convention according to available tasks
         presence=0
         for taskname in "${tasks[@]}"; do
@@ -154,22 +139,23 @@ function verify_copy_pavpsy_files {
             fi
         done
         if [[ "$presence" == 0 ]]; then
-            echo -e "\\t ${RED}Error: Improper file name $file_name, does not meet standard${NC}"
+            echo -e "\\t ${RED}Error: Improper file name $file_name, does not match any Psychopy task name from" \
+	        "data-monitoring/data-dictionary/central-tracker_datadict.csv${NC}"
             continue
         fi
         # check if file contains only valid id's
-        output=$( python ${dataset}/data-monitoring/check-id.py $id "${raw}/${dir}/${subject}${file_name}" )
+        output=$( python ${dataset}/data-monitoring/check-id.py $id "${raw}/${dir}/${subject}/${file_name}" )
         if [[ "\$output" =~ "False" ]]; then
             echo -e "\\t ${RED}Error: ID mismatch in $file_name. Not equal to $id.${NC}"
             continue
         fi
 
         # copy file to checked if it does not exist already
-        if [ ! -f "$check/$dir/$subject/$file_name" ]; then
-            echo -e "\\t ${GREEN}Copying $file_name to $check/$dir/$subject ${NC}"
-            cp $raw/$dir/$subject/$file_name $check/$dir/$subject
+        if [ ! -f "$check/$subject/$dir/$file_name" ]; then
+            echo -e "\\t ${GREEN}Copying $file_name to $check/$subject/$dir ${NC}"
+            cp $raw/$dir/$subject/$file_name $check/$subject/$dir
         else
-            echo -e "\\t $subject/$file_name already exists in checked, skipping copy"
+            echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
         fi
 
     done
@@ -190,12 +176,12 @@ function verify_copy_pavpsy_files {
 }
 
 function verify_copy_bids_files {
-    elements=(*)
     dir=$1
     subject=$2
     tasks=$3
     filetypes=$4
     ignore_mismatch_err=$5
+    files=($(find $raw/$dir/$subject -type f -printf "%f\n"))
 
     # create list of tasks if relevant
     if [[ $tasks != 0 ]]; then
@@ -210,32 +196,36 @@ function verify_copy_bids_files {
     # split filetypes into array
     filetypes=($(echo $filetypes | tr "," "\n"))
 
-    # create empty array to collect tasks observed in pavlovia folder
+    # create empty array to collect tasks observed in eeg/digi folder
     obs=()
     # get sub id
     id=$(get_ID $subject)
 
     # search for eeg system
-    if [[ $dir == "eeg" ]]; then
+    if [[ $(basename $dir) == "eeg" ]]; then
         extensions=0
         for type in "${filetypes[@]}"; do
             if [[ $type == "bv" ]]; then
-                extensions=("${bv[@]}")
+                extensions=("${bv_exts[@]}")
             elif [[ $type == "egi" ]]; then
-                extensions=("${egi[@]}")
+                extensions=("${egi_exts[@]}")
             fi
         done
         if [ $extensions = 0 ]; then
-            echo -e "\\t ${RED}Error: ${filetypes[@]} does not contain system type."
+            echo -e "\\t ${RED}Error: ${filetypes[@]} does not contain EEG files."
             exit 1
+	fi
+	if [[ ${filetypes[@]} == *eeg* && ${filetypes[@]} == *bv* ]]; then
+	    echo -e "\\t ${RED}Error: ${filetypes[@]} should not contain both EGI and BV EEG files."
+	    exit 1
         fi
-    elif [[ $dir == "digi" ]]; then
+    elif [[ $(basename $dir) == "digi" ]]; then
         # search for file with digi extensions
         presence=0
         for ext in "${digi[@]}"; do
-            for file in "${elements[@]}"; do
-                file_name=$(echo $file | grep ".${ext}.gpg");
-                if [[ "$file_name" ]]; then
+            for file in "${files[@]}"; do
+                encrypted_file=$(echo $file | grep ".${ext}.gpg");
+                if [[ "$encrypted_file" ]]; then
                     presence=1
                     break
                 fi
@@ -243,14 +233,14 @@ function verify_copy_bids_files {
 
             # if file with extension hasn't been found after iteration, exit with error
             if [[ "$presence" == 0 ]]; then
-                echo -e "\\t ${RED}Error: digi folder missing $ext filetype.${NC}"
+                echo -e "\\t ${RED}Error: digi folder missing $ext.gpg filetype.${NC}"
                 exit 1
             else
-                if [[ ! "$file_name" == "" && ! -f "$check/$eeg/$subject/$dir/$file_name" ]]; then
-                    echo -e "\\t ${RED}Can't find $file_name in $check/$eeg/$subject/$dir. ${NC}"
+                if [[ ! "$encrypted_file" == "" && ! -f "$check/$subject/$dir/$encrypted_file" ]]; then
+                    echo -e "\\t ${RED}Can't find $encrypted_file in $check/$subject/$dir, exiting. ${NC}"
                     exit 1
                 else
-                    echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
+                    echo -e "\\t $subject/$dir/$encrypted_file already exists in checked, skipping copy"
                 fi
             fi
         done
@@ -259,8 +249,11 @@ function verify_copy_bids_files {
 
     # filter according to data file
     for ext in "${extensions[@]}"; do
-        data=$(echo "${elements[*]}" | grep "\.${ext}")
-        data=($data)
+        data=()
+        for file_name in ${files[@]}; do
+            [[ $file_name == *".${ext}" ]] && data+=($file_name)
+        done
+
         len=$(echo "${#data[@]}")
 
         # check if folder contains exact number of tasks
@@ -272,8 +265,7 @@ function verify_copy_bids_files {
         else
             echo -e "\\t ${GREEN}Not checking if # tasks and # data runs are 1-to-1."
         fi
-        for i in "${!data[@]}"; do
-            file_name="${data[$i]}"
+        for file_name in "${data[@]}"; do
             # check if file follows naming convention according to available tasks
             presence=0
             if [[ $ignore_mismatch_err == "" ]]; then
@@ -288,19 +280,18 @@ function verify_copy_bids_files {
                     echo -e "\\t ${RED}Error: Improper file name $file_name, does not meet standard${NC}"
                     continue
                 fi
-    
                 # copy file to checked if it does not exist already
-                if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
-                    echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
-                    cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
+                if [ ! -f "$check/$subject/$dir/$file_name" ]; then
+                    echo -e "\\t ${GREEN}Copying $file_name to $check/$subject/$dir ${NC}"
+                    cp $raw/$dir/$subject/$file_name $check/$subject/$dir
                 else
                     echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
                 fi
             else
                 presence=1
-                if [ ! -f "$check/$eeg/$subject/$dir/$file_name" ]; then
-                    echo -e "\\t ${GREEN}Copying $file_name to $check/$eeg/$subject/$dir ${NC}"
-                    cp $raw/$dir/$subject/$file_name $check/$eeg/$subject/$dir
+                if [ ! -f "$check/$subject/$dir/$file_name" ]; then
+                    echo -e "\\t ${GREEN}Copying $file_name to $check/$subject/$dir ${NC}"
+                    cp $raw/$dir/$subject/$file_name $check/$subject/$dir
                 else
                     echo -e "\\t $subject/$dir/$file_name already exists in checked, skipping copy"
                 fi
@@ -308,6 +299,4 @@ function verify_copy_bids_files {
 
         done
     done
-
-    exit 0
 }
