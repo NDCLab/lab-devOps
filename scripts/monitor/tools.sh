@@ -7,7 +7,7 @@ NC='\033[0m'
 
 # arrays containing subsets of data
 pavpsy=("pavlovia" "psychopy")
-audivid=("zoom" "audio" "video")
+audivid=("zoom" "audio" "video" "audacity")
 eegtype=("eeg" "digi")
 
 # eeg system files
