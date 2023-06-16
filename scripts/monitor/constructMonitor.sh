@@ -108,6 +108,7 @@ do
 	    fi
 	    # If zoom, audio, or video dataset
 	    if [[ \${audivid[*]} =~ \$dir ]]; then
+                # Audio/video files should be manually copied to checked already
 		:
 	    fi
 	    # If redcap dataset

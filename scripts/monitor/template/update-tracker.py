@@ -6,7 +6,7 @@ import pathlib
 import re
 
 # list audio-vid data
-audivid = ["zoom", "audio", "video"]
+audivid = ["zoom", "audio", "video", "audacity"]
 # list pav-psy data
 pavpsy = ["pavlovia", "psychopy"]
 # list eeg systems
@@ -109,7 +109,7 @@ if __name__ == "__main__":
                 if 'parent' in redcap_path and value.startswith(tuple(parental_reports)):
                     surv_re = re.search('^([a-zA-Z]+)_([a-zA-Z]_)?(s[0-9]+_r[0-9]+_e[0-9]+)$', value)
                     surv_version = '' if not surv_re.group(2) else surv_re.group(2)
-                    value = surv_re.group(1) + '_parent_' + surv_version + surv_re.group(3)
+                    value = surv_re.group(1) + surv_version + '_parent_' + surv_re.group(3)
                     # adds "parent" to central tracker column name
 ########################################################################################
                 try:
@@ -187,9 +187,15 @@ if __name__ == "__main__":
         for data_type in list(set(data_types) & set(audivid)):
             for sub in subjects:
                 dir_id = sub
-            
-                collabel = data_type + "Data" + ses_tag
-                tracker_df.loc[dir_id, collabel] = "1" if dir_id in ids else "0"
+                if isdir(join(checked_path,'sub-'+str(dir_id),session,data_type)):
+                    for f in listdir(join(checked_path,'sub-'+str(dir_id),session,data_type)):
+                        audi_vid_re = re.match('^.*_(audio|video|zoom|audacity)_(s[0-9]+_r[0-9]+_e[0-9]+)\.zip\.gpg$',f)
+                        if audi_vid_re:
+                            tracker_df.loc[dir_id, audi_vid_re.group(1) + "Data_" + audi_vid_re.group(2)] = "1"
+
+
+                #collabel = data_type + "Data" + ses_tag
+                #tracker_df.loc[dir_id, collabel] = "1" if dir_id in ids else "0"
     
                 # make remaining empty values equal to 0
                 # tracker_df[collabel] = tracker_df[collabel].fillna("0")
@@ -211,23 +217,23 @@ if __name__ == "__main__":
             # TODO: Need better implementation here
             if "eeg" in data_types:
                 if bv_present:
-                    tracker_df.loc[dir_id, "bvData" + ses_tag] = "0"
                     if isdir(join(checked_path,'sub-'+str(dir_id),session,'eeg')):
                         for f in listdir(join(checked_path,'sub-'+str(dir_id),session,'eeg')):
-                            if re.match('^.*eeg$',f):
-                                tracker_df.loc[dir_id, "bvData" + ses_tag] = "1"
+                            eeg_re = re.match('^.*_(s[0-9]+_r[0-9]+_e[0-9]+)\.eeg$',f)
+                            if eeg_re:
+                                tracker_df.loc[dir_id, "bvData_" + eeg_re.group(1)] = "1"
                 if egi_present:
-                    tracker_df.loc[dir_id, "egiData" + ses_tag] = "0"
                     if isdir(join(checked_path,'sub-'+str(dir_id),session,'eeg')):
                         for f in listdir(join(checked_path,'sub-'+str(dir_id),session,'eeg')):
-                            if re.match('^.*mff$',f):
-                                tracker_df.loc[dir_id, "egiData" + ses_tag] = "1"
+                            eeg_re = re.match('^.*_(s[0-9]+_r[0-9]+_e[0-9]+)\.mff$',f)
+                            if eeg_re:
+                                tracker_df.loc[dir_id, "egiData_" + eeg_re.group(1)] = "1"
             if "digi" in data_types:
-                tracker_df.loc[dir_id, "digiData" + ses_tag] = "0"
                 if isdir(join(checked_path,'sub-'+str(dir_id),session,'digi')):
                     for f in listdir(join(checked_path,'sub-'+str(dir_id),session,'digi')):
-                        if re.match('^.*gpg$',f):
-                            tracker_df.loc[dir_id, "digiData" + ses_tag] = "1"
+                        digi_re = re.match('^.*_(s[0-9]+_r[0-9]+_e[0-9]+)\.zip\.gpg$',f)
+                        if digi_re:
+                            tracker_df.loc[dir_id, "digiData_" + digi_re.group(1)] = "1"
 
 
             # make remaining empty values equal to 0
