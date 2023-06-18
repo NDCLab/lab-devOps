@@ -56,7 +56,7 @@ for ses in \${ses_names[@]}
 do
 	[[ \$ses == "none" ]] && ses="" # if no session directories set ses to empty
 	dirs=(\$(find \$raw/\$ses -mindepth 1 -maxdepth 1 -type d -printf "%f\n"))
-	[[ \${dirs[*]} != *redcap* ]] && dirs+=("redcap")
+	#[[ \${dirs[*]} != *redcap* ]] && dirs+=("redcap")
 	data_types=\${dirs[*]}; data_types=\${data_types// /,}
 	for dir in \${dirs[@]}
 	do
@@ -198,20 +198,23 @@ do
 	done
 
 	echo "updating tracker, ses: \$ses, redcaps: \${redcaps[*]}"
+        command=\$(echo "echo \$raw/\${ses}redcap/{\$(echo \${redcaps[*]} | sed 's/ /,/g')}")
+        redcap_files=\$(eval \$command); redcap_files=\${redcap_files// /,} # comma separated list of redcaps in optional session folder
+        [[ \${redcaps[*]} == "" ]] && redcap_files=none
         [[ \$ses == "" ]] && ses="none"
-        for redcap_file in \${redcaps[@]}; do
+        #for redcap_file in \${redcaps[@]}; do
             if [[ \$ses == "none" ]]; then
 	        # update trackers
-	        output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$raw/redcap/\$redcap_file \$ses \$tasks \$childdata \$parental_reports)
+	        output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \$ses \$tasks \$childdata \$parental_reports)
             else
 	        ses_re='^.*'\${ses:0:-1}'.*\$'
                 #if [[ \$redcap_file =~ \${ses_re} ]]; then
-	            output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$raw/\${ses}redcap/\$redcap_file \${ses:0:-1} \$tasks \$childdata \$parental_reports)
-		    echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$raw/\${ses}redcap/\$redcap_file \${ses:0:-1} \$tasks \$childdata \$parental_reports"
+	            output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \${ses:0:-1} \$tasks \$childdata \$parental_reports)
+		    echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \${ses:0:-1} \$tasks \$childdata \$parental_reports"
                     echo \$output
 	        #fi
 	    fi
-        done
+        #done
 
 
 
