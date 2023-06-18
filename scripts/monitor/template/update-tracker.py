@@ -33,7 +33,7 @@ def get_redcap_columns(datadict):
         cols[row["variable"] + completed] = row["variable"]
         # also map Sp. surveys to same column name in central tracker if completed
         surv_match = re.search('^([a-zA-Z]+)_([a-zA-Z]_)?(s[0-9]+_r[0-9]+_e[0-9]+)$', row["variable"])
-        if surv_match and "questionnaire" in row["description"]:
+        if surv_match and "redcap_data" in row["description"]:
             surv_version = '' if not surv_match.group(2) else surv_match.group(2)
             surv_esp = surv_match.group(1) + 'es_' + surv_version + surv_match.group(3)
             cols[surv_esp + completed] = row["variable"]
@@ -44,11 +44,13 @@ if __name__ == "__main__":
     checked_path = sys.argv[1]
     data_types = sys.argv[2]
     dataset = sys.argv[3]
-    redcap_path = sys.argv[4]
+    redcaps = sys.argv[4]
     session = sys.argv[5]
     tasks = sys.argv[6]
     child = sys.argv[7]
     parental_reports = sys.argv[8]
+
+    redcaps = redcaps.split(',')
     if session == "none":
       session = ""
       ses_tag = ""
@@ -71,67 +73,87 @@ if __name__ == "__main__":
     ids = [id for id in tracker_df.index]
     subjects = []
     
-    if "redcap" in data_types: 
-        rc_df = pd.read_csv(redcap_path, index_col="record_id")
-        # If hallMonitor passes "redcap" arg, data exists and passed checks 
-        vals = pd.read_csv(redcap_path, header=None, nrows=1).iloc[0,:].value_counts()
-        # Exit if duplicate column names in redcap
-        if any(vals.values != 1):
-            dupes = []
-            for rc_col in vals.keys():
-                if vals[rc_col] > 1:
-                    dupes.append(rc_col)
-            sys.exit('Duplicate columns found in redcap: ' + ', '.join(dupes) + '. Exiting')
-        for index, row in rc_df.iterrows():
-            id = int(row.name)
-            if child == 'true':
-                if re.search('30[089](\d{4})', str(id)):
-                    child_id = '300' + re.search('30[089](\d{4})', str(id)).group(1)
-                    child_id = int(child_id)
+    if "redcap" in data_types and redcaps[0] != "none":
+        for redcap_path in redcaps:
+            rc_df = pd.read_csv(redcap_path, index_col="record_id")
+            # If hallMonitor passes "redcap" arg, data exists and passed checks 
+            vals = pd.read_csv(redcap_path, header=None, nrows=1).iloc[0,:].value_counts()
+            # Exit if duplicate column names in redcap
+            if any(vals.values != 1):
+                dupes = []
+                for rc_col in vals.keys():
+                    if vals[rc_col] > 1:
+                        dupes.append(rc_col)
+                sys.exit('Duplicate columns found in redcap: ' + ', '.join(dupes) + '. Exiting')
+            for index, row in rc_df.iterrows():
+                id = int(row.name)
+                if child == 'true':
+                    if re.search('30[089](\d{4})', str(id)):
+                        child_id = '300' + re.search('30[089](\d{4})', str(id)).group(1)
+                        child_id = int(child_id)
+                    else:
+                        print(str(id), "doesn't match expected child or parent id format of \"30{1,8, or 9}XXXX\", skipping")
+                        continue
                 else:
-                    print(str(id), "doesn't match expected child or parent id format of \"30{1,8, or 9}XXXX\", skipping")
-                    continue
-            else:
-                child_id = id
-            if child_id not in tracker_df.index:
-                print(child_id, "missing in tracker file, skipping")
-                continue 
-            subjects.append(child_id)
-            # check for part. consent
-            #if rc_df.loc[id, "consent_yn"]==1:
-            #    tracker_df.loc[id, "consent" + ses_tag] = "1"
-            #    subjects.append(id)
-            #else:
-            #    print("consent missing for " + str(id) + ", skipping")
-            #    continue
-            for key, value in redcheck_columns.items():
-######################################################## temporary solution to identifying parental self-reports ######################
-                if 'parent' in redcap_path and value.startswith(tuple(parental_reports)):
-                    surv_re = re.search('^([a-zA-Z]+)_([a-zA-Z]_)?(s[0-9]+_r[0-9]+_e[0-9]+)$', value)
-                    surv_version = '' if not surv_re.group(2) else surv_re.group(2)
-                    value = surv_re.group(1) + surv_version + '_parent_' + surv_re.group(3)
+                    child_id = id
+                if child_id not in tracker_df.index:
+                    print(child_id, "missing in tracker file, skipping")
+                    continue 
+                subjects.append(child_id)
+                # check for part. consent
+                #if rc_df.loc[id, "consent_yn"]==1:
+                #    tracker_df.loc[id, "consent" + ses_tag] = "1"
+                #    subjects.append(id)
+                #else:
+                #    print("consent missing for " + str(id) + ", skipping")
+                #    continue
+                for key, value in redcheck_columns.items():
+            ######################################################## temporary solution to identifying parental self-reports ######################
+                    if 'parent' in redcap_path and value.startswith(tuple(parental_reports)):
+                        surv_re = re.search('^([a-zA-Z]+)_([a-zA-Z]_)?(s[0-9]+_r[0-9]+_e[0-9]+)$', value)
+                        surv_version = '' if not surv_re.group(2) else surv_re.group(2)
+                        value = surv_re.group(1) + surv_version + '_parent_' + surv_re.group(3)
                     # adds "parent" to central tracker column name
-########################################################################################
-                try:
-                    val = rc_df.loc[id, key]
+            ########################################################################################
+
                     try:
-                        if tracker_df.loc[child_id, value] == "1":
-                            # if value already set continue
-                            continue
-                        else:
+                        val = rc_df.loc[id, key]
+                        try:
+                            if tracker_df.loc[child_id, value] == "1":
+                                # if value already set continue
+                                continue
+                            else:
+                                tracker_df.loc[child_id, value] = "1" if val == 2 else "0"
+                        except:
                             tracker_df.loc[child_id, value] = "1" if val == 2 else "0"
-                    except:
-                        tracker_df.loc[child_id, value] = "1" if val == 2 else "0"
-                except Exception as e_msg:
-                    continue
-        # make remaining empty values equal to 0
-        # tracker_df["redcapData_s1_r1_e1"] = tracker_df["redcapData_s1_r1_e1"].fillna("0")
-        # for measures as well
-        # for key in redcheck_columns.keys():
-        #    tracker_df[redcheck_columns[key]] = tracker_df[redcheck_columns[key]].fillna("NA") 
+                    except Exception as e_msg:
+                        continue
+
+                for session_type in ['bbs', 'iqs']:
+                    if session_type + 'parent' in redcap_path:
+                        for key, value in row.items():
+                            if key.startswith(session_type + 'paid_lang'):
+                                lang_re = re.match('^' + session_type + 'paid_lang.*(s[0-9]+_r[0-9]+(_e[0-9]+)?)', key)
+                                if lang_re:
+                                    sess = lang_re.group(1)
+                                    tracker_df.loc[child_id, 'plang' + session_type + '_' + sess] = str(value) # 1 for english 2 for sp?
+                        parentid_re = re.match('30([089])\d{4}', str(row.name))
+                        if parentid_re and 'sess' in locals():
+                            if parentid_re.group(1) == '8':
+                                tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "1"
+                            elif parentid_re.group(1) == '9':
+                                tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "2" # 1 for primary parent, 2 for secondary?
+                #elif 'bbsparent' in redcap_path:
+                    
+            ########################################################################################
+            # make remaining empty values equal to 0
+            # tracker_df["redcapData_s1_r1_e1"] = tracker_df["redcapData_s1_r1_e1"].fillna("0")
+            # for measures as well
+            # for key in redcheck_columns.keys():
+            #    tracker_df[redcheck_columns[key]] = tracker_df[redcheck_columns[key]].fillna("NA") 
         tracker_df.to_csv(data_tracker_file)
     else:
-        sys.exit('Can\'t find redcap in ' + dataset +'/sourcedata/raw, exiting ')
+        print('Can\'t find redcaps in ' + dataset + '/sourcedata/raw/redcap, skipping ')
 
     if bool(set(data_types) & set(pavpsy)):
         tasks = tasks.split(",")
