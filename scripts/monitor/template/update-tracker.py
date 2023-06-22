@@ -15,17 +15,18 @@ eeg = ["eeg", "digi"]
 provenance = "code-hallMonitor"
 
 # TODO: Make this occur once during construction
-def get_redcap_columns(datadict):
+def get_redcap_columns(datadict_df):
     completed = "_complete"
-    df_dd = pd.read_csv(datadict)
+    df = datadict_df
 
     # filter for prov
-    df_dd = df_dd.loc[df_dd['provenance'] == provenance]
+    df = df.loc[df['provenance'] == provenance]
 
     cols = {}
-    for _, row in df_dd.iterrows():
+    for _, row in df.iterrows():
         # skip redcap static
-        if "consent" in row["variable"] or "redcap" in row["variable"]:
+        #if "consent" in row["variable"] or "redcap" in row["variable"]:
+        if "redcap" in row["variable"]:
             continue
         # skip other data checks
         if "audio" in row["variable"] or "bv" in row["variable"]:
@@ -38,7 +39,16 @@ def get_redcap_columns(datadict):
             surv_esp = surv_match.group(1) + 'es_' + surv_version + surv_match.group(3)
             cols[surv_esp + completed] = row["variable"]
     return cols
-        
+
+def get_multiple_reports_tags(datadict_df):
+    # identical surveys with multiple reports (eg from both child and parent) should have a tag (<surv_name>_"parent"_s1_r1_e1) in var name in datadict
+    df = datadict_df
+    names_list = []
+    for _, row in df.iterrows():
+        surv_match = re.match('^[a-zA-Z0-9\-]+(_[a-z])?_([a-zA-Z]{2,})?_s[0-9]+_r[0-9]+(_e[0-9]+)?$', row.variable)
+        if surv_match and surv_match.group(2) and surv_match.group(2) not in names_list:
+            names_list.append(surv_match.group(2))
+    return names_list
 
 if __name__ == "__main__":
     checked_path = sys.argv[1]
@@ -48,7 +58,7 @@ if __name__ == "__main__":
     session = sys.argv[5]
     tasks = sys.argv[6]
     child = sys.argv[7]
-    parental_reports = sys.argv[8]
+    #parental_reports = sys.argv[8]
 
     redcaps = redcaps.split(',')
     if session == "none":
@@ -56,14 +66,12 @@ if __name__ == "__main__":
       ses_tag = ""
     else:
       ses_tag = "_" + session
-    if parental_reports == "none":
-      parental_reports = []
-    else:
-      parental_reports = parental_reports.split(',')
 
     data_types = data_types.split(',')
     DATA_DICT = dataset + "/data-monitoring/data-dictionary/central-tracker_datadict.csv"
-    redcheck_columns = get_redcap_columns(DATA_DICT)
+    df_dd = pd.read_csv(DATA_DICT)
+    redcheck_columns = get_redcap_columns(df_dd)
+    multiple_reports_tags = get_multiple_reports_tags(df_dd)
     
     # extract project path from dataset
     proj_name = basename(normpath(dataset))
@@ -108,13 +116,12 @@ if __name__ == "__main__":
                 #    print("consent missing for " + str(id) + ", skipping")
                 #    continue
                 for key, value in redcheck_columns.items():
-            ######################################################## temporary solution to identifying parental self-reports ######################
-                    if 'parent' in redcap_path and value.startswith(tuple(parental_reports)):
-                        surv_re = re.search('^([a-zA-Z]+)_([a-zA-Z]_)?(s[0-9]+_r[0-9]+_e[0-9]+)$', value)
-                        surv_version = '' if not surv_re.group(2) else surv_re.group(2)
-                        value = surv_re.group(1) + surv_version + '_parent_' + surv_re.group(3)
-                    # adds "parent" to central tracker column name
-            ########################################################################################
+                    for tag in multiple_reports_tags:
+                        surv_re = re.match('^([a-zA-Z0-9\-]+)_([a-z]_)?([a-zA-Z]{2,})?_(s[0-9]+_r[0-9]+_e[0-9]+)$', value)
+                        if tag in redcap_path and surv_re and surv_re.group(3) == tag:
+                            surv_version = '' if not surv_re.group(2) else surv_re.group(2)
+                            key = surv_re.group(1) + '_' + surv_version + surv_re.group(4) + completed
+                    # adds "parent" to redcap column name in central tracker
 
                     try:
                         val = rc_df.loc[id, key]
@@ -143,7 +150,6 @@ if __name__ == "__main__":
                                 tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "1"
                             elif parentid_re.group(1) == '9':
                                 tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "2" # 1 for primary parent, 2 for secondary?
-                #elif 'bbsparent' in redcap_path:
                     
             ########################################################################################
             # make remaining empty values equal to 0
@@ -151,7 +157,12 @@ if __name__ == "__main__":
             # for measures as well
             # for key in redcheck_columns.keys():
             #    tracker_df[redcheck_columns[key]] = tracker_df[redcheck_columns[key]].fillna("NA") 
-        tracker_df.to_csv(data_tracker_file)
+            duplicate_cols = []
+            for col, _ in tracker_df.iteritems():
+                if re.match('^.*\.[0-9]+$', col):
+                    duplicate_cols.append(col)
+            tracker_df.drop(columns=duplicate_cols, inplace=True)
+            tracker_df.to_csv(data_tracker_file)
     else:
         print('Can\'t find redcaps in ' + dataset + '/sourcedata/raw/redcap, skipping ')
 

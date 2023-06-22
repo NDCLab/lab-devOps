@@ -6,7 +6,6 @@ filetypes=$2
 tasks=$3
 ntasksdatamismatch=$4
 childdata=$5
-parental_reports=$6
 
 # determine if sourcedata/raw has session folders, reproduce session+run structure in checked
 #ses_re='^s[0-9]+_r[0-9]+'
@@ -27,10 +26,8 @@ tasks="${tasks}"
 filetypes="${filetypes}"
 ntasksdatamismatch="${ntasksdatamismatch}"
 childdata="${childdata}"
-parental_reports="${parental_reports}"
 [[ \$ntasksdatamismatch == true ]] && ignore_mismatch_err="true"
 [[ \$childdata == true ]] && childdata="true"
-[[ \$parental_reports == "none" ]] && parental_reports="none"
 logfile="\${dataset}/data-monitoring/data-monitoring-log.md"
 
 # determine if sourcedata/raw has session folders, reproduce session+run structure in checked
@@ -205,12 +202,12 @@ do
         #for redcap_file in \${redcaps[@]}; do
             if [[ \$ses == "none" ]]; then
 	        # update trackers
-	        output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \$ses \$tasks \$childdata \$parental_reports)
+	        output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \$ses \$tasks \$childdata)
             else
 	        ses_re='^.*'\${ses:0:-1}'.*\$'
                 #if [[ \$redcap_file =~ \${ses_re} ]]; then
-	            output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \${ses:0:-1} \$tasks \$childdata \$parental_reports)
-		    echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \${ses:0:-1} \$tasks \$childdata \$parental_reports"
+	            output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \${ses:0:-1} \$tasks \$childdata)
+		    echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \${ses:0:-1} \$tasks \$childdata"
                     echo \$output
 	        #fi
 	    fi
