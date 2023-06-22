@@ -106,8 +106,9 @@ if __name__ == "__main__":
                     child_id = id
                 if child_id not in tracker_df.index:
                     print(child_id, "missing in tracker file, skipping")
-                    continue 
-                subjects.append(child_id)
+                    continue
+                if child_id not in subjects:
+                    subjects.append(child_id)
                 # check for part. consent
                 #if rc_df.loc[id, "consent_yn"]==1:
                 #    tracker_df.loc[id, "consent" + ses_tag] = "1"
