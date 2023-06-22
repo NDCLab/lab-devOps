@@ -13,10 +13,10 @@ pavpsy = ["pavlovia", "psychopy"]
 eeg = ["eeg", "digi"]
 # list hallMonitor key
 provenance = "code-hallMonitor"
+completed = "_complete"
 
 # TODO: Make this occur once during construction
 def get_redcap_columns(datadict_df):
-    completed = "_complete"
     df = datadict_df
 
     # filter for prov
