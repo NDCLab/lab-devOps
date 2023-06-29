@@ -8,7 +8,7 @@ if __name__ == "__main__":
     with open(filepath, "r") as dd:
         reader = csv.DictReader(dd)
         for row in reader:
-            if "task status" in row["description"]:
+            if "psychopy" in row["description"].split(':')[0]:
                 tasks.append(row["\xef\xbb\xbfvariable"]) #works for Python-2.7.5
                 #tasks.append(row["\ufeffvariable"]) #works for Python-3.6.8
     print(','.join(tasks))
