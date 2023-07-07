@@ -7,18 +7,9 @@ tasks=$3
 ntasksdatamismatch=$4
 childdata=$5
 
-# determine if sourcedata/raw has session folders, reproduce session+run structure in checked
-#ses_re='^s[0-9]+_r[0-9]+'
-#ses_names=()
-#for i in $(find $projpath/sourcedata/raw -maxdepth 1 -type d); do
-#  if [[ $(basename $i) =~ $ses_re ]]; then ses_names+=($(basename $i)/); fi
-#done
-#[[ ${#ses_names[@]} -eq 0 ]] && ses_names="none"
-
 # write out hallMonitor file with template strings
 cat <<EOF >> "${projpath}/data-monitoring/hallMonitor.sh"
 #!/bin/bash
-#IFS=$'\n'
 
 # init proj specific variables
 dataset="${projpath}"
@@ -47,8 +38,7 @@ usage() { echo "Usage: sh hallMonitor.sh [-m/-r] [string list of replacement or 
 
 
 error_detected=false
-#dirs=\$(find \$raw -mindepth 1 -maxdepth 1 -type d -printf "%f ")
-#unset IFS
+
 for ses in \${ses_names[@]}
 do
 	[[ \$ses == "none" ]] && ses="" # if no session directories set ses to empty
@@ -60,22 +50,8 @@ do
 	    # If psychopy or pavlovia dataset
 	    if [[ \${pavpsy[*]} =~ \$dir ]]; then
 		echo "Accessing \$raw/\$ses\$dir"
-		#cd \$raw/\$dir
-		#if [ ! -e "\$check/\$dir" ]; then
-		#    mkdir \$check/\$dir
-		#fi
-		# store dir names in array
-		#sub_names=(*/)
-		#sub_names=(\$(ls \$raw/\$ses\$dir))
 		sub_names=(\$(find \$raw/\$ses\$dir -mindepth 1 -maxdepth 1 -type d -printf "%f\n"))
 		for subject in "\${sub_names[@]}"; do
-		    #subject=\${sub_names[\$i]}
-
-		    # if no pavlovia dataset exists in checked, create
-	            #if [ ! -e "\$check/\$subject/\$ses\$dir" ]; then
-	            #    mkdir -p \$check/\$subject/\$ses\$dir
-	            #fi
-
 		    # check if name is properly named and copy if correct
 		    sub_check=\$(verify_copy_sub \$subject \$ses\$dir)
 		    res=\$?
@@ -155,19 +131,6 @@ do
 		sub_names=(\$(ls \$raw/\$ses\$dir))
 		for subject in "\${sub_names[@]}"; do
 
-		# if no bidsish dataset exists in checked, create
-		#if [ ! -e "\${check}/\${eeg}" ]; then
-		#    mkdir \$check/\$eeg
-		#fi
-
-		#echo "Accessing \$raw/\$dir"
-		#cd \$raw/\$dir
-		#sub_names=(*/)
-		#for i in "\${!sub_names[@]}"; do
-		    #if [ ! -e "\${check}/\$subject/\$ses\$dir" ]; then
-		    #    mkdir -p "\${check}/\$subject/\$ses\$dir"
-		    #fi
-		    #subject=\${sub_names[\$i]}
 		    sub_check=\$(verify_copy_sub \$subject \$ses\$dir)
 		    res=\$?
 		    if [ \$res != 0 ]; then
@@ -178,7 +141,6 @@ do
 		    fi
 
 		    echo -e "\\t Checking files of \$raw/\$ses\$dir/\$subject"
-		    #cd \$raw/\$dir/\$subject
 		    files_log=\$(verify_copy_bids_files \$ses\$dir \$subject \$tasks \$filetypes \$ignore_mismatch_err)
 		    res=\$?
 		    if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
@@ -199,33 +161,18 @@ do
         redcap_files=\$(eval \$command); redcap_files=\${redcap_files// /,} # comma separated list of redcaps in optional session folder
         [[ \${redcaps[*]} == "" ]] && redcap_files=none
         [[ \$ses == "" ]] && ses="none"
-        #for redcap_file in \${redcaps[@]}; do
             if [[ \$ses == "none" ]]; then
 	        # update trackers
 	        output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \$ses \$tasks \$childdata)
             else
 	        ses_re='^.*'\${ses:0:-1}'.*\$'
-                #if [[ \$redcap_file =~ \${ses_re} ]]; then
 	            output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \${ses:0:-1} \$tasks \$childdata)
 		    echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \${ses:0:-1} \$tasks \$childdata"
                     echo \$output
-	        #fi
 	    fi
-        #done
-
-
-
 
 done
 
-# update trackers
-#output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$raw/redcap/\$redcap_file \$tasks)
-#        if [[ "\$output" =~ "Error" ]]; then
-#            echo -e "\\t \$output \\n \\t \${RED}Error detected in checked \${data_types} data.\${NC}"
-#            error_detected=true
-#        fi
-
-#cd \${dataset}/data-monitoring
 if [ \$error_detected = true ]; then
     update_log "error" \$logfile
 else

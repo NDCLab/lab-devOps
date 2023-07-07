@@ -20,13 +20,11 @@ def get_redcap_columns(datadict_df):
     df = datadict_df
 
     # filter for prov
-    #df = df.loc[df['provenance'] == provenance]
     df = df.loc[df['provenance'].isin(provenance)]
 
     cols = {}
     for _, row in df.iterrows():
         # skip redcap static
-        #if "consent" in row["variable"] or "redcap" in row["variable"]:
         if "redcap" in row["variable"]:
             continue
         # skip other data checks
@@ -41,8 +39,7 @@ def get_redcap_columns(datadict_df):
             multiple_report_tag = '' if not surv_match.group(4) else surv_match.group(4)
             surv_esp = surv_match.group(1) + 'es' + surv_version + scrd_str + multiple_report_tag + surv_match.group(5)
             cols[surv_esp + completed] = row["variable"]
-    #cols["consent_es_complete"] = "consent" # Redcap col name is consent_es_complete not consentes_complete
-    cols["consentes_complete"] = "consent"
+    cols["consentes_complete"] = "consent" # Redcap col name is consent_es_complete not consentes_complete
     return cols
 
 def get_multiple_reports_tags(datadict_df):
@@ -63,7 +60,6 @@ if __name__ == "__main__":
     session = sys.argv[5]
     tasks = sys.argv[6]
     child = sys.argv[7]
-    #parental_reports = sys.argv[8]
 
     redcaps = redcaps.split(',')
     if session == "none":
@@ -117,16 +113,8 @@ if __name__ == "__main__":
                     continue
                 if child_id not in subjects:
                     subjects.append(child_id)
-                # check for part. consent
-                #if rc_df.loc[id, "consent_yn"]==1:
-                #    tracker_df.loc[id, "consent" + ses_tag] = "1"
-                #    subjects.append(id)
-                #else:
-                #    print("consent missing for " + str(id) + ", skipping")
-                #    continue
                 for key, value in redcheck_columns.items():
                     for tag in multiple_reports_tags:
-                        #surv_re = re.match('^([a-zA-Z0-9\-]+)_([a-z]_)?([a-zA-Z]{2,})?_(s[0-9]+_r[0-9]+_e[0-9]+)$', value)
                         surv_re = re.match('^([a-zA-Z0-9\-]+)(_[a-z])?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?(_s[0-9]+_r[0-9]+_e[0-9]+)$', value)
                         if tag in redcap_path and surv_re and surv_re.group(4) == '_' + tag:
                             surv_version = '' if not surv_re.group(2) else surv_re.group(2)
@@ -162,13 +150,7 @@ if __name__ == "__main__":
                                 tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "1"
                             elif parentid_re.group(1) == '9':
                                 tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "2" # 1 for primary parent, 2 for secondary?
-                    
-            ########################################################################################
-            # make remaining empty values equal to 0
-            # tracker_df["redcapData_s1_r1_e1"] = tracker_df["redcapData_s1_r1_e1"].fillna("0")
-            # for measures as well
-            # for key in redcheck_columns.keys():
-            #    tracker_df[redcheck_columns[key]] = tracker_df[redcheck_columns[key]].fillna("NA") 
+
             duplicate_cols = []
             for col, _ in tracker_df.iteritems():
                 if re.match('^.*\.[0-9]+$', col):
@@ -192,34 +174,6 @@ if __name__ == "__main__":
     if bool(set(data_types) & set(pavpsy)):
         tasks = tasks.split(",")
         # TODO: Pipeline checks data already processed. 
-        #for dir in (set(data_types) & set(pavpsy)):
-            #for (dirpath, dirnames, filenames) in walk(checked_path + '/' + dir):
-            #for (dirpath, dirnames, filenames) in walk(checked_path):
-                #if dir in dirpath:
-                #path = pathlib.PurePath(dirpath)
-                #if path.name == dir:
-                        # TODO: need better implementation.
-                        # Need to apply better engineering principles here
-                        #if "sub" in path.name:
-                        #if "sub" in dirpath:
-                        #del dir_id
-                        #for subdir in dirpath.split('/'):
-                        #    if "sub-" in subdir:
-                        #        dir_id = int(subdir[4:])
-                        #        break
-                            #dir_id = int(path.name[4:])
-                                #if dir_id not in ids:
-                                    #continue
-                            #else:
-                            #    continue
-                        #if 'dir_id' in locals():
-                        #    for task in tasks:
-                        #        if task in ''.join(filenames):
-                        #            tracker_df.loc[dir_id, task] = "1"
-                        #        else: 
-                        #            tracker_df.loc[dir_id, task] = "0"
-                        #else:
-                        #    continue
 
         for data in (set(data_types) & set(pavpsy)):
             for subdir in listdir(checked_path):
@@ -239,7 +193,6 @@ if __name__ == "__main__":
         tracker_df.to_csv(data_tracker_file)
     
     if bool(set(data_types) & set(audivid)):
-        # check for audivid data?
         for data_type in list(set(data_types) & set(audivid)):
             for sub in subjects:
                 dir_id = sub
