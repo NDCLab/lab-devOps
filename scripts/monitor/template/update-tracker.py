@@ -4,6 +4,7 @@ from os.path import basename, normpath, join, isdir
 from os import listdir, walk
 import pathlib
 import re
+import math
 
 # list audio-vid data
 audivid = ["zoom", "audio", "video", "audacity"]
@@ -87,7 +88,14 @@ if __name__ == "__main__":
     if "redcap" in data_types and redcaps[0] != "none":
         allowed_duplicate_columns = []
         for redcap_path in redcaps:
-            rc_df = pd.read_csv(redcap_path, index_col="record_id")
+            # for bbsRA REDcap get thrive IDs from 'bbsratrk_acthrive_s1_r1_e1' column
+            if 'ThrivebbsRA' in redcap_path:
+                for column in pd.read_csv(redcap_path).columns:
+                    if column.startswith('bbsratrk_acthrive'):
+                        rc_df = pd.read_csv(redcap_path, index_col=column)
+                        break
+            else:
+                rc_df = pd.read_csv(redcap_path, index_col="record_id")
             # If hallMonitor passes "redcap" arg, data exists and passed checks 
             vals = pd.read_csv(redcap_path, header=None, nrows=1).iloc[0,:].value_counts()
             # Exit if duplicate column names in redcap
@@ -98,7 +106,11 @@ if __name__ == "__main__":
                         dupes.append(rc_col)
                 sys.exit('Duplicate columns found in redcap: ' + ', '.join(dupes) + '. Exiting')
             for index, row in rc_df.iterrows():
-                id = int(row.name)
+                if (isinstance(index, float) or isinstance(index, int)) and not math.isnan(index):
+                    id = int(row.name)
+                else:
+                    print("skipping nan value in ", str(redcap_path), ": ", str(index))
+                    continue
                 if child == 'true':
                     if re.search('30[089](\d{4})', str(id)):
                         child_id = '300' + re.search('30[089](\d{4})', str(id)).group(1)
