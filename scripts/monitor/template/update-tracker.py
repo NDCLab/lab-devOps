@@ -12,7 +12,7 @@ pavpsy = ["pavlovia", "psychopy"]
 # list eeg systems
 eeg = ["eeg", "digi"]
 # list hallMonitor key
-provenance = "code-hallMonitor"
+provenance = ["code-hallMonitor", "code-instruments"]
 completed = "_complete"
 
 # TODO: Make this occur once during construction
@@ -20,7 +20,8 @@ def get_redcap_columns(datadict_df):
     df = datadict_df
 
     # filter for prov
-    df = df.loc[df['provenance'] == provenance]
+    #df = df.loc[df['provenance'] == provenance]
+    df = df.loc[df['provenance'].isin(provenance)]
 
     cols = {}
     for _, row in df.iterrows():
@@ -29,15 +30,19 @@ def get_redcap_columns(datadict_df):
         if "redcap" in row["variable"]:
             continue
         # skip other data checks
-        if "audio" in row["variable"] or "bv" in row["variable"]:
+        if "audacity" in row["variable"] or "bv" in row["variable"]:
             continue
         cols[row["variable"] + completed] = row["variable"]
         # also map Sp. surveys to same column name in central tracker if completed
-        surv_match = re.search('^([a-zA-Z]+)_([a-zA-Z]_)?(s[0-9]+_r[0-9]+_e[0-9]+)$', row["variable"])
+        surv_match = re.match('^([a-zA-Z0-9\-]+)(_[a-z])?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?(_s[0-9]+_r[0-9]+_e[0-9]+)$', row["variable"])
         if surv_match and "redcap_data" in row["description"]:
             surv_version = '' if not surv_match.group(2) else surv_match.group(2)
-            surv_esp = surv_match.group(1) + 'es_' + surv_version + surv_match.group(3)
+            scrd_str = '' if not surv_match.group(3) else surv_match.group(3)
+            multiple_report_tag = '' if not surv_match.group(4) else surv_match.group(4)
+            surv_esp = surv_match.group(1) + 'es' + surv_version + scrd_str + multiple_report_tag + surv_match.group(5)
             cols[surv_esp + completed] = row["variable"]
+    #cols["consent_es_complete"] = "consent" # Redcap col name is consent_es_complete not consentes_complete
+    cols["consentes_complete"] = "consent"
     return cols
 
 def get_multiple_reports_tags(datadict_df):
@@ -45,9 +50,9 @@ def get_multiple_reports_tags(datadict_df):
     df = datadict_df
     names_list = []
     for _, row in df.iterrows():
-        surv_match = re.match('^[a-zA-Z0-9\-]+(_[a-z])?_([a-zA-Z]{2,})?_s[0-9]+_r[0-9]+(_e[0-9]+)?$', row.variable)
-        if surv_match and surv_match.group(2) and surv_match.group(2) not in names_list:
-            names_list.append(surv_match.group(2))
+        surv_match = re.match('^([a-zA-Z0-9\-]+)(_[a-z])?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?(_s[0-9]+_r[0-9]+_e[0-9]+)$', row.variable)
+        if surv_match and surv_match.group(4) and surv_match.group(4)[1:] not in names_list:
+            names_list.append(surv_match.group(4)[1:])
     return names_list
 
 if __name__ == "__main__":
@@ -80,8 +85,11 @@ if __name__ == "__main__":
     tracker_df = pd.read_csv(data_tracker_file, index_col="id")
     ids = [id for id in tracker_df.index]
     subjects = []
+
+    all_redcap_columns = [] # list of all redcap columns whose names should be mirrored in central tracker
     
     if "redcap" in data_types and redcaps[0] != "none":
+        allowed_duplicate_columns = []
         for redcap_path in redcaps:
             rc_df = pd.read_csv(redcap_path, index_col="record_id")
             # If hallMonitor passes "redcap" arg, data exists and passed checks 
@@ -118,10 +126,13 @@ if __name__ == "__main__":
                 #    continue
                 for key, value in redcheck_columns.items():
                     for tag in multiple_reports_tags:
-                        surv_re = re.match('^([a-zA-Z0-9\-]+)_([a-z]_)?([a-zA-Z]{2,})?_(s[0-9]+_r[0-9]+_e[0-9]+)$', value)
-                        if tag in redcap_path and surv_re and surv_re.group(3) == tag:
+                        #surv_re = re.match('^([a-zA-Z0-9\-]+)_([a-z]_)?([a-zA-Z]{2,})?_(s[0-9]+_r[0-9]+_e[0-9]+)$', value)
+                        surv_re = re.match('^([a-zA-Z0-9\-]+)(_[a-z])?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?(_s[0-9]+_r[0-9]+_e[0-9]+)$', value)
+                        if tag in redcap_path and surv_re and surv_re.group(4) == '_' + tag:
                             surv_version = '' if not surv_re.group(2) else surv_re.group(2)
-                            key = surv_re.group(1) + '_' + surv_version + surv_re.group(4) + completed
+                            scrd_str = '' if not surv_re.group(3) else surv_re.group(3)
+                            key = surv_re.group(1) + surv_version + scrd_str + surv_re.group(5) + completed
+                            allowed_duplicate_columns.append(key)
                     # adds "parent" to redcap column name in central tracker
 
                     try:
@@ -164,6 +175,17 @@ if __name__ == "__main__":
                     duplicate_cols.append(col)
             tracker_df.drop(columns=duplicate_cols, inplace=True)
             tracker_df.to_csv(data_tracker_file)
+
+            for col in rc_df.columns:
+                if col.endswith(completed):
+                    all_redcap_columns.append(col)
+
+        all_duplicate_cols = []
+        for col in all_redcap_columns:
+            if all_redcap_columns.count(col) > 1 and col not in allowed_duplicate_columns:
+                all_duplicate_cols.append(col)
+        if len(all_duplicate_cols) > 0:
+            sys.exit("Duplicate columns were found across Redcaps: ",", ".join(all_duplicate_cols),", Exiting.")
     else:
         print('Can\'t find redcaps in ' + dataset + '/sourcedata/raw/redcap, skipping ')
 
@@ -225,7 +247,11 @@ if __name__ == "__main__":
                     for f in listdir(join(checked_path,'sub-'+str(dir_id),session,data_type)):
                         audi_vid_re = re.match('^.*_(audio|video|zoom|audacity)_(s[0-9]+_r[0-9]+_e[0-9]+)\.zip\.gpg$',f)
                         if audi_vid_re:
-                            tracker_df.loc[dir_id, audi_vid_re.group(1) + "Data_" + audi_vid_re.group(2)] = "1"
+                            if audi_vid_re.group(1) == 'zoom' or audi_vid_re.group(1) == 'video':
+                                data_modality = 'zoom'
+                            elif audi_vid_re.group(1) == 'audacity' or audi_vid_re.group(1) == 'audio':
+                                data_modality = 'audacity'
+                            tracker_df.loc[dir_id, data_modality + "Data_" + audi_vid_re.group(2)] = "1"
 
 
                 #collabel = data_type + "Data" + ses_tag
