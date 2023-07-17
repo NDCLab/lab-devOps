@@ -29,19 +29,20 @@ json_scorer="/home/data/NDClab/tools/instruments/scripts/json_scorer.py"
 survey_data="/home/data/NDClab/tools/instruments/scripts/surveys.json"
 
 # get most recent redcap file for processing
-cd $data_source
-input_file=$( get_new_redcap )
-echo "Found newest redcap: ${input_file}"
-cd ../../../data-monitoring
+input_files=$( get_new_redcaps $data_source)
+echo "Found newest redcaps: ${input_files}"
 
-# run instruments to preprocess survey data
-singularity exec --bind $dataset,/home/data/NDClab/tools/instruments \
-                $sing_image \
-                python3 $json_scorer \
+for input_file in ${input_files}
+do
+    # run instruments to preprocess survey data
+    singularity exec --bind $dataset,/home/data/NDClab/tools/instruments \
+                    $sing_image \
+                    python3 $json_scorer \
                     "${data_source}/${input_file}" \
                     $survey_data \
                     $output_path \
-                    $tracker 
+                    $tracker
+done
 
 # insert singularity scripts here
 
@@ -50,6 +51,6 @@ if [[ ! -f "$log" ]]; then
     exit 0
 fi
 now=`date '+%Y-%m-%d_%T'`
-echo "${now} Preprocessing ran: view slurm-.out file to see effects." >> $log
+echo "${now} Preprocessing ran: view slurm-${SLURM_JOB_ID}.out file to see effects." >> $log
 
 # zoom, redcap_data, redcap_scrd, psychopy, eeg, audio, digi
