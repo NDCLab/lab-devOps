@@ -37,6 +37,7 @@ function update_log {
 function get_new_redcaps {
 
 dir=$1
+if [[ -z $dir ]]; then echo "Please specify the redcaps parent folder" && exit 1; fi
 redcaps=($(find $dir -type f -printf "%f\n"))
 time_stamp_re='\d{4}-\d{2}-\d{2}_\d{4}'
 stem_re="_DATA_${time_stamp_re}.csv$"
@@ -104,6 +105,13 @@ function verify_copy_pavpsy_files {
     subject=$2
     tasks=$3
     data=($(find $raw/$dir/$subject -type f -name "*.csv" -printf "%f\n"))
+
+    for file in $(find $raw/$dir/$subject -maxdepth 1 -type f -printf "%f\n"); do
+        if [[ $file =~ [Cc]orrected.* ]]; then
+            echo -e "\\t Corrected file observed in $dir/$subject, skipping task name checks and copy"
+            exit 0
+        fi
+    done
 
     # create list of tasks if relevant
     if [[ $tasks != 0 ]]; then
