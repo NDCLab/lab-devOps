@@ -6,7 +6,7 @@ if __name__ == "__main__":
     file = sys.argv[2]
     
     # extract id col
-    file_df = pd.read_csv(file, error_bad_lines=False, warn_bad_lines=False)
+    file_df = pd.read_csv(file, on_bad_lines="skip")
     if "id" in file_df:
         id_col = file_df["id"]
     elif "participant" in file_df:
