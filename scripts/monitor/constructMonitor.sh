@@ -2,10 +2,8 @@
 # A script to construct your hallMonitor file
 
 projpath=$1
-filetypes=$2
-tasks=$3
-ntasksdatamismatch=$4
-childdata=$5
+ntasksdatamismatch=$2
+childdata=$3
 
 # write out hallMonitor file with template strings
 cat <<EOF >> "${projpath}/data-monitoring/hallMonitor.sh"
@@ -13,8 +11,6 @@ cat <<EOF >> "${projpath}/data-monitoring/hallMonitor.sh"
 
 # init proj specific variables
 dataset="${projpath}"
-tasks="${tasks}"
-filetypes="${filetypes}"
 ntasksdatamismatch="${ntasksdatamismatch}"
 childdata="${childdata}"
 [[ \$ntasksdatamismatch == true ]] && ignore_mismatch_err="true"
@@ -42,119 +38,63 @@ error_detected=false
 for ses in \${ses_names[@]}
 do
 	[[ \$ses == "none" ]] && ses="" # if no session directories set ses to empty
-	dirs=(\$(find \$raw/\$ses -mindepth 1 -maxdepth 1 -type d -printf "%f\n"))
+	#dirs=(\$(find \$raw/\$ses -mindepth 1 -maxdepth 1 -type d -printf "%f\n"))
 	#[[ \${dirs[*]} != *redcap* ]] && dirs+=("redcap")
-	data_types=\${dirs[*]}; data_types=\${data_types// /,}
-	for dir in \${dirs[@]}
-	do
+	#data_types=\${dirs[*]}; data_types=\${data_types// /,}
+	#for dir in \${dirs[@]}
+	#do
 	    # If psychopy or pavlovia dataset
-	    if [[ \${pavpsy[*]} =~ \$dir ]]; then
-		echo "Accessing \$raw/\$ses\$dir"
-		sub_names=(\$(find \$raw/\$ses\$dir -mindepth 1 -maxdepth 1 -type d -printf "%f\n"))
-		for subject in "\${sub_names[@]}"; do
-		    # check if name is properly named and copy if correct
-		    sub_check=\$(verify_copy_sub \$subject \$ses\$dir)
-		    res=\$?
-		    if [ \$res != 0 ]; then
-		        echo -e "\$sub_check"
-		        echo -e "\\t \${RED}Error detected in \$subject. View above.\${NC} \\n" 
-		        error_detected=true
-		        continue 
-		    fi
-		    echo -e "\\t Checking files of \$raw/\$dir/\$subject"
-
-		    # check if files contain all tasks, appropriatley named, 
-		    # and contain correct ID's
-		    files_log=\$(verify_copy_pavpsy_files \$ses\$dir \$subject \$tasks)
-		    res=\$?
-		    if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
-		        echo -e "\$files_log"
-		        echo -e "\\t \${RED}Error detected in \$subject. View above\${NC} \\n"
-		        error_detected=true
-		        continue 
-		    else 
-		        echo -e "\$files_log"
-		        echo -e "\\t \${GREEN}Success. All Psychopy data passes checks in \$subject.\${NC}"
-		    fi
-		done
-		echo -e "\\n"            
-	    fi
-	    # If zoom, audio, or video dataset
-	    if [[ \${audivid[*]} =~ \$dir ]]; then
-                # Audio/video files should be manually copied to checked already
-		:
-	    fi
 	    # If redcap dataset
-	    if [ "\$dir" == "redcap" ]; then
-		echo "Accessing \$raw/\$ses\$dir"
+	    #if [ "\$dir" == "redcap" ]; then
+		#echo "Accessing \$raw/\$ses\$dir"
+	if [ ! -d \$raw/\${ses}redcap ]; then
+		echo "Error: no redcap folder found in \$raw/\$ses directory"
+	else
+		echo "Accessing \$raw/\${ses}redcap"
 		# if redcap does not exist in checked, create it
-		if [ ! -e "\$check/\$dir" ]; then
-		    mkdir -p \$check/\$dir
+		if [ ! -e "\$check/redcap" ]; then
+			mkdir -p \$check/redcap
 		fi
 
 		# store file names in array and get most recent file, check if stem is correct
-		redcaps=(\$( get_new_redcaps \$raw/\$ses\$dir ))
+		redcaps=(\$( get_new_redcaps \$raw/\${ses}redcap ))
 		for redcap_file in \${redcaps[@]}; do
 			if [[ "\$redcap_file" =~ "Error:" ]]; then
-			    echo -e "\$redcap_file"
-			    echo -e "\\t \${RED}Error detected in \$dir. View above\${NC}"
-			    error_detected=true
-			    continue
+				echo -e "\$redcap_file"
+				echo -e "\\t \${RED}Error detected in redcap. View above\${NC}"
+				error_detected=true
+				continue
 			fi
 			echo -e "\\t Newest Redcap found: \$redcap_file"
 			
 			# move only if data does not already exist in checked
-			if [ -f "\$check/\$dir/\$redcap_file" ]; then
-			    echo -e "\\t \$dir/\$redcap_file already exists in checked, skipping copy \\n"
-			    continue
+			if [ -f "\$check/redcap/\$redcap_file" ]; then
+				echo -e "\\t redcap/\$redcap_file already exists in checked, skipping copy \\n"
+				continue
 			fi
 
 			echo -e "\\t \${GREEN}Data passes criteria\${NC}"
 
 
 			echo -e "\\t copying \$redcap_file to \$check/\$dir"
-			cp \$raw/\$ses\$dir/\$redcap_file \$check/\$dir
+			cp \$raw/\${ses}redcap/\$redcap_file \$check/\redcap
 
-			# rename columns in checked using replace or map
+		# rename columns in checked using replace or map
 			while getopts ":rm" opt; do
-			    case \${opt} in
+				case \${opt} in
 				r)
-				    python \${dataset}/data-monitoring/rename-cols.py \$check/\$dir/\$redcap_file "replace" \$2 ;;
+					python \${dataset}/data-monitoring/rename-cols.py \$check/\$dir/\$redcap_file "replace" \$2 ;;
 				m)
-				    python \${dataset}/data-monitoring/rename-cols.py \$check/\$dir/\$redcap_file "map" \$2 ;;
+					python \${dataset}/data-monitoring/rename-cols.py \$check/\$dir/\$redcap_file "map" \$2 ;;
 				:)
-			    esac 
+				esac 
 			done
 		done
-	    fi
-	    if [[ \${eegtype[*]} =~ \$dir ]]; then
-		sub_names=(\$(ls \$raw/\$ses\$dir))
-		for subject in "\${sub_names[@]}"; do
+	fi
 
-		    sub_check=\$(verify_copy_sub \$subject \$ses\$dir)
-		    res=\$?
-		    if [ \$res != 0 ]; then
-		        echo -e "\$sub_check"
-		        echo -e "\\t \${RED}Error detected in \$subject. View above.\${NC} \\n" 
-		        error_detected=true
-		        continue 
-		    fi
-
-		    echo -e "\\t Checking files of \$raw/\$ses\$dir/\$subject"
-		    files_log=\$(verify_copy_bids_files \$ses\$dir \$subject \$tasks \$filetypes \$ignore_mismatch_err)
-		    res=\$?
-		    if [[ \$res != 0 || "\$files_log" =~ "Error:" ]]; then
-		        echo -e "\$files_log"
-		        echo -e "\\t \${RED}Error detected in \$subject. View above\${NC} \\n"
-		        error_detected=true
-		        continue 
-		    else 
-		        echo -e "\$files_log"
-		        echo -e "\\t \${GREEN}Success. All data passes checks in \$subject.\${NC}"
-		    fi
-		done
-	    fi
-	done
+	echo "calling verify-copy.py"
+	output=\$( python \${dataset}/data-monitoring/verify-copy.py \$dataset)
+	echo -e "\$output"
 
 	echo "updating tracker, ses: \$ses, redcaps: \${redcaps[*]}"
         command=\$(echo "echo \$raw/\${ses}redcap/{\$(echo \${redcaps[*]} | sed 's/ /,/g')}")
@@ -163,12 +103,14 @@ do
         [[ \$ses == "" ]] && ses="none"
             if [[ \$ses == "none" ]]; then
 	        # update trackers
-	        output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \$ses \$tasks \$childdata)
+	        output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \$ses \$childdata)
+                echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses} \$childdata"
+                echo -e "\$output"
             else
 	        ses_re='^.*'\${ses:0:-1}'.*\$'
-	            output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \${ses:0:-1} \$tasks \$childdata)
-		    echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \${data_types} \$dataset \$redcap_files \${ses:0:-1} \$tasks \$childdata"
-                    echo \$output
+	            output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses:0:-1} \$childdata)
+		    echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses:0:-1} \$childdata"
+                    echo -e "\$output"
 	    fi
 
 done
