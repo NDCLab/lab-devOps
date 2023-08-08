@@ -7,6 +7,8 @@ datam_path="data-monitoring"
 code_path="code"
 labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 
+module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg # needed for pandas
+
 # TODO: include ndc colors
 cat << "EOF"
  .__   __.  _______   ______  __          ___      .______
@@ -43,8 +45,7 @@ done
 
 shift $((OPTIND-1))
 project=$1
-datatypes=$2
-id=$3
+id=$2
 if [[ $gen_tracker == true ]]; then
     echo "Setting up central tracker"
     python "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $id $project
@@ -52,12 +53,12 @@ if [[ $gen_tracker == true ]]; then
 fi
 
 # get tasks
-tasks=$(python "${labpath}/get_tasks.py" "${project}/${datam_path}/data-dictionary/central-tracker_datadict.csv")
-if [[ $tasks == "" ]]; then
-  echo "Can't find tasks in ${project}/${datam_path}/data-dictionary/central_tracker_datadict.csv" && exit 1
-else
-  echo "tasks: $tasks"
-fi
+#tasks=$(python "${labpath}/get_tasks.py" "${project}/${datam_path}/data-dictionary/central-tracker_datadict.csv")
+#if [[ $tasks == "" ]]; then
+#  echo "Can't find tasks in ${project}/${datam_path}/data-dictionary/central_tracker_datadict.csv" && exit 1
+#else
+#  echo "tasks: $tasks"
+#fi
 
 #TODO: loop through a list, collect list from dir.
 
@@ -74,11 +75,13 @@ if [ -f "${project}/${datam_path}/check-id.py" ]; then
 fi
 cp "${labpath}/template/rename-cols.py" "${project}/${datam_path}"
 cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
+cp "${labpath}/template/verify-copy.py" "${project}/${datam_path}"
 cp "${labpath}/template/check-id.py" "${project}/${datam_path}"
 
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/rename-cols.py"
 chmod +x "${project}/${datam_path}/update-tracker.py"
+chmod +x "${project}/${datam_path}/verify-copy.py"
 
 echo "Setting up hallMonitor.sh"
 # delete if previously written
@@ -89,7 +92,7 @@ if [ -f "${project}/${datam_path}/hallMonitor.sub" ]; then
     rm -f "${project}/${datam_path}/hallMonitor.sub"
 fi
 # set up hallMonitor sh file with preset tasks instead of simply copying
-sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $datatypes $tasks $ntasksdatamismatch $childdata
+sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $ntasksdatamismatch $childdata
 # sets up hallMonitor sub file without any default mapping or replacement
 cp "${labpath}/template/hallMonitor.sub" "${project}/${datam_path}"
 

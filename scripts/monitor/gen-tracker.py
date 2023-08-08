@@ -1,4 +1,5 @@
 import sys
+import pandas as pd
 
 if __name__ == "__main__":
     filepath = sys.argv[1]
@@ -8,14 +9,15 @@ if __name__ == "__main__":
     DATA_DICT = "/home/data/NDClab/datasets/{}/data-monitoring/data-dictionary/central-tracker_datadict.csv".format(project)
     SUB_NUM = 1000
 
-    # take note of headers
+    df_dd = pd.read_csv(DATA_DICT)
+
     headers = []
-    with open(DATA_DICT) as dd:
+    headers.append('id')
+    for _, row in df_dd.iloc[1:].iterrows():
         # skip header
-        next(dd)
-        for row in dd:
-            headers.append(row.replace(',', '|', 1).split("|")[0]) 
-            # headers.append(row.split(',')[0])
+        # every row but 'id' should have allowed suffixes
+        for suf in row["allowedSuffix"].split(', '):
+            headers.append(row["variable"] + '_' + suf)
 
     # write id 1000 numbers 
     with open(filepath, "w") as file:
@@ -23,3 +25,4 @@ if __name__ == "__main__":
         file.write(','.join(headers) + "\n")
         for id in range(id_stand, id_stand + SUB_NUM):
             file.write(str(id) + "\n")
+        
