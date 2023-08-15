@@ -65,8 +65,6 @@ def get_multiple_reports_tags(datadict_df):
     df = datadict_df
     names_list = []
     for _, row in df.iterrows():
-        #surv_match = re.match('^([a-zA-Z0-9\-]+)(_[a-z])?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?(_s[0-9]+_r[0-9]+_e[0-9]+)$', row.variable)
-        #if surv_match and surv_match.group(4) and surv_match.group(4)[1:] not in names_list:
         surv_match = re.match('^([a-zA-Z0-9\-]+)(_[a-z])?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?$', row.variable)
         if surv_match and surv_match.group(4) and surv_match.group(4)[1:] not in names_list and row["dataType"] == "redcap_data":
             names_list.append(surv_match.group(4)[1:])
@@ -86,11 +84,9 @@ def get_tasks(datadict_df):
 
 if __name__ == "__main__":
     checked_path = sys.argv[1]
-    #data_types = sys.argv[2]
     dataset = sys.argv[2]
     redcaps = sys.argv[3]
     session = sys.argv[4]
-    #tasks = sys.argv[5]
     child = sys.argv[5]
 
     redcaps = redcaps.split(',')
@@ -100,14 +96,10 @@ if __name__ == "__main__":
     else:
       ses_tag = "_" + session
 
-    #datatypes_to_ignore = ["id", "consent", "assent", "redcap_data", "redcap_scrd", "parent_info"]
-
-    #data_types = data_types.split(',')
     DATA_DICT = dataset + "/data-monitoring/data-dictionary/central-tracker_datadict.csv"
     df_dd = pd.read_csv(DATA_DICT)
     redcheck_columns = get_redcap_columns(df_dd)
     multiple_reports_tags = get_multiple_reports_tags(df_dd)
-    #data_types = get_data_types(df_dd)
     tasks_dict = get_tasks(df_dd)
     
     # extract project path from dataset
@@ -118,7 +110,7 @@ if __name__ == "__main__":
     ids = [id for id in tracker_df.index]
     subjects = []
 
-    all_redcap_columns = [] # list of all redcap columns whose names should be mirrored in central tracker
+    all_redcap_columns = dict() # list of all redcap columns whose names should be mirrored in central tracker
     
     #if "redcap" in data_types and redcaps[0] != "none":
     if redcaps[0] != "none":
@@ -140,7 +132,7 @@ if __name__ == "__main__":
                 for rc_col in vals.keys():
                     if vals[rc_col] > 1:
                         dupes.append(rc_col)
-                sys.exit('Duplicate columns found in redcap: ' + ', '.join(dupes) + '. Exiting')
+                sys.exit('Error: Duplicate columns found in redcap ' + redcap_path + ': ' + ', '.join(dupes) + '. Exiting')
             for index, row in rc_df.iterrows():
                 if (isinstance(index, float) or isinstance(index, int)) and not math.isnan(index):
                     id = int(row.name)
@@ -208,14 +200,19 @@ if __name__ == "__main__":
 
             for col in rc_df.columns:
                 if col.endswith(completed):
-                    all_redcap_columns.append(col)
+                    all_redcap_columns.setdefault(col,[]).append(redcap_path)
 
         all_duplicate_cols = []
-        for col in all_redcap_columns:
-            if all_redcap_columns.count(col) > 1 and col not in allowed_duplicate_columns:
+        redcaps_of_duplicates = []
+        for col, rcs in all_redcap_columns.items():
+            if len(all_redcap_columns[col]) > 1 and col not in allowed_duplicate_columns:
                 all_duplicate_cols.append(col)
+                redcaps_of_duplicates.append(', '.join(rcs))
         if len(all_duplicate_cols) > 0:
-            sys.exit("Duplicate columns were found across Redcaps: ",", ".join(all_duplicate_cols),", Exiting.")
+            errmsg = "Error: Duplicate columns were found across Redcaps: "
+            for i in range(0, len(all_duplicate_cols)):
+                errmsg = errmsg + all_duplicate_cols[i] + " in " + redcaps_of_duplicates[i] + "; "
+            sys.exit(errmsg + "Exiting.")
     else:
         print('Can\'t find redcaps in ' + dataset + '/sourcedata/raw/redcap, skipping ')
 
@@ -232,7 +229,6 @@ if __name__ == "__main__":
                 for ext in file_exts:
                     file_present = False
                     for filename in listdir(join(checked_path, subdir, session, datatype)):
-                        #if re.match('^sub-' + str(dir_id) + '_' + task + '.*\\' + ext + '$', filename):
                         if re.match('^sub-' + str(dir_id) + '_' + task + '.*(s[0-9]+_r[0-9]+_e[0-9]+).*\\' + ext + '$', filename):
                             file_present = True
                             suffix = re.match('^sub-' + str(dir_id) + '_' + task + '.*(s[0-9]+_r[0-9]+_e[0-9]+).*\\' + ext + '$', filename).group(1)
@@ -242,91 +238,12 @@ if __name__ == "__main__":
                         print("Can\'t find ", ext, " file in ", join(checked_path, subdir, session, datatype))
                 if all_files_present:
                     tracker_df.loc[dir_id, task + "_" + suffix] = "1"
-                    #tracker_df.loc[dir_id, task] = "1"
                 else:
                     tracker_df.loc[dir_id, task] = "0"
             except:
                 tracker_df.loc[dir_id, task] = "0"
 
     tracker_df.to_csv(data_tracker_file)
-
-#    if bool(set(data_types) & set(pavpsy)):
-#        tasks = tasks.split(",")
-#        # TODO: Pipeline checks data already processed. 
-
-#        for data in (set(data_types) & set(pavpsy)):
-#            for subdir in listdir(checked_path):
-#                if "sub-" in subdir:
-#                    dir_id = int(subdir[4:])
-#                else:
-#                    continue
-#                for task in tasks:
-#                    try:
-#                        if task in ''.join(listdir(join(checked_path,subdir,session,data))):
-#                            tracker_df.loc[dir_id, task] = "1"
-#                        else:
-#                            tracker_df.loc[dir_id, task] = "0"
-#                    except:
-#                        tracker_df.loc[dir_id, task] = "0"
-#
-#        tracker_df.to_csv(data_tracker_file)
-    
-#    if bool(set(data_types) & set(audivid)):
-#        for data_type in list(set(data_types) & set(audivid)):
-#            for sub in subjects:
-#                dir_id = sub
-#                if isdir(join(checked_path,'sub-'+str(dir_id),session,data_type)):
-#                    for f in listdir(join(checked_path,'sub-'+str(dir_id),session,data_type)):
-#                        audi_vid_re = re.match('^.*_(audio|video|zoom|audacity)_(s[0-9]+_r[0-9]+_e[0-9]+)\.zip\.gpg$',f)
-#                        if audi_vid_re:
-#                            if audi_vid_re.group(1) == 'zoom' or audi_vid_re.group(1) == 'video':
-#                                data_modality = 'zoom'
-#                            elif audi_vid_re.group(1) == 'audacity' or audi_vid_re.group(1) == 'audio':
-#                                data_modality = 'audacity'
-#                            tracker_df.loc[dir_id, data_modality + "Data_" + audi_vid_re.group(2)] = "1"
-
-
-                #collabel = data_type + "Data" + ses_tag
-                #tracker_df.loc[dir_id, collabel] = "1" if dir_id in ids else "0"
-    
-                # make remaining empty values equal to 0
-                # tracker_df[collabel] = tracker_df[collabel].fillna("0")
-#        tracker_df.to_csv(data_tracker_file)
-    
-#    if bool(set(data_types) & set(eeg)):
-#        # check initial csv for either Brainvision or EGI column (shouldn't have both)
-#        df_dd = pd.read_csv(DATA_DICT)
-#        bv_present = False; egi_present = False
-#        for _, row in df_dd.iterrows():
-#            if "bvData" in row["variable"]:
-#                bv_present = True
-#                break
-#            if "egiData" in row["variable"]:
-#                egi_present = True
-#                break
-#        for sub in subjects:
-#            dir_id = sub
-#            # TODO: Need better implementation here
-#            if "eeg" in data_types:
-#                if bv_present:
-#                    if isdir(join(checked_path,'sub-'+str(dir_id),session,'eeg')):
-#                        for f in listdir(join(checked_path,'sub-'+str(dir_id),session,'eeg')):
-#                            eeg_re = re.match('^.*_(s[0-9]+_r[0-9]+_e[0-9]+)\.eeg$',f)
-#                            if eeg_re:
-#                                tracker_df.loc[dir_id, "bvData_" + eeg_re.group(1)] = "1"
-#                if egi_present:
-#                    if isdir(join(checked_path,'sub-'+str(dir_id),session,'eeg')):
-#                        for f in listdir(join(checked_path,'sub-'+str(dir_id),session,'eeg')):
-#                            eeg_re = re.match('^.*_(s[0-9]+_r[0-9]+_e[0-9]+)\.mff$',f)
-#                            if eeg_re:
-#                                tracker_df.loc[dir_id, "egiData_" + eeg_re.group(1)] = "1"
-#            if "digi" in data_types:
-#                if isdir(join(checked_path,'sub-'+str(dir_id),session,'digi')):
-#                    for f in listdir(join(checked_path,'sub-'+str(dir_id),session,'digi')):
-#                        digi_re = re.match('^.*_(s[0-9]+_r[0-9]+_e[0-9]+)\.zip\.gpg$',f)
-#                        if digi_re:
-#                            tracker_df.loc[dir_id, "digiData_" + digi_re.group(1)] = "1"
-
 
             # make remaining empty values equal to 0
             # tracker_df[collabel] = tracker_df[collabel].fillna("0")
