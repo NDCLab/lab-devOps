@@ -52,16 +52,6 @@ if [[ $gen_tracker == true ]]; then
     chmod +x "${project}/${datam_path}/central-tracker_${project}.csv"
 fi
 
-# get tasks
-#tasks=$(python "${labpath}/get_tasks.py" "${project}/${datam_path}/data-dictionary/central-tracker_datadict.csv")
-#if [[ $tasks == "" ]]; then
-#  echo "Can't find tasks in ${project}/${datam_path}/data-dictionary/central_tracker_datadict.csv" && exit 1
-#else
-#  echo "tasks: $tasks"
-#fi
-
-#TODO: loop through a list, collect list from dir.
-
 echo "Setting up hallMonitor helper files"
 # delete if previously written
 if [ -f "${project}/${datam_path}/rename-cols.py" ]; then
