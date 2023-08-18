@@ -18,11 +18,12 @@ childdata="${childdata}"
 logfile="\${dataset}/data-monitoring/data-monitoring-log.md"
 
 # determine if sourcedata/raw has session folders, reproduce session+run structure in checked
-ses_re='^s[0-9]+_r[0-9]+(_e[0-9]+)?$'
+ses_re='^s[0-9]+_r[0-9]+$'
 ses_names=()
 for i in \$(find \$dataset/sourcedata/raw -maxdepth 1 -type d); do
   if [[ \$(basename \$i) =~ \$ses_re ]]; then ses_names+=(\$(basename \$i)/); fi
 done
+IFS=\$'\n' && ses_names=(\$(sort <<<"\${ses_names[*]}")) && unset IFS
 [[ \${#ses_names[@]} -eq 0 ]] && ses_names="none"
 
 # load in functions & variables
@@ -30,7 +31,9 @@ source /home/data/NDClab/tools/lab-devOps/scripts/monitor/tools.sh
 
 usage() { echo "Usage: sh hallMonitor.sh [-m/-r] [string list of replacement or mapping]" 1>&2; exit 1; }
 
-
+echo "calling verify-copy.py"
+output=\$( python \${dataset}/data-monitoring/verify-copy.py \$dataset)
+echo -e "\$output"
 
 
 error_detected=false
@@ -38,17 +41,9 @@ error_detected=false
 for ses in \${ses_names[@]}
 do
 	[[ \$ses == "none" ]] && ses="" # if no session directories set ses to empty
-	#dirs=(\$(find \$raw/\$ses -mindepth 1 -maxdepth 1 -type d -printf "%f\n"))
-	#[[ \${dirs[*]} != *redcap* ]] && dirs+=("redcap")
-	#data_types=\${dirs[*]}; data_types=\${data_types// /,}
-	#for dir in \${dirs[@]}
-	#do
-	    # If psychopy or pavlovia dataset
-	    # If redcap dataset
-	    #if [ "\$dir" == "redcap" ]; then
-		#echo "Accessing \$raw/\$ses\$dir"
 	if [ ! -d \$raw/\${ses}redcap ]; then
-		echo "Error: no redcap folder found in \$raw/\$ses directory"
+		echo "No redcap folder found in \$raw/\$ses directory"
+                redcaps=("")
 	else
 		echo "Accessing \$raw/\${ses}redcap"
 		# if redcap does not exist in checked, create it
@@ -92,15 +87,12 @@ do
 		done
 	fi
 
-	echo "calling verify-copy.py"
-	output=\$( python \${dataset}/data-monitoring/verify-copy.py \$dataset)
-	echo -e "\$output"
-
-	echo "updating tracker, ses: \$ses, redcaps: \${redcaps[*]}"
-        command=\$(echo "echo \$raw/\${ses}redcap/{\$(echo \${redcaps[*]} | sed 's/ /,/g')}")
-        redcap_files=\$(eval \$command); redcap_files=\${redcap_files// /,} # comma separated list of redcaps in optional session folder
-        [[ \${redcaps[*]} == "" ]] && redcap_files=none
-        [[ \$ses == "" ]] && ses="none"
+        if [[ ! \${redcaps[*]} == "" ]]; then
+	    echo "updating tracker, ses: \$ses, redcaps: \${redcaps[*]}"
+            command=\$(echo "echo \$raw/\${ses}redcap/{\$(echo \${redcaps[*]} | sed 's/ /,/g')}")
+            redcap_files=\$(eval \$command); redcap_files=\${redcap_files// /,} # comma separated list of redcaps in optional session folder
+            [[ \${redcaps[*]} == "" ]] && redcap_files=none
+            [[ \$ses == "" ]] && ses="none"
             if [[ \$ses == "none" ]]; then
 	        # update trackers
 	        output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \$ses \$childdata)
@@ -108,10 +100,11 @@ do
                 echo -e "\$output"
             else
 	        ses_re='^.*'\${ses:0:-1}'.*\$'
-	            output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses:0:-1} \$childdata)
-		    echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses:0:-1} \$childdata"
-                    echo -e "\$output"
+	        output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses:0:-1} \$childdata)
+		echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses:0:-1} \$childdata"
+                echo -e "\$output"
 	    fi
+        fi
 
 done
 
