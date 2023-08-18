@@ -135,14 +135,12 @@ if __name__ == "__main__":
                                         presence = True
                                         # copy file to checked, unless "corrected" is seen
                                         if not isdir(join(checked, subject, ses, datatype)):
-                                            print("Creating ", join(subject, ses, datatype), " directory in checked")
+                                            print(c.GREEN + "Creating ", join(subject, ses, datatype), " directory in checked" + c.ENDC)
                                             makedirs(join(checked, subject, ses, datatype))
                                         if not isfile(join(checked, subject, ses, datatype, raw_file)):
                                             print(c.GREEN + "Copying ", raw_file, " to checked" + c.ENDC)
                                             shutil.copy(join(raw, ses, datatype, subject, raw_file), join(checked, subject, ses, datatype, raw_file))
                                         copied_files.append(raw_file)
-                        #if not len(copied_files) == len(fileexts):
-                            #print("Not all required files found in", join(raw, ses, datatype, subject), "; files seen:", ", ".join(copied_files) + ", expected files with extensions:", ", ".join(fileexts))
             else:
                 print(c.RED + "Error: can\'t find ", datatype, "directory under ", raw, "/", ses + c.ENDC)
 
