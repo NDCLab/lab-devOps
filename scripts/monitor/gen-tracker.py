@@ -12,12 +12,14 @@ if __name__ == "__main__":
     df_dd = pd.read_csv(DATA_DICT)
 
     headers = []
-    headers.append('id')
-    for _, row in df_dd.iloc[1:].iterrows():
+    sessionless = ["id", "consent", "assent"]
+    headers.extend(sessionless)
+    for _, row in df_dd.iloc[0:].iterrows():
         # skip header
-        # every row but 'id' should have allowed suffixes
-        for suf in row["allowedSuffix"].split(', '):
-            headers.append(row["variable"] + '_' + suf)
+        # every row but 'id', 'consent', and assent should have allowed suffixes
+        if row["variable"] not in sessionless:
+            for suf in row["allowedSuffix"].split(', '):
+                headers.append(row["variable"] + '_' + suf)
 
     # write id 1000 numbers 
     with open(filepath, "w") as file:
