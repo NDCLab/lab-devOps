@@ -7,26 +7,13 @@ import re
 import math
 
 
-
-# list audio-vid data
-audivid = ["zoom", "audio", "video", "audacity"]
-# list pav-psy data
-pavpsy = ["pavlovia", "psychopy"]
-# list eeg systems
-eeg = ["eeg", "digi"]
 # list hallMonitor key
 provenance = ["code-hallMonitor", "code-instruments"]
 completed = "_complete"
 
-class bcolors:
+class c:
     RED = '\033[31m'
     GREEN = '\033[32m'
-    YELLOW  = '\033[33m'
-    BLUE    = '\033[34m'
-    MAGENTA = '\033[35m'
-    CYAN    = '\033[36m'
-    WHITE   = '\033[37m'
-    RESET   = '\033[39m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
@@ -41,10 +28,9 @@ def get_redcap_columns(datadict_df):
     cols = {}
     for _, row in df.iterrows():
         # skip redcap static
-        if "redcap" in row["variable"]:
-            continue
-        # skip other data checks
-        if "audacity" in row["variable"] or "bv" in row["variable"]:
+        if row["variable"].startswith("consent") or row["variable"].startswith("assent"):
+            cols[row["variable"] + completed] = row["variable"]
+            cols[row["variable"] + "es" + completed] = row["variable"]
             continue
         allowed_suffixes = row["allowedSuffix"].split(", ")
         for ses_tag in allowed_suffixes:
@@ -57,7 +43,6 @@ def get_redcap_columns(datadict_df):
                 multiple_report_tag = '' if not surv_match.group(4) else surv_match.group(4)
                 surv_esp = surv_match.group(1) + 'es' + surv_version + scrd_str + multiple_report_tag + ses_tag
                 cols[surv_esp + completed] = row["variable"]
-    cols["consentes_complete"] = "consent" # Redcap col name is consent_es_complete not consentes_complete
     return cols
 
 def get_multiple_reports_tags(datadict_df):
@@ -79,7 +64,7 @@ def get_tasks(datadict_df):
             if isinstance(row["dataType"], str) and isinstance(row["expectedFileExts"], str):
                 tasks_dict[row["variable"]] = [row["dataType"], row["expectedFileExts"]]
             else:
-                print("Error: Must have dataType and expectedFileExts fields in datadict for ", row["variable"], ", skipping.")
+                print(c.RED + "Error: Must have dataType and expectedFileExts fields in datadict for ", row["variable"], ", skipping." + c.ENDC)
     return tasks_dict
 
 if __name__ == "__main__":
@@ -183,13 +168,13 @@ if __name__ == "__main__":
                                 lang_re = re.match('^' + session_type + 'paid_lang.*(s[0-9]+_r[0-9]+(_e[0-9]+)?)', key)
                                 if lang_re:
                                     sess = lang_re.group(1)
-                                    tracker_df.loc[child_id, 'plang' + session_type + '_' + sess] = str(int(value) - 1) # 0 for english 1 for sp?
+                                    tracker_df.loc[child_id, 'plang' + session_type + '_' + sess] = str(int(value)) # 1 for english 2 for sp
                         parentid_re = re.match('30([089])\d{4}', str(row.name))
                         if parentid_re and 'sess' in locals():
                             if parentid_re.group(1) == '8':
-                                tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "0"
+                                tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "8"
                             elif parentid_re.group(1) == '9':
-                                tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "1" # 0 for primary parent, 1 for secondary?
+                                tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "9" # 8 for primary parent, 9 for secondary
 
             duplicate_cols = []
             for col, _ in tracker_df.iteritems():
@@ -225,6 +210,8 @@ if __name__ == "__main__":
             else:
                 continue
             try:
+                if "suffix" in locals():
+                    del suffix
                 all_files_present = True
                 for ext in file_exts:
                     file_present = False
@@ -239,13 +226,15 @@ if __name__ == "__main__":
                 if all_files_present:
                     tracker_df.loc[dir_id, task + "_" + suffix] = "1"
                 else:
-                    tracker_df.loc[dir_id, task] = "0"
+                    if "suffix" in locals():
+                        tracker_df.loc[dir_id, task + "_" + suffix] = "0"
             except:
-                tracker_df.loc[dir_id, task] = "0"
+                if "suffix" in locals():
+                    tracker_df.loc[dir_id, task + "_" + suffix] = "0"
 
     tracker_df.to_csv(data_tracker_file)
 
             # make remaining empty values equal to 0
             # tracker_df[collabel] = tracker_df[collabel].fillna("0")
         #tracker_df.to_csv(data_tracker_file)
-    print("Success: {} data tracker updated.".format(', '.join([dtype[0] for dtype in list(tasks_dict.values())])))
+    print(c.GREEN + "Success: {} data tracker updated.".format(', '.join([dtype[0] for dtype in list(tasks_dict.values())])) + c.ENDC)
