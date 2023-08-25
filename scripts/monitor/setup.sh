@@ -24,11 +24,8 @@ sleep 2
 
 # interpret optional t flag to construct tracker
 
-while getopts "nct" opt; do
+while getopts "ct" opt; do
   case "${opt}" in
-    n)
-      ntasksdatamismatch=true
-      ;;
     c)
       childdata=true
       ;;
@@ -40,7 +37,6 @@ while getopts "nct" opt; do
       ;;
   esac
 done
-[[ -z $ntasksdatamismatch ]] && ntasksdatamismatch=false
 [[ -z $childdata ]] && childdata=false
 
 shift $((OPTIND-1))
@@ -82,7 +78,7 @@ if [ -f "${project}/${datam_path}/hallMonitor.sub" ]; then
     rm -f "${project}/${datam_path}/hallMonitor.sub"
 fi
 # set up hallMonitor sh file with preset tasks instead of simply copying
-sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $ntasksdatamismatch $childdata
+sh "${labpath}/constructMonitor.sh" "/home/data/NDClab/datasets/${project}" $childdata
 # sets up hallMonitor sub file without any default mapping or replacement
 cp "${labpath}/template/hallMonitor.sub" "${project}/${datam_path}"
 
