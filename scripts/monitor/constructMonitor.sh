@@ -2,8 +2,7 @@
 # A script to construct your hallMonitor file
 
 projpath=$1
-ntasksdatamismatch=$2
-childdata=$3
+childdata=$2
 
 # write out hallMonitor file with template strings
 cat <<EOF >> "${projpath}/data-monitoring/hallMonitor.sh"
@@ -11,11 +10,8 @@ cat <<EOF >> "${projpath}/data-monitoring/hallMonitor.sh"
 
 # init proj specific variables
 dataset="${projpath}"
-ntasksdatamismatch="${ntasksdatamismatch}"
 childdata="${childdata}"
-[[ \$ntasksdatamismatch == true ]] && ignore_mismatch_err="true"
 [[ \$childdata == true ]] && childdata="true"
-logfile="\${dataset}/data-monitoring/data-monitoring-log.md"
 
 # determine if sourcedata/raw has session folders, reproduce session+run structure in checked
 ses_re='^s[0-9]+_r[0-9]+$'
@@ -107,11 +103,5 @@ do
         fi
 
 done
-
-if [ \$error_detected = true ]; then
-    update_log "error" \$logfile
-else
-    update_log "success" \$logfile
-fi
 
 EOF
