@@ -10,7 +10,7 @@ labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg # needed for pandas
 
 # TODO: include ndc colors
-cat << "EOF"
+cat <<EOF
  .__   __.  _______   ______  __          ___      .______
  |  \ |  | |       \ /      ||  |        /   \     |   _  \
  |   \|  | |  .--.  |  ,----'|  |       /  ^  \    |  |_)  |
@@ -41,10 +41,21 @@ done
 
 shift $((OPTIND-1))
 project=$1
-id=$2
+dataset="/home/data/NDClab/datasets/${project}"
+source $labpath/tools.sh
+rc_dirs=$(find $raw -type d -name "redcap")
+rc_arr=()
+for subdir in ${rc_dirs}; do
+    redcaps=($(get_new_redcaps $subdir))
+    for filename in ${redcaps[@]}; do
+        rc_arr+=($subdir/$filename)
+    done
+done
+all_redcaps=$(echo ${rc_arr[*]} | sed 's/ /,/g')
+
 if [[ $gen_tracker == true ]]; then
     echo "Setting up central tracker"
-    python "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $id $project
+    python "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $project $all_redcaps
     chmod +x "${project}/${datam_path}/central-tracker_${project}.csv"
 fi
 
@@ -68,6 +79,7 @@ cp "${labpath}/template/check-id.py" "${project}/${datam_path}"
 chmod +x "${project}/${datam_path}/rename-cols.py"
 chmod +x "${project}/${datam_path}/update-tracker.py"
 chmod +x "${project}/${datam_path}/verify-copy.py"
+chmod +x "${project}/${datam_path}/check-id.py"
 
 echo "Setting up hallMonitor.sh"
 # delete if previously written
@@ -95,4 +107,3 @@ cp "${labpath}/template/preprocess.sub" "${project}/${datam_path}"
 
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/preprocess.sub"
-chmod +x "${project}/${datam_path}/check-id.py"
