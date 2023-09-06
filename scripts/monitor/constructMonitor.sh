@@ -59,7 +59,9 @@ do
 			echo -e "\\t Newest Redcap found: \$redcap_file"
 			
 			# move only if data does not already exist in checked
-			if [ -f "\$check/redcap/\$redcap_file" ]; then
+                        cmp --silent "\$raw/\${ses}redcap/\$redcap_file" "\$check/redcap/\$redcap_file"
+                        same_file=\$(echo \$?)
+			if [ -f "\$check/redcap/\$redcap_file" ] && [ \$same_file -eq 0 ]; then
 				echo -e "\\t redcap/\$redcap_file already exists in checked, skipping copy \\n"
 				continue
 			fi
