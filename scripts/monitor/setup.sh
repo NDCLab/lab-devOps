@@ -10,7 +10,7 @@ labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg # needed for pandas
 
 # TODO: include ndc colors
-cat <<EOF
+cat << "EOF"
  .__   __.  _______   ______  __          ___      .______
  |  \ |  | |       \ /      ||  |        /   \     |   _  \
  |   \|  | |  .--.  |  ,----'|  |       /  ^  \    |  |_)  |

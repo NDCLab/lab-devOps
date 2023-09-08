@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # build dict of expected files/datatypes from datadict
     for var, row in df_dd.iterrows():
         if row["dataType"] not in datatypes_to_ignore and (isinstance(row["dataType"], str) or not math.isnan(row["dataType"])):
-            dd_dict[var] = [row["dataType"], row["allowedSuffix"], row["expectedFileExts"], row["allowedValues"]]
+            dd_dict[var] = [row["dataType"], row["allowedSuffix"], row["expectedFileExt"], row["allowedValues"]]
 
     allowed_subs = df_dd.loc["id", "allowedValues"]
     allowed_subs_re = "^(" + allowed_subs.replace(" ", "").replace("X", ".").replace(",", "|") + ")$"

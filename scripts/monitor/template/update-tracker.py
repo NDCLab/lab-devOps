@@ -240,14 +240,14 @@ if __name__ == "__main__":
                             elif parentid_re.group(1) == '9':
                                 tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "9" # 8 for primary parent, 9 for secondary
 
-            # for subject IDs missing from parent redcaps, fill in "0" for plang/pidentity
+            # for subject IDs missing from parent redcaps, fill in "NA" for plang/pidentity
             for session_type in ['bbs', 'iqs']:
                 if session_type + 'parent' in redcap_path:
                     for subj in set(subjects).difference(rc_subjects):
                         for col in tracker_df.columns:
                             if re.match('^p(lang|identity)' + session_type + '_' + session + '_e[0-9]+$', col):
                                 try:
-                                    tracker_df.loc[subj, col] = "0"
+                                    tracker_df.loc[subj, col] = "NA"
                                 except Exception as e_msg:
                                     continue
             # for subject IDs missing from redcap, fill in "0" in redcap columns
