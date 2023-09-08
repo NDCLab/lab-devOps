@@ -1,11 +1,11 @@
 import pandas as pd
 import sys
-from os.path import basename, normpath, join, isdir, splitext
+from os.path import basename, normpath, join, isdir, isfile, splitext
 from os import listdir, walk
 import pathlib
 import re
 import math
-
+import datetime
 
 # list hallMonitor key
 provenance = ["code-hallMonitor", "code-instruments"]
@@ -61,11 +61,47 @@ def get_tasks(datadict_df):
     datatypes_to_ignore = ["id", "consent", "assent", "redcap_data", "redcap_scrd", "parent_info"]
     for _, row in df.iterrows():
         if row["dataType"] not in datatypes_to_ignore:
-            if isinstance(row["dataType"], str) and isinstance(row["expectedFileExts"], str):
-                tasks_dict[row["variable"]] = [row["dataType"], row["expectedFileExts"]]
+            if isinstance(row["dataType"], str) and isinstance(row["expectedFileExt"], str):
+                tasks_dict[row["variable"]] = [row["dataType"], row["expectedFileExt"], row["allowedSuffix"]]
             else:
-                print(c.RED + "Error: Must have dataType and expectedFileExts fields in datadict for ", row["variable"], ", skipping." + c.ENDC)
+                print(c.RED + "Error: Must have dataType, expectedFileExt, and allowedSuffix fields in datadict for ", row["variable"], ", skipping." + c.ENDC)
     return tasks_dict
+
+def get_IDs(datadict_df):
+    df_dd = datadict_df
+    id_desc = df_dd.set_index("variable").loc["id", "description"].split(" ")
+    # ID description column should contain redcap and variable from which to read IDs, in format 'file: "{name of redcap}"; variable: "{column name}"'
+    for i in id_desc:
+        if "file:" in i:
+            idx = id_desc.index(i)+1
+            id_rc = id_desc[idx].strip("\"\';,()")
+        elif "variable:" in i:
+            idx = id_desc.index(i)+1
+            var = id_desc[idx].strip("\"\';,()")
+    if "id_rc" not in locals() or "var" not in locals():
+        sys.exit("Can\'t find redcap column to read IDs from in datadict")
+
+    redcap_files = [join(checked_path,"redcap",f) for f in listdir(join(checked_path,"redcap")) if isfile(join(checked_path,"redcap",f))]
+    for redcap in redcap_files:
+
+        rc_re = re.match('^' + id_rc + '.*_data_(\d{4}-\d{2}-\d{2}_\d{4}).*$', basename(redcap).lower())
+        if rc_re:
+            timestamp = rc_re.group(1)
+            date = datetime.datetime.strptime(timestamp,'%Y-%m-%d_%H%M')
+            if "newest_date" not in locals():
+                newest_date = date
+                consent_redcap = redcap
+            else:
+                if date > newest_date:
+                    newest_date = date
+                    consent_redcap = redcap
+            
+    if "consent_redcap" not in locals():
+        sys.exit("Can\'t find" + id_rc + "redcap to read IDs from")
+    consent_redcap = pd.read_csv(consent_redcap, index_col=var)
+    ids = consent_redcap.index.tolist()
+    return ids
+
 
 if __name__ == "__main__":
     checked_path = sys.argv[1]
@@ -86,18 +122,26 @@ if __name__ == "__main__":
     redcheck_columns = get_redcap_columns(df_dd)
     multiple_reports_tags = get_multiple_reports_tags(df_dd)
     tasks_dict = get_tasks(df_dd)
+    ids = get_IDs(df_dd)
     
     # extract project path from dataset
     proj_name = basename(normpath(dataset))
 
     data_tracker_file = "{}/data-monitoring/central-tracker_{}.csv".format(dataset, proj_name)
-    tracker_df = pd.read_csv(data_tracker_file, index_col="id")
-    ids = [id for id in tracker_df.index]
-    subjects = []
+    tracker_df = pd.read_csv(data_tracker_file)
+
+    tracker_ids = tracker_df["id"].tolist()
+    new_subjects = list(set(ids).difference(tracker_ids))
+    if len(new_subjects) > 0:
+        new_subjects_df = pd.DataFrame({"id": new_subjects})
+        tracker_df = tracker_df.append(new_subjects_df)
+    tracker_df = tracker_df.set_index("id")
+    tracker_df.sort_index(axis="index", inplace=True)
+
+    subjects = tracker_df.index.to_list()
 
     all_redcap_columns = dict() # list of all redcap columns whose names should be mirrored in central tracker
     
-    #if "redcap" in data_types and redcaps[0] != "none":
     if redcaps[0] != "none":
         allowed_duplicate_columns = []
         for redcap_path in redcaps:
@@ -118,6 +162,31 @@ if __name__ == "__main__":
                     if vals[rc_col] > 1:
                         dupes.append(rc_col)
                 sys.exit('Error: Duplicate columns found in redcap ' + redcap_path + ': ' + ', '.join(dupes) + '. Exiting')
+
+            rc_subjects = []
+            rc_ids = rc_df.index.tolist()
+            if child == 'true':
+                for id in rc_ids:
+                    if re.search('30[089](\d{4})', str(id)):
+                        child_id = int('300' + re.search('30[089](\d{4})', str(id)).group(1))
+                        rc_subjects.append(child_id)
+            else:
+                rc_subjects = rc_ids
+            rc_subjects.sort()
+
+            all_keys = dict()
+            for key, value in redcheck_columns.items():
+                all_keys[key] = value
+                for tag in multiple_reports_tags:
+                    surv_re = re.match('^([a-zA-Z0-9\-]+)(_[a-z])?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?(_s[0-9]+_r[0-9]+_e[0-9]+)$', value)
+                    if tag in redcap_path and surv_re and surv_re.group(4) == '_' + tag:
+                        surv_version = '' if not surv_re.group(2) else surv_re.group(2)
+                        scrd_str = '' if not surv_re.group(3) else surv_re.group(3)
+                        key = surv_re.group(1) + surv_version + scrd_str + surv_re.group(5) + completed
+                        allowed_duplicate_columns.append(key)
+                        all_keys[key] = value
+                # adds "parent" to redcap column name in central tracker
+
             for index, row in rc_df.iterrows():
                 if (isinstance(index, float) or isinstance(index, int)) and not math.isnan(index):
                     id = int(row.name)
@@ -136,20 +205,12 @@ if __name__ == "__main__":
                 if child_id not in tracker_df.index:
                     print(child_id, "missing in tracker file, skipping")
                     continue
-                if child_id not in subjects:
-                    subjects.append(child_id)
-                for key, value in redcheck_columns.items():
-                    for tag in multiple_reports_tags:
-                        surv_re = re.match('^([a-zA-Z0-9\-]+)(_[a-z])?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?(_s[0-9]+_r[0-9]+_e[0-9]+)$', value)
-                        if tag in redcap_path and surv_re and surv_re.group(4) == '_' + tag:
-                            surv_version = '' if not surv_re.group(2) else surv_re.group(2)
-                            scrd_str = '' if not surv_re.group(3) else surv_re.group(3)
-                            key = surv_re.group(1) + surv_version + scrd_str + surv_re.group(5) + completed
-                            allowed_duplicate_columns.append(key)
-                    # adds "parent" to redcap column name in central tracker
 
+                keys_in_redcap = dict()
+                for key, value in all_keys.items():
                     try:
                         val = rc_df.loc[id, key]
+                        keys_in_redcap[key] = value
                         try:
                             if tracker_df.loc[child_id, value] == "1":
                                 # if value already set continue
@@ -161,8 +222,11 @@ if __name__ == "__main__":
                     except Exception as e_msg:
                         continue
 
+
                 for session_type in ['bbs', 'iqs']:
                     if session_type + 'parent' in redcap_path:
+                        if 'sess' in locals():
+                            del sess
                         for key, value in row.items():
                             if key.startswith(session_type + 'paid_lang'):
                                 lang_re = re.match('^' + session_type + 'paid_lang.*(s[0-9]+_r[0-9]+(_e[0-9]+)?)', key)
@@ -175,6 +239,25 @@ if __name__ == "__main__":
                                 tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "8"
                             elif parentid_re.group(1) == '9':
                                 tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "9" # 8 for primary parent, 9 for secondary
+
+            # for subject IDs missing from parent redcaps, fill in "0" for plang/pidentity
+            for session_type in ['bbs', 'iqs']:
+                if session_type + 'parent' in redcap_path:
+                    for subj in set(subjects).difference(rc_subjects):
+                        for col in tracker_df.columns:
+                            if re.match('^p(lang|identity)' + session_type + '_' + session + '_e[0-9]+$', col):
+                                try:
+                                    tracker_df.loc[subj, col] = "0"
+                                except Exception as e_msg:
+                                    continue
+            # for subject IDs missing from redcap, fill in "0" in redcap columns
+            for subj in set(subjects).difference(rc_subjects):
+                for key, value in keys_in_redcap.items():
+                    if re.match('^.*' + session + '_e[0-9]+$', value):
+                        try:
+                            tracker_df.loc[subj, value] = "0"
+                        except Exception as e_msg:
+                            continue
 
             duplicate_cols = []
             for col, _ in tracker_df.iteritems():
@@ -199,42 +282,49 @@ if __name__ == "__main__":
                 errmsg = errmsg + all_duplicate_cols[i] + " in " + redcaps_of_duplicates[i] + "; "
             sys.exit(errmsg + "Exiting.")
     else:
-        print('Can\'t find redcaps in ' + dataset + '/sourcedata/raw/redcap, skipping ')
+        sys.exit('Can\'t find redcaps in ' + dataset + '/sourcedata/raw/redcap, skipping ')
 
     for task, values in tasks_dict.items():
         datatype = values[0]
         file_exts = values[1].split(", ")
-        for subdir in listdir(checked_path):
-            if "sub-" in subdir:
-                dir_id = int(subdir[4:])
-            else:
-                continue
-            try:
-                if "suffix" in locals():
-                    del suffix
-                all_files_present = True
-                for ext in file_exts:
-                    file_present = False
-                    for filename in listdir(join(checked_path, subdir, session, datatype)):
-                        if re.match('^sub-' + str(dir_id) + '_' + task + '.*(s[0-9]+_r[0-9]+_e[0-9]+).*\\' + ext + '$', filename):
-                            file_present = True
-                            suffix = re.match('^sub-' + str(dir_id) + '_' + task + '.*(s[0-9]+_r[0-9]+_e[0-9]+).*\\' + ext + '$', filename).group(1)
-                            break
-                    if not file_present:
-                        all_files_present = False
-                        print("Can\'t find ", ext, " file in ", join(checked_path, subdir, session, datatype))
-                if all_files_present:
-                    tracker_df.loc[dir_id, task + "_" + suffix] = "1"
-                else:
-                    if "suffix" in locals():
-                        tracker_df.loc[dir_id, task + "_" + suffix] = "0"
-            except:
-                if "suffix" in locals():
-                    tracker_df.loc[dir_id, task + "_" + suffix] = "0"
+        file_sfxs = values[2].split(", ")
+        for subj in subjects:
+            subdir = "sub-" + str(subj)
+            dir_id = int(subj)
+            for sfx in file_sfxs:
+                suf_re = re.match('^(s[0-9]+_r[0-9]+)_e[0-9]+$', sfx)
+                if suf_re and suf_re.group(1) == session:
+                    try:
+                        corrected = False
+                        for filename in listdir(join(checked_path, subdir, session, datatype)):
+                            if re.match('^[Cc]orrected.*$', filename):
+                                corrected = True
+                                break
+                        all_files_present = True
+                        for ext in file_exts:
+                            file_present = False
+                            for filename in listdir(join(checked_path, subdir, session, datatype)):
+                                if corrected:
+                                    if re.match('^sub-' + str(dir_id) + '_' + task + '_' + sfx + '[a-zA-Z0-9_-]*\\' + ext + '$', filename):
+                                    # when corrected.txt file present allow string between suffix and ext (e.g. "s1_r1_e1_firstrun_practice.eeg")
+                                        file_present = True
+                                        break
+                                else:
+                                    if re.match('^sub-' + str(dir_id) + '_' + task + '_' + sfx + '\\' + ext + '$', filename):
+                                        file_present = True
+                                        break
+                            if not file_present:
+                                all_files_present = False
+                        if all_files_present:
+                            tracker_df.loc[dir_id, task + "_" + sfx] = "1"
+                        else:
+                            tracker_df.loc[dir_id, task + "_" + sfx] = "0"
+                    except:
+                        tracker_df.loc[dir_id, task + "_" + sfx] = "0"
 
     tracker_df.to_csv(data_tracker_file)
 
             # make remaining empty values equal to 0
             # tracker_df[collabel] = tracker_df[collabel].fillna("0")
-        #tracker_df.to_csv(data_tracker_file)
+
     print(c.GREEN + "Success: {} data tracker updated.".format(', '.join([dtype[0] for dtype in list(tasks_dict.values())])) + c.ENDC)
