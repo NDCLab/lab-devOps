@@ -20,7 +20,7 @@ function update_log {
         touch $logfile
     fi
     now=`date '+%Y-%m-%d_%T'`
-    echo "${now} Data monitoring status: ${status}" >> $logfile
+    echo "${now} Data monitoring status for job ${SLURM_JOB_ID}: ${status}" >> $logfile
 }
 
 # A function to get array of the newest redcap files according to redcap timestamp, not file modification date.
