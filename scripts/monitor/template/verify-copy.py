@@ -17,6 +17,19 @@ class c:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+def allowed_val(allowed_vals, value):
+    allowed_vals = allowed_vals.replace(" ", "")
+    intervals = re.split("[\[\]]", allowed_vals)
+    intervals = list(filter(lambda x: x not in [",", ""], intervals))
+    allowed = False
+    for interval in intervals:
+        lower = float(interval.split(",")[0])
+        upper = float(interval.split(",")[1])
+        if lower <= int(value) <= upper:
+            allowed = True
+            break
+    return allowed
+
 if __name__ == "__main__":
     dataset = sys.argv[1]
 
@@ -42,7 +55,6 @@ if __name__ == "__main__":
             dd_dict[var] = [row["dataType"], row["allowedSuffix"], row["expectedFileExt"], row["allowedValues"]]
 
     allowed_subs = df_dd.loc["id", "allowedValues"]
-    allowed_subs_re = "^(" + allowed_subs.replace(" ", "").replace("X", ".").replace(",", "|") + ")$"
 
     # now search sourcedata/raw for correct files
     for key, values in dd_dict.items():
@@ -101,7 +113,7 @@ if __name__ == "__main__":
                                 print(c.RED + "Error: file from session", file_re.group(5), "found in", ses, "folder:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
                             if file_re.group(9) not in possible_exts and len(file_re.group(9)) > 0:
                                 print(c.RED + "Error: file with extension", file_re.group(9), "found, doesn\'t match expected extensions", ", ".join(possible_exts), ":", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
-                            if not re.match(allowed_subs_re, file_re.group(2)) and file_re.group(2) != '':
+                            if file_re.group(2) != '' and not allowed_val(allowed_subs, file_re.group(2)):
                                 print(c.RED + "Error: subject number", file_re.group(2), "not an allowed subject value", allowed_subs, "in file:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
                             if file_re.group(3) not in dd_dict.keys():
                                 print(c.RED + "Error: variable name", file_re.group(3), "does not match any datadict variables, in file:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
