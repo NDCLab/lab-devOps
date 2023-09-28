@@ -9,14 +9,21 @@ labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 
 module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg # needed for pandas
 
-# TODO: include ndc colors
-cat << "EOF"
- .__   __.  _______   ______  __          ___      .______
- |  \ |  | |       \ /      ||  |        /   \     |   _  \
- |   \|  | |  .--.  |  ,----'|  |       /  ^  \    |  |_)  |
- |  . `  | |  |  |  |  |     |  |      /  /_\  \   |   _  <
- |  |\   | |  '--'  |  `----.|  `----./  _____  \  |  |_)  |
- |__| \__| |_______/ \______||_______/__/     \__\ |______/
+#include ndc colors
+c1=$'\033[95m'
+c2=$'\033[93m'
+c3=$'\033[33m'
+#c4=$'\033[34m'
+c4=$'\033[94m'
+c5=$'\033[92m'
+ENDC=$'\033[0m'
+cat <<EOF
+ ${c1}.__   __.${ENDC}  ${c2}_______${ENDC}   ${c3}______${ENDC}  ${c4}__${ENDC}          ${c5}___${ENDC}      ${c2}.______${ENDC}
+ ${c1}|  \ |  |${ENDC} ${c2}|       \\${ENDC} ${c3}/      |${ENDC}${c4}|  |${ENDC}        ${c5}/   \\${ENDC}     ${c2}|   _  \\${ENDC}
+ ${c1}|   \|  |${ENDC} ${c2}|  .--.${ENDC}  ${c3}|  ,----'${ENDC}${c4}|  |${ENDC}       ${c5}/  ^  \\${ENDC}    ${c2}|  |_)  |${ENDC}
+ ${c1}|  . \`  |${ENDC} ${c2}|  |  |${ENDC}  ${c3}|  |${ENDC}     ${c4}|  |${ENDC}      ${c5}/  /_\  \\${ENDC}   ${c2}|   _  <${ENDC}
+ ${c1}|  |\   |${ENDC} ${c2}|  '--'${ENDC}  ${c3}|  \`----.${ENDC}${c4}|  \`----.${ENDC}${c5}/  _____  \\${ENDC}  ${c2}|  |_)  |${ENDC}
+ ${c1}|__| \__|${ENDC} ${c2}|_______/${ENDC} ${c3}\______|${ENDC}${c4}|_______${ENDC}${c5}/__/     \__\\${ENDC} ${c2}|______/${ENDC}
 EOF
 
 echo -e "data monitoring setting up ... \\n"
