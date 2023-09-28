@@ -25,7 +25,7 @@ do
 		cd "$DIR/$REPO"
 		git fetch
 		MSG=$(git pull 2>&1)
-		echo $REPO; echo $MSG # make sure to output (possible) error message to log file
+		echo $MSG # make sure to output (possible) error message to log file
 		FILES=($(git status --porcelain))
                 [[ ${#FILES[@]} -gt 0 ]] && echo "Found ${#FILES[@]} modified/untracked files in $REPO"
 		[[ $MSG =~ "error: Your local changes" || ${#FILES[@]} -gt 0 ]] && repoarr+=("$REPO")
