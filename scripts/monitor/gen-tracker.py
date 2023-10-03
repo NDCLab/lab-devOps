@@ -3,12 +3,10 @@ import pandas as pd
 from os.path import basename
 import collections
 
-sessionless = ["id", "consent", "assent"]
-
 def check_data_dict_variables(df_dd):
     all_tracker_cols = []
     for _, row in df_dd.iterrows():
-        if row["variable"] not in sessionless:
+        if not isinstance(row["allowedSuffix"], float):
             for suf in row["allowedSuffix"].split(', '):
                 all_tracker_cols.append(row["variable"] + "_" + suf)
     duplicates = [col for col, count in collections.Counter(all_tracker_cols).items() if count > 1]
@@ -67,13 +65,19 @@ if __name__ == "__main__":
     ids = consent_redcap.index.tolist()
     
     headers = []
-    headers.extend(sessionless)
     for _, row in df_dd.iloc[0:].iterrows():
         # skip header
         # every row but 'id', 'consent', and assent should have allowed suffixes
-        if row["variable"] not in sessionless:
+        if not isinstance(row["allowedSuffix"], float):
             for suf in row["allowedSuffix"].split(', '):
                 headers.append(row["variable"] + '_' + suf)
+        else:
+            headers.append(row["variable"])
+
+
+
+
+
     # write ids 
     with open(filepath, "w") as file:
         # write columns
