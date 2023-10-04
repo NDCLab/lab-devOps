@@ -44,14 +44,17 @@ if __name__ == "__main__":
             sessions = True
             break
 
-    datatypes_to_ignore = ["id", "consent", "assent", "redcap_data", "redcap_scrd", "parent_info"]
-
     df_dd = pd.read_csv(datadict, index_col = "variable")
     dd_dict = dict()
 
+    task_vars = []
+    for _, row in df_dd.iterrows():
+        if not isinstance(row["expectedFileExt"], float):
+            task_vars.append(row.name)
+
     # build dict of expected files/datatypes from datadict
     for var, row in df_dd.iterrows():
-        if row["dataType"] not in datatypes_to_ignore and (isinstance(row["dataType"], str) or not math.isnan(row["dataType"])):
+        if row.name in task_vars:
             dd_dict[var] = [row["dataType"], row["allowedSuffix"], row["expectedFileExt"], row["allowedValues"]]
 
     allowed_subs = df_dd.loc["id", "allowedValues"]
@@ -59,7 +62,6 @@ if __name__ == "__main__":
     # now search sourcedata/raw for correct files
     for key, values in dd_dict.items():
         print("Verifying files for:", key)
-        #presence = False
         variable = key
         datatype = values[0]
         allowed_suffixes = values[1].split(", ")
@@ -85,12 +87,12 @@ if __name__ == "__main__":
                     obs_files = []
                     corrected = False
                     for raw_file in listdir(join(raw, ses, datatype, subject)):
-                        if re.match('^[Cc]orrected.*$', raw_file):
+                        if re.match('^[Dd]eviation.*$', raw_file):
                             corrected = True
                         else:
                             obs_files.append(raw_file)
                     if corrected:
-                        print("Corrected.txt seen in ", join(raw, ses, datatype, subject), ", skipping copy.")
+                        print("deviation.txt seen in ", join(raw, ses, datatype, subject), ", skipping copy.")
                         for raw_file in listdir(join(raw, ses, datatype, subject)):
                             # still check that files are in the correct subject folder and session folder
                             file_re = re.match("^(sub-[0-9]*)_([a-zA-Z0-9_-]*_)?(s[0-9]*_r[0-9]*)_e[0-9]*.*$", raw_file)
@@ -117,6 +119,10 @@ if __name__ == "__main__":
                                 print(c.RED + "Error: subject number", file_re.group(2), "not an allowed subject value", allowed_subs, "in file:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
                             if file_re.group(3) not in dd_dict.keys():
                                 print(c.RED + "Error: variable name", file_re.group(3), "does not match any datadict variables, in file:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
+                            #
+                            if datatype not in file_re.group(3):
+                                print(c.RED + "Error: variable name", file_re.group(3), "does not contain the name of the enclosing datatype folder", datatype, "in file:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
+                            #
                             if file_re.group(4) not in allowed_suffixes:
                                 print(c.RED + "Error: suffix", file_re.group(4), "not in allowed suffixes", ", ".join(allowed_suffixes), "in file:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
                             if file_re.group(2) == "":
@@ -145,7 +151,7 @@ if __name__ == "__main__":
                                 for raw_file in listdir(join(raw, ses, datatype, subject)):
                                     if re.match(subject + "_" + variable + "_" + suffix + ext, raw_file):
                                         presence = True
-                                        # copy file to checked, unless "corrected" is seen
+                                        # copy file to checked, unless "deviation" is seen
                                         if not isdir(join(checked, subject, ses, datatype)):
                                             print(c.GREEN + "Creating ", join(subject, ses, datatype), " directory in checked" + c.ENDC)
                                             makedirs(join(checked, subject, ses, datatype))
