@@ -45,12 +45,6 @@ if __name__ == "__main__":
     check_data_dict_variables(df_dd)
     check_data_dict_provenance(df_dd)
 
-    if not changes_in_dict.empty:
-        print("Error: changes found, listed belowe")
-        print(changes_in_dict)
-    else:
-        
-    
     id_desc = df_dd.set_index("variable").loc["id", "provenance"].split(" ")
     # ID description column should contain redcap and variable from which to read IDs, in format 'file: "{name of redcap}"; variable: "{column name}"'
     for i in id_desc:
@@ -79,18 +73,12 @@ if __name__ == "__main__":
                 headers.append(row["variable"] + '_' + suf)
         else:
             headers.append(row["variable"])
-
-
-
-
-
     # write ids 
     with open(filepath, "w") as file:
         # write columns
         file.write(','.join(headers) + "\n")
         for id in ids:
             file.write(str(id) + "\n")
-
 
     dd_latest = splitext(DATA_DICT)[0] + "_latest.csv"
     shutil.copy(DATA_DICT, dd_latest)

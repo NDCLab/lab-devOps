@@ -119,10 +119,8 @@ if __name__ == "__main__":
                                 print(c.RED + "Error: subject number", file_re.group(2), "not an allowed subject value", allowed_subs, "in file:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
                             if file_re.group(3) not in dd_dict.keys():
                                 print(c.RED + "Error: variable name", file_re.group(3), "does not match any datadict variables, in file:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
-                            #
                             if datatype not in file_re.group(3):
                                 print(c.RED + "Error: variable name", file_re.group(3), "does not contain the name of the enclosing datatype folder", datatype, "in file:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
-                            #
                             if file_re.group(4) not in allowed_suffixes:
                                 print(c.RED + "Error: suffix", file_re.group(4), "not in allowed suffixes", ", ".join(allowed_suffixes), "in file:", join(raw, ses, datatype, subject, raw_file) + c.ENDC)
                             if file_re.group(2) == "":
