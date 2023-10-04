@@ -6,6 +6,8 @@ usage() { echo "Usage: setup.sh [-t] [-n] [-c] [-p surv1,surv2,surv3] <project-p
 datam_path="data-monitoring"
 code_path="code"
 labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
+datapath="/home/data/NDClab/datasets"
+cd $datapath
 
 module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg # needed for pandas
 
@@ -81,12 +83,14 @@ cp "${labpath}/template/rename-cols.py" "${project}/${datam_path}"
 cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
 cp "${labpath}/template/verify-copy.py" "${project}/${datam_path}"
 cp "${labpath}/template/check-id.py" "${project}/${datam_path}"
+cp "${labpath}/template/check-datadict.py" "${project}/${datam_path}"
 
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/rename-cols.py"
 chmod +x "${project}/${datam_path}/update-tracker.py"
 chmod +x "${project}/${datam_path}/verify-copy.py"
 chmod +x "${project}/${datam_path}/check-id.py"
+chmod +x "${project}/${datam_path}/check-datadict.py"
 
 echo "Setting up hallMonitor.sh"
 # delete if previously written

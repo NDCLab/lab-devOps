@@ -1,7 +1,8 @@
 import sys
 import pandas as pd
-from os.path import basename
+from os.path import basename, splitext, isfile
 import collections
+import shutil
 
 def check_data_dict_variables(df_dd):
     all_tracker_cols = []
@@ -33,7 +34,6 @@ def check_data_dict_provenance(df_dd):
     if len(duplicates) > 0:
         sys.exit("Error in data dictionary, duplicate provenances seen: " + "; ".join(duplicates))
 
-
 if __name__ == "__main__":
     filepath = sys.argv[1]
     project = sys.argv[2]
@@ -44,6 +44,12 @@ if __name__ == "__main__":
     df_dd = pd.read_csv(DATA_DICT)
     check_data_dict_variables(df_dd)
     check_data_dict_provenance(df_dd)
+
+    if not changes_in_dict.empty:
+        print("Error: changes found, listed belowe")
+        print(changes_in_dict)
+    else:
+        
     
     id_desc = df_dd.set_index("variable").loc["id", "provenance"].split(" ")
     # ID description column should contain redcap and variable from which to read IDs, in format 'file: "{name of redcap}"; variable: "{column name}"'
@@ -84,3 +90,7 @@ if __name__ == "__main__":
         file.write(','.join(headers) + "\n")
         for id in ids:
             file.write(str(id) + "\n")
+
+
+    dd_latest = splitext(DATA_DICT)[0] + "_latest.csv"
+    shutil.copy(DATA_DICT, dd_latest)
