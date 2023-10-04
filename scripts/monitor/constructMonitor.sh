@@ -27,6 +27,10 @@ source /home/data/NDClab/tools/lab-devOps/scripts/monitor/tools.sh
 
 usage() { echo "Usage: sh hallMonitor.sh [-m/-r] [string list of replacement or mapping]" 1>&2; exit 1; }
 
+echo "checking that the data dictionary is up to date"
+output=\$( python \${dataset}/data-monitoring/check-datadict.py \$dataset)
+echo -e "\$output"
+
 echo "calling verify-copy.py"
 output=\$( python \${dataset}/data-monitoring/verify-copy.py \$dataset)
 echo -e "\$output"
