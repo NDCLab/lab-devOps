@@ -153,7 +153,7 @@ if __name__ == "__main__":
                                         if not isdir(join(checked, subject, ses, datatype)):
                                             print(c.GREEN + "Creating ", join(subject, ses, datatype), " directory in checked" + c.ENDC)
                                             makedirs(join(checked, subject, ses, datatype))
-                                        if not isfile(join(checked, subject, ses, datatype, raw_file)):
+                                        if not isfile(join(checked, subject, ses, datatype, raw_file)) and splitext(raw_file)[1] != '.gpg':
                                             print(c.GREEN + "Copying ", raw_file, " to checked" + c.ENDC)
                                             shutil.copy(join(raw, ses, datatype, subject, raw_file), join(checked, subject, ses, datatype, raw_file))
                                         copied_files.append(raw_file)
