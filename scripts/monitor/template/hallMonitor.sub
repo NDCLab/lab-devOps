@@ -7,7 +7,7 @@
 # load python modules and execute
 #module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg
 #./hallMonitor.sh
-singularity exec -e /home/data/NDClab/tools/containers/fmriprep/fmriprep-22.1.0.sif ./hallMonitor.sh
+singularity exec -e /home/data/NDClab/tools/containers/python-3.8/python-3.8.simg ./hallMonitor.sh
 
 source /home/data/NDClab/tools/lab-devOps/scripts/monitor/tools.sh
 logfile="data-monitoring-log.md"
