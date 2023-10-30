@@ -149,8 +149,65 @@ def fill_combination_columns(tracker_df, dd_df):
                 tracker_df.loc[id, combined_col] = "1"
             else:
                 tracker_df.loc[id, combined_col] = "0"
-        if not any(tracker_df.loc[:, combined_col]):
+        if not any(tracker_df.loc[:, combined_col] == "1"):
             tracker_df.loc[:, combined_col] = "" # all zeros columns leave blank
+
+def parent_columns(datadict_df):
+    parent_info = dict()
+    for _, row in datadict_df.iterrows():
+        if row["dataType"] == "parent_identity":
+            prov = row["provenance"].split(" ")
+            if "file:" in prov and "variable:" in prov:
+                idx = prov.index("file:")
+                rc_filename = prov[idx+1].strip("\";")
+                idx = prov.index("variable:")
+                rc_variable = prov[idx+1].strip("\";")
+                parent_info.setdefault(rc_filename,[]).append(row["variable"])
+            else:
+                continue
+            rc_df = pd.read_csv(all_redcap_paths[rc_filename])
+            parent_ids = list(rc_df.loc[:, rc_variable])
+            for id in parent_ids:
+                if re.search(study_no + '[089](\d{4})', str(id)):
+                    child_id = study_no + '0' + re.search(study_no + '([089])(\d{4})', str(id)).group(2)
+                    child_id = int(child_id)
+                    parent = re.search(study_no + '([089])(\d{4})', str(id)).group(1)
+                else:
+                    continue
+                try:
+                    for suf in row["allowedSuffix"].split(", "):
+                        if re.match("^" + session + "_e[0-9]+$", suf):
+                            tracker_df.loc[child_id, row["variable"] + "_" + suf] = parent
+                except:
+                    continue
+        elif row["dataType"] == "parent_lang":
+            prov = row["provenance"].split(" ")
+            if "file:" in prov and "variable:" in prov:
+                idx = prov.index("file:")
+                rc_filename = prov[idx+1].strip("\";")
+                idx = prov.index("variable:")
+                rc_variable = prov[idx+1].strip("\";")
+                parent_info.setdefault(rc_filename,[]).append(row["variable"])
+            else:
+                continue
+            rc_df = pd.read_csv(all_redcap_paths[rc_filename], index_col="record_id")
+            for col in rc_df.columns:
+                lang_re = re.match(rc_variable + "_(s[0-9]+_r[0-9]+_e[0-9]+)", col)
+                if lang_re:
+                    for _, rc_row in rc_df.iterrows():
+                        if re.search(study_no + '[089](\d{4})', str(rc_row.name)):
+                            child_id = study_no + '0' + re.search(study_no + '([089])(\d{4})', str(rc_row.name)).group(2)
+                            child_id = int(child_id)
+                            if str(rc_row[col]) == "1" or str(rc_row[col]) == "2":
+                                try:
+                                    for suf in row["allowedSuffix"].split(", "):
+                                        if re.match("^" + session + "_e[0-9]+$", suf):
+                                            tracker_df.loc[child_id, row["variable"] + "_" + suf] = str(rc_row[col])
+                                except:
+                                    continue
+                            else:
+                                print("Error: unknown value seen for parent language, should be 1 for English and 2 for Spanish.")
+    return parent_info
 
 if __name__ == "__main__":
     checked_path = sys.argv[1]
@@ -194,6 +251,7 @@ if __name__ == "__main__":
     
     if redcaps[0] != "none":
         all_rc_dfs = dict()
+        all_rc_subjects = dict()
         for expected_rc in redcheck_columns.keys():
             present = False
             for redcap in redcaps:
@@ -233,6 +291,8 @@ if __name__ == "__main__":
             else:
                 rc_subjects = rc_ids
             rc_subjects.sort()
+
+            all_rc_subjects[expected_rc] = rc_subjects
 
             all_keys = dict()
             for key, value in redcheck_columns[expected_rc].items():
@@ -285,33 +345,6 @@ if __name__ == "__main__":
                     except Exception as e_msg:
                         continue
 
-                for session_type in ['bbs', 'iqs']:
-                    if session_type + 'parent' in all_redcap_paths[expected_rc]:
-                        if 'sess' in locals():
-                            del sess
-                        for key, value in row.items():
-                            if key.startswith(session_type + 'paid_lang'):
-                                lang_re = re.match('^' + session_type + 'paid_lang.*(s[0-9]+_r[0-9]+(_e[0-9]+)?)', key)
-                                if lang_re:
-                                    sess = lang_re.group(1)
-                                    tracker_df.loc[child_id, 'plang' + session_type + '_' + sess] = str(int(value)) # 1 for english 2 for sp
-                        parentid_re = re.match(study_no + '([089])\d{4}', str(row.name))
-                        if parentid_re and 'sess' in locals():
-                            if parentid_re.group(1) == '8':
-                                tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "8"
-                            elif parentid_re.group(1) == '9':
-                                tracker_df.loc[child_id, 'pidentity' + session_type + '_' + sess] = "9" # 8 for primary parent, 9 for secondary
-
-            # for subject IDs missing from parent redcaps, fill in "NA" for plang/pidentity
-            for session_type in ['bbs', 'iqs']:
-                if session_type + 'parent' in all_redcap_paths[expected_rc]:
-                    for subj in set(subjects).difference(rc_subjects):
-                        for col in tracker_df.columns:
-                            if re.match('^p(lang|identity)' + session_type + '_' + session + '_e[0-9]+$', col):
-                                try:
-                                    tracker_df.loc[subj, col] = "NA"
-                                except Exception as e_msg:
-                                    continue
             # for subject IDs missing from redcap, fill in "0" in redcap columns
             for subj in set(subjects).difference(rc_subjects):
                 for key, value in keys_in_redcap.items():
@@ -332,6 +365,19 @@ if __name__ == "__main__":
             for col in rc_df.columns:
                 if col.endswith(completed):
                     all_redcap_columns.setdefault(col,[]).append(all_redcap_paths[expected_rc])
+
+        parent_info = parent_columns(df_dd)
+
+        for expected_rc in redcheck_columns.keys():
+            if expected_rc in parent_info.keys():
+                for subj in set(subjects).difference(all_rc_subjects[expected_rc]):
+                    for col in tracker_df.columns:
+                        for var in parent_info[expected_rc]:
+                            if re.match('^' + var + '_' + session + '_e[0-9]+$', col):
+                                try:
+                                    tracker_df.loc[subj, col] = "NA"
+                                except Exception as e_msg:
+                                    continue
 
         all_duplicate_cols = []
         redcaps_of_duplicates = []
@@ -390,7 +436,7 @@ if __name__ == "__main__":
     tracker_df.to_csv(data_tracker_file)
 
     # Create more readable csv with no blank columns
-    tracker_df = pd.read_csv(data_tracker_file)
+    tracker_df = pd.read_csv(data_tracker_file, index_col="id")
     data_tracker_filename = splitext(data_tracker_file)[0]
     tracker_df_no_blank_columns = tracker_df.loc[:, tracker_df.notnull().any(axis=0)]
     tracker_df_no_blank_columns = tracker_df_no_blank_columns.fillna("NA")

@@ -1,7 +1,7 @@
 #!/bin/bash
 # A script to set up data monitoring & preprocessing in your project
 
-usage() { echo "Usage: setup.sh [-t] [-n] [-c] [-p surv1,surv2,surv3] <project-path> [datatype1,datatype2,datatype3] [id]" 1>&2; exit 1; }
+usage() { echo "Usage: setup.sh [-t] [-c] <project-name>" 1>&2; exit 1; }
 
 datam_path="data-monitoring"
 code_path="code"
