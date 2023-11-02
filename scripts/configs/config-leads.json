@@ -17,6 +17,7 @@
     "read-dataset": "ndclab",
     "social-flanker-eeg-dataset": "apoly003",
     "thrive-dataset": "gbuzzell",
+    "working-memory-error-dataset": "fzakirov",
     "technician": "dhunt",
     "lab-manager": "ndclab"
 }
