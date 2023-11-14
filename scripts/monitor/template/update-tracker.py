@@ -331,6 +331,7 @@ if __name__ == "__main__":
 
                 keys_in_redcap = dict()
                 for key, value in all_keys.items():
+                    # key = key.lower() # redcap columns always lowercase, not necessarily so in datadict?
                     try:
                         val = rc_df.loc[id, key]
                         keys_in_redcap[key] = value

@@ -10,6 +10,8 @@ def check_data_dict_variables(df_dd):
         if not isinstance(row["allowedSuffix"], float):
             for suf in row["allowedSuffix"].split(', '):
                 all_tracker_cols.append(row["variable"] + "_" + suf)
+        else:
+            all_tracker_cols.append(row["variable"]) # possible duplicate rows without sessions
     duplicates = [col for col, count in collections.Counter(all_tracker_cols).items() if count > 1]
     if len(duplicates) > 0:
         sys.exit("Error in data dictionary, duplicate column names seen: " + ", ".join(duplicates))
