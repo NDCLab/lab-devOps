@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-from os import listdir, makedirs
+from os import listdir, makedirs, system
 from os.path import join, isdir, isfile, splitext
 
 import shutil
