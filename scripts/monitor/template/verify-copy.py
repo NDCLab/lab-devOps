@@ -163,7 +163,7 @@ if __name__ == "__main__":
                                             system('cp -p ' + join(raw, ses, datatype, subject, raw_file) + ' ' + join(checked, subject, ses, datatype, raw_file))
                                         copied_files.append(raw_file)
             else:
-                print(c.RED + "Error: can\'t find ", datatype, "directory under ", raw, "/", ses + c.ENDC)
+                print(c.RED + "Error: can\'t find", datatype, "directory under", raw+"/"+ses + c.ENDC)
 
     # do same filename checks for checked files
     for variable, values in dd_dict.items():
