@@ -38,17 +38,22 @@ def get_redcap_columns(datadict_df):
         prov = row["provenance"].split(" ")
         if "file:" in prov and "variable:" in prov:
             idx = prov.index("file:")
-            rc_filename = prov[idx+1].strip("\";")
+            rc_filename = prov[idx+1].strip("\";,")
             idx = prov.index("variable:")
-            rc_variable = prov[idx+1].strip("\";")
+            rc_variable = prov[idx+1].strip("\";,")
             if rc_variable == "":
-                rc_variable = row["variable"]
+                rc_variable = row["variable"].lower()
             if not rc_filename in cols.keys():
                 cols[rc_filename] = {}
+            if "id:" in prov:
+                idx = prov.index("id:")
+                rc_idcol = prov[idx+1].strip("\";,")
+                cols[rc_filename]["id_column"] = rc_idcol
         else:
             continue
         for ses_tag in allowed_suffixes:
-            cols[rc_filename][rc_variable + ses_tag + completed] = row["variable"] + ses_tag
+            var = row["variable"].lower()
+            cols[rc_filename][rc_variable + ses_tag + completed] = var + ses_tag
             key_counter[rc_variable + ses_tag + completed] += 1
             # also map Sp. surveys to same column name in central tracker if completed
             surv_match = re.match('^([a-zA-Z0-9\-]+)(_[a-z])?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?$', rc_variable)
@@ -57,10 +62,10 @@ def get_redcap_columns(datadict_df):
                 scrd_str = '' if not surv_match.group(3) else surv_match.group(3)
                 multiple_report_tag = '' if not surv_match.group(4) else surv_match.group(4)
                 surv_esp = surv_match.group(1) + 'es' + surv_version + scrd_str + multiple_report_tag + ses_tag
-                cols[rc_filename][surv_esp + completed] = row["variable"] + ses_tag
+                cols[rc_filename][surv_esp + completed] = var + ses_tag
                 key_counter[surv_esp + completed] += 1
             if "consent" in row["dataType"] or "assent" in row["dataType"]:
-                cols[rc_filename][row["variable"] + "es" + completed] = row["variable"]
+                cols[rc_filename][var + "es" + completed] = var
     for key, value in key_counter.items():
         if value > 1:
             allowed_duplicate_columns.append(key)
@@ -263,13 +268,14 @@ if __name__ == "__main__":
                     sys.error(c.RED + "Error: multiple redcaps found with name specified in datadict, " + redcap_path + " and " + redcap + ", exiting." + c.ENDC)
             if present == False:
                 sys.exit(c.RED + "Error: can't find redcap specified in datadict " + expected_rc + ", exiting." + c.ENDC)
-
-            if 'ThrivebbsRA' in redcap_path:
+            if "id_column" in redcheck_columns[expected_rc].keys():
+                id_col = redcheck_columns[expected_rc]["id_column"]
                 for column in pd.read_csv(redcap_path).columns:
-                    if column.startswith('bbsratrk_acthrive'):
+                    if column.startswith(id_col):
                         all_rc_dfs[expected_rc] = pd.read_csv(redcap_path, index_col = column)
             else:
-                all_rc_dfs[expected_rc] = pd.read_csv(redcap_path, index_col = "record_id")
+                id_col = "record_id"
+                all_rc_dfs[expected_rc] = pd.read_csv(redcap_path, index_col = id_col)
             # If hallMonitor passes "redcap" arg, data exists and passed checks 
             vals = pd.read_csv(redcap_path, header=None, nrows=1).iloc[0,:].value_counts()
             # Exit if duplicate column names in redcap
@@ -331,7 +337,6 @@ if __name__ == "__main__":
 
                 keys_in_redcap = dict()
                 for key, value in all_keys.items():
-                    # key = key.lower() # redcap columns always lowercase, not necessarily so in datadict?
                     try:
                         val = rc_df.loc[id, key]
                         keys_in_redcap[key] = value
