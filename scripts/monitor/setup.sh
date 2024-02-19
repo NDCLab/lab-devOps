@@ -7,6 +7,7 @@ datam_path="data-monitoring"
 code_path="code"
 labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
 datapath="/home/data/NDClab/datasets"
+sing_image="/home/data/NDClab/tools/instruments/containers/singularity/inst-container.simg"
 cd $datapath
 
 module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg # needed for pandas
@@ -64,7 +65,8 @@ all_redcaps=$(echo ${rc_arr[*]} | sed 's/ /,/g')
 
 if [[ $gen_tracker == true ]]; then
     echo "Setting up central tracker"
-    python "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $project $all_redcaps
+    module load singularity-3.8.2
+    singularity exec --bind /home/data/NDClab/tools/lab-devOps,/home/data/NDClab/tools/lab-devOps $sing_image python3 "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $project $all_redcaps
     chmod +x "${project}/${datam_path}/central-tracker_${project}.csv"
 fi
 
