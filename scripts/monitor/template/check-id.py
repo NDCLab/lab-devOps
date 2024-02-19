@@ -1,5 +1,6 @@
 import sys
 import pandas as pd
+import math
 
 if __name__ == "__main__":
     id = sys.argv[1]
@@ -18,5 +19,8 @@ if __name__ == "__main__":
         print("Error: cannot find id or participant column in", file)
 
     # check if first ids match vals listed
-    if not id_col[0] == int(id):
-        print("Error: ID value in", file, "does not match", id)
+    if isinstance(id_col[0], float) and math.isnan(id_col[0]):
+        print("Error: nan value seen in ID for", file, "file")
+    else:
+        if not int(id_col[0]) == int(id):
+            print("Error: ID value in", file, "does not match", id)
