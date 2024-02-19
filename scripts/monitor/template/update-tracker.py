@@ -52,7 +52,8 @@ def get_redcap_columns(datadict_df):
         else:
             continue
         for ses_tag in allowed_suffixes:
-            var = row["variable"].lower()
+            #var = row["variable"]
+            var = row["variable"]
             cols[rc_filename][rc_variable + ses_tag + completed] = var + ses_tag
             key_counter[rc_variable + ses_tag + completed] += 1
             # also map Sp. surveys to same column name in central tracker if completed
@@ -64,8 +65,8 @@ def get_redcap_columns(datadict_df):
                 surv_esp = surv_match.group(1) + 'es' + surv_version + scrd_str + multiple_report_tag + ses_tag
                 cols[rc_filename][surv_esp + completed] = var + ses_tag
                 key_counter[surv_esp + completed] += 1
-            if "consent" in row["dataType"] or "assent" in row["dataType"]:
-                cols[rc_filename][var + "es" + completed] = var
+            if "consent" in row["dataType"]:
+                cols[rc_filename][rc_variable + "es" + completed] = var
     for key, value in key_counter.items():
         if value > 1:
             allowed_duplicate_columns.append(key)
@@ -303,7 +304,8 @@ if __name__ == "__main__":
             all_keys = dict()
             for key, value in redcheck_columns[expected_rc].items():
                 all_keys[key] = value
-                if key.startswith("consent") or key.startswith("assent"):
+                if key.startswith("consent") or key.startswith("assent") or key.startswith("id_column"):
+                #if key.startswith("consent") or key.startswith("assent") or key.startswith("id_column") or key.startswith("demo_e"):
                     continue
                 if not re.match('^.*es(_[a-zA-Z])?_s[0-9]+_r[0-9]+_e[0-9]+_complete', key) and key not in all_rc_dfs[expected_rc].columns:
                     other_rcs = []

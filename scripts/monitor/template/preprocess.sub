@@ -3,6 +3,7 @@
 #SBATCH --ntasks=1               # total number of tasks across all nodes
 #SBATCH --cpus-per-task=1        # CPUS to use when using data parallelization
 #SBATCH --time=00:30:00          # total run time limit (HH:MM:SS)
+#SBATCH --output=%x-%j.out
 
 # A slurm script to run ALL of preprocessing
 
@@ -23,6 +24,7 @@ log="${dataset}/data-monitoring/data-monitoring-log.md"
 
 dir="$(basename $dataset)"
 tracker="${dataset}/data-monitoring/central-tracker_${dir}.csv"
+datadict="${dataset}/data-monitoring/data-dictionary/central-tracker_datadict.csv"
 
 # constant paths
 sing_image="/home/data/NDClab/tools/instruments/containers/singularity/inst-container.simg"
@@ -45,6 +47,7 @@ do
                     $survey_data \
                     $output_path \
                     $idcol \
+                    $datadict \
                     $tracker
 done
 
