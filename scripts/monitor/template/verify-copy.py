@@ -9,6 +9,7 @@ import pandas as pd
 import re
 import math
 import subprocess
+from collections import defaultdict
 
 class c:
     RED = '\033[31m'
@@ -30,15 +31,59 @@ def allowed_val(allowed_vals, value):
             break
     return allowed
 
-def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, numfiles):
-        # check that files in raw and checked match conventions
-        obs_files = []
-        corrected = False
+def check_number_of_files(path, datatype, tasks, corrected):
+    if corrected:
+        print("deviation.txt seen in ", path, ", continuing.")
+        return
+    for raw_file in listdir(path):
+        file_re = re.match('^sub-([0-9]{7})_(.*)_(s[0-9]+_r[0-9]+_e[0-9]+)\.([a-z0-9.]+)$', raw_file)
+        if re.match('^[Dd]eviation$', raw_file):
+            print("deviation.txt seen in", path, ", continuing.")
+            return
+        if not file_re:
+            print("unexpected file format seen in", join(path, raw_file))
+        if file_re and file_re.group(2) not in tasks:
+            print("unexpected task name seen in", join(path, raw_file))
+    taskssum = 0
+    already_counted = []
+    for task in tasks:
+        comb = False
+        for row in combination_rows.keys():
+            if task in already_counted:
+                comb = True
+                break
+            if task in combination_rows[row] and row not in already_counted:
+                comb = True
+                already_counted.extend(combination_rows[row])
+                taskssum += len(dd_dict[task][2].split(",")) # number files expected from expectedFileExt # assume combination rows expect same # files
+                break
+        if not comb:
+            # not a combination row
+            taskssum += len(dd_dict[task][2].split(",")) # number files expected from expectedFileExt
+    obs_files = len(listdir(path))
+    if obs_files > taskssum:
+        print(c.RED + "Error: number of", datatype, "data files in subject folder", sub, str(obs_files), "greater than the expected number", str(taskssum) + c.ENDC)
+    if obs_files < taskssum:
+        print(c.RED + "Error: number of", datatype, "data files in subject folder", sub, str(obs_files), "less than the expected number", str(taskssum) + c.ENDC)
+    tasks_seen = []
+    for raw_file in listdir(path):
+        file_re = re.match('^sub-([0-9]+)_(.*)_(s[0-9]+_r[0-9]+_e[0-9]+)\.([a-z0-9]+)$', raw_file)
+        if file_re and file_re.group(2) not in tasks_seen:
+            tasks_seen.append(file_re.group(2))
+    for key in combination_rows.keys():
+        combination_rows_seen = set(tasks_seen).intersection(set(combination_rows[key]))
+        if len(combination_rows_seen) > 1:
+            print(c.RED + "Error: multiple different combination rows", str(combination_rows_seen), "seen in subject folder", sub, ": ", str(path), ", only one expected." + c.ENDC)
+
+def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, numfiles, var, corrected):
+        task_files_counter = defaultdict(lambda: 0)
+        task_names = []
         for raw_file in listdir(path):
-            if re.match('^[Dd]eviation.*$', raw_file):
-                corrected = True
-            else:
-                obs_files.append(raw_file)
+            for task in task_vars:
+                if re.match('^sub-([0-9]{7})_('+task +')_(s[0-9]+_r[0-9]+_e[0-9]+)\.([a-z0-9.]+)$', raw_file):
+                    if task not in task_names:
+                        task_names.append(task)
+                    task_files_counter[task] += 1
         if corrected:
             print("deviation.txt seen in ", path, ", continuing.")
             for raw_file in listdir(path):
@@ -49,10 +94,6 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, n
                 if file_re and len(ses) > 0 and file_re.group(3) != ses:
                     print(c.RED + "Error: file from session", file_re.group(3), "found in", ses, "folder:", path + c.ENDC)
             return
-        if len(obs_files) > numfiles:
-            print(c.RED + "Error: number of", datatype, "data files in subject folder", sub, str(len(obs_files)), "greater than the expected number", str(numfiles) + c.ENDC)
-        elif len(obs_files) < numfiles:
-            print(c.RED + "Error: number of", datatype, "data files in subject folder", sub, str(len(obs_files)), "less than the expected number", str(numfiles) + c.ENDC)
         for raw_file in listdir(path):
             #check sub-#, check session folder, check extension
             file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))((?:\.[a-zA-Z]+)*)$", raw_file)
@@ -88,6 +129,38 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, n
                     subprocess.run(["python3", "check-id.py", file_re.group(2), join(path, raw_file)], shell=False)
             else:
                 print(c.RED + "Error: file ", join(path, raw_file), " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>" + c.ENDC)
+        combination = False
+        for dict_var, values in combination_rows.items():
+            if var in values:
+                combination = True
+                combination_var = dict_var
+                break
+        for ext in possible_exts:
+            file_present = False
+            for ext2 in ext.split("|"): # in case of multiple options for extensions i.e. .zip.gpg|.tar.gpg
+                for suf in allowed_suffixes:
+                    #if combination:
+                        # combination_file_present = False
+                        # for eitheror_var in combination_rows[combination_var]:
+                        #     if isfile(join(path, sub+'_'+eitheror_var+'_'+suf+ext2)):
+                        #         if combination_file_present:
+                        #             second_file_seen = sub+'_'+eitheror_var+'_'+suf+ext2
+                        #             print(c.RED + "Error: both", file_seen, "and", second_file_seen, "found in", path + ", should have only one or the other" + c.ENDC)
+                        #         else:
+                        #             file_present = True
+                        #             combination_file_present = True
+                        #             file_seen = sub+'_'+eitheror_var+'_'+suf+ext2
+                    if combination:
+                        for eitheror_var in combination_rows[combination_var]:
+                            if isfile(join(path, sub+'_'+eitheror_var+'_'+suf+ext2)):
+                                file_present = True
+                                break
+                    else:
+                        if isfile(join(path, sub+'_'+var+'_'+suf+ext2)):
+                            file_present = True
+                            break
+            if not file_present:
+                print(c.RED + "Error: no such file", sub+'_'+var+'_sX_rX_eX'+ext, "can be found in", path + c.ENDC)
 
 if __name__ == "__main__":
     dataset = sys.argv[1]
@@ -107,9 +180,15 @@ if __name__ == "__main__":
     dd_dict = dict()
 
     task_vars = []
+    combination_rows = {}
     for _, row in df_dd.iterrows():
         if not isinstance(row["expectedFileExt"], float):
             task_vars.append(row.name)
+        if row["dataType"] == "combination":
+            idx = row["provenance"].split(" ").index("variables:")
+            vars = "".join(row["provenance"].split(" ")[idx+1:]).split(",")
+            vars = [var.strip("\"") for var in vars]
+            combination_rows[row.name] = vars
 
     # build dict of expected files/datatypes from datadict
     for var, row in df_dd.iterrows():
@@ -144,7 +223,12 @@ if __name__ == "__main__":
                         continue
                     path = join(raw, ses, datatype, subject)
                     # check that files in raw match conventions
-                    check_filenames(path, subject, ses, datatype, allowed_suffixes, possible_exts, numfiles)
+                    corrected = False
+                    for raw_file in listdir(path):
+                        if re.match('^[Dd]eviation.*$', raw_file):
+                            corrected = True
+                            break
+                    check_filenames(path, subject, ses, datatype, allowed_suffixes, possible_exts, numfiles, variable, corrected)
                     # copy to checked
                     for suffix in allowed_suffixes:
                         presence = False
@@ -164,7 +248,27 @@ if __name__ == "__main__":
                                         copied_files.append(raw_file)
             else:
                 print(c.RED + "Error: can\'t find", datatype, "directory under", raw+"/"+ses + c.ENDC)
-
+    print("Verifying numbers of files in subdirectories in raw")
+    datatype_folders = []
+    for subdir in dd_dict.values():
+        if subdir[0] not in datatype_folders:
+            datatype_folders.append(subdir[0])
+    for session_folder in listdir(raw):
+        if isdir(join(raw, session_folder)):
+            for datatype_folder in datatype_folders:
+                tasks = []
+                for task, vals in dd_dict.items():
+                    if vals[0] == datatype_folder:
+                        tasks.append(task)
+                if isdir(join(raw, session_folder, datatype_folder)):
+                    for sub in listdir(join(raw, session_folder, datatype_folder)):
+                        path = join(raw, session_folder, datatype_folder, sub)
+                        corrected = False
+                        for raw_file in listdir(path):
+                            if re.match('^[Dd]eviation.*$', raw_file):
+                                corrected = True
+                                break
+                        check_number_of_files(path, datatype_folder, tasks, corrected)
     # do same filename checks for checked files
     for variable, values in dd_dict.items():
         print("Verifying files in checked for:", variable)
@@ -190,4 +294,27 @@ if __name__ == "__main__":
                     if isdir(join(checked, sub, ses, datatype)):
                         # check that files in checked match conventions
                         path = join(checked, sub, ses, datatype)
-                        check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, numfiles)
+                        corrected = False
+                        for raw_file in listdir(path):
+                            if re.match('^[Dd]eviation.*$', raw_file):
+                                corrected = True
+                                break
+                        check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, numfiles, variable, corrected)
+    print("Verifying numbers of files in subdirectories in checked")
+    for sub in listdir(checked):
+        if isdir(join(checked, sub)):
+            for session_folder in listdir(join(checked, sub)):
+                if isdir(join(checked, sub, session_folder)):
+                    for datatype_folder in datatype_folders:
+                        tasks = []
+                        for task, vals in dd_dict.items():
+                            if vals[0] == datatype_folder:
+                                tasks.append(task)
+                        path = join(checked, sub, session_folder, datatype_folder)
+                        if isdir(path):
+                            corrected = False
+                            for raw_file in listdir(path):
+                                if re.match('^[Dd]eviation.*$', raw_file):
+                                    corrected = True
+                                    break
+                            check_number_of_files(path, datatype_folder, tasks, corrected)
