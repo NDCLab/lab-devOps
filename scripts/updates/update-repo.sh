@@ -26,7 +26,7 @@ do
 		git fetch
 		MSG=$(git pull 2>&1)
 		echo $MSG # make sure to output (possible) error message to log file
-		FILES=($(git status --porcelain))
+		IFS=$'\n' && FILES=($(git status --porcelain)) && unset IFS
                 [[ ${#FILES[@]} -gt 0 ]] && echo "Found ${#FILES[@]} modified/untracked files in $REPO"
 		[[ $MSG =~ "error: Your local changes" || ${#FILES[@]} -gt 0 ]] && repoarr+=("$REPO")
 	      else
@@ -50,6 +50,7 @@ then
             "$repo needs re-sync with Github" "$LAB_TECH@fiu.edu"
         else
             # email proj lead
+            echo "Emailing project lead $PROJ_LEAD for $repo"
             echo "As project lead, you are being notified that there are changes on the HPC in the $repo repo that have not " \
             "been pushed to the GitHub remote. Please identify the source of these changes and complete the git sequence to re-sync " \
             "with the GitHub remote." | mail -s "$repo needs to be re-synced with Github" "$PROJ_LEAD@fiu.edu"

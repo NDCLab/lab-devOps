@@ -1,5 +1,6 @@
 {
     "casper-dataset": "ostib001",
+    "diverse-hair-eeg-dataset": "ostib001",
     "memory-for-error-dataset": "khoss005",
     "mfe-online-dataset": "khoss005",
     "mfe-c-face-dataset": "khoss005",
