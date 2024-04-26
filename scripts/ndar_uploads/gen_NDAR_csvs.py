@@ -134,6 +134,19 @@ def map_vals(ndar_df, ndar_col, ndar_csv, ndar_json, sre, parent=False):
                         sum = str(int(sum))
                         ndar_df.loc[child_id, ndar_col] = sum
                     continue
+                #TODO test "average"
+                if ndar_json[ndar_csv]["req_columns"][ndar_col]["computed"] == "average" and "components" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
+                    sum = 0
+                    ncols = len(ndar_json[ndar_csv]["req_columns"][ndar_col]["components"])
+                    for comp in ndar_json[ndar_csv]["req_columns"][ndar_col]["components"]:
+                        val = float(rc_df.loc[id, comp + "_" + sre])
+                        sum += val
+                    if math.isnan(sum) and "missing" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
+                        ndar_df.loc[child_id, ndar_col] = ndar_json[ndar_csv]["req_columns"][ndar_col]["missing"]
+                    else:
+                        avg = str(float(sum/ncols))
+                        ndar_df.loc[child_id, ndar_col] = avg
+                    continue
             else:
                 sys.exit("Can't assign value for " + str(ndar_col) + ", name of redcap or redcap variable name missing, exiting.")
         if "conditional_column" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys() and "conditional_column_mapping" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():

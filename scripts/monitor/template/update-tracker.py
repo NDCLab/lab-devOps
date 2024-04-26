@@ -57,7 +57,7 @@ def get_redcap_columns(datadict_df):
             cols[rc_filename][rc_variable + ses_tag + completed] = var + ses_tag
             key_counter[rc_variable + ses_tag + completed] += 1
             # also map Sp. surveys to same column name in central tracker if completed
-            surv_match = re.match('^([a-zA-Z0-9\-]+)(_[a-z])?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?$', rc_variable)
+            surv_match = re.match('^([a-zA-Z0-9\-]+)(_[a-z0-9]{1,2})?(_scrd[a-zA-Z]+)?(_[a-zA-Z]{2,})?$', rc_variable)
             if surv_match and "redcap_data" in row["dataType"]:
                 surv_version = '' if not surv_match.group(2) else surv_match.group(2)
                 scrd_str = '' if not surv_match.group(3) else surv_match.group(3)
@@ -406,6 +406,7 @@ if __name__ == "__main__":
         file_exts = values[1].split(", ")
         file_sfxs = values[2].split(", ")
         for subj in subjects:
+            no_data = False
             subdir = "sub-" + str(subj)
             dir_id = int(subj)
             for sfx in file_sfxs:
@@ -417,6 +418,12 @@ if __name__ == "__main__":
                             if re.match('^[Dd]eviation.*$', filename):
                                 corrected = True
                                 break
+                            if re.match('^no-data\.txt$', filename):
+                                tracker_df.loc[dir_id, task + "_" + sfx] = "0"
+                                no_data = True
+                                break
+                        if no_data:
+                            break
                         all_files_present = True
                         for ext in file_exts:
                             file_present = False
