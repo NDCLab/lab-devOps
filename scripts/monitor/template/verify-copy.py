@@ -2,7 +2,7 @@
 
 import sys
 from os import listdir, makedirs, system
-from os.path import join, isdir, isfile, splitext
+from os.path import join, isdir, isfile, splitext, getsize, basename
 
 import shutil
 import pandas as pd
@@ -33,12 +33,15 @@ def allowed_val(allowed_vals, value):
 
 def check_number_of_files(path, datatype, tasks, corrected):
     if corrected:
-        print("deviation.txt seen in ", path, ", continuing.")
+        print("deviation.txt or no-data.txt seen in ", path, ", continuing.")
         return
     for raw_file in listdir(path):
         file_re = re.match('^sub-([0-9]{7})_(.*)_(s[0-9]+_r[0-9]+_e[0-9]+)\.([a-z0-9.]+)$', raw_file)
         if re.match('^[Dd]eviation$', raw_file):
             print("deviation.txt seen in", path, ", continuing.")
+            return
+        if re.match('^no-data\.txt$', raw_file):
+            print("no-data.txt seen in", path, ", continuing.")
             return
         if not file_re:
             print("unexpected file format seen in", join(path, raw_file))
@@ -85,7 +88,7 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, n
                         task_names.append(task)
                     task_files_counter[task] += 1
         if corrected:
-            print("deviation.txt seen in ", path, ", continuing.")
+            print("deviation.txt or no-data.txt seen in ", path, ", continuing.")
             for raw_file in listdir(path):
                 # still check that files are in the correct subject folder and session folder
                 file_re = re.match("^(sub-[0-9]*)_([a-zA-Z0-9_-]*_)?(s[0-9]*_r[0-9]*)_e[0-9]*.*$", raw_file)
@@ -96,6 +99,13 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, n
             return
         for raw_file in listdir(path):
             #check sub-#, check session folder, check extension
+            if getsize(join(path, raw_file)) == 0:
+                try:
+                    os.remove(join(path, raw_file)) # just delete it
+                    print(c.RED + "Error: empty file", join(path, raw_file), "seen, deleting." + c.ENDC)
+                except:
+                    print(c.RED + "Error: empty file", join(path, raw_file), "seen, please ask lab tech to delete empty file and rerun hallMonitor." + c.ENDC)
+                continue
             file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))((?:\.[a-zA-Z]+)*)$", raw_file)
             if file_re:
                 if file_re.group(1) != sub:
@@ -162,6 +172,22 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, n
             if not file_present:
                 print(c.RED + "Error: no such file", sub+'_'+var+'_sX_rX_eX'+ext, "can be found in", path + c.ENDC)
 
+def check_vhdr(sub_path, eeg_path, datatype):
+    for sub in listdir(sub_path):
+        path = join(sub_path, sub, eeg_path)
+        if isdir(path):
+            for file in listdir(path):
+                if file.endswith('.vhdr'):
+                    with open(join(sub_path, sub, eeg_path, file)) as f:
+                        for i, line in enumerate(f):
+                            if i == 5: # Should be "DataFile" line
+                                fname = line.split('=')[1].strip('\n')
+                    f.close()
+                    vhdr_fname = splitext(file)[0]
+                    eeg_fname = splitext(fname)[0]
+                    if vhdr_fname != eeg_fname:
+                        print(c.RED + "Error: DataFile in header " + fname + " does not match up with name of file " + file + " in folder " + path + "." + c.ENDC)
+
 if __name__ == "__main__":
     dataset = sys.argv[1]
 
@@ -204,7 +230,7 @@ if __name__ == "__main__":
         allowed_suffixes = values[1].split(", ")
         fileexts = values[2].split(", ") # with or without . ?
         allowed_vals = values[3].split(", ")
-        possible_exts = sum([ext.split('|') for ext in fileexts], [])
+        possible_exts = sum([ext.split('|') for ext in fileexts], []) #shouldn't this be done later?
         numfiles = len(fileexts)
 
         if sessions:
@@ -217,6 +243,10 @@ if __name__ == "__main__":
             expected_sessions = [""]
         for ses in expected_sessions:
             if isdir(join(raw, ses, datatype)):
+                # for EEG check that filename in vhdr matches up w/ .eeg file
+                if '.eeg' in possible_exts and '.vmrk' in possible_exts and '.vhdr' in possible_exts:
+                    path = join(raw, ses, datatype)
+                    check_vhdr(path, "", "eeg")
                 for subject in listdir(join(raw, ses, datatype)):
                     if not re.match("^sub-[0-9]+$", subject):
                         print(c.RED + "Error: subject directory ", subject, " does not match sub-# convention" + c.ENDC)
@@ -225,11 +255,14 @@ if __name__ == "__main__":
                     # check that files in raw match conventions
                     corrected = False
                     for raw_file in listdir(path):
-                        if re.match('^[Dd]eviation.*$', raw_file):
+                        if re.match('^[Dd]eviation.*$', raw_file) or re.match('^no-data\.txt$', raw_file):
                             corrected = True
                             break
                     check_filenames(path, subject, ses, datatype, allowed_suffixes, possible_exts, numfiles, variable, corrected)
                     # copy to checked
+                    # copy file to checked, unless "deviation" is seen
+                    if corrected:
+                        continue
                     for suffix in allowed_suffixes:
                         presence = False
                         copied_files = []
@@ -238,7 +271,6 @@ if __name__ == "__main__":
                                 for raw_file in listdir(join(raw, ses, datatype, subject)):
                                     if re.match(subject + "_" + variable + "_" + suffix + ext, raw_file):
                                         presence = True
-                                        # copy file to checked, unless "deviation" is seen
                                         if not isdir(join(checked, subject, ses, datatype)):
                                             print(c.GREEN + "Creating ", join(subject, ses, datatype), " directory in checked" + c.ENDC)
                                             makedirs(join(checked, subject, ses, datatype))
@@ -265,7 +297,7 @@ if __name__ == "__main__":
                         path = join(raw, session_folder, datatype_folder, sub)
                         corrected = False
                         for raw_file in listdir(path):
-                            if re.match('^[Dd]eviation.*$', raw_file):
+                            if re.match('^[Dd]eviation.*$', raw_file) or re.match('^no-data\.txt$', raw_file):
                                 corrected = True
                                 break
                         check_number_of_files(path, datatype_folder, tasks, corrected)
@@ -288,6 +320,11 @@ if __name__ == "__main__":
                     expected_sessions.append(ses_re.group(1))
         else:
             expected_sessions = [""]
+        # for EEG check that filename in vhdr matches up w/ .eeg file
+        if '.eeg' in possible_exts and '.vmrk' in possible_exts and '.vhdr' in possible_exts:
+            for ses in expected_sessions:
+                path = checked
+                check_vhdr(path, join(ses, datatype), "eeg")
         for sub in listdir(checked):
             if sub.startswith("sub-"):
                 for ses in expected_sessions:
@@ -296,7 +333,7 @@ if __name__ == "__main__":
                         path = join(checked, sub, ses, datatype)
                         corrected = False
                         for raw_file in listdir(path):
-                            if re.match('^[Dd]eviation.*$', raw_file):
+                            if re.match('^[Dd]eviation.*$', raw_file) or re.match('^no-data\.txt$', raw_file):
                                 corrected = True
                                 break
                         check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, numfiles, variable, corrected)
@@ -314,7 +351,7 @@ if __name__ == "__main__":
                         if isdir(path):
                             corrected = False
                             for raw_file in listdir(path):
-                                if re.match('^[Dd]eviation.*$', raw_file):
+                                if re.match('^[Dd]eviation.*$', raw_file) or re.match('^no-data\.txt$', raw_file):
                                     corrected = True
                                     break
                             check_number_of_files(path, datatype_folder, tasks, corrected)
