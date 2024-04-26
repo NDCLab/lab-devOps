@@ -2,10 +2,11 @@
 
 usage() {
   cat <<EOF
-  Usage: $0 [-s session:user1/user2,session:user1/user2 ] [-n session:user1/user2,session:user1/user2 ]
+  Usage: $0 [-s session:user1/user2,session:user1/user2 ] [-n session:user1/user2,session:user1/user2 ] [-r]
 
   -s subjects and sessions to process, sessions separated by commas and users separated by slashes
   -n subjects and sessions not to process
+  -r just score redcap data, no EEG
 
   Default is to preprocess every subject.
 
@@ -22,7 +23,7 @@ EOF
 exit 0
 }
 
-while getopts "s:n:" opt; do
+while getopts "s:n:r" opt; do
   case "${opt}" in
     s)
       sstr=${OPTARG}
@@ -32,12 +33,14 @@ while getopts "s:n:" opt; do
       nstr=${OPTARG}
       IFS=',' read -ra subs_not_to_process <<< $nstr && unset IFS
       ;;
+    r)
+      score_only=true
+      ;;
     *)
       usage
       ;;
   esac
 done
-#TODO add only scoring redcaps option?
 
 if [[ -n $subs_to_process ]] && [[ -n $subs_not_to_process ]]
   then
@@ -82,11 +85,11 @@ else
    done
 fi
 
-#mem_needed=$(( $totalsubs * 15 )) # ~15gb / sub
-mem_needed=$(( $totalsubs * 10 )) # ~10gb / sub
-#walltime_needed=$(( $totalsubs * 8 )) # ~8hr / sub
-walltime_needed=$(( $totalsubs * 2 )) # ~8hr / 4subs
-
-#sbatch --mem=${mem_needed}G --time=${walltime_needed}:00:00 --cpus-per-task=4 preprocess.sub
-#sbatch --mem=${mem_needed}G --time=${walltime_needed}:00:00 --cpus-per-task=4 --account=iacc_gbuzzell --partition=highmem1 --qos=highmem1 preprocess.sub
-sbatch --mem=${mem_needed}G --time=${walltime_needed}:00:00 --cpus-per-task=4 --account=iacc_gbuzzell --partition=highmem1 --qos=highmem1 --export=ALL,sstr=${sstr},nstr=${nstr} preprocess.sub
+if [[ -z "$score_only" ]]
+    then
+    mem_needed=$(( $totalsubs * 10 )) # ~10gb / sub
+    walltime_needed=$(( $totalsubs * 2 )) # ~8hr / 4subs
+    sbatch --mem=${mem_needed}G --time=${walltime_needed}:00:00 --cpus-per-task=4 --account=iacc_gbuzzell --partition=highmem1 --qos=highmem1 --export=ALL,sstr=${sstr},nstr=${nstr} preprocess.sub
+else
+    sbatch --mem=1G --time=00:30:00 --export=All,score=${score_only} preprocess.sub
+fi

@@ -60,44 +60,46 @@ done
 sessions=($(find ${dataset}/sourcedata/raw -mindepth 1 -maxdepth 1 -type d -printf "%f\n"))
 
 
-
-if [[ $sstr ]]; then
-    IFS=',' read -ra subs_to_process <<< $sstr && unset IFS
-    for s in ${subs_to_process[@]}; do
-        session=$(echo $s | cut -d':' -f1)
-        subjects_to_process=$(echo $s | cut -d':' -f2)
-        matlab -nodisplay -nosplash -r "addpath('$dataset/code'); MADE_pipeline $proj $subjects_to_process $session"
-        # update tracker
-        singularity exec -e $sing_image python3 update-tracker-postMADE.py $proj $session
-    done
-elif [[ $nstr ]]; then
-    IFS=',' read -ra subs_not_to_process <<< $nstr && unset IFS
-    for s in ${subs_not_to_process[@]}; do
-        session=$(echo $s | cut -d':' -f1)
-        subjects_not_to_process=$(echo $s | cut -d':' -f2)
-        subjects_to_process=$(singularity exec -e $sing_image python3 subjects_yet_to_process.py $project $session) #need container for pandas
-        subs_arr=($(echo ${subjects_to_process} | sed 's/\// /g'))
-        for subnot in $(echo ${subjects_not_to_process} | sed 's/\// /g' ); do
-            #subjects_to_process=$(echo $subjects_to_process | sed -E 's/${subnot}(\/)?//g')
-            subs_arr=($(echo ${subs_arr[@]/$subnot}))
-        done
-        subjects_to_process=$(echo ${subs_arr[*]} | sed 's/ /\//g')
-        matlab -nodisplay -nosplash -r "addpath('$dataset/code'); MADE_pipeline $proj $subjects_to_process $session"
-        # update tracker
-        singularity exec -e $sing_image python3 update-tracker-postMADE.py $proj $session
-    done
-else
-    for session in ${sessions[@]}; do
-        subjects_to_process=$(singularity exec -e $sing_image python3 subjects_yet_to_process.py $(basename $dataset) $session) #need container for pandas
-        if [[ -n ${subjects_to_process} ]]
-            then
+if [[ -z "$score" ]]; then
+    if [[ -n "$sstr" ]]; then
+        IFS=',' read -ra subs_to_process <<< $sstr && unset IFS
+        for s in ${subs_to_process[@]}; do
+            session=$(echo $s | cut -d':' -f1)
+            subjects_to_process=$(echo $s | cut -d':' -f2)
             matlab -nodisplay -nosplash -r "addpath('$dataset/code'); MADE_pipeline $proj $subjects_to_process $session"
             # update tracker
             singularity exec -e $sing_image python3 update-tracker-postMADE.py $proj $session
-        fi
-    done
+        done
+    elif [[ -n "$nstr" ]]; then
+        IFS=',' read -ra subs_not_to_process <<< $nstr && unset IFS
+        for s in ${subs_not_to_process[@]}; do
+            session=$(echo $s | cut -d':' -f1)
+            subjects_not_to_process=$(echo $s | cut -d':' -f2)
+            subjects_to_process=$(singularity exec -e $sing_image python3 subjects_yet_to_process.py $project $session) #need container for pandas
+            subs_arr=($(echo ${subjects_to_process} | sed 's/\// /g'))
+            for subnot in $(echo ${subjects_not_to_process} | sed 's/\// /g' ); do
+                #subjects_to_process=$(echo $subjects_to_process | sed -E 's/${subnot}(\/)?//g')
+                subs_arr=($(echo ${subs_arr[@]/$subnot}))
+            done
+            subjects_to_process=$(echo ${subs_arr[*]} | sed 's/ /\//g')
+            matlab -nodisplay -nosplash -r "addpath('$dataset/code'); MADE_pipeline $proj $subjects_to_process $session"
+            # update tracker
+            singularity exec -e $sing_image python3 update-tracker-postMADE.py $proj $session
+        done
+    else
+        for session in ${sessions[@]}; do
+            subjects_to_process=$(singularity exec -e $sing_image python3 subjects_yet_to_process.py $(basename $dataset) $session) #need container for pandas
+            if [[ -n ${subjects_to_process} ]]
+                then
+                matlab -nodisplay -nosplash -r "addpath('$dataset/code'); MADE_pipeline $proj $subjects_to_process $session"
+                # update tracker
+                singularity exec -e $sing_image python3 update-tracker-postMADE.py $proj $session
+            fi
+        done
+    fi
+else
+    echo -e "skipping preprocessing"
 fi
-
 
 
 
