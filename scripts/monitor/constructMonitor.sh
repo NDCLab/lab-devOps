@@ -106,6 +106,8 @@ do
 		echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses:0:-1} \$childdata"
                 echo -e "\$output"
 	    fi
+            output=\$( python \${dataset}/data-monitoring/check_existence_datatype_folders.py \$dataset \$redcap_files \${ses:0:-1})
+            echo -e "\$output"
         fi
 
 done
