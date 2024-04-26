@@ -6,6 +6,7 @@ usage() { echo "Usage: setup.sh [-t] [-c] <project-name>" 1>&2; exit 1; }
 datam_path="data-monitoring"
 code_path="code"
 labpath="/home/data/NDClab/tools/lab-devOps/scripts/monitor"
+MADE_path="/home/data/NDClab/tools/lab-devOps/scripts/MADE_pipeline_standard"
 datapath="/home/data/NDClab/datasets"
 sing_image="/home/data/NDClab/tools/instruments/containers/singularity/inst-container.simg"
 cd $datapath
@@ -66,7 +67,7 @@ all_redcaps=$(echo ${rc_arr[*]} | sed 's/ /,/g')
 if [[ $gen_tracker == true ]]; then
     echo "Setting up central tracker"
     module load singularity-3.8.2
-    singularity exec --bind /home/data/NDClab/tools/lab-devOps,/home/data/NDClab/tools/lab-devOps $sing_image python3 "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $project $all_redcaps
+    singularity exec --bind /home/data/NDClab/tools/lab-devOps $sing_image python3 "${labpath}/gen-tracker.py" "${project}/${datam_path}/central-tracker_${project}.csv" $project $all_redcaps
     chmod +x "${project}/${datam_path}/central-tracker_${project}.csv"
 fi
 
@@ -86,6 +87,9 @@ cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
 cp "${labpath}/template/verify-copy.py" "${project}/${datam_path}"
 cp "${labpath}/template/check-id.py" "${project}/${datam_path}"
 cp "${labpath}/template/check-datadict.py" "${project}/${datam_path}"
+cp "${MADE_path}/subjects_yet_to_process.py" "${project}/${datam_path}"
+cp "${MADE_path}/update-tracker-postMADE.py" "${project}/${datam_path}"
+cp "${MADE_path}/MADE_pipeline.m" "${project}/${code_path}"
 
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/rename-cols.py"
@@ -93,6 +97,9 @@ chmod +x "${project}/${datam_path}/update-tracker.py"
 chmod +x "${project}/${datam_path}/verify-copy.py"
 chmod +x "${project}/${datam_path}/check-id.py"
 chmod +x "${project}/${datam_path}/check-datadict.py"
+chmod +x "${project}/${datam_path}/subjects_yet_to_process.py"
+chmod +x "${project}/${datam_path}/update-tracker-postMADE.py"
+chmod +x "${project}/${code_path}/MADE_pipeline.m"
 
 echo "Setting up hallMonitor.sh"
 # delete if previously written
@@ -115,8 +122,12 @@ echo "Setting up preprocess.sub"
 # delete if previously written
 if [ -f "${project}/${datam_path}/preprocess.sub" ]; then
     rm -f "${project}/${datam_path}/preprocess.sub"
+    rm -f "${project}/${datam_path}/preprocess_wrapper.sh"
 fi
 cp "${labpath}/template/preprocess.sub" "${project}/${datam_path}"
+cp "${labpath}/template/preprocess_wrapper.sh" "${project}/${datam_path}"
+
 
 # give permissions for all copied files
 chmod +x "${project}/${datam_path}/preprocess.sub"
+chmod +x "${project}/${datam_path}/preprocess_wrapper.sh"
