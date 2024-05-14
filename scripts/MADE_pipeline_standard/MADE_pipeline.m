@@ -184,6 +184,17 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
             continue
         end
 
+        % Read files to analyses
+        datafile_names=dir([rawdata_location filesep '*.vhdr']);
+        datafile_names=datafile_names(~ismember({datafile_names.name},{'.', '..', '.DS_Store'}));
+        datafile_names={datafile_names.name};
+        %[filepath,name,ext] = fileparts(char(datafile_names{1}));
+        if length(datafile_names) == 0
+            %warning(['Cannot find vhdr file / files in ' rawdata_location ', skipping.']);
+            %continue
+            error(['Cannot find vhdr file / files in ' rawdata_location ', skipping.']);
+        end
+
         % Enter the path of the folder where you want to save the processed data
         output_location = fullfile(main_dir, "derivatives", "preprocessed", subjects_to_process(file_locater_counter), session, "eeg" );
         % update the output_location
@@ -197,32 +208,22 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
         dfile=fullfile(output_location, 'MADE_logfiles', [char(vhdr_file) '_' datestr(now,'mm-dd-yyyy_HH:MM:SS') '.log']);
         diary(dfile)
 
-        % Read files to analyses
-        datafile_names=dir([rawdata_location filesep '*.vhdr']);
-        datafile_names=datafile_names(~ismember({datafile_names.name},{'.', '..', '.DS_Store'}));
-        datafile_names={datafile_names.name};
-        %[filepath,name,ext] = fileparts(char(datafile_names{1}));
-        if length(datafile_names) == 0
-            warning(['Cannot find vhdr file / files in ' rawdata_location ', skipping.']);
-            continue
-        end
-
         corrected=dir([rawdata_location filesep 'deviation.txt']);
         if length({corrected.name}) ~= 0
             corrected=1
-%
             devFile = readlines([rawdata_location filesep 'deviation.txt']);
+            vhdrFound = 0;
             for i = 1:length(devFile)
                 if startsWith(lower(devFile(i)), "files to process:")
                     line = devFile(i).split(':');
                     filesToProcess = strip(line(2).split(','));
                     filesToProcess = filesToProcess(endsWith(filesToProcess(:), "vhdr")); %only need vhdrs
+                    vhdrFound = 1;
                 end
             end
-            if exist('filesToProcess', 'var')
+            if vhdrFound
                 datafile_names = cellstr(filesToProcess');
             end
-%
         else
             corrected=0
         end
@@ -1040,7 +1041,14 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
 
 
         catch
-            fprintf('ERROR: failed for subject %s, look at log in %s/MADE_logfiles for details, continuing.\n', subjects_to_process(file_locater_counter), output_location)
+            fprintf('ERROR: failed for subject %s, look at log in %s/MADE_logfiles for details, continuing.\n', subjects_to_process(file_locater_counter), output_location);
+            any_usable_data = 0;
+            report_table=table({datafile_names{subject}}, {datetime('now')}, {reference_used_for_faster}, {faster_bad_channels}, {ica_preparation_bad_channels}, {length_ica_data}, ...
+                {total_ICs}, {ICs_removed}, {total_epochs_before_artifact_rejection}, {total_epochs_after_artifact_rejection}, {total_channels_interpolated}, {any_usable_data});
+            report_table.Properties.VariableNames={'datafile_names', 'date_processed', 'reference_used_for_faster', 'faster_bad_channels', ...
+                'ica_preparation_bad_channels', 'length_ica_data', 'total_ICs', 'ICs_removed', 'total_epochs_before_artifact_rejection', ...
+                'total_epochs_after_artifact_rejection', 'total_channels_interpolated', 'any_usable_data'};
+            writetable(report_table, [output_location filesep 'MADE_preprocessing_report_' task '_ERROR_incomplete.csv'], "WriteMode", "append");
         end
 
 
