@@ -23,7 +23,7 @@ EOF
 exit 0
 }
 
-while getopts "s:n:r" opt; do
+while getopts "s:n:rc:" opt; do
   case "${opt}" in
     s)
       sstr=${OPTARG}
@@ -36,11 +36,19 @@ while getopts "s:n:r" opt; do
     r)
       score_only=true
       ;;
+    c)
+      cpus=${OPTARG}
+      ;;
     *)
       usage
       ;;
   esac
 done
+
+if [[ -z $cpus ]]
+  then
+  cpus=4
+fi
 
 if [[ -n $subs_to_process ]] && [[ -n $subs_not_to_process ]]
   then
@@ -88,8 +96,8 @@ fi
 if [[ -z "$score_only" ]]
     then
     mem_needed=$(( $totalsubs * 10 )) # ~10gb / sub
-    walltime_needed=$(( $totalsubs * 2 )) # ~8hr / 4subs
-    sbatch --mem=${mem_needed}G --time=${walltime_needed}:00:00 --cpus-per-task=4 --account=iacc_gbuzzell --partition=highmem1 --qos=highmem1 --export=ALL,sstr=${sstr},nstr=${nstr} preprocess.sub
+    walltime_needed=$(( (totalsubs+cpus-1) / 4 * 8 ))
+    sbatch --mem=${mem_needed}G --time=${walltime_needed}:00:00 --cpus-per-task=$cpus --account=iacc_gbuzzell --partition=highmem1 --qos=highmem1 --export=ALL,sstr=${sstr},nstr=${nstr} preprocess.sub
 else
     sbatch --mem=1G --time=00:30:00 --export=All,score=${score_only} preprocess.sub
 fi

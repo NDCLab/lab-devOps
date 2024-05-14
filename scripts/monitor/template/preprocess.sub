@@ -97,6 +97,10 @@ if [[ -z "$score" ]]; then
             fi
         done
     fi
+    NUMERRORS=$(cat preprocess.sub-${SLURM_JOB_ID}.out | grep "ERROR: " | wc -l)
+    if [[ $NUMERRORS -gt 0 ]]; then
+        cat preprocess.sub-${SLURM_JOB_ID}.out | grep "ERROR: " > preprocess.sub-${SLURM_JOB_ID}_errorlog.out
+    fi
 else
     echo -e "skipping preprocessing"
 fi
