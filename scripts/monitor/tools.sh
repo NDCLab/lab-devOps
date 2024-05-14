@@ -66,3 +66,19 @@ function get_ID {
     subject=$1
     echo "$(cut -d'-' -f2 <<<$subject)"
 }
+
+function check_redcaps_in_right_session_folders {
+    session=$1
+    redcaps=$2
+    redcaps=$(echo ${redcaps[*]} | sed 's/,/ /g')
+    redcap_re='^[a-zA-Z0-9]+(s[0-9]+)(r[0-9]+)_DATA_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{4}\.csv$'
+    for rc in ${redcaps[@]}; do
+        if [[ $(basename $rc) =~ $redcap_re ]]; then
+            expected_ses_folder="${BASH_REMATCH[1]}_${BASH_REMATCH[2]}"
+            if [[ $session != $expected_ses_folder ]]; then
+                echo "Found redcap ${rc} in the wrong session folder ${session}, exiting."
+                exit 1
+            fi
+        fi
+    done
+}

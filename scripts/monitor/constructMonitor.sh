@@ -101,6 +101,9 @@ do
                 echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses} \$childdata"
                 echo -e "\$output"
             else
+                echo "checking redcaps in session folder \${ses:0:-1}"
+                output=\$(check_redcaps_in_right_session_folders \${ses:0:-1} \${redcap_files})
+                [[ \$? == 1 ]] && echo "\$output" && exit 1
 	        ses_re='^.*'\${ses:0:-1}'.*\$'
 	        output=\$( python \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses:0:-1} \$childdata)
 		echo "args: \${dataset}/data-monitoring/update-tracker.py "\${check}" \$dataset \$redcap_files \${ses:0:-1} \$childdata"
