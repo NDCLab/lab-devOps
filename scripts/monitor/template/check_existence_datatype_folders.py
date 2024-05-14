@@ -15,6 +15,8 @@ if __name__ == "__main__":
     datadict = "{}/data-monitoring/data-dictionary/central-tracker_datadict.csv".format(dataset)
     dataset_base = basename(dataset)
     tracker = "{}/data-monitoring/central-tracker_{}.csv".format(dataset,dataset_base)
+    raw = "{}/sourcedata/raw".format(dataset)
+    checked = "{}/sourcedata/checked".format(dataset)
 
     df_dd = pd.read_csv(datadict, index_col = "variable")
     tracker_df = pd.read_csv(tracker, index_col = "id")
@@ -40,21 +42,21 @@ if __name__ == "__main__":
                 rc_idcol = "record_id"
             datarow = df_dd.loc[visit + '_data',:]
             tasks = []
-            #dprov = datarow['provenance'].split(' ')
             dprov = datarow['provenance'].split(':')
-            #if "dataType:" in dprov:
             if "variables" in dprov:
-                #idx = dprov.index("dataType:")
                 idx = dprov.index("variables")
-                ####
                 for task in dprov[idx+1].split(','):
-                #for task in dprov[idx+1:]:
                     task = task.strip("\";, ")
                     tasks.append(task)
-                ###
             visit_dict[visit] = [rc_filename, rc_variable, rc_idcol, tasks]
-
+    task_datatype = {}
     for visit, vals in visit_dict.items():
+        task_datatype = {}
+        for task in vals[3]:
+            if task not in list(df_dd.index):
+                sys.exit("Task " + task + " not found in datadict, exiting.")
+            else:
+                task_datatype[task] = df_dd.loc[task, 'dataType']
         found_rc = False
         for i in range(0, len(redcap_list)):
             if vals[0] in redcap_list[i]:
@@ -68,10 +70,20 @@ if __name__ == "__main__":
         #subs_w_data = list(rc_df[rc_df[rc_var+"_"+session+"_e1_complete"] != 0].index) #? always be a _complete column?
         subs_w_data = list(rc_df[rc_df[rc_var+"_"+session+"_e1_complete"] == 2].index) #? always be a _complete column?
         tracker_df.loc[subs_w_data, visit+'_status_'+session+'_e1'] = 1
-        #if len(vals[3]) == 0: #?
-            #allpresent = True
-            #continue
         for sub in subs_w_data:
+            ignore_no_data = False
+            for task, dtype in task_datatype.items():
+                if dtype == 'combination':
+                    continue
+                if isdir(join(checked, 'sub-'+str(int(sub)), session, dtype)):
+                    for dfile in listdir(join(checked, 'sub-'+str(int(sub)), session, dtype)):
+                        if dfile == "no-data.txt":
+                            ignore_no_data = True
+                            break
+            if ignore_no_data:
+                tracker_df.loc[sub, visit+'_data_'+session+'_e1'] = 0
+                # don't print error if no data
+                continue
             allpresent = True
             #corrected = False
             checked = join(dataset, 'sourcedata', 'checked')
