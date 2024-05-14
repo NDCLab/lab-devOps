@@ -257,7 +257,9 @@ if __name__ == "__main__":
                     for raw_file in listdir(path):
                         if re.match('^[Dd]eviation.*$', raw_file) or re.match('^no-data\.txt$', raw_file):
                             corrected = True
-                            break
+                            system('mkdir -p ' + join(checked, subject, ses, datatype))
+                            system('cp ' + join(raw, ses, datatype, subject, raw_file) + ' ' + join(checked, subject, ses, datatype, raw_file))
+                            #break
                     check_filenames(path, subject, ses, datatype, allowed_suffixes, possible_exts, numfiles, variable, corrected)
                     # copy to checked
                     # copy file to checked, unless "deviation" is seen
