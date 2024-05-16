@@ -33,15 +33,12 @@ def allowed_val(allowed_vals, value):
 
 def check_number_of_files(path, datatype, tasks, corrected):
     if corrected:
-        print("deviation.txt or no-data.txt seen in ", path, ", continuing.")
         return
     for raw_file in listdir(path):
         file_re = re.match('^sub-([0-9]{7})_(.*)_(s[0-9]+_r[0-9]+_e[0-9]+)\.([a-z0-9.]+)$', raw_file)
         if re.match('^[Dd]eviation$', raw_file):
-            print("deviation.txt seen in", path, ", continuing.")
             return
         if re.match('^no-data\.txt$', raw_file):
-            print("no-data.txt seen in", path, ", continuing.")
             return
         if not file_re:
             print("unexpected file format seen in", join(path, raw_file))
@@ -78,7 +75,7 @@ def check_number_of_files(path, datatype, tasks, corrected):
         if len(combination_rows_seen) > 1:
             print(c.RED + "Error: multiple different combination rows", str(combination_rows_seen), "seen in subject folder", sub, ": ", str(path), ", only one expected." + c.ENDC)
 
-def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, numfiles, var, corrected):
+def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, corrected):
         task_files_counter = defaultdict(lambda: 0)
         task_names = []
         for raw_file in listdir(path):
@@ -87,8 +84,6 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, n
                     if task not in task_names:
                         task_names.append(task)
                     task_files_counter[task] += 1
-        if corrected:
-            print("deviation.txt or no-data.txt seen in ", path, ".")
         for raw_file in listdir(path):
             #check sub-#, check session folder, check extension
             if getsize(join(path, raw_file)) == 0:
@@ -98,7 +93,6 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, n
                 except:
                     print(c.RED + "Error: empty file", join(path, raw_file), "seen, please ask lab tech to delete empty file and rerun hallMonitor." + c.ENDC)
                 continue
-            #file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))((?:\.[a-zA-Z]+)*)$", raw_file)
             file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))(_[a-zA-Z0-9_-]+)?((?:\.[a-zA-Z]+)*)$", raw_file)
             if file_re:
                 if file_re.group(1) != sub:
@@ -133,39 +127,28 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, n
             else:
                 if not re.match('[Dd]eviation\.txt', raw_file):
                     print(c.RED + "Error: file ", join(path, raw_file), " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>" + c.ENDC)
-        combination = False
-        for dict_var, values in combination_rows.items():
-            if var in values:
-                combination = True
-                combination_var = dict_var
-                break
-        for ext in possible_exts:
-            file_present = False
-            for ext2 in ext.split("|"): # in case of multiple options for extensions i.e. .zip.gpg|.tar.gpg
-                for suf in allowed_suffixes:
-                    #if combination:
-                        # combination_file_present = False
-                        # for eitheror_var in combination_rows[combination_var]:
-                        #     if isfile(join(path, sub+'_'+eitheror_var+'_'+suf+ext2)):
-                        #         if combination_file_present:
-                        #             second_file_seen = sub+'_'+eitheror_var+'_'+suf+ext2
-                        #             print(c.RED + "Error: both", file_seen, "and", second_file_seen, "found in", path + ", should have only one or the other" + c.ENDC)
-                        #         else:
-                        #             file_present = True
-                        #             combination_file_present = True
-                        #             file_seen = sub+'_'+eitheror_var+'_'+suf+ext2
-                    if combination:
-                        for eitheror_var in combination_rows[combination_var]:
-                            if isfile(join(path, sub+'_'+eitheror_var+'_'+suf+ext2)):
-                                file_present = True
-                                break
-                    else:
-                        for rawfile in listdir(path):
-                            if re.match('^'+sub+'_'+var+'_'+suf+'(_[a-zA-Z0-9_-]+)?'+ext2+'$', rawfile):
-                                file_present = True
-                                break
-            if not file_present:
-                print(c.RED + "Error: no such file", sub+'_'+var+'_sX_rX_eX'+ext, "can be found in", path + c.ENDC)
+
+def check_for_files(path, sub, allowed_suffixes, possible_exts, var):
+    combination = False
+    for dict_var, values in combination_rows.items():
+        if var in values:
+            combination = True
+            combination_var = dict_var
+            break
+    for ext in possible_exts:
+        file_present = False
+        for ext2 in ext.split("|"): # in case of multiple options for extensions i.e. .zip.gpg|.tar.gpg
+            for suf in allowed_suffixes:
+                if combination:
+                    for eitheror_var in combination_rows[combination_var]:
+                        if isfile(join(path, sub+'_'+eitheror_var+'_'+suf+ext2)):
+                            file_present = True
+                            break
+                else:
+                    for rawfile in listdir(path):
+                        if re.match('^'+sub+'_'+var+'_'+suf+'(_[a-zA-Z0-9_-]+)?'+ext2+'$', rawfile):
+                            file_present = True
+                            break
 
 def check_vhdr(sub_path, eeg_path, datatype):
     for sub in listdir(sub_path):
@@ -219,14 +202,23 @@ if __name__ == "__main__":
     allowed_subs = df_dd.loc["id", "allowedValues"]
 
     # now search sourcedata/raw for correct files
+    dtypes = []
+    dtype_exts = defaultdict(lambda: [])
+    dtype_sfxs = defaultdict(lambda: [])
     for variable, values in dd_dict.items():
         print("Verifying files in raw for:", variable)
+        variable = variable
         datatype = values[0]
         allowed_suffixes = values[1].split(", ")
         fileexts = values[2].split(", ") # with or without . ?
         allowed_vals = values[3].split(", ")
         possible_exts = sum([ext.split('|') for ext in fileexts], []) #shouldn't this be done later?
         numfiles = len(fileexts)
+
+        dtype_exts[datatype].extend(possible_exts)
+        dtype_sfxs[datatype].extend(allowed_suffixes)
+        if datatype not in dtypes:
+            dtypes.append(datatype)
 
         if sessions:
             expected_sessions = []
@@ -261,7 +253,7 @@ if __name__ == "__main__":
                             system('cp ' + join(raw, ses, datatype, subject, raw_file) + ' ' + join(checked, subject, ses, datatype, raw_file))
                     if no_data:
                         break
-                    check_filenames(path, subject, ses, datatype, allowed_suffixes, possible_exts, numfiles, variable, corrected)
+                    check_for_files(path, subject, allowed_suffixes, possible_exts, variable)
                     # copy to checked
                     # copy file to checked, unless "deviation" is seen
                     if corrected:
@@ -283,6 +275,34 @@ if __name__ == "__main__":
                                         copied_files.append(raw_file)
             else:
                 print(c.RED + "Error: can\'t find", datatype, "directory under", raw+"/"+ses + c.ENDC)
+    for dtype in dtypes:
+        if sessions:
+            expected_sessions = []
+            for ses in dtype_sfxs[dtype]:
+                ses_re = re.match("(s[0-9]+_r[0-9]+)(_e[0-9]+)?", ses)
+                if ses_re:
+                    expected_sessions.append(ses_re.group(1))
+        else:
+            expected_sessions = [""]
+        for ses in expected_sessions:
+            if isdir(join(raw, ses, dtype)):
+                for subject in listdir(join(raw, ses, dtype)):
+                    if not re.match("^sub-[0-9]+$", subject):
+                        continue
+                    path = join(raw, ses, dtype, subject)
+                    # check that files in raw match conventions
+                    corrected = False
+                    no_data = False
+                    for raw_file in listdir(path):
+                        if re.match('^[Dd]eviation.*$', raw_file):
+                            corrected = True
+                        if re.match('^no-data\.txt$', raw_file):
+                            no_data = True
+                    if no_data:
+                        break
+                    check_filenames(path, subject, ses, dtype, dtype_sfxs[dtype], dtype_exts[dtype], corrected)
+
+
     print("Verifying numbers of files in subdirectories in raw")
     datatype_folders = []
     for subdir in dd_dict.values():
@@ -305,6 +325,9 @@ if __name__ == "__main__":
                                 break
                         check_number_of_files(path, datatype_folder, tasks, corrected)
     # do same filename checks for checked files
+    dtypes = []
+    dtype_exts = defaultdict(lambda: [])
+    dtype_sfxs = defaultdict(lambda: [])
     for variable, values in dd_dict.items():
         print("Verifying files in checked for:", variable)
         variable = variable
@@ -314,6 +337,11 @@ if __name__ == "__main__":
         allowed_vals = values[3].split(", ")
         possible_exts = sum([ext.split('|') for ext in fileexts], [])
         numfiles = len(fileexts)
+
+        dtype_exts[datatype].extend(possible_exts)
+        dtype_sfxs[datatype].extend(allowed_suffixes)
+        if datatype not in dtypes:
+            dtypes.append(datatype)
 
         if sessions:
             expected_sessions = []
@@ -343,7 +371,34 @@ if __name__ == "__main__":
                                 no_data = True
                         if no_data:
                             break
-                        check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, numfiles, variable, corrected)
+                        check_for_files(path, sub, allowed_suffixes, possible_exts, variable)
+
+    for dtype in dtypes:
+        if sessions:
+            expected_sessions = []
+            for ses in dtype_sfxs[dtype]:
+                ses_re = re.match("(s[0-9]+_r[0-9]+)(_e[0-9]+)?", ses)
+                if ses_re:
+                    expected_sessions.append(ses_re.group(1))
+        else:
+            expected_sessions = [""]
+        for sub in listdir(checked):
+            if sub.startswith("sub-"):
+                for ses in expected_sessions:
+                    if isdir(join(checked, sub, ses, dtype)):
+                        path = join(checked, sub, ses, dtype)
+                        corrected = False
+                        no_data = False
+                        for raw_file in listdir(path):
+                            if re.match('^[Dd]eviation.*$', raw_file):
+                                corrected = True
+                            if re.match('^no-data\.txt$', raw_file):
+                                no_data = True
+                        if no_data:
+                            break
+                        else:
+                            check_filenames(path, sub, ses, dtype, dtype_sfxs[dtype], dtype_exts[dtype], corrected)
+
     print("Verifying numbers of files in subdirectories in checked")
     for sub in listdir(checked):
         if isdir(join(checked, sub)):
@@ -362,3 +417,4 @@ if __name__ == "__main__":
                                     corrected = True
                                     break
                             check_number_of_files(path, datatype_folder, tasks, corrected)
+
