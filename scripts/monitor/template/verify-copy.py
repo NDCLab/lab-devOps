@@ -131,7 +131,8 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, n
                     # Call check-id.py for psychopy files
                     subprocess.run(["python3", "check-id.py", file_re.group(2), join(path, raw_file)], shell=False)
             else:
-                print(c.RED + "Error: file ", join(path, raw_file), " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>" + c.ENDC)
+                if not re.match('[Dd]eviation\.txt', raw_file):
+                    print(c.RED + "Error: file ", join(path, raw_file), " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>" + c.ENDC)
         combination = False
         for dict_var, values in combination_rows.items():
             if var in values:
@@ -159,9 +160,10 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, n
                                 file_present = True
                                 break
                     else:
-                        if isfile(join(path, sub+'_'+var+'_'+suf+ext2)):
-                            file_present = True
-                            break
+                        for rawfile in listdir(path):
+                            if re.match('^'+sub+'_'+var+'_'+suf+'(_[a-zA-Z0-9_-]+)?'+ext2+'$', rawfile):
+                                file_present = True
+                                break
             if not file_present:
                 print(c.RED + "Error: no such file", sub+'_'+var+'_sX_rX_eX'+ext, "can be found in", path + c.ENDC)
 
