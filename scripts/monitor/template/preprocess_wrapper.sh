@@ -96,7 +96,7 @@ fi
 if [[ -z "$score_only" ]]
     then
     mem_needed=$(( $totalsubs * 10 )) # ~10gb / sub
-    walltime_needed=$(( (totalsubs+cpus-1) / 4 * 8 ))
+    walltime_needed=$(( (totalsubs+cpus-1) / 4 * 10 ))
     sbatch --mem=${mem_needed}G --time=${walltime_needed}:00:00 --cpus-per-task=$cpus --account=iacc_gbuzzell --partition=highmem1 --qos=highmem1 --export=ALL,sstr=${sstr},nstr=${nstr} preprocess.sub
 else
     sbatch --mem=1G --time=00:30:00 --export=All,score=${score_only} preprocess.sub
