@@ -1,7 +1,7 @@
 import pandas as pd
 
 import os
-from os.path import basename
+from os.path import basename, join
 
 import sys
 import json
@@ -86,9 +86,11 @@ def map_interview_date(ndar_df, ndar_json, sre):
 def map_vals(ndar_df, ndar_col, ndar_csv, ndar_json, sre, parent=False):
     rc = ndar_json[ndar_csv]["req_columns"][ndar_col]["redcap"] if "redcap" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys() else math.nan
     rc_variable = ndar_json[ndar_csv]["req_columns"][ndar_col]["rc_variable"] if "rc_variable" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys() else math.nan
+    #rc_variable = Column(ndar_json[ndar_csv]["req_columns"][ndar_col]["rc_variable"]) if "rc_variable" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys() else math.nan
     rc_df = redcaps_dict[rc] if isinstance(rc, str) else math.nan
     if isinstance(rc_df, pd.core.frame.DataFrame):
         if isinstance(rc_variable, str):
+        #if isinstance(rc_variable, Column):
             if "sessionless" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
                 rc_column = rc_variable # "record_id" and "interview_date" don't have sX-rX-eX appended
             else:
@@ -97,32 +99,33 @@ def map_vals(ndar_df, ndar_col, ndar_csv, ndar_json, sre, parent=False):
             rc_column = math.nan
 
     for id in ndar_df.index:
-        ################ quick fix
         if parent:
-            id = int(str(id)[0:2] + "8" + str(id)[3:])
-        #################
+            id = int(str(id)[0:2] + "8" + str(id)[3:]) # will IDs always be XX8XXXX?
+            col_re = re.match('^([a-zA-Z0-9]+)_(.*)$', rc_column)
+            rc_column_es = col_re.group(1) + "es_" + col_re.group(2)
+        else:
+            rc_column_es = math.nan
         if str(id)[2] == "8" or str(id)[2] == "9":
             child_id = int(str(id)[0:2] + "0" + str(id)[3:])
         else:
             child_id = id
-        ############
-        ########### fill in session (i.e. "s1") in timepoint_label in ndar_subject01
+        # fill in session (i.e. "s1") in timepoint_label in ndar_subject01
         if ndar_col == "timepoint_label" and ndar_csv == "ndar_subject01":
             sess = sre[0:2]
             ndar_df.loc[child_id, ndar_col] = sess
             continue
-        ##############
         if isinstance(rc_df, pd.core.frame.DataFrame):
             if id not in rc_df.index:
                 ndar_df.loc[child_id, ndar_col] = "" # "NA" ?
                 continue
-        #if math.isnan(rc) or math.isnan(rc_variable):
         if not isinstance(rc, str) or not isinstance(rc_variable, str):
             if "default" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
                 val = ndar_json[ndar_csv]["req_columns"][ndar_col]["default"]
                 ndar_df.loc[child_id, ndar_col] = val
                 continue
             elif "computed" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
+                if not "components" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
+                    sys.exit("Can't compute value for " + str(ndar_col) + ", must specify components to compute value from, exiting.")
                 if ndar_json[ndar_csv]["req_columns"][ndar_col]["computed"] == "sum" and "components" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
                     sum = 0
                     for comp in ndar_json[ndar_csv]["req_columns"][ndar_col]["components"]:
@@ -134,8 +137,7 @@ def map_vals(ndar_df, ndar_col, ndar_csv, ndar_json, sre, parent=False):
                         sum = str(int(sum))
                         ndar_df.loc[child_id, ndar_col] = sum
                     continue
-                #TODO test "average"
-                if ndar_json[ndar_csv]["req_columns"][ndar_col]["computed"] == "average" and "components" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
+                elif ndar_json[ndar_csv]["req_columns"][ndar_col]["computed"] == "average" and "components" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
                     sum = 0
                     ncols = len(ndar_json[ndar_csv]["req_columns"][ndar_col]["components"])
                     for comp in ndar_json[ndar_csv]["req_columns"][ndar_col]["components"]:
@@ -147,33 +149,44 @@ def map_vals(ndar_df, ndar_col, ndar_csv, ndar_json, sre, parent=False):
                         avg = str(float(sum/ncols))
                         ndar_df.loc[child_id, ndar_col] = avg
                     continue
+                else:
+                    sys.exit("Can't compute value for " + str(ndar_col) + ", must specify \"sum\" or \"average.\", exiting.")
             else:
                 sys.exit("Can't assign value for " + str(ndar_col) + ", name of redcap or redcap variable name missing, exiting.")
         if "conditional_column" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys() and "conditional_column_mapping" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
+            # should really do this and "mapping" in a separate function
             conditional_rc = ndar_json[ndar_csv]["req_columns"][ndar_col]["conditional_column"]["redcap"]
             conditional_rc_variable = ndar_json[ndar_csv]["req_columns"][ndar_col]["conditional_column"]["rc_variable"]
-            conditional_rc_df = redcaps_dict[conditional_rc]
+            try:
+                conditional_rc_df = redcaps_dict[conditional_rc]
+            except KeyError:
+                sys.exit("Can't find redcap " + conditional_rc + ", exiting.")
             for col in conditional_rc_df.columns:
-                #if col.startswith(conditional_rc_variable):
                 if col.startswith(conditional_rc_variable+"_"):
                     conditional_rc_column = col
+                    if "parent" in ndar_json[ndar_csv]["req_columns"][ndar_col]["conditional_column"] and ndar_json[ndar_csv]["req_columns"][ndar_col]["conditional_column"]["parent"].lower() == 'true':
+                        conditional_rc_column_es = Column(conditional_rc_column).coles
+                    else:
+                        conditional_rc_column_es = math.nan
                     # TODO: deal with when more than one column starts with cond_rc_variable (e1 and e2, etc?)
                     break
             conditional_rc_id = int(str(id)[0:2] + str(conditional_rc_df.index[0])[2] + str(id)[3:]) # conditional redcap could be parent or child, 300's or 308's or 309's
             val = conditional_rc_df.loc[conditional_rc_id, conditional_rc_column]
+            #if math.isnan(val) and not math.isnan(conditional_rc_df.loc[conditional_rc_id, conditional_rc_column_es]): # look at "es" surveys too if it's a parent survey
+            if math.isnan(val) and conditional_rc_column_es in conditional_rc_df.columns and not math.isnan(conditional_rc_df.loc[conditional_rc_id, conditional_rc_column_es]): # look at "es" surveys too if it's a parent survey
+                val = conditional_rc_df.loc[conditional_rc_id, conditional_rc_column_es]
             if (isinstance(val, float) or isinstance(val, int)) and not math.isnan(val):
                 val = str(int(val))
             if val in  ndar_json[ndar_csv]["req_columns"][ndar_col]["conditional_column_mapping"].keys():
                 ndar_df.loc[child_id, ndar_col] = ndar_json[ndar_csv]["req_columns"][ndar_col]["conditional_column_mapping"][val]
                 continue
         if "mapping" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
-            #
             val = rc_df.loc[id, rc_column]
+            if math.isnan(val) and rc_column_es in rc_df.columns and not math.isnan(rc_df.loc[id, rc_column_es]):
+                val = rc_df.loc[id, rc_column_es]
             if (isinstance(val, np.float64) or isinstance(val, np.float32) or isinstance(val, np.int32) or isinstance(val, np.int64)) and not math.isnan(val):
                 val = str(int(val))
-            #if rc_df.loc[id, rc_column] in ndar_json[ndar_csv]["req_columns"][ndar_col]["mapping"].keys():
             if val in ndar_json[ndar_csv]["req_columns"][ndar_col]["mapping"].keys():
-                #ndar_df.loc[child_id, ndar_col] = ndar_json[ndar_csv]["req_columns"][ndar_col]["mapping"][rc_df.loc[child_id, rc_column]]
                 ndar_df.loc[child_id, ndar_col] = ndar_json[ndar_csv]["req_columns"][ndar_col]["mapping"][val]
                 continue
             if math.isnan(rc_df.loc[id, rc_column]) and "missing" in ndar_json[ndar_csv]["req_columns"][ndar_col]["mapping"].keys():
@@ -192,23 +205,13 @@ def map_vals(ndar_df, ndar_col, ndar_csv, ndar_json, sre, parent=False):
                 ndar_df.loc[child_id, ndar_col] = val
             else:
                 ndar_df.loc[child_id, ndar_col] = rc_df.loc[id, rc_column]
-            ########## deal with sex, spanish language/es issue
-            if ndar_col == "sex":
-                rc_column_es = "demoes_d_sexbirth_" + sre
-                if not isinstance(rc_df.loc[id, rc_column], str) and (isinstance(rc_df.loc[id, rc_column_es], float) and not math.isnan(rc_df.loc[id, rc_column_es])):
-                    val = str(int(rc_df.loc[id, rc_column_es]))
-                    mapped_val = ndar_json[ndar_csv]["req_columns"][ndar_col]["mapping"][val]
-                    ndar_df.loc[child_id, ndar_col] = mapped_val
-            #############
             continue
         else:
-            #
             if isinstance(rc_df.loc[id, rc_column], float) and not math.isnan(rc_df.loc[id, rc_column]):
                 val = str(int(rc_df.loc[id, rc_column]))
                 ndar_df.loc[child_id, ndar_col] = val
             else:
                 ndar_df.loc[child_id, ndar_col] = rc_df.loc[id, rc_column]
-            #ndar_df.loc[child_id, ndar_col] = rc_df.loc[id, rc_column]
 
 
 def map_adis(ndar_df, ndar_col, ndar_csv, ndar_json, sre, all_columns=False, parent=False):
@@ -244,11 +247,21 @@ def save_csv(ndar_csv, ndar_df):
     f = open('tmpfile.csv', 'r')
     csvstring = f.read()
     f.close()
-    with open('/mnt/c/Users/davhu/OneDrive/Documents/NDAR_upload_scripts/outputs/' + ndar_csv + '_incomplete.csv', 'w') as f:
+    with open(join(out_path, ndar_csv + '_incomplete.csv'), 'w') as f:
         f.write(ndar_csv[0:-2] + ",01" + ","*(len(df.columns)-2) + "\n")
         f.write(csvstring)
     f.close()
     os.remove('tmpfile.csv')
+
+class Column:
+    def __init__(self, col):
+        self.col = col
+        col_re = re.match('^([a-zA-Z0-9]+)(_.*)?$', col)
+        if not col_re:
+            raise ValueError('column ' + col + ' does not fit column naming conventions.')
+        else:
+            after_es_str = col_re.group(2) if col_re.group(2) else ""
+            self.coles = col_re.group(1) + "es" + after_es_str
 
 
 if __name__ == "__main__":
@@ -256,6 +269,7 @@ if __name__ == "__main__":
     df_dd = sys.argv[2] # filename of data dictionary
     ndar_json = sys.argv[3] # json with mapping info
     sre = sys.argv[4] # session run event, like "s1_r1_e1"
+    out_path = sys.argv[5] # output folder for CSVs
 
     redcaps = redcaps.split(',')
     df_dd = pd.read_csv(df_dd)
@@ -265,14 +279,13 @@ if __name__ == "__main__":
 
     redcaps_dict = get_redcaps(df_dd, redcaps) # dataframes of each redcap
 
-    if "src_subject_id" in ndar_json["all"]["req_columns"].keys(): # src_subject_id required to get ids/indices
+    if "src_subject_id" in ndar_json["all"]["req_columns"].keys(): # src_subject_id required to get ids/indices at least for thrive
         redcap = ndar_json["all"]["req_columns"]["src_subject_id"]["redcap"]
         for rc in redcaps:
             if redcap in basename(rc).lower():
                 id_redcap = pd.read_csv(rc, index_col = ndar_json["all"]["req_columns"]["src_subject_id"]["rc_variable"]) # record_id
                 ids = list(id_redcap.index)
                 break
-        #################
         # for thrive, drop rows who haven't filled out infosht
         if "infosht_" + sre + "_complete" in id_redcap.columns:
             complete_infosht_ids = []
@@ -280,10 +293,13 @@ if __name__ == "__main__":
                 if id_redcap.loc[id,"infosht_" + sre + "_complete"] == 2 or id_redcap.loc[id,"infoshtes_" + sre + "_complete"] == 2:
                     complete_infosht_ids.append(id)
             ids = [int(str(id)[0:2] + "0" + str(id)[3:]) for id in complete_infosht_ids] #quick fix to parent ids -> child ids
-        ##################
     for ndar_csv in ndar_json.keys():
         ndar_columns = ndar_json[ndar_csv]["all_columns"]
         df = pd.DataFrame(columns = ndar_columns, index = ids)
+        if ndar_csv == "adis_v01":
+            map_adis(df, col, ndar_csv, ndar_json, sre)
+            save_csv(ndar_csv, df)
+            continue
         for col in ndar_json["all"]["req_columns"].keys():
             if col == "interview_date":
                 map_interview_date(df, ndar_json, sre)
@@ -294,15 +310,16 @@ if __name__ == "__main__":
             if col == "src_subject_id":
                 df.loc[:, col] = ids
                 continue
-            map_vals(df, col, "all", ndar_json, sre, parent=True)
-        if ndar_csv == "adis_v01":
-            map_adis(df, col, ndar_csv, ndar_json, sre)
-            save_csv(ndar_csv, df)
-            continue
+            parent_col = False
+            if "parent" in ndar_json["all"]["req_columns"][col] and ndar_json["all"]["req_columns"][col]["parent"].lower() == "true":
+                parent_col = True
+            map_vals(df, col, "all", ndar_json, sre, parent=parent_col)
         for col in ndar_json[ndar_csv]["req_columns"]:
             if col == "race":
                 map_race(df, ndar_json, sre)
                 continue
-            map_vals(df, col, ndar_csv, ndar_json, sre)
-
+            parent_col = False
+            if "parent" in ndar_json[ndar_csv]["req_columns"][col] and ndar_json[ndar_csv]["req_columns"][col]["parent"].lower() == "true":
+                parent_col = True
+            map_vals(df, col, ndar_csv, ndar_json, sre, parent=parent_col)
         save_csv(ndar_csv, df)
