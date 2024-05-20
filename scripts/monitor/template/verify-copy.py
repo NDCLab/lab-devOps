@@ -121,7 +121,7 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, c
                     print(c.RED + "Error: event # missing from file:", join(path, raw_file) + c.ENDC)
                 if file_re.group(10) == "":
                     print(c.RED + "Error: extension missing from file, does\'nt match expected extensions", ", ".join(possible_exts), ":", join(path, raw_file) + c.ENDC)
-                if datatype == "psychopy" and file_re.group(10) == ".csv" and file_re.group(2) != "" and not corrected:
+                if datatype == "psychopy" and file_re.group(10) == ".csv" and file_re.group(2) != "":
                     # Call check-id.py for psychopy files
                     subprocess.run(["python3", "check-id.py", file_re.group(2), join(path, raw_file)], shell=False)
             else:
@@ -215,8 +215,8 @@ if __name__ == "__main__":
         possible_exts = sum([ext.split('|') for ext in fileexts], []) #shouldn't this be done later?
         numfiles = len(fileexts)
 
-        dtype_exts[datatype].extend(possible_exts)
-        dtype_sfxs[datatype].extend(allowed_suffixes)
+        dtype_exts[datatype] = list(set(dtype_exts[datatype]).union(set(possible_exts)))
+        dtype_sfxs[datatype] = list(set(dtype_sfxs[datatype]).union(set(allowed_suffixes)))
         if datatype not in dtypes:
             dtypes.append(datatype)
 
@@ -338,8 +338,8 @@ if __name__ == "__main__":
         possible_exts = sum([ext.split('|') for ext in fileexts], [])
         numfiles = len(fileexts)
 
-        dtype_exts[datatype].extend(possible_exts)
-        dtype_sfxs[datatype].extend(allowed_suffixes)
+        dtype_exts[datatype] = list(set(dtype_exts[datatype]).union(set(possible_exts)))
+        dtype_sfxs[datatype] = list(set(dtype_sfxs[datatype]).union(set(allowed_suffixes)))
         if datatype not in dtypes:
             dtypes.append(datatype)
 
