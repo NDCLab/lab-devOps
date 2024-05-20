@@ -299,7 +299,7 @@ if __name__ == "__main__":
                         if re.match('^no-data\.txt$', raw_file):
                             no_data = True
                     if no_data:
-                        break
+                        continue
                     check_filenames(path, subject, ses, dtype, dtype_sfxs[dtype], dtype_exts[dtype], corrected)
 
 
