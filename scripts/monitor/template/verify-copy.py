@@ -141,14 +141,17 @@ def check_for_files(path, sub, allowed_suffixes, possible_exts, var):
             for suf in allowed_suffixes:
                 if combination:
                     for eitheror_var in combination_rows[combination_var]:
-                        if isfile(join(path, sub+'_'+eitheror_var+'_'+suf+ext2)):
-                            file_present = True
-                            break
+                        for rawfile in listdir(path):
+                            if re.match('^'+sub+'_'+eitheror_var+'_'+suf+'(_[a-zA-Z0-9_-]+)?'+ext2+'$', rawfile):
+                                file_present = True
+                                break
                 else:
                     for rawfile in listdir(path):
                         if re.match('^'+sub+'_'+var+'_'+suf+'(_[a-zA-Z0-9_-]+)?'+ext2+'$', rawfile):
                             file_present = True
                             break
+        if not file_present:
+                print(c.RED + "Error: no such file", sub+'_'+var+'_sX_rX_eX'+ext, "can be found in", path + c.ENDC)
 
 def check_vhdr(sub_path, eeg_path, datatype):
     for sub in listdir(sub_path):
@@ -252,7 +255,7 @@ if __name__ == "__main__":
                             system('mkdir -p ' + join(checked, subject, ses, datatype))
                             system('cp ' + join(raw, ses, datatype, subject, raw_file) + ' ' + join(checked, subject, ses, datatype, raw_file))
                     if no_data:
-                        break
+                        continue
                     check_for_files(path, subject, allowed_suffixes, possible_exts, variable)
                     # copy to checked
                     # copy file to checked, unless "deviation" is seen
