@@ -67,57 +67,36 @@ if __name__ == "__main__":
             sys.exit("Can't find redcap with name " + vals[0] +", exiting.")
         rc_df = pd.read_csv(redcap, index_col = vals[2])
         rc_var = vals[1]
-        #subs_w_data = list(rc_df[rc_df[rc_var+"_"+session+"_e1_complete"] != 0].index) #? always be a _complete column?
         subs_w_data = list(rc_df[rc_df[rc_var+"_"+session+"_e1_complete"] == 2].index) #? always be a _complete column?
         tracker_df.loc[subs_w_data, visit+'_status_'+session+'_e1'] = 1
         for sub in subs_w_data:
-            ignore_no_data = False
+            no_data_tasks = []
             for task, dtype in task_datatype.items():
                 if dtype == 'combination':
                     continue
                 if isdir(join(checked, 'sub-'+str(int(sub)), session, dtype)):
                     for dfile in listdir(join(checked, 'sub-'+str(int(sub)), session, dtype)):
                         if dfile == "no-data.txt":
-                            ignore_no_data = True
+                            no_data_tasks.append(task)
                             break
-            if ignore_no_data:
-                tracker_df.loc[sub, visit+'_data_'+session+'_e1'] = 0
-                # don't print error if no data
-                continue
             allpresent = True
-            #corrected = False
-            checked = join(dataset, 'sourcedata', 'checked')
+            checked = join(dataset, 'sourcedata', 'checked') #?
             missing_tasks = []
+            ignore_no_data = False
             for task in vals[3]:
-                if not tracker_df.loc[sub, task + '_' + session + '_e1'] == 1:
+                if not tracker_df.loc[sub, task + '_' + session + '_e1'] == 1 and task not in no_data_tasks:
                     allpresent = False
                     missing_tasks.append(task)
+                elif task in no_data_tasks:
+                    ignore_no_data = True
+                    tracker_df.loc[sub, visit+'_data_'+session+'_e1'] = 0
+            if allpresent and ignore_no_data:
+                continue # no error
             if allpresent:
                 tracker_df.loc[sub, visit+'_data_'+session+'_e1'] = 1
             else:
                 tracker_df.loc[sub, visit+'_data_'+session+'_e1'] = 0
                 print("\033[31mError: Expected tasks " + ", ".join(missing_tasks) + " not seen in subject " + str(sub) + ", session " + session + ".\033[0m")
-        # check raw
-        #raw = join(dataset, 'sourcedata', 'raw', session)
-        #for task in vals[3]:
-        #    if not isdir(join(raw, task)):
-        #        #error
-        #    else:
-        #        for sub in subs_w_data:
-        #            if not isdir(join(raw, task, 'sub-'+str(int(sub)))):
-        #                #error
-        ## check checked
-        #checked = join(dataset, 'sourcedata', 'checked')
-        #for task in vals[3]:
-        #    allpresent = True
-        #    for sub in subs_w_data:
-        #        if not isdir(join(checked, 'sub-'+str(int(sub)), session, task)):
-        #            #error
-        #            allpresent = False
-        #if allpresent:
-        #    tracker_df.loc[sub, visit+'_data_'+session+'_e1'] = 1
-        #else:
-        #    tracker_df.loc[sub, visit+'_data_'+session+'_e1'] = 0
     tracker_df.to_csv(tracker)
 
 
