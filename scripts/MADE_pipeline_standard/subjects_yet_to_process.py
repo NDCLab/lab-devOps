@@ -20,10 +20,9 @@ if __name__ == "__main__":
             tasks.append(row["variable"])
 
     all_ids = tracker_df.index.tolist()
-    #processed_ids = tracker_df.index[tracker_df["all_eeg_preprocessing_" + session + "_e1_complete"] == 2].tolist()
-    if tasks[0] + "_preprocessing_" + session + "_e1_complete" not in tracker_df.columns: #if nobody's been processed yet create column in tracker
-        tracker_df.loc[:, tasks[0] + "_preprocessing_" + session + "_e1_complete"] = 0
-    processed_ids = tracker_df.index[tracker_df[tasks[0] + "_preprocessing_" + session + "_e1_complete"] == 2].tolist() #TODO work for multiple eeg tasks
+    if tasks[0] + "_preprocessing_finished_" + session + "_e1" not in tracker_df.columns: #if nobody's been processed yet create column in tracker
+        tracker_df.loc[:, tasks[0] + "_preprocessing_finished_" + session + "_e1"] = 0
+    processed_ids = tracker_df.index[tracker_df[tasks[0] + "_preprocessing_finished_" + session + "_e1"] == 1].tolist() #TODO work for multiple eeg tasks
     unprocessed_ids = list(set(all_ids).difference(set(processed_ids)))
     unprocessed_ids = [str(x) for x in unprocessed_ids]
     # only process subjects that currently have EEG data
@@ -37,5 +36,4 @@ if __name__ == "__main__":
         else:
             unprocessed_ids.remove(subj)
 
-    #print(",".join(unprocessed_ids))
     print("/".join(unprocessed_ids))

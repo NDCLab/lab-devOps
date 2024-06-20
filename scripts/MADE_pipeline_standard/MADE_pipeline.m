@@ -223,6 +223,8 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
             end
             if vhdrFound
                 datafile_names = cellstr(filesToProcess');
+            else
+                datafile_names = {};
             end
         else
             corrected=0
@@ -281,7 +283,7 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
             if length(filename_re) == 0 && corrected == 0
                 warning(['File name ' datafile_names{subject} ' in ' rawdata_location ' does not match conventions, skipping.']);
                 continue
-            % EEG files with a deviation.txt in the folder may have an additional description before ".vhdr"
+            % EEG files with a deviation.txt in the folder may have an additional description before ".vhdr" and after "s1_r1_e1"
             elseif length(filename_re) == 0 && corrected == 1
                 filename_re = regexp(datafile_names{subject}, '^(sub-[0-9]+)_([a-zA-Z0-9_-]+)_(s[0-9]+_r[0-9]+_e[0-9]+)_?([a-zA-Z0-9_-]*)(\.[a-z0-9]+)$', 'tokens');
                 if length(filename_re) == 0
@@ -289,12 +291,16 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                     continue
                 else
                     [subj, task, sess, desc, ext] = filename_re{1}{:};
-                    if length(desc) > 0
-                        task = [task '_' desc];
+                    if length(desc) == 0
+                        output_report_path = [output_location filesep 'MADE_preprocessing_report_' task '_' sess];
+                    else
+                        output_report_path = [output_location filesep 'MADE_preprocessing_report_' task '_' sess '_' desc];
+                        desc = ['_' desc];
                     end
                 end
             else
                 [subj, task, sess, ext] = filename_re{1}{:};
+                desc = '';
             end
 
             %% Initialize EEG structurem, output variables, and report table
@@ -491,11 +497,11 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                     EEG = eeg_checkset(EEG);
                     %EEG = pop_editset(EEG, 'setname',  strrep(datafile_names{subject}, ext, '_no_usable_data_all_bad_channels'));
                     %EEG = pop_saveset(EEG, 'filename', strrep(datafile_names{subject}, ext, '_no_usable_data_all_bad_channels.set'),'filepath', [output_location filesep 'processed_data' filesep ]); % save .set format
-                    EEG = pop_editset(EEG, 'setname', strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess));
-                    EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,'.set'),'filepath', [output_location filesep ]); % save .set format
+                    EEG = pop_editset(EEG, 'setname', strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc));
+                    EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc,'.set'),'filepath', [output_location filesep ]); % save .set format
                 elseif output_format==2
                     %save([[output_location filesep 'processed_data' filesep ] strrep(datafile_names{subject}, ext, '_no_usable_data_all_bad_channels.mat')], 'EEG'); % save .mat format
-                    parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,'.mat')], EEG); % save .mat format
+                    parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc,'.mat')], EEG); % save .mat format
                 end
             else
                 % Reject channels that are bad as identified by Faster
@@ -528,7 +534,7 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                 report_table.Properties.VariableNames={'datafile_names', 'date_processed', 'reference_used_for_faster', 'faster_bad_channels', ...
                  'ica_preparation_bad_channels', 'length_ica_data', 'total_ICs', 'ICs_removed', 'total_epochs_before_artifact_rejection', ...
                  'total_epochs_after_artifact_rejection', 'total_channels_interpolated', 'any_usable_data'};
-                writetable(report_table, [output_location filesep 'MADE_preprocessing_report_' task '.csv'], "WriteMode", "append");
+                writetable(report_table, [output_report_path '.csv'], "WriteMode", "append");
                 continue % ignore rest of the processing and go to next subject
             end
 
@@ -536,10 +542,10 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
             if save_interim_result ==1
                 if output_format==1
                     EEG = eeg_checkset( EEG );
-                    EEG = pop_editset(EEG, 'setname', strcat(subj,'_',task,'_filtered_data_',sess));
-                    EEG = pop_saveset( EEG,'filename',strcat(subj,'_',task,'_filtered_data_',sess,'.set'),'filepath', [output_location filesep]); % save .set format
+                    EEG = pop_editset(EEG, 'setname', strcat(subj,'_',task,'_filtered_data_',sess,desc));
+                    EEG = pop_saveset( EEG,'filename',strcat(subj,'_',task,'_filtered_data_',sess,desc,'.set'),'filepath', [output_location filesep]); % save .set format
                 elseif output_format==2
-                    parsave([[output_location filesep ] strcat(subj,'_',task,'_filtered_data_',sess,'.mat')], EEG); % save .mat format
+                    parsave([[output_location filesep ] strcat(subj,'_',task,'_filtered_data_',sess,desc,'.mat')], EEG); % save .mat format
                 end
             end
 
@@ -613,10 +619,10 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                 warning(['No usable data for datafile', datafile_names{subject}]);
                 if output_format==1
                     EEG = eeg_checkset(EEG);
-                    EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_no_usable_data_all_bad_channels_',sess));
-                    EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_channels_',sess,'.set'),'filepath', [output_location filesep ]); % save .set format
+                    EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_no_usable_data_all_bad_channels_',sess,desc));
+                    EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_channels_',sess,desc,'.set'),'filepath', [output_location filesep ]); % save .set format
                 elseif output_format==2
-                    parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_channels_',sess,'.mat')], EEG); % save .mat format
+                    parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_channels_',sess,desc,'.mat')], EEG); % save .mat format
                 end
 
             else
@@ -644,7 +650,7 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                 report_table.Properties.VariableNames={'datafile_names', 'date_processed', 'reference_used_for_faster', 'faster_bad_channels', ...
                     'ica_preparation_bad_channels', 'length_ica_data', 'total_ICs', 'ICs_removed', 'total_epochs_before_artifact_rejection', ...
                     'total_epochs_after_artifact_rejection', 'total_channels_interpolated', 'any_usable_data'};
-                writetable(report_table, [output_location filesep 'MADE_preprocessing_report_' task '.csv'], "WriteMode", "append");
+                writetable(report_table, [output_report_path '.csv'], "WriteMode", "append");
                 continue % ignore rest of the processing and go to next datafile
             end
 
@@ -733,10 +739,10 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
             if save_interim_result==1
                 if output_format==1
                     EEG = eeg_checkset(EEG);
-                    EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_ica_data_',sess));
-                    EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_ica_data_',sess,'.set'),'filepath', [output_location filesep ]); % save .set format
+                    EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_ica_data_',sess,desc));
+                    EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_ica_data_',sess,desc,'.set'),'filepath', [output_location filesep ]); % save .set format
                 elseif output_format==2
-                    parsave([[output_location filesep ] strcat(subj,'_',task,'_ica_data_',sess,'.mat')], EEG); % save .mat format
+                    parsave([[output_location filesep ] strcat(subj,'_',task,'_ica_data_',sess,desc,'.mat')], EEG); % save .mat format
                 end
             end
 
@@ -756,10 +762,10 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                 warning(['No usable data for datafile', datafile_names{subject}]);
                 if output_format==1
                     EEG = eeg_checkset(EEG);
-                    EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_no_usable_data_all_bad_ICs_',sess));
-                    EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_ICs_',sess,'.set'),'filepath', [output_location filesep ]); % save .set format
+                    EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_no_usable_data_all_bad_ICs_',sess,desc));
+                    EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_ICs_',sess,desc,'.set'),'filepath', [output_location filesep ]); % save .set format
                 elseif output_format==2
-                    parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_ICs_',sess,'.mat')], EEG); % save .mat format
+                    parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_ICs_',sess,desc,'.mat')], EEG); % save .mat format
                 end
             else
                 EEG = eeg_checkset( EEG );
@@ -776,7 +782,7 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                 report_table.Properties.VariableNames={'datafile_names', 'date_processed', 'reference_used_for_faster', 'faster_bad_channels', ...
                     'ica_preparation_bad_channels', 'length_ica_data', 'total_ICs', 'ICs_removed', 'total_epochs_before_artifact_rejection', ...
                     'total_epochs_after_artifact_rejection', 'total_channels_interpolated', 'any_usable_data'};
-                writetable(report_table, [output_location filesep 'MADE_preprocessing_report_' task '.csv'], "WriteMode", "append");
+                writetable(report_table, [output_report_path '.csv'], "WriteMode", "append");
                 continue % ignore rest of the processing and go to next datafile
             end
 
@@ -842,10 +848,10 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                         warning(['No usable data for datafile', datafile_names{subject}]);
                         if output_format==1
                             EEG = eeg_checkset(EEG);
-                            EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess));
-                            EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,'.set'),'filepath', [output_location filesep ]); % save .set format
+                            EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc));
+                            EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc,'.set'),'filepath', [output_location filesep ]); % save .set format
                         elseif output_format==2
-                            parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,'.mat')], EEG); % save .mat format
+                            parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc,'.mat')], EEG); % save .mat format
                         end
                     else
                         EEG = pop_rejepoch( EEG, badepoch, 0);
@@ -892,10 +898,10 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                         warning(['No usable data for datafile', datafile_names{subject}]);
                         if output_format==1
                             EEG = eeg_checkset(EEG);
-                            EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess));
-                            EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,'.set'),'filepath', [output_location filesep ]); % save .set format
+                            EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc));
+                            EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc,'.set'),'filepath', [output_location filesep ]); % save .set format
                         elseif output_format==2
-                            parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,'.mat')], EEG); % save .mat format
+                            parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc,'.mat')], EEG); % save .mat format
                         end
                     else
                         EEG = pop_rejepoch(EEG, badepoch, 0);
@@ -913,10 +919,10 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                     warning(['No usable data for datafile', datafile_names{subject}]);
                     if output_format==1
                         EEG = eeg_checkset(EEG);
-                        EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess));
-                        EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,'.set'),'filepath', [output_location filesep ]); % save .set format
+                        EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc));
+                        EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc,'.set'),'filepath', [output_location filesep ]); % save .set format
                     elseif output_format==2
-                        parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,'.mat')], EEG); % save .mat format
+                        parsave([[output_location filesep ] strcat(subj,'_',task,'_no_usable_data_all_bad_epochs_',sess,desc,'.mat')], EEG); % save .mat format
                     end
                 else
                     EEG = pop_rejepoch(EEG,(EEG.reject.rejthresh), 0);
@@ -944,7 +950,7 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                 report_table.Properties.VariableNames={'datafile_names', 'date_processed', 'reference_used_for_faster', 'faster_bad_channels', ...
                     'ica_preparation_bad_channels', 'length_ica_data', 'total_ICs', 'ICs_removed', 'total_epochs_before_artifact_rejection', ...
                     'total_epochs_after_artifact_rejection', 'total_channels_interpolated', 'any_usable_data'};
-                writetable(report_table, [output_location filesep 'MADE_preprocessing_report_' task '.csv'], "WriteMode", "append");
+                writetable(report_table, [output_report_path '.csv'], "WriteMode", "append");
                 continue % ignore rest of the processing and go to next datafile
             else
                 total_epochs_after_artifact_rejection=EEG.trials;
@@ -979,17 +985,17 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
             %% Save processed data
             if output_format==1
                 EEG = eeg_checkset(EEG);
-                EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_processed_data_',sess));
-                EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_processed_data_',sess,'.set'),'filepath', [output_location filesep ]); % save .set format
+                EEG = pop_editset(EEG, 'setname',  strcat(subj,'_',task,'_processed_data_',sess,desc));
+                EEG = pop_saveset(EEG, 'filename', strcat(subj,'_',task,'_processed_data_',sess,desc,'.set'),'filepath', [output_location filesep ]); % save .set format
             elseif output_format==2
-                parsave([[output_location filesep ] strcat(subj,'_',task,'_processed_data_',sess,'.mat')], EEG); % save .mat format
+                parsave([[output_location filesep ] strcat(subj,'_',task,'_processed_data_',sess,desc,'.mat')], EEG); % save .mat format
             end
 
 
 
-            filtered_filename = [[output_location filesep ] strcat(subj,'_',task,'_filtered_data_',sess)];
-            ica_filename = [[output_location filesep ] strcat(subj,'_',task,'_ica_data_',sess)];
-            processed_filename = [[output_location filesep ] strcat(subj,'_',task,'_processed_data_',sess)];
+            filtered_filename = [[output_location filesep ] strcat(subj,'_',task,'_filtered_data_',sess,desc)];
+            ica_filename = [[output_location filesep ] strcat(subj,'_',task,'_ica_data_',sess,desc)];
+            processed_filename = [[output_location filesep ] strcat(subj,'_',task,'_processed_data_',sess,desc)];
 
             if save_interim_result
                 if output_format==1
@@ -1026,7 +1032,7 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                 'total_epochs_after_artifact_rejection', 'total_channels_interpolated', 'any_usable_data'};
 
             %write/append table to disk
-            writetable(report_table, [output_location filesep 'MADE_preprocessing_report_' task '.csv'], "WriteMode", "append");
+            writetable(report_table, [output_report_path '.csv'], "WriteMode", "append");
             % final_report_table = vertcat(final_report_table, report_table);
 
 
@@ -1048,7 +1054,7 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
             report_table.Properties.VariableNames={'datafile_names', 'date_processed', 'reference_used_for_faster', 'faster_bad_channels', ...
                 'ica_preparation_bad_channels', 'length_ica_data', 'total_ICs', 'ICs_removed', 'total_epochs_before_artifact_rejection', ...
                 'total_epochs_after_artifact_rejection', 'total_channels_interpolated', 'any_usable_data'};
-            writetable(report_table, [output_location filesep 'MADE_preprocessing_report_' task '_ERROR_incomplete.csv'], "WriteMode", "append");
+            writetable(report_table, [output_report_path '_ERROR_incomplete.csv'], "WriteMode", "append");
         end
 
 
