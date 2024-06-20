@@ -33,7 +33,7 @@ def get_redcaps(datadict_df, redcaps):
                 redcaps_dict[expected_rc] = pd.read_csv(redcap_path, index_col="record_id")
                 present = True
             elif expected_rc in basename(redcap.lower()) and present == True:
-                sys.error("Error: multiple redcaps found with name specified in datadict, " + redcap_path + " and " + redcap + ", exiting.")
+                sys.exit("Error: multiple redcaps found with name specified in datadict, " + redcap_path + " and " + redcap + ", exiting.")
         if present == False:
             sys.exit("Error: can't find redcap specified in datadict " + expected_rc + ", exiting.")
     return redcaps_dict
