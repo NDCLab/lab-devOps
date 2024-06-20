@@ -24,4 +24,4 @@ if __name__ == "__main__":
         print("Error: nan value seen in ID for", file, "file")
     else:
         if not int(id_col[0]) == int(id):
-            print("Error: ID value in", file, "does not match", id)
+            print("Error: ID value in", file, str(id_col[0]), "does not match", id)

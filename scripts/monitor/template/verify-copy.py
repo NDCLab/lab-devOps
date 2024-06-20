@@ -86,7 +86,7 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, c
                     task_files_counter[task] += 1
         for raw_file in listdir(path):
             #check sub-#, check session folder, check extension
-            if getsize(join(path, raw_file)) == 0:
+            if getsize(join(path, raw_file)) == 0 and not re.match('deviation\.txt', raw_file):
                 try:
                     os.remove(join(path, raw_file)) # just delete it
                     print(c.RED + "Error: empty file", join(path, raw_file), "seen, deleting." + c.ENDC)
@@ -163,11 +163,16 @@ def check_vhdr(sub_path, eeg_path, datatype):
                         for i, line in enumerate(f):
                             if i == 5: # Should be "DataFile" line
                                 fname = line.split('=')[1].strip('\n')
+                            if i == 6: # "MarkerFile"
+                                vmrk = line.split('=')[1].strip('\n')
                     f.close()
                     vhdr_fname = splitext(file)[0]
                     eeg_fname = splitext(fname)[0]
+                    vmrk_fname = splitext(vmrk)[0]
                     if vhdr_fname != eeg_fname:
                         print(c.RED + "Error: DataFile in header " + fname + " does not match up with name of file " + file + " in folder " + path + "." + c.ENDC)
+                    if vhdr_fname != vmrk_fname:
+                        print(c.RED + "Error: MarkerFile in header " + vmrk + " does not match up with name of file " + file + " in folder " + path + "." + c.ENDC)
 
 if __name__ == "__main__":
     dataset = sys.argv[1]

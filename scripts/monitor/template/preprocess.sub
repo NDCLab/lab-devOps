@@ -27,6 +27,14 @@ log="${dataset}/data-monitoring/data-monitoring-log.md"
 proj="$(basename $dataset)"
 tracker="${dataset}/data-monitoring/central-tracker_${proj}.csv"
 datadict="${dataset}/data-monitoring/data-dictionary/central-tracker_datadict.csv"
+if [[ ! -z "$dummy" ]]
+  then
+  tracker=None # don't update tracker
+  if [[ ! -f ${datadict} ]]
+    then
+    datadict=None
+  fi
+fi
 
 # constant paths
 sing_image="/home/data/NDClab/tools/instruments/containers/singularity/inst-container.simg"
@@ -40,8 +48,12 @@ echo "Found newest redcaps: ${input_files}"
 
 for input_file in ${input_files}
 do
-    #idcol=$(python3 $id_col_script "${data_source}/${input_file}" $data_dict)
-    idcol=$(singularity exec -e $sing_image python3 $id_col_script "${data_source}/${input_file}" $datadict)
+    if [[ ! -f ${datadict} ]] # if no datadict assume the ID column is "record_id"
+        then
+        idcol="record_id"
+    else
+        idcol=$(singularity exec -e $sing_image python3 $id_col_script "${data_source}/${input_file}" $datadict)
+    fi
     # run instruments to preprocess survey data
     singularity exec --bind $dataset,/home/data/NDClab/tools/instruments \
                     $sing_image \
@@ -55,8 +67,6 @@ do
 done
 
 # insert singularity scripts here
-#dataset="thrive-dataset"
-#sessions=($(find /home/data/NDClab/datasets/${dataset}/sourcedata/raw -mindepth 1 -maxdepth 1 -type d -printf "%f\n"))
 sessions=($(find ${dataset}/sourcedata/raw -mindepth 1 -maxdepth 1 -type d -printf "%f\n"))
 
 
@@ -104,32 +114,6 @@ if [[ -z "$score" ]]; then
 else
     echo -e "skipping preprocessing"
 fi
-
-
-
-
-
-
-
-
-
-
-
-##cd ${dataset}/code # change to directory MADE_pipeline.m is found
-#for session in ${sessions[@]}
-#   do
-#   #subjects_to_process=$(singularity exec -e $sing_image python3 subjects_yet_to_process.py $dataset $session) #need container for pandas
-#   #numsubs=$(echo $subjects_to_process | sed 's/\// /g' | wc -w)
-#   #totalsubs=$(( $totalsubs + $numsubs ))
-#   #subjects_to_process=$(singularity exec -e $sing_image python3 subjects_yet_to_process.py $(basename $dataset) $session) #need container for pandas
-#   subjects_to_process="3000064/3000066/3000067/3000071/3000073/3000074/3000077/3000079"
-#   if [[ -n ${subjects_to_process} ]]
-#       then
-#       #matlab -nodisplay -nosplash -r "MADE_pipeline $dataset $subjects_to_process $session"
-#       matlab -nodisplay -nosplash -r "addpath('$dataset/code'); MADE_pipeline $proj $subjects_to_process $session"
-#   fi
-#done
-##cd ${dataset}/data-monitoring
 
 if [[ ! -f "$log" ]]; then
     echo "$log does not exist, skipping log."

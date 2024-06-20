@@ -18,6 +18,7 @@ if [[ $NUMERRORS -gt 0 ]]; then
     error_detected="true"
 else
     error_detected="false"
+    touch slurm-${SLURM_JOB_ID}_errorlog.out
 fi
 if [ $error_detected = true ]; then
     update_log "error; $NUMERRORS errors seen, check slurm-${SLURM_JOB_ID}_errorlog.out for more info" $logfile

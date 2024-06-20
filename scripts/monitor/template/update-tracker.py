@@ -266,7 +266,7 @@ if __name__ == "__main__":
                     all_redcap_paths[expected_rc] = redcap_path
                     present = True
                 elif expected_rc in basename(redcap.lower()) and present == True:
-                    sys.error(c.RED + "Error: multiple redcaps found with name specified in datadict, " + redcap_path + " and " + redcap + ", exiting." + c.ENDC)
+                    sys.exit(c.RED + "Error: multiple redcaps found with name specified in datadict, " + redcap_path + " and " + redcap + ", exiting." + c.ENDC)
             if present == False:
                 sys.exit(c.RED + "Error: can't find redcap specified in datadict " + expected_rc + ", exiting." + c.ENDC)
             if "id_column" in redcheck_columns[expected_rc].keys():
