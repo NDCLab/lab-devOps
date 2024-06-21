@@ -8,8 +8,8 @@ import shutil
 import pandas as pd
 import re
 import math
-import subprocess
 from collections import defaultdict
+import importlib
 
 class c:
     RED = '\033[31m'
@@ -123,7 +123,7 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, c
                     print(c.RED + "Error: extension missing from file, does\'nt match expected extensions", ", ".join(possible_exts), ":", join(path, raw_file) + c.ENDC)
                 if datatype == "psychopy" and file_re.group(10) == ".csv" and file_re.group(2) != "":
                     # Call check-id.py for psychopy files
-                    subprocess.run(["python3", "check-id.py", file_re.group(2), join(path, raw_file)], shell=False)
+                    check_id.check_id(file_re.group(2), join(path, raw_file))
             else:
                 if not re.match('[Dd]eviation\.txt', raw_file):
                     print(c.RED + "Error: file ", join(path, raw_file), " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>" + c.ENDC)
@@ -187,6 +187,8 @@ if __name__ == "__main__":
         if re.match("s[0-9]+_r[0-9]+(_e[0-9]+)?", dir):
             sessions = True
             break
+
+    check_id = importlib.import_module("check-id")
 
     df_dd = pd.read_csv(datadict, index_col = "variable")
     dd_dict = dict()
