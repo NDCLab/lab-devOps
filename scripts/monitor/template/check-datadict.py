@@ -9,8 +9,7 @@ class c:
     GREEN = '\033[32m'
     ENDC = '\033[0m'
 
-if __name__ == "__main__":
-    dpath = sys.argv[1]
+def check_datadict(dpath):
     project = basename(dpath)
     dd_filename = "/home/data/NDClab/datasets/{}/data-monitoring/data-dictionary/central-tracker_datadict.csv".format(project)
     dd_last_setup = splitext(dd_filename)[0] + "_latest.csv"
@@ -27,3 +26,7 @@ if __name__ == "__main__":
         print(c.GREEN + "datadict up to date, proceeding" + c.ENDC)
     else:
         print(c.RED + "Error: modifications in data dictionary seen, please run setup.sh again to generate tracker with updated info." + c.ENDC)
+
+if __name__ == "__main__":
+    dpath = sys.argv[1]
+    check_datadict(dpath)

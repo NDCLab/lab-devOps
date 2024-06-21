@@ -10,10 +10,7 @@ class c:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-if __name__ == "__main__":
-    id = sys.argv[1]
-    file = sys.argv[2]
-    
+def check_id(id, file):
     # extract id col
     if pd.__version__ >= "1.4.0":
         file_df = pd.read_csv(file, on_bad_lines="skip")
@@ -32,3 +29,8 @@ if __name__ == "__main__":
     else:
         if not int(id_col[0]) == int(id):
             print(c.RED + "Error: ID value in", file, str(id_col[0]), "does not match", id + c.ENDC)
+
+if __name__ == "__main__":
+    id = sys.argv[1]
+    file = sys.argv[2]
+    check_id(id, file)
