@@ -76,7 +76,7 @@ function check_redcaps_in_right_session_folders {
         if [[ $(basename $rc) =~ $redcap_re ]]; then
             expected_ses_folder="${BASH_REMATCH[1]}_${BASH_REMATCH[2]}"
             if [[ $session != $expected_ses_folder ]]; then
-                echo "Found redcap ${rc} in the wrong session folder ${session}, exiting."
+                echo -e "\\t ${RED}Error: Found redcap ${rc} in the wrong session folder ${session}, exiting.${NC}"
                 exit 1
             fi
         fi
