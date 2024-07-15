@@ -1,0 +1,36 @@
+#!/bin/bash
+#SBATCH --nodes=1                # node count
+#SBATCH --ntasks=1               # total number of tasks across all nodes
+#SBATCH --cpus-per-task=1        # CPUS to use when using data parallelization
+#SBATCH --time=10:00:00          # total run time limit (HH:MM:SS)
+#SBATCH --mem=10GB
+#SBATCH --output=%x-%j.out
+
+#example usage
+#sbatch --mem=${mem_needed}G --time=${walltime_needed}:00:00 --cpus-per-task=$cpus --account=iacc_gbuzzell --partition=highmem1 --qos=highmem1 --export=ALL,dset=${dset},current_submission=${current_submission} copy_zip_eeg.sub
+
+PYIMG="/home/data/NDClab/tools/containers/python-3.8/python-3.8.simg"
+if [[ -z "$dset" ]]
+  then
+  dset="thrive-dataset"
+fi
+if [[ -z "$current_submission" ]]
+  then
+  current_submission="jul-2024-submission"
+fi
+
+singularity exec -e $PYIMG bash -c "python3 new_ndar_submission.py $dset $current_submission"
+
+# Directory to search for folders
+search_directory="/home/data/NDClab/datasets/$dset/data-monitoring/ndar/$current_submission/eeg"
+
+# Change to the search directory
+cd "$search_directory"
+
+# Find all directories and zip them
+module load zip-3.0-gcc-4.8.5-v4kyuwb
+which zip
+## for thrive files zips ~20 / hr
+find . -mindepth 1 -maxdepth 1 -type d -exec sh -c 'zip -r "${1%/}.zip" "$1"' _ {} \;
+
+echo "Zipping of folders complete, see $search_directory for outputs."

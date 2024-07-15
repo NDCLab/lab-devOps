@@ -1,0 +1,902 @@
+{
+    "all": {
+        "all_columns": ["src_subject_id", "interview_date", "interview_age", "sex"],
+        "req_columns": {
+            "src_subject_id": {
+                "rc_variable": "infosht_s1_r1_e1_complete",
+                "redcap": "readbbsparent",
+                "sessionless": "true"
+            },
+            "interview_date": {
+                "rc_variable": "infosht_s1_r1_e1_timestamp",
+                "redcap": "readbbsparent",
+                "sessionless": "true"
+            },
+            "interview_age": {
+                "rc_variable": "infosht_dob",
+                "redcap": "readbbsparent",
+                "mapping": "custom"
+            },
+            "sex": {
+                "rc_variable": "demo_d_sexbirth",
+                "redcap": "readbbsparent",
+                "mapping": {
+                    "1": "M",
+                    "2": "F",
+                    "3": "O"
+                },
+                "parent": "true"
+            }
+        }
+    },
+    "ndar_subject01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "race", "ethnic_group", "phenotype", "phenotype_description", "twins_study", "sibling_study", "family_study", "family_user_def_id", "subjectkey_mother", "src_mother_id", "subjectkey_father", "src_father_id", "subjectkey_sibling1", "src_sibling1_id", "sibling_type1", "subjectkey_sibling2", "src_sibling2_id", "sibling_type2", "subjectkey_sibling3", "src_sibling3_id", "sibling_type3", "subjectkey_sibling4", "src_sibling4_id", "sibling_type4", "zygosity", "sample_taken", "sample_id_original", "sample_description", "biorepository_name", "sample_id_biorepository", "patient_id_biorepository", "cell_id_original", "cell_id_biorepository", "agre_subject_id", "sfari_subject_id", "cpea_site", "cpea_id", "blood_id", "adi_dx", "ados_dx", "agp_family_id", "agp_subject_id", "site", "comments_misc", "week", "study", "reg_edu", "reg_mother_edu", "ca243", "ccc2english", "primary_language", "physiological_responses_type", "reg_father_edu", "employ_status", "bkgrnd_med", "demo_logfinc", "demo_wt_n_nr", "demo_stratum", "grade", "service_specialed", "asisped", "brain_injury", "trt_grp", "version_form", "visit", "reason_nint", "reason_nint_other", "liv_sit", "height_met", "weight_met", "bmi", "q013", "medchng", "capacity", "blood_1", "blood_2", "country", "country_origin", "demo_6", "year_mta", "chronic_ticdisorder_motor", "chronic_ticdisorder_vocal", "chronicticdisorder_combined", "provisional_ticdisorder", "transient_ticdisorder", "tic_disorder_nos", "p53i3", "ticsxcur", "ticdxoverride", "ocddiagnoisid", "ocddiagnois", "hxocdage", "ocsxcur", "ocdxoverride", "trichid", "trichage", "trichsxcur", "adhd_combined", "adhd_predom_inattent", "adhd_predom_hyperimpul", "grantnum", "adhd_subclinical", "ksads_adhd_age", "adhdsxcur", "adhddxoverride", "flag_atypical", "flag_psychosis", "flag_pdd_asd", "flag_other_neurolog", "flag_congenital_anom", "flag_genetic_chromosomal", "dxsmrysubmitted", "flag_other_psych", "flag_other_medical", "flag_other_desc", "othergeneticstudy", "othergeneticstudydescr", "subsiteid", "evaluated", "evaldate", "multibirthid", "tourettes_disorder", "sample", "race_other", "respond", "date_confirmed_phenotype", "pos_years", "position1", "timepoint_label", "trt_grp_desc", "longform_id", "src_sibling6_id", "sibling_type6", "subjectkey_sibling7", "src_sibling7_id", "sibling_type7", "subjectkey_sibling8", "src_sibling8_id", "sibling_type8", "subjectkey_sibling9", "src_sibling9_id", "sibling_type9", "subjectkey_sibling10", "src_sibling10_id", "sibling_type10", "subjectkey_sibling5", "src_sibling5_id", "sibling_type5", "subjectkey_sibling6", "subjectkey_femalecaregiver", "subjectkey_malecaregiver", "src_femalecaregiver_id", "src_malecaregiver_id", "ref_child_id", "child_subjectkey", "screen_randomization", "fetal_age", "fetal_age_type", "studyphase", "gender_identity", "demo_sex_tgender", "teen_subject_id", "trtarm"],
+        "req_columns": {
+            "race": {
+                "rc_variable": "demo_d_race",
+                "redcap": "readbbsparent",
+                "mapping": "custom",
+                "parent": "true"
+            },
+            "phenotype": {
+                "default": "NA"
+            },
+            "phenotype_description": {
+                "default": "NA"
+            },
+            "twins_study": {
+                "default": "No"
+            },
+            "sibling_study": {
+                "default": "No"
+            },
+            "family_study": {
+                "default": "No"
+            },
+            "sample_taken": {
+                "default": "No"
+            },
+            "ca243": {
+                "rc_variable": "physinfo_hand",
+                "redcap": "readbbschild"
+            },
+            "gender_identity": {
+                "rc_variable": "identitya_gender",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "9"
+                }
+            },
+            "timepoint_label": {
+                "mapping": "custom"
+            }
+        }
+    },
+    "pds01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "respond", "pds_1", "pds_2", "pds_3", "pds_4", "pds_5", "pds_6", "pds_7", "pds_boy_rs", "pds_girl_rs", "respondent_other_specify", "pds_7_pv", "pds_9_pv", "pds_pv_boy_tanner", "pds_pv_girl_tanner", "pds_8_pv", "pds_cv_6_girl", "dsmvers", "pstatus", "site", "trt_grp", "days_baseline", "etype", "respond_detail_oth_spec", "relationship", "pds5", "pds6g", "pds6gyr", "pds6gmo", "pds6g_d", "pds_n", "pds_sum", "pds_ave", "visit", "visday", "pds_7b_pv", "imputation", "labsample29", "pufe_008t", "pufe_005at", "pufe_005bt", "pufe_005ct", "height_std", "weight_std", "comments_misc", "pds_pr_stage", "q19_a3", "visit_num", "accult_select_language", "pds_f6_y_dk", "menstrualcycle2_y_dk", "menstrualcycle3_y", "usingbc", "menstrualcycle5_y", "menstrualcycle6_y", "pds_q7", "pds_q9", "pds_q10", "neuro_q8_height_cm", "q19_a1a", "q19_a1b", "neuro_q10_weight_kg", "anthroweight1lb", "aut_prebasic_health", "pds_height_now_1", "timept", "pubertyg_19", "gynecological_hist_6", "menstrualcycle4_y", "menstrualcycle2_y", "scq_24_a", "midihist_029a", "midihist_030a", "cirsg_13_endocrine_condn", "hypoage", "hyperage", "menstrualcycle1_y", "pubertyg_15", "pubertyb_18", "pubertyg_20", "pubertyb_17", "pds_2b", "pds_2_1b", "pds_2_2b", "pds_5b", "mhx016b", "resp_source", "comqother", "fmc2_d", "pregnant", "visit_year", "pdsm_1", "pdsm_2", "pdsm_3", "pdsm_4", "pdsm_5", "pdsm_6", "pdsf_1", "pdsf_2", "pdsf_3", "pdsf_4", "pdsf_5", "pdsf_6", "pdsf_7", "teen_timepoint", "pds_wetdream", "pds_wetdreamage", "pds_firstbra", "ampscz_missing", "ampscz_missing_spec", "ampscz_entry_date", "chrpds_pds_4_p", "sex_choice"],
+        "req_columns": {
+            "respond": {
+                "default": 3
+            },
+            "pds_1": {
+                "rc_variable": "pds_i1",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds_2": {
+                "rc_variable": "pds_i2",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds_3": {
+                "rc_variable": "pds_i3",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds_6": {
+                "rc_variable": "pds_i4",
+                "redcap": "readbbschild",
+                "conditional_column": {
+                    "redcap": "readbbsparent",
+                    "rc_variable": "demo_d_sexbirth"
+                },
+                "conditional_column_mapping": {
+                    "1": "-99",
+                    "3": "-99"
+                },
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds_7": {
+                "rc_variable": "pds_i5",
+                "redcap": "readbbschild",
+                "conditional_column":  {
+                    "redcap": "readbbsparent",
+                    "rc_variable": "demo_d_sexbirth"
+                },
+                "conditional_column_mapping": {
+                    "1": "-99",
+                    "3": "-99"
+                },
+                "mapping": {
+                    "0": "1",
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds6gyr": {
+                "rc_variable": "pds_i6",
+                "redcap": "readbbschild",
+                "conditional_column":  {
+                    "redcap": "readbbsparent",
+                    "rc_variable": "demo_d_sexbirth"
+                },
+                "conditional_column_mapping": {
+                    "1": "-300",
+                    "3": "-300"
+                },
+                "mapping": {
+                    "missing": "-900"
+                }
+            },
+            "pds_4": {
+                "rc_variable": "pds_i7",
+                "redcap": "readbbschild",
+                "conditional_column": {
+                    "redcap": "readbbsparent",
+                    "rc_variable": "demo_d_sexbirth"
+                },
+                "conditional_column_mapping": {
+                    "2": "-99",
+                    "3": "-99"
+                },
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds_5": {
+                "rc_variable": "pds_i8",
+                "redcap": "readbbschild",
+                "conditional_column": {
+                    "redcap": "readbbsparent",
+                    "rc_variable": "demo_d_sexbirth"
+                },
+                "conditional_column_mapping": {
+                    "2": "-99",
+                    "3": "-99"
+                },
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            }
+        }
+    },
+    "spai_c01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "c_spai1", "c_spai2", "c_spai3", "c_spai4", "c_spai5", "c_spai6", "c_spai7", "c_spai8", "c_spai9a", "c_spai9b", "c_spai9c", "c_spai10a", "c_spai10b", "c_spai10c", "c_spai11a", "c_spai11b", "c_spai11c", "c_spai12a", "c_spai12b", "c_spai12c", "c_spai13a", "c_spai13b", "c_spai13c", "c_spai14a", "c_spai14b", "c_spai14c", "c_spai15a", "c_spai15b", "c_spai15c", "c_spai16a", "c_spai16b", "c_spai16c", "c_spai17a", "c_spai17b", "c_spai17c", "c_spai18a", "c_spai18b", "c_spai18c", "c_spai19a", "c_spai19b", "c_spai19c", "c_spai20a", "c_spai20b", "c_spai20c", "c_spai21a", "c_spai21b", "c_spai21c", "c_spai21d", "c_spai22", "c_spai23", "c_spai24a", "c_spai24b", "c_spai24c", "c_spai25a", "c_spai25b", "c_spai25c", "c_spai25d", "c_spai25e", "c_spai26a", "c_spai26b", "c_spai26c", "c_spai26d", "c_spai26e", "c_spaitot", "visit"],
+        "req_columns": {
+            "c_spai3": {
+                "rc_variable": "spaic_i3",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai4": {
+                "rc_variable": "spaic_i4",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai10a": {
+                "rc_variable": "spaic_i12",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai10b": {
+                "rc_variable": "spaic_i13",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai10c": {
+                "rc_variable": "spaic_i14",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai11a": {
+                "rc_variable": "spaic_i15",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai11b": {
+                "rc_variable": "spaic_i16",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai11c": {
+                "rc_variable": "spaic_i17",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai12a": {
+                "rc_variable": "spaic_i18",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai12b": {
+                "rc_variable": "spaic_i19",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai12c": {
+                "rc_variable": "spaic_i20",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai13a": {
+                "rc_variable": "spaic_i21",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai13b": {
+                "rc_variable": "spaic_i22",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai13c": {
+                "rc_variable": "spaic_i23",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai14a": {
+                "rc_variable": "spaic_i24",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai14b": {
+                "rc_variable": "spaic_i25",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai14c": {
+                "rc_variable": "spaic_i26",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai15a": {
+                "rc_variable": "spaic_i27",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai15b": {
+                "rc_variable": "spaic_i28",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai15c": {
+                "rc_variable": "spaic_i29",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai16a": {
+                "rc_variable": "spaic_i30",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai16b": {
+                "rc_variable": "spaic_i31",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai16c": {
+                "rc_variable": "spaic_i32",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai17a": {
+                "rc_variable": "spaic_i33",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai17b": {
+                "rc_variable": "spaic_i34",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai17c": {
+                "rc_variable": "spaic_i35",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai23": {
+                "rc_variable": "spaic_i50",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            }
+        }
+    },
+    "cde_rcadsyouth01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_age", "interview_date", "sex", "rcads_y01", "rcads_y02", "rcads_y03", "rcads_y04", "rcads_y05", "rcads_y06", "rcads_y07", "rcads_y08", "rcads_y09", "rcads_y10", "rcads_y11", "rcads_y12", "rcads_y13", "rcads_y14", "rcads_y15", "rcads_y16", "rcads_y17", "rcads_y18", "rcads_y19", "rcads_y20", "rcads_y21", "rcads_y22", "rcads_y23", "rcads_y24", "rcads_y25", "rcads_y26"],
+        "req_columns": {
+            "rcads_y01": {
+                "rc_variable": "rcads_i1",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y02": {
+                "rc_variable": "rcads_i2",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y03": {
+                "rc_variable": "rcads_i3",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y04": {
+                "rc_variable": "rcads_i4",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y05": {
+                "rc_variable": "rcads_i5",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y06": {
+                "rc_variable": "rcads_i6",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y07": {
+                "rc_variable": "rcads_i7",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y08": {
+                "rc_variable": "rcads_i8",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y09": {
+                "rc_variable": "rcads_i9",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y10": {
+                "rc_variable": "rcads_i10",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y11": {
+                "rc_variable": "rcads_i11",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y12": {
+                "rc_variable": "rcads_i12",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y13": {
+                "rc_variable": "rcads_i13",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y14": {
+                "rc_variable": "rcads_i14",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y15": {
+                "rc_variable": "rcads_i15",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y16": {
+                "rc_variable": "rcads_i16",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y17": {
+                "rc_variable": "rcads_i17",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y19": {
+                "rc_variable": "rcads_i19",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y20": {
+                "rc_variable": "rcads_i20",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y21": {
+                "rc_variable": "rcads_i21",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y22": {
+                "rc_variable": "rcads_i22",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y23": {
+                "rc_variable": "rcads_i23",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y24": {
+                "rc_variable": "rcads_i24",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y25": {
+                "rc_variable": "rcads_i25",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y26": {
+                "redcap": "readbbschild",
+                "default": "1"
+            }
+        }
+    },
+    "cde_dsm5crossyouth01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_age", "interview_date", "sex", "dsm_cross_ch1", "dsm_cross_ch2", "dsm_cross_ch3", "dsm_cross_ch4", "dsm_cross_ch5", "dsm_cross_ch6", "dsm_cross_ch7", "dsm_cross_ch8", "dsm_cross_ch9", "dsm_cross_ch10", "dsm_cross_ch11", "dsm_cross_ch12", "dsm_cross_ch13", "dsm_cross_ch14", "dsm_cross_ch15", "dsm_cross_ch16", "dsm_cross_ch17", "dsm_cross_ch18", "dsm_cross_ch19", "dsm_cross_ch20", "dsm_cross_ch21", "dsm_cross_ch22", "dsm_cross_ch23", "dsm_cross_ch24", "dsm_cross_ch25", "dsm_cross_ch26"],
+        "req_columns": {
+            "dsm_cross_ch1": {
+                "rc_variable": "dsmxc_i1",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch2": {
+                "rc_variable": "dsmxc_i2",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch3": {
+                "rc_variable": "dsmxc_i3",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch4": {
+                "rc_variable": "dsmxc_i4",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch5": {
+                "rc_variable": "dsmxc_i5",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch6": {
+                "rc_variable": "dsmxc_i6",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch7": {
+                "rc_variable": "dsmxc_i7",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch8": {
+                "rc_variable": "dsmxc_i8",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch9": {
+                "rc_variable": "dsmxc_i9",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch10": {
+                "rc_variable": "dsmxc_i10",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch11": {
+                "rc_variable": "dsmxc_i11",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch12": {
+                "rc_variable": "dsmxc_i12",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch13": {
+                "rc_variable": "dsmxc_i13",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch14": {
+                "rc_variable": "dsmxc_i14",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch15": {
+                "rc_variable": "dsmxc_i15",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch16": {
+                "rc_variable": "dsmxc_i16",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch17": {
+                "rc_variable": "dsmxc_i17",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch18": {
+                "rc_variable": "dsmxc_i18",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch19": {
+                "rc_variable": "dsmxc_i19",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch20": {
+                "rc_variable": "dsmxc_i20",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "0": "2",
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch21": {
+                "rc_variable": "dsmxc_i21",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "0": "2",
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch22": {
+                "rc_variable": "dsmxc_i22",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "0": "2",
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch23": {
+                "rc_variable": "dsmxc_i23",
+                "redcap": "readbbschild",
+                "mapping": {
+                    "0": "2",
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch26": {
+                "redcap": "readbbschild",
+                "default": "1"
+            }
+        }
+    },
+    "staic01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_age", "interview_date", "sex", "comments_misc", "staic_c1_q1", "staic_c1_q2", "staic_c1_q3", "staic_c1_q4", "staic_c1_q5", "staic_c1_q6", "staic_c1_q7", "staic_c1_q8", "staic_c1_q9", "staic_c1_q10", "staic_c1_q11", "staic_c1_q12", "staic_c1_q13", "staic_c1_q14", "staic_c1_q15", "staic_c1_q16", "staic_c1_q17", "staic_c1_q18", "staic_c1_q19", "staic_c1_q20", "staic_c2_q1", "staic_c2_q2", "staic_c2_q3", "staic_c2_q4", "staic_c2_q5", "staic_c2_q6", "staic_c2_q7", "staic_c2_q8", "staic_c2_q9", "staic_c2_q10", "staic_c2_q11", "staic_c2_q12", "staic_c2_q13", "staic_c2_q14", "staic_c2_q15", "staic_c2_q16", "staic_c2_q17", "staic_c2_q18", "staic_c2_q19", "staic_c2_q20", "stais_time", "stais_state_c_rawscore", "staittot", "staiy_state", "visit_num", "visit", "stais_trait_c_rawscore", "staic_time", "timepoint_label"],
+        "req_columns": {
+            "staic_c1_q1": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i1",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q2": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i2",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q3": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i3",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q4": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i4",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q5": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i5",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q6": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i6",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q7": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i7",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q8": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i8",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q9": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i9",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q10": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i10",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q11": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i11",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q12": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i12",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q13": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i13",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q14": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i14",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q15": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i15",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q16": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i16",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q17": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i17",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q18": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i18",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q19": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i19",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "staic_c1_q20": {
+                "redcap": "readbbschild",
+                "rc_variable": "staic_i20",
+                "mapping": {
+                    "missing": "-9"
+                }
+            }
+        }
+    }
+}
+

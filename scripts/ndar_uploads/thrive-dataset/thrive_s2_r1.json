@@ -3,23 +3,28 @@
         "all_columns": ["src_subject_id", "interview_date", "interview_age", "sex"],
         "req_columns": {
             "src_subject_id": {
-                "rc_variable": "record_id",
+                "rc_variable": "infosht18m_s2_r1_e1_complete",
                 "redcap": "iqsparent",
-                "sessionless": "true"
+                "sessionless": "true",
+                "parent": "true"
             },
             "interview_date": {
-                "rc_variable": "infosht_s1_r1_e1_timestamp",
+                "rc_variable": "infosht18m_s2_r1_e1_timestamp",
                 "redcap": "iqsparent",
-                "sessionless": "true"
+                "sessionless": "true",
+                "parent": "true"
             },
             "interview_age": {
                 "rc_variable": "infosht_dob",
                 "redcap": "iqsparent",
-                "mapping": "custom"
+                "mapping": "custom",
+                "parent": "true"
             },
             "sex": {
-                "rc_variable": "demo_d_sexbirth",
-                "redcap": "iqsparent",
+                "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                "redcap": "iqsparents1r1",
+                "different_session": "true",
+                "sessionless": "true",
                 "mapping": {
                     "1": "M",
                     "2": "F",
@@ -33,9 +38,11 @@
         "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "race", "ethnic_group", "phenotype", "phenotype_description", "twins_study", "sibling_study", "family_study", "family_user_def_id", "subjectkey_mother", "src_mother_id", "subjectkey_father", "src_father_id", "subjectkey_sibling1", "src_sibling1_id", "sibling_type1", "subjectkey_sibling2", "src_sibling2_id", "sibling_type2", "subjectkey_sibling3", "src_sibling3_id", "sibling_type3", "subjectkey_sibling4", "src_sibling4_id", "sibling_type4", "zygosity", "sample_taken", "sample_id_original", "sample_description", "biorepository_name", "sample_id_biorepository", "patient_id_biorepository", "cell_id_original", "cell_id_biorepository", "agre_subject_id", "sfari_subject_id", "cpea_site", "cpea_id", "blood_id", "adi_dx", "ados_dx", "agp_family_id", "agp_subject_id", "site", "comments_misc", "week", "study", "reg_edu", "reg_mother_edu", "ca243", "ccc2english", "primary_language", "physiological_responses_type", "reg_father_edu", "employ_status", "bkgrnd_med", "demo_logfinc", "demo_wt_n_nr", "demo_stratum", "grade", "service_specialed", "asisped", "brain_injury", "trt_grp", "version_form", "visit", "reason_nint", "reason_nint_other", "liv_sit", "height_met", "weight_met", "bmi", "q013", "medchng", "capacity", "blood_1", "blood_2", "country", "country_origin", "demo_6", "year_mta", "chronic_ticdisorder_motor", "chronic_ticdisorder_vocal", "chronicticdisorder_combined", "provisional_ticdisorder", "transient_ticdisorder", "tic_disorder_nos", "p53i3", "ticsxcur", "ticdxoverride", "ocddiagnoisid", "ocddiagnois", "hxocdage", "ocsxcur", "ocdxoverride", "trichid", "trichage", "trichsxcur", "adhd_combined", "adhd_predom_inattent", "adhd_predom_hyperimpul", "grantnum", "adhd_subclinical", "ksads_adhd_age", "adhdsxcur", "adhddxoverride", "flag_atypical", "flag_psychosis", "flag_pdd_asd", "flag_other_neurolog", "flag_congenital_anom", "flag_genetic_chromosomal", "dxsmrysubmitted", "flag_other_psych", "flag_other_medical", "flag_other_desc", "othergeneticstudy", "othergeneticstudydescr", "subsiteid", "evaluated", "evaldate", "multibirthid", "tourettes_disorder", "sample", "race_other", "respond", "date_confirmed_phenotype", "pos_years", "position1", "timepoint_label", "trt_grp_desc", "longform_id", "src_sibling6_id", "sibling_type6", "subjectkey_sibling7", "src_sibling7_id", "sibling_type7", "subjectkey_sibling8", "src_sibling8_id", "sibling_type8", "subjectkey_sibling9", "src_sibling9_id", "sibling_type9", "subjectkey_sibling10", "src_sibling10_id", "sibling_type10", "subjectkey_sibling5", "src_sibling5_id", "sibling_type5", "subjectkey_sibling6", "subjectkey_femalecaregiver", "subjectkey_malecaregiver", "src_femalecaregiver_id", "src_malecaregiver_id", "ref_child_id", "child_subjectkey", "screen_randomization", "fetal_age", "fetal_age_type", "studyphase", "gender_identity", "demo_sex_tgender", "teen_subject_id", "trtarm"],
         "req_columns": {
             "race": {
-                "rc_variable": "demo_d_race",
-                "redcap": "iqsparent",
-                "mapping": "custom"
+                "rc_variable": "demo_d_race_s1_r1_e1",
+                "redcap": "iqsparents1r1",
+                "sessionless": "true",
+                "mapping": "custom",
+                "parent": "true"
             },
             "phenotype": {
                 "default": "NA"
@@ -105,8 +112,10 @@
                 "rc_variable": "pds_i4",
                 "redcap": "iqschild",
                 "conditional_column": {
-                    "redcap": "iqsparent",
-                    "rc_variable": "demo_d_sexbirth"
+                    "redcap": "iqsparents1r1",
+                    "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                    "different_session": "true",
+                    "sessionless": "true"
                 },
                 "conditional_column_mapping": {
                     "1": "-99",
@@ -121,8 +130,10 @@
                 "rc_variable": "pds_i5",
                 "redcap": "iqschild",
                 "conditional_column":  {
-                    "redcap": "iqsparent",
-                    "rc_variable": "demo_d_sexbirth"
+                    "redcap": "iqsparents1r1",
+                    "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                    "different_session": "true",
+                    "sessionless": "true"
                 },
                 "conditional_column_mapping": {
                     "1": "-99",
@@ -138,8 +149,10 @@
                 "rc_variable": "pds_i6",
                 "redcap": "iqschild",
                 "conditional_column":  {
-                    "redcap": "iqsparent",
-                    "rc_variable": "demo_d_sexbirth"
+                    "redcap": "iqsparents1r1",
+                    "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                    "different_session": "true",
+                    "sessionless": "true"
                 },
                 "conditional_column_mapping": {
                     "1": "-300",
@@ -153,8 +166,10 @@
                 "rc_variable": "pds_i7",
                 "redcap": "iqschild",
                 "conditional_column": {
-                    "redcap": "iqsparent",
-                    "rc_variable": "demo_d_sexbirth"
+                    "redcap": "iqsparents1r1",
+                    "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                    "different_session": "true",
+                    "sessionless": "true"
                 },
                 "conditional_column_mapping": {
                     "2": "-99",
@@ -169,8 +184,10 @@
                 "rc_variable": "pds_i8",
                 "redcap": "iqschild",
                 "conditional_column": {
-                    "redcap": "iqsparent",
-                    "rc_variable": "demo_d_sexbirth"
+                    "redcap": "iqsparents1r1",
+                    "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                    "different_session": "true",
+                    "sessionless": "true"
                 },
                 "conditional_column_mapping": {
                     "2": "-99",
@@ -1064,14 +1081,12 @@
         "req_columns": {
             "totalanx": {
                 "redcap": "iqsclinician",
-                "mapping": "custom",
                 "computed": "sum",
                 "missing": "-9",
                 "components": ["lsascl_i1", "lsascl_i3", "lsascl_i5", "lsascl_i7", "lsascl_i9", "lsascl_i11", "lsascl_i13", "lsascl_i15", "lsascl_i17", "lsascl_i19", "lsascl_i21", "lsascl_i23", "lsascl_i25", "lsascl_i27", "lsascl_i29", "lsascl_i31", "lsascl_i33", "lsascl_i35", "lsascl_i37", "lsascl_i39", "lsascl_i41", "lsascl_i43", "lsascl_i45", "lsascl_i47"]
             },
             "totalav": {
                 "redcap": "iqsclinician",
-                "mapping": "custom",
                 "computed": "sum",
                 "missing": "-9",
                 "components": ["lsascl_i2", "lsascl_i4", "lsascl_i6", "lsascl_i8", "lsascl_i10", "lsascl_i12", "lsascl_i14", "lsascl_i16", "lsascl_i18", "lsascl_i20", "lsascl_i22", "lsascl_i24", "lsascl_i26", "lsascl_i28", "lsascl_i30", "lsascl_i32", "lsascl_i34", "lsascl_i36", "lsascl_i38", "lsascl_i40", "lsascl_i42", "lsascl_i44", "lsascl_i46", "lsascl_i48"]

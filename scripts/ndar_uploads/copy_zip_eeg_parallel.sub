@@ -1,0 +1,64 @@
+#!/bin/bash
+#SBATCH --nodes=1                # node count
+#SBATCH --ntasks=4               # total number of tasks across all nodes
+#SBATCH --cpus-per-task=1        # CPUS to use when using data parallelization
+#SBATCH --time=10:00:00          # total run time limit (HH:MM:SS)
+#SBATCH --mem-per-cpu=7GB
+#SBATCH --account=iacc_gbuzzell
+#SBATCH --partition=highmem1
+#SBATCH --qos=highmem1
+#SBATCH --output=%x-%j.out
+
+#example usage
+#sbatch --mem=${mem_needed}G --time=${walltime_needed}:00:00 --cpus-per-task=$cpus --account=iacc_gbuzzell --partition=highmem1 --qos=highmem1 --export=ALL,dset=${dset},current_submission=${current_submission} copy_zip_eeg_parallel.sub
+
+PYIMG="/home/data/NDClab/tools/containers/python-3.8/python-3.8.simg"
+
+if [[ -z "$dset" ]]
+  then
+  dset="thrive-dataset"
+fi
+if [[ -z "$current_submission" ]]
+  then
+  current_submission="jul-2024-submission"
+fi
+
+output=$(singularity exec -e $PYIMG bash -c "python3 new_ndar_submission.py $dset $current_submission")
+
+# Directory to search for folders
+search_directory="/home/data/NDClab/datasets/$dset/data-monitoring/ndar/$current_submission/eeg"
+
+# Change to the search directory
+cd "$search_directory"
+
+# Find all directories and zip them
+module load zip-3.0-gcc-4.8.5-v4kyuwb
+which zip
+## for thrive files zips ~20 / hr
+FILES=($(find $PWD -mindepth 1 -maxdepth 1 -type d))
+NUMFILES=${#FILES[@]}
+#for 4 CPUS
+NUM_PER_CPU=$(( $NUMFILES / 4 ))
+LEFTOVER=$(( $NUMFILES % 4 ))
+idx=0
+ARR1=(${FILES[@]:0:$NUM_PER_CPU}) && idx=$(( $idx + $NUM_PER_CPU ))
+ARR2=(${FILES[@]:$idx:$NUM_PER_CPU}) && idx=$(( $idx + $NUM_PER_CPU ))
+ARR3=(${FILES[@]:$idx:$NUM_PER_CPU}) && idx=$(( $idx + $NUM_PER_CPU ))
+ARR4=(${FILES[@]:$idx:$(( $NUM_PER_CPU + $LEFTOVER ))})
+[[ ! -d $search_directory/tmpdir ]] && mkdir $search_directory/tmpdir
+
+# run in parallel w 4 cpus
+srun --export=ALL --ntasks=1 --nodes=1 --cpus-per-task=$SLURM_CPUS_PER_TASK bash -c "for EEG in ${ARR1[*]}; do zip -r \$(dirname \${EEG})/tmpdir/\$(basename \${EEG}).zip \${EEG}; mv \$(dirname \${EEG})/tmpdir/\$(basename \${EEG}).zip \$(dirname \${EEG})/\$(basename \${EEG}).zip; done" &
+srun --export=ALL --ntasks=1 --nodes=1 --cpus-per-task=$SLURM_CPUS_PER_TASK bash -c "for EEG in ${ARR2[*]}; do zip -r \$(dirname \${EEG})/tmpdir/\$(basename \${EEG}).zip \${EEG}; mv \$(dirname \${EEG})/tmpdir/\$(basename \${EEG}).zip \$(dirname \${EEG})/\$(basename \${EEG}).zip; done" &
+srun --export=ALL --ntasks=1 --nodes=1 --cpus-per-task=$SLURM_CPUS_PER_TASK bash -c "for EEG in ${ARR3[*]}; do zip -r \$(dirname \${EEG})/tmpdir/\$(basename \${EEG}).zip \${EEG}; mv \$(dirname \${EEG})/tmpdir/\$(basename \${EEG}).zip \$(dirname \${EEG})/\$(basename \${EEG}).zip; done" &
+srun --export=ALL --ntasks=1 --nodes=1 --cpus-per-task=$SLURM_CPUS_PER_TASK bash -c "for EEG in ${ARR4[*]}; do zip -r \$(dirname \${EEG})/tmpdir/\$(basename \${EEG}).zip \${EEG}; mv \$(dirname \${EEG})/tmpdir/\$(basename \${EEG}).zip \$(dirname \${EEG})/\$(basename \${EEG}).zip; done" &
+wait
+#srun --export=ALL --ntasks=1 --nodes=1 --cpus-per-task=$SLURM_CPUS_PER_TASK bash -c "for EEG in ${ARR1[*]}; do zip -r \${EEG}.zip \${EEG}; done" &
+#srun --export=ALL --ntasks=1 --nodes=1 --cpus-per-task=$SLURM_CPUS_PER_TASK bash -c "for EEG in ${ARR2[*]}; do zip -r \${EEG}.zip \${EEG}; done" &
+#srun --export=ALL --ntasks=1 --nodes=1 --cpus-per-task=$SLURM_CPUS_PER_TASK bash -c "for EEG in ${ARR3[*]}; do zip -r \${EEG}.zip \${EEG}; done" &
+#srun --export=ALL --ntasks=1 --nodes=1 --cpus-per-task=$SLURM_CPUS_PER_TASK bash -c "for EEG in ${ARR4[*]}; do zip -r \${EEG}.zip \${EEG}; done" &
+
+[[ -d $search_directory/tmpdir ]] && rm -r $search_directory/tmpdir
+
+
+echo "Zipping of folders complete, see $search_directory for outputs."
