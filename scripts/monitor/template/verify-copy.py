@@ -87,11 +87,7 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, c
         for raw_file in listdir(path):
             #check sub-#, check session folder, check extension
             if getsize(join(path, raw_file)) == 0 and not re.match('deviation\.txt', raw_file):
-                try:
-                    os.remove(join(path, raw_file)) # just delete it
-                    print(c.RED + "Error: empty file", join(path, raw_file), "seen, deleting." + c.ENDC)
-                except:
-                    print(c.RED + "Error: empty file", join(path, raw_file), "seen, please ask lab tech to delete empty file and rerun hallMonitor." + c.ENDC)
+                print(c.RED + "Error: empty file", join(path, raw_file), "seen, please notify EEG RAs that an empty file was uploaded and upload correct file." + c.ENDC)
                 continue
             file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))(_[a-zA-Z0-9_-]+)?((?:\.[a-zA-Z]+)*)$", raw_file)
             if file_re:
