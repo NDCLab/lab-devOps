@@ -195,7 +195,7 @@ def map_vals(ndar_df, ndar_col, ndar_csv, ndar_json, sre, parent=False):
             if "mapping_formula" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
                 x = rc_df.loc[id, rc_column]
                 val = eval(ndar_json[ndar_csv]["req_columns"][ndar_col]["mapping_formula"])
-                if -0.01 < val-round(val) < 0.01: # don't round if val is a decimal
+                if -0.001 < val-round(val) < 0.001: # don't round if val is a decimal
                     val = str(int(val))
                 ndar_df.loc[child_id, ndar_col] = val
                 continue

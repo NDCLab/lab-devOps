@@ -73,6 +73,18 @@ if __name__ == "__main__":
             no_data_tasks = []
             for task, dtype in task_datatype.items():
                 if dtype == 'combination':
+                    comb_vars = df_dd.loc['arrow-alert_psychopy','provenance'].split(":")[1].split(",")
+                    comb_vars = [x.strip("\" ") for x in comb_vars]
+                    #comb_vars = [x.strip("\" ") for x in df_dd.loc['arrow-alert_psychopy','provenance'].split(":")[1].split(",")
+                    folders = []
+                    for var in comb_vars:
+                        folders.append(df_dd.loc[var,'dataType'])
+                    for folder in folders:
+                        if isdir(join(checked, 'sub-'+str(int(sub)), session, folder)):
+                            for dfile in listdir(join(checked, 'sub-'+str(int(sub)), session, folder)):
+                                if dfile == "no-data.txt":
+                                    if task not in no_data_tasks:
+                                        no_data_tasks.append(task)
                     continue
                 if isdir(join(checked, 'sub-'+str(int(sub)), session, dtype)):
                     for dfile in listdir(join(checked, 'sub-'+str(int(sub)), session, dtype)):
