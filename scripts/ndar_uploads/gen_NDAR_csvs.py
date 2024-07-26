@@ -48,7 +48,7 @@ def get_redcaps(datadict_df, redcaps, ndar_json, other_sessions=False):
     return redcaps_dict
 
 
-def map_race(ndar_df, ndar_json, redcap, race_col, sre, sessionless=False, parent=False):
+def map_race(ndar_df, ndar_json, redcap, race_col, sre, col_name, sessionless=False, parent=False):
     race_dict = { "10": "White", "11": "Black or African American", "12": "American Indian/Alaska Native", "13": "American Indian/Alaska Native", \
                   "14": "Hawaiian or Pacific Islander", "15": "Hawaiian or Pacific Islander", "16": "Hawaiian or Pacific Islander", \
                   "17": "Hawaiian or Pacific Islander", "18": "Asian", "19": "Asian", "20": "Asian", "21": "Asian", "22": "Asian", "23": "Asian", \
@@ -73,16 +73,14 @@ def map_race(ndar_df, ndar_json, redcap, race_col, sre, sessionless=False, paren
         if sum == 1:
             for col in race_cols:
                 if rc_df.loc[id, col] == 1:
-                    race_num = re.match('^demo(es)?_d_race_s[0-9]+_r[0-9]+_e[0-9]+_+([0-9]+)$', col).group(2)
-                    #race_num = re.match('^demo(es)?_e_race_s[0-9]+_r[0-9]+_e[0-9]+_+([0-9]+)$', col).group(2)
+                    race_num = re.match('^demo(es)?_[de]_race_s[0-9]+_r[0-9]+_e[0-9]+_+([0-9]+)$', col).group(2)
                     # TODO this needs to be drawn from the JSON
-                    #########################################
                     race = race_dict[race_num]
-                    ndar_df.loc[child_id, "race"] = race
+                    ndar_df.loc[child_id, col_name] = race
         elif sum > 1:
-            ndar_df.loc[child_id, "race"] = "More than one race"
+            ndar_df.loc[child_id, col_name] = "More than one race"
         elif sum == 0:
-            ndar_df.loc[child_id, "race"] = "Unknown or not reported"
+            ndar_df.loc[child_id, col_name] = "Unknown or not reported"
 
 
 def map_interview_date(ndar_df, ndar_json, sre, rc, rc_col):
@@ -246,7 +244,7 @@ def map_adis(ndar_df, ndar_col, ndar_csv, ndar_json, sre, all_columns=False, par
             val = rc_df.loc[id, "adis_fn_dx" + str(i) + "_lb_" + sre]
             if not math.isnan(val):
                 val = str(int(val))
-                if val not in diagnoses:
+                if val not in diagnoses and val != "3":
                     diagnoses.append(val)
         for diagnosis in diagnoses:
             if diagnosis == "0":
