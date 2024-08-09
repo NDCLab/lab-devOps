@@ -415,10 +415,10 @@ if __name__ == "__main__":
                     try:
                         corrected = False
                         for filename in listdir(join(checked_path, subdir, session, datatype)):
-                            if re.match('^[Dd]eviation.*$', filename):
+                            if re.match('^.*[Dd]eviation\.txt$', filename):
                                 corrected = True
                                 break
-                            if re.match('^no-data\.txt$', filename):
+                            if re.match('^.*no-data\.txt$', filename):
                                 tracker_df.loc[dir_id, task + "_" + sfx] = "0"
                                 no_data = True
                                 break

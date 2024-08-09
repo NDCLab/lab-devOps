@@ -38,7 +38,7 @@ def check_number_of_files(path, datatype, tasks, corrected):
         file_re = re.match('^sub-([0-9]{7})_(.*)_(s[0-9]+_r[0-9]+_e[0-9]+)\.([a-z0-9.]+)$', raw_file)
         if re.match('^[Dd]eviation$', raw_file):
             return
-        if re.match('^no-data\.txt$', raw_file):
+        if re.match('^.*no-data\.txt$', raw_file):
             return
         if not file_re:
             print("unexpected file format seen in", join(path, raw_file))
@@ -86,7 +86,7 @@ def check_filenames(path, sub, ses, datatype, allowed_suffixes, possible_exts, c
                     task_files_counter[task] += 1
         for raw_file in listdir(path):
             #check sub-#, check session folder, check extension
-            if getsize(join(path, raw_file)) == 0 and not re.match('deviation\.txt', raw_file):
+            if getsize(join(path, raw_file)) == 0 and not re.match('.*deviation\.txt', raw_file):
                 print(c.RED + "Error: empty file", join(path, raw_file), "seen, please notify EEG RAs that an empty file was uploaded and upload correct file." + c.ENDC)
                 continue
             file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))(_[a-zA-Z0-9_-]+)?((?:\.[a-zA-Z]+)*)$", raw_file)
@@ -253,7 +253,7 @@ if __name__ == "__main__":
                             corrected = True
                             system('mkdir -p ' + join(checked, subject, ses, datatype))
                             system('cp ' + join(raw, ses, datatype, subject, raw_file) + ' ' + join(checked, subject, ses, datatype, raw_file))
-                        if re.match('^no-data\.txt$', raw_file):
+                        if re.match('^.*no-data\.txt$', raw_file):
                             no_data = True
                             system('mkdir -p ' + join(checked, subject, ses, datatype))
                             system('cp ' + join(raw, ses, datatype, subject, raw_file) + ' ' + join(checked, subject, ses, datatype, raw_file))
@@ -302,7 +302,7 @@ if __name__ == "__main__":
                     for raw_file in listdir(path):
                         if re.match('^[Dd]eviation.*$', raw_file):
                             corrected = True
-                        if re.match('^no-data\.txt$', raw_file):
+                        if re.match('^.*no-data\.txt$', raw_file):
                             no_data = True
                     if no_data:
                         continue
@@ -326,7 +326,7 @@ if __name__ == "__main__":
                         path = join(raw, session_folder, datatype_folder, sub)
                         corrected = False
                         for raw_file in listdir(path):
-                            if re.match('^[Dd]eviation.*$', raw_file) or re.match('^no-data\.txt$', raw_file):
+                            if re.match('^[Dd]eviation.*$', raw_file) or re.match('^.*no-data\.txt$', raw_file):
                                 corrected = True
                                 break
                         check_number_of_files(path, datatype_folder, tasks, corrected)
@@ -373,7 +373,7 @@ if __name__ == "__main__":
                         for raw_file in listdir(path):
                             if re.match('^[Dd]eviation.*$', raw_file):
                                 corrected = True
-                            if re.match('^no-data\.txt$', raw_file):
+                            if re.match('^.*no-data\.txt$', raw_file):
                                 no_data = True
                         if no_data:
                             break
@@ -398,7 +398,7 @@ if __name__ == "__main__":
                         for raw_file in listdir(path):
                             if re.match('^[Dd]eviation.*$', raw_file):
                                 corrected = True
-                            if re.match('^no-data\.txt$', raw_file):
+                            if re.match('^.*no-data\.txt$', raw_file):
                                 no_data = True
                         if no_data:
                             break
@@ -419,7 +419,7 @@ if __name__ == "__main__":
                         if isdir(path):
                             corrected = False
                             for raw_file in listdir(path):
-                                if re.match('^[Dd]eviation.*$', raw_file) or re.match('^no-data\.txt$', raw_file):
+                                if re.match('^[Dd]eviation.*$', raw_file) or re.match('^.*no-data\.txt$', raw_file):
                                     corrected = True
                                     break
                             check_number_of_files(path, datatype_folder, tasks, corrected)
