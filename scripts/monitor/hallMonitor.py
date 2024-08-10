@@ -7,6 +7,8 @@ import os
 import pandas as pd
 import pytz
 
+DT_FORMAT = r"%Y-%m-%d_%H-%M"
+
 
 def get_args():
     """Get the arguments passed to hallMonitor
@@ -20,6 +22,7 @@ def get_args():
     )
     parser.add_argument(
         "--child-data",
+        dest="childdata",
         action="store_true",
         help="Include this switch if the study includes child data.",
     )
@@ -28,18 +31,31 @@ def get_args():
     return parser.parse_args()
 
 
-def get_file_record(dataset):
-    file_record_path = os.path.join(
-        dataset, "data-monitoring", "validated-file-record.csv"
-    )
-    return pd.read_csv(file_record_path)
+def get_id_record(dataset):
+    record_path = os.path.join(dataset, "data-monitoring", "file-record.csv")
+    return pd.read_csv(record_path)
 
 
-def write_file_record(dataset, record):
-    file_record_path = os.path.join(
-        dataset, "data-monitoring", "validated-file-record.csv"
+def write_id_record(dataset, df):
+    record_path = os.path.join(dataset, "data-monitoring", "file-record.csv")
+    df.to_csv(record_path)
+
+
+def get_identifiers(dataset):
+    datadict_path = os.path.join(
+        dataset, "data-monitoring", "data-dictionary", "central-tracker_datadict.csv"
     )
-    record.to_csv(file_record_path)
+    dd_df = pd.read_csv(datadict_path)
+    # ignore = ["id", "consent", "assent", "combination"]  # what else?
+    # dd_df = dd_df[~dd_df["dataType"].isin(ignore)]
+
+    # TODO: Complete this to generate all valid identifiers for a study
+
+    return pd.Series()
+
+
+def get_identifier_files(dataset, identifier):
+    pass
 
 
 def handle_raw_unchecked(dataset):
@@ -51,6 +67,32 @@ def get_latest_pending(dataset):
     pending_files = os.listdir(pending_path)
     pending_df = pd.read_csv(pending_files[-1])
     return pending_df
+
+
+def df_from_colmap(colmap):
+    """Generates a Pandas DataFrame from a column-datatype dictionary
+
+    Args:
+        colmap (dict[str, str]): A dictionary containing entries of the form "name": "float|str|int"
+
+    Returns:
+        pandas.DataFrame: An empty DataFrame, generated as specified by colmap
+    """
+    df = pd.DataFrame({c: pd.Series(dtype=t) for c, t in colmap.items()})
+    return df
+
+
+def new_pending_df():
+    colmap = {
+        "date-time": "str",
+        "user": "str",
+        "dataType": "str",
+        "identifier": "str",
+        "pass-raw": "int",
+        "error-type": "str",
+        "error-details": "str",
+    }
+    return df_from_colmap(colmap)
 
 
 def get_passed_raw_check(dataset):
@@ -66,49 +108,59 @@ def new_qa_checklist():
         "qa": "int",
         "local-move": "int",
     }
-    checklist = pd.DataFrame({c: pd.Series(dtype=t) for c, t in colmap.items()})
-    return checklist
-
-
-def write_qa_checklist(dataset, qa_df):
-    qa_checklist_path = os.path.join(
-        dataset, "sourcedata", "pending-qa", "qa-checklist.csv"
-    )
-    qa_df.to_csv(qa_checklist_path)
+    return df_from_colmap(colmap)
 
 
 def handle_qa_unchecked(dataset):
-    qa_checklist_path = os.path.join(
-        dataset, "sourcedata", "pending-qa", "qa-checklist.csv"
-    )
+    print("Starting QA check...")
+
+    record_df = get_id_record(dataset)
+    pending_qa_dir = os.path.join(dataset, "sourcedata", "pending-qa")
+    qa_checklist_path = os.path.join(pending_qa_dir, "qa-checklist.csv")
     if os.path.exists(qa_checklist_path):
         qa_df = pd.read_csv(qa_checklist_path)
-    else:
+    else:  # first run
         qa_df = new_qa_checklist()
 
-    cols = ["identifier", "user"]
-    passed_qa = qa_df[(qa_df["qa"] == 1) & (qa_df["local-move"] == 1)][cols]
-    # move to checked
-
-    # raw dir order is session/datatype/subject
-    # checked dir order is subject/session/datatype
-
-    # remove passed IDs from qa_df
-    qa_df = qa_df[qa_df["identifier"] != passed_qa["identifier"]]
-    write_qa_checklist(dataset, qa_df)
-
-    # write passed IDs to validated-file-record.csv
+    # FIXME unsure of proper column vals
+    passed_ids = qa_df[(qa_df["qa"] == 1) & (qa_df["local-move"] == 1)]["identifier"]
+    print(f"Found {len(passed_ids)} new identifiers that passed QA checks")
     dt = datetime.datetime.now(pytz.timezone("US/Eastern"))
-    passed_qa["date-time"] = dt
-    passed_qa["raw"] = 1
-    passed_qa["qa"] = 1
-    passed_qa["checked"] = 1
-    record = get_file_record(dataset)
-    record = pd.concat(record, passed_qa)
-    write_file_record(dataset, record)
+    dt = dt.strftime(DT_FORMAT)
 
-    pending = get_latest_pending(dataset)
-    passed_raw = pending[pending["pass-raw"] == 1]["identifier"]
+    # log QA-passed IDs to identifier record
+    record_df[record_df["identifier"].isin(passed_ids)]["date-time"] = dt
+    write_id_record(dataset, record_df)
+
+    # remove QA-passed files from pending-qa and QA tracker
+    qa_df = qa_df[~qa_df["identifier"].isin(passed_ids)]
+    for id in passed_ids:
+        files = get_identifier_files(id)
+        # TODO Remove files from pending-qa
+    # clean up empty directories
+    subprocess.run(
+        ["find", pending_qa_dir, "-depth", "-empty", "-type", "d", "-delete"]
+    )
+
+    # stage raw-passed identifiers (no QA check, passed raw check)
+    new_qa = record_df[record_df["qa"].isna()]
+    new_qa = new_qa[~new_qa["raw"].isna()]
+
+    # TODO Copy files associated with identifiers to pending-qa
+    for id in new_qa["identifier"]:
+        files = get_identifier_files(id)
+        # copy to pending-qa, making parent directories if need be
+
+    # modify and write out QA tracker to reflect changes
+    new_qa = new_qa[["identifier", "dataType"]]
+    new_qa["date-time"] = dt
+    # FIXME Should this be filled manually or detected?
+    new_qa["user"] = getuser()
+    new_qa[["qa", "local-move"]] = 0
+    qa_df = pd.concat([qa_df, new_qa])
+    qa_df.to_csv(qa_checklist_path)
+
+    print("QA check done!")
 
 
 def handle_validated():
@@ -117,16 +169,10 @@ def handle_validated():
 
 if __name__ == "__main__":
     args = get_args()
-
-    dataset = args.dataset
-    raw_dir = os.path.join(dataset, "sourcedata", "raw")
-    checked_dir = os.path.join(dataset, "sourcedata", "checked")
-    datadict_path = os.path.join(dataset, "data-monitoring", "?")
-
-    dd_df = pd.read_csv(datadict_path)
+    dataset = os.path.realpath(args.dataset)
 
     # handle raw unchecked identifiers
-    handle_raw_unchecked(dataset)
+    handle_raw_unchecked(dataset, args.childdata)
 
     # handle QA unchecked identifiers
     handle_qa_unchecked(dataset)
