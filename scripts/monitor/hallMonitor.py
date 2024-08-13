@@ -1,7 +1,6 @@
 #!/bin/python3
 
-import argparse
-import datetime
+import logging
 import os
 
 import pandas as pd
@@ -171,11 +170,25 @@ if __name__ == "__main__":
     args = get_args()
     dataset = os.path.realpath(args.dataset)
 
-    # handle raw unchecked identifiers
-    handle_raw_unchecked(dataset, args.childdata)
+    # set up logging to file and console
 
-    # handle QA unchecked identifiers
-    handle_qa_unchecked(dataset)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
 
-    # handle fully-validated identifiers
-    handle_validated(dataset)
+    log_path = os.path.join(dataset, LOGGING_SUBPATH)
+    file_handler = logging.FileHandler(log_path)
+    file_handler.setLevel(logging.DEBUG)
+    file_formatter = logging.Formatter(
+        "[%(asctime)s] (%(levelname)s)\t%(funcname)s(): %(message)s"
+    )
+    file_handler.setFormatter(file_formatter)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.ERROR)
+    console_formatter = logging.Formatter(
+        "[%(relativeCreated)dms] (%(levelname)s)\t%(message)s"
+    )
+    console_handler.setFormatter(console_formatter)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
