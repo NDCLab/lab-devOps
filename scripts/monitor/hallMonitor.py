@@ -58,11 +58,11 @@ def has_deviation(identifier, parentdirs):
                 no_data = True
     return [deviation, no_data]
 
-def check_filenames(raw_files, deviation, raw):
+def check_filenames(files, deviation, raw):
     errors = []
     if deviation[1] == True: # no data
         return errors
-    for file in raw_files:
+    for filename in files:
         parent_dirs = file.split('/')
         if raw: # raw directory structure
             sub = parent_dirs[-2]
@@ -72,44 +72,44 @@ def check_filenames(raw_files, deviation, raw):
             sub = parent_dirs[-4]
             ses = parent_dirs[-3]
             datatype = parent_dirs[-2]
-        file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))(_[a-zA-Z0-9_-]+)?((?:\.[a-zA-Z]+)*)$", raw_file)
+        file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))(_[a-zA-Z0-9_-]+)?((?:\.[a-zA-Z]+)*)$", filename)
         if file_re:
         #####################
             # all filename checks (not number of files checks, not _data or _status checks), write any errors to "errors"
-
+            #TODO need possible_exts, allowed_vals, allowed_suffixes, possible variable names from dd_df
             if file_re.group(1) != sub:
-                errors.append("Error: file from subject " + file_re.group(1) + " found in " + sub + " folder: " + raw_file)
+                errors.append("Error: file from subject " + file_re.group(1) + " found in " + sub + " folder: " + filename)
             if file_re.group(5) != ses:
-                errors.append("Error: file from session " + file_re.group(5) + " found in " + ses + " folder: " + raw_file) 
+                errors.append("Error: file from session " + file_re.group(5) + " found in " + ses + " folder: " + filename) 
             if file_re.group(10) not in possible_exts and len(file_re.group(10)) > 0:
-                errors.append("Error: file with extension " + file_re.group(10) + " found, doesn\'t match expected extensions " + ", ".join(possible_exts) + ": " + raw_file) 
+                errors.append("Error: file with extension " + file_re.group(10) + " found, doesn\'t match expected extensions " + ", ".join(possible_exts) + ": " + filename) 
             if file_re.group(2) != '' and not allowed_val(allowed_subs, file_re.group(2)):
-                errors.append("Error: subject number " + file_re.group(2) + " not an allowed subject value " + allowed_subs + " in file: " + raw_file)
+                errors.append("Error: subject number " + file_re.group(2) + " not an allowed subject value " + allowed_subs + " in file: " + filename)
             if file_re.group(3) not in dd_dict.keys():
-                errors.append("Error: variable name " + file_re.group(3) + " does not match any datadict variables, in file: " + raw_file)
+                errors.append("Error: variable name " + file_re.group(3) + " does not match any datadict variables, in file: " + filename)
             if datatype not in file_re.group(3):
-                errors.append("Error: variable name " + file_re.group(3) +  " does not contain the name of the enclosing datatype folder " + datatype + " in file: " + raw_file)
+                errors.append("Error: variable name " + file_re.group(3) +  " does not contain the name of the enclosing datatype folder " + datatype + " in file: " + filename)
             if file_re.group(4) not in allowed_suffixes:
-                errors.append("Error: suffix " + file_re.group(4) + " not in allowed suffixes " + ", ".join(allowed_suffixes) + " in file: " + raw_file)
+                errors.append("Error: suffix " + file_re.group(4) + " not in allowed suffixes " + ", ".join(allowed_suffixes) + " in file: " + filename)
             if file_re.group(2) == "":
-                errors.append("Error: subject # missing from file: " + raw_file)
+                errors.append("Error: subject # missing from file: " + filename)
             if file_re.group(3) == "":
-                errors.append("Error: variable name missing from file: " + raw_file)
+                errors.append("Error: variable name missing from file: " + filename)
             if file_re.group(6) == "":
-                errors.append("Error: session # missing from file: " + raw_file)
+                errors.append("Error: session # missing from file: " + filename)
             if file_re.group(7) == "":
-                errors.append("Error: run # missing from file: " + raw_file)
+                errors.append("Error: run # missing from file: " + filename)
             if file_re.group(8) == "":
-                errors.append("Error: event # missing from file: " +raw_file)
+                errors.append("Error: event # missing from file: " +filename)
             if file_re.group(10) == "":
-                errors.append("Error: extension missing from file, does\'nt match expected extensions " + ", ".join(possible_exts) + ": " + raw_file)
+                errors.append("Error: extension missing from file, does\'nt match expected extensions " + ", ".join(possible_exts) + ": " + filename)
             if datatype == "psychopy" and file_re.group(10) == ".csv" and file_re.group(2) != "":
 
                 # Call check-id.py for psychopy files
-                check_id.check_id(file_re.group(2), raw_file)
+                check_id.check_id(file_re.group(2), filename)
         ###########
         else:
-            errors.append("Error: file " + join(path, raw_file) + " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>")
+            errors.append("Error: file " + join(path, filename) + " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>")
     return errors
 
 def get_identifiers(dataset, raw_or_checked):
