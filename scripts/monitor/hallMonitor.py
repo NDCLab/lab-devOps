@@ -3,6 +3,7 @@
 import argparse
 import datetime
 import os
+import re
 
 import pandas as pd
 import pytz
@@ -40,26 +41,61 @@ def write_id_record(dataset, df):
     record_path = os.path.join(dataset, "data-monitoring", "file-record.csv")
     df.to_csv(record_path)
 
+def getuser():
+    return os.getenv('USER')
 
 def get_identifiers(dataset):
-    datadict_path = os.path.join(
-        dataset, "data-monitoring", "data-dictionary", "central-tracker_datadict.csv"
-    )
-    dd_df = pd.read_csv(datadict_path)
-    # ignore = ["id", "consent", "assent", "combination"]  # what else?
-    # dd_df = dd_df[~dd_df["dataType"].isin(ignore)]
+    #datadict_path = os.path.join(
+    #    dataset, "data-monitoring", "data-dictionary", "central-tracker_datadict.csv"
+    #)
+    #dd_df = pd.read_csv(datadict_path)
+    ## ignore = ["id", "consent", "assent", "combination"]  # what else?
+    ## dd_df = dd_df[~dd_df["dataType"].isin(ignore)]
+    #
+    ## TODO: Complete this to generate all valid identifiers for a study
+    #
+    #return pd.Series()
+    identifiers_dict = {}
+    sessions = os.listdir(raw)
+    for session in sessions:
+        if isdir(join(raw, session)):
+            for dtype in os.listdir(join(raw, session)):
+                for sub in os.listdir(join(raw, session, dtype)):
+                    if isdir(join(raw, session, dtype, sub)):
+                        for raw_file in os.listdir(join(raw, session, dtype, sub)):
+                            file_re = re.match("^(sub-[0-9]*_[a-zA-Z0-9_-]*_s[0-9]*_r[0-9]*_e[0-9]*)(_[a-zA-Z0-9_-]+)?(?:\.[a-zA-Z]+)*$", raw_file)
+                            if file_re:
+                                identifier = file_re.group(1)
+                                if identifier not in identifiers_dict.keys():
+                                    #identifiers_dict[identifier] = {'parentdirs': [], 'deviation_strings': []}
+                                    identifiers_dict[identifier] = {'parentdirs': []} # want to know absolute paths of identifier(s), anything else?
+                                if join(raw, session, dtype, sub) not in identifiers_dict[identifier]['parentdirs']:
+                                    identifiers_dict[identifier]['parentdirs'].append(join(raw, session, dtype, sub)) # dict of all identifiers and their parent dirs
+    return identifiers_dict
 
-    # TODO: Complete this to generate all valid identifiers for a study
+def check_identifiers(dataset, identifiers_dict):
+    for key, vals in identifiers_dict:
+        raw_files = get_identifier_files(dataset, key, vals)
+    errors = [] # append to here all errors associated with this identifier
+        
 
-    return pd.Series()
-
-
-def get_identifier_files(dataset, identifier):
-    pass
+def get_identifier_files(dataset, identifier, vals):
+    variable = re.match("^sub-[0-9]*_([a-zA-Z0-9_-]*)_s[0-9]*_r[0-9]*_e[0-9]*?$", identifier).group(1)
+    exts = dd_df[dd_df['variable'] == variable]['expectedFileExt'].iloc[0]
+    exts = exts.split(',')
+    exts = [ext.strip() for ext in exts]
+    expected_files = []
+    for parentdir in vals['parentdirs']:
+        for ext in exts:
+            expected_files.append(join(parentdir, identifier+ext))
+    return expected_files
+    # should return all files expected for the given identifier (minus any "deviation" strings)
 
 
 def handle_raw_unchecked(dataset):
     record = get_file_record(dataset)
+    identifiers = get_identifiers(dataset)
+    check_identifiers(identifiers)
 
 
 def get_latest_pending(dataset):
@@ -170,6 +206,12 @@ def handle_validated():
 if __name__ == "__main__":
     args = get_args()
     dataset = os.path.realpath(args.dataset)
+    raw = join(dataset, 'sourcedata/raw')
+    checked = join(dataset, 'sourcedata/checked')
+    datadict_path = os.path.join(
+        dataset, "data-monitoring", "data-dictionary", "central-tracker_datadict.csv"
+    )
+    dd_df = pd.read_csv(datadict_path)
 
     # handle raw unchecked identifiers
     handle_raw_unchecked(dataset, args.childdata)
