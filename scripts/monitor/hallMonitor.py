@@ -3,6 +3,7 @@
 import argparse
 import datetime
 import os
+from os.path import join, isdir, abspath, dirname, basename
 import re
 
 import pandas as pd
@@ -44,7 +45,74 @@ def write_id_record(dataset, df):
 def getuser():
     return os.getenv('USER')
 
-def get_identifiers(dataset):
+def has_deviation(identifier, parentdirs):
+    # is there a deviation.txt in the folder
+    # return list of True and/or False for deviation and no-data
+    deviation = False
+    no_data = False
+    for parentdir in parentdirs:
+        for file in os.listdir(parentdir):
+            if re.match('^'+identifier+'-deviation\.txt$', file):
+                deviation = True
+            elif re.match('^'+identifier+'-no-data\.txt$', file):
+                no_data = True
+    return [deviation, no_data]
+
+def check_filenames(raw_files, deviation, raw):
+    errors = []
+    if deviation[1] == True: # no data
+        return errors
+    for file in raw_files:
+        parent_dirs = file.split('/')
+        if raw: # raw directory structure
+            sub = parent_dirs[-2]
+            ses = parent_dirs[-4]
+            datatype = parent_dirs[-3]
+        else: # checked directory structure
+            sub = parent_dirs[-4]
+            ses = parent_dirs[-3]
+            datatype = parent_dirs[-2]
+        file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))(_[a-zA-Z0-9_-]+)?((?:\.[a-zA-Z]+)*)$", raw_file)
+        if file_re:
+        #####################
+            # all filename checks (not number of files checks, not _data or _status checks), write any errors to "errors"
+
+            if file_re.group(1) != sub:
+                errors.append("Error: file from subject " + file_re.group(1) + " found in " + sub + " folder: " + raw_file)
+            if file_re.group(5) != ses:
+                errors.append("Error: file from session " + file_re.group(5) + " found in " + ses + " folder: " + raw_file) 
+            if file_re.group(10) not in possible_exts and len(file_re.group(10)) > 0:
+                errors.append("Error: file with extension " + file_re.group(10) + " found, doesn\'t match expected extensions " + ", ".join(possible_exts) + ": " + raw_file) 
+            if file_re.group(2) != '' and not allowed_val(allowed_subs, file_re.group(2)):
+                errors.append("Error: subject number " + file_re.group(2) + " not an allowed subject value " + allowed_subs + " in file: " + raw_file)
+            if file_re.group(3) not in dd_dict.keys():
+                errors.append("Error: variable name " + file_re.group(3) + " does not match any datadict variables, in file: " + raw_file)
+            if datatype not in file_re.group(3):
+                errors.append("Error: variable name " + file_re.group(3) +  " does not contain the name of the enclosing datatype folder " + datatype + " in file: " + raw_file)
+            if file_re.group(4) not in allowed_suffixes:
+                errors.append("Error: suffix " + file_re.group(4) + " not in allowed suffixes " + ", ".join(allowed_suffixes) + " in file: " + raw_file)
+            if file_re.group(2) == "":
+                errors.append("Error: subject # missing from file: " + raw_file)
+            if file_re.group(3) == "":
+                errors.append("Error: variable name missing from file: " + raw_file)
+            if file_re.group(6) == "":
+                errors.append("Error: session # missing from file: " + raw_file)
+            if file_re.group(7) == "":
+                errors.append("Error: run # missing from file: " + raw_file)
+            if file_re.group(8) == "":
+                errors.append("Error: event # missing from file: " +raw_file)
+            if file_re.group(10) == "":
+                errors.append("Error: extension missing from file, does\'nt match expected extensions " + ", ".join(possible_exts) + ": " + raw_file)
+            if datatype == "psychopy" and file_re.group(10) == ".csv" and file_re.group(2) != "":
+
+                # Call check-id.py for psychopy files
+                check_id.check_id(file_re.group(2), raw_file)
+        ###########
+        else:
+            errors.append("Error: file " + join(path, raw_file) + " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>")
+    return errors
+
+def get_identifiers(dataset, raw_or_checked):
     #datadict_path = os.path.join(
     #    dataset, "data-monitoring", "data-dictionary", "central-tracker_datadict.csv"
     #)
@@ -55,29 +123,36 @@ def get_identifiers(dataset):
     ## TODO: Complete this to generate all valid identifiers for a study
     #
     #return pd.Series()
+    #if raw_or_checked == "raw":
+    #elif raw_or_checked == "checked":
+    raw_or_checked = join(dataset, 'sourcedata', raw_or_checked)
     identifiers_dict = {}
-    sessions = os.listdir(raw)
-    for session in sessions:
-        if isdir(join(raw, session)):
-            for dtype in os.listdir(join(raw, session)):
-                for sub in os.listdir(join(raw, session, dtype)):
-                    if isdir(join(raw, session, dtype, sub)):
-                        for raw_file in os.listdir(join(raw, session, dtype, sub)):
-                            file_re = re.match("^(sub-[0-9]*_[a-zA-Z0-9_-]*_s[0-9]*_r[0-9]*_e[0-9]*)(_[a-zA-Z0-9_-]+)?(?:\.[a-zA-Z]+)*$", raw_file)
-                            if file_re:
-                                identifier = file_re.group(1)
-                                if identifier not in identifiers_dict.keys():
-                                    #identifiers_dict[identifier] = {'parentdirs': [], 'deviation_strings': []}
-                                    identifiers_dict[identifier] = {'parentdirs': []} # want to know absolute paths of identifier(s), anything else?
-                                if join(raw, session, dtype, sub) not in identifiers_dict[identifier]['parentdirs']:
-                                    identifiers_dict[identifier]['parentdirs'].append(join(raw, session, dtype, sub)) # dict of all identifiers and their parent dirs
+    firstdirs = os.listdir(raw_or_checked)
+    for firstdir in firstdirs:
+        if isdir(join(raw_or_checked, firstdir)):
+            for secondir in os.listdir(join(raw_or_checked, firstdir)):
+                if isdir(join(raw_or_checked, firstdir, secondir)):
+                    for thirddir in os.listdir(join(raw_or_checked, firstdir, secondir)):
+                        if isdir(join(raw_or_checked, firstdir, secondir, thirddir)):
+                            for raw_file in os.listdir(join(raw_or_checked, firstdir, secondir, thirddir)):
+                                file_re = re.match("^(sub-[0-9]*_[a-zA-Z0-9_-]*_s[0-9]*_r[0-9]*_e[0-9]*)(_[a-zA-Z0-9_-]+)?(?:\.[a-zA-Z]+)*$", raw_file)
+                                if file_re:
+                                    identifier = file_re.group(1)
+                                    if identifier not in identifiers_dict.keys():
+                                        #identifiers_dict[identifier] = {'parentdirs': [], 'deviation_strings': []}
+                                        identifiers_dict[identifier] = {'parentdirs': []} # want to know absolute paths of identifier(s), anything else?
+                                    if join(raw_or_checked, firstdir, secondir, thirddir) not in identifiers_dict[identifier]['parentdirs']:
+                                        identifiers_dict[identifier]['parentdirs'].append(join(raw_or_checked, firstdir, secondir, thirddir)) # dict of all identifiers and their parent dirs
     return identifiers_dict
+
+
 
 def check_identifiers(dataset, identifiers_dict):
     for key, vals in identifiers_dict:
         raw_files = get_identifier_files(dataset, key, vals)
-    errors = [] # append to here all errors associated with this identifier
-        
+        deviation = has_deviation(key, vals['parentdirs'])
+        errors = check_filenames(raw_files, deviation)
+        passed = True if len(errors) == 0 else False        
 
 def get_identifier_files(dataset, identifier, vals):
     variable = re.match("^sub-[0-9]*_([a-zA-Z0-9_-]*)_s[0-9]*_r[0-9]*_e[0-9]*?$", identifier).group(1)
@@ -94,7 +169,7 @@ def get_identifier_files(dataset, identifier, vals):
 
 def handle_raw_unchecked(dataset):
     record = get_file_record(dataset)
-    identifiers = get_identifiers(dataset)
+    identifiers = get_identifiers(dataset, "raw")
     check_identifiers(identifiers)
 
 
