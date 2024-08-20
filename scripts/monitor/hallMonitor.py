@@ -45,6 +45,37 @@ def write_id_record(dataset, df):
 def getuser():
     return os.getenv('USER')
 
+def parse_datadict(dd_df):
+    dd_dict = dict()
+    task_vars = []
+    combination_rows = {}
+    for _, row in df_dd.iterrows():
+        if not isinstance(row["expectedFileExt"], float): # all rows in datadict with extensions i.e. with data files
+            task_vars.append(row.name)
+        if row["dataType"] == "combination":
+            idx = row["provenance"].split(" ").index("variables:")
+            vars = "".join(row["provenance"].split(" ")[idx+1:]).split(",")
+            vars = [var.strip("\"") for var in vars]
+            combination_rows[row.name] = vars
+    # build dict of expected files/datatypes from datadict
+    for var, row in df_dd.iterrows():
+        if row.name in task_vars:
+            dd_dict[var] = [row["dataType"], row["allowedSuffix"], row["expectedFileExt"], row["allowedValues"]]
+    return dd_dict
+
+def allowed_val(allowed_vals, value):
+    allowed_vals = allowed_vals.replace(" ", "")
+    intervals = re.split("[\[\]]", allowed_vals)
+    intervals = list(filter(lambda x: x not in [",", ""], intervals))
+    allowed = False
+    for interval in intervals:
+        lower = float(interval.split(",")[0])
+        upper = float(interval.split(",")[1])
+        if lower <= int(value) <= upper:
+            allowed = True
+            break
+    return allowed
+
 def has_deviation(identifier, parentdirs):
     # is there a deviation.txt in the folder
     # return list of True and/or False for deviation and no-data
@@ -58,73 +89,87 @@ def has_deviation(identifier, parentdirs):
                 no_data = True
     return [deviation, no_data]
 
-def check_filenames(files, deviation, raw):
+def write_to_pending_files(identifier, errors, pending_df):
+    user = getuser()
+    dt = datetime.datetime.now(pytz.timezone("US/Eastern"))
+    dt = timestamp.strftime(DT_FORMAT)
+    datatype = re.match("^sub-[0-9]*_([a-zA-Z0-9_-]*)_s[0-9]*_r[0-9]*_e[0-9]*(_[a-zA-Z0-9_-]+)?$", identifier).group(1)
+    pass_raw = True if len(errors) == 0 else False
+    #error_type
+    #error_details = "NA" if error == "" else error
+    idx = len(pending_df)
+    if len(errors) == 0:
+        error_type = "NA"
+        error_details = "NA"
+        pending_df.loc[idx] = [identifier, dt, user, datatype, pass_raw, error_type, error_details]
+    else:
+        for error in errors:
+            pending_df.loc[idx] = [identifier, dt, user, datatype, pass_raw, error[1], error[0]]
+            idx+=1
+    return pending_df
+
+def check_filenames(variable, files, deviation, raw_or_checked):
+    [datatype, allowed_suffixes, possible_exts, allowed_subs] = variable_dict[identifier]
+    allowed_suffixes = allowed_suffixes.split(",")
+    allowed_suffixes = [x.strip() for x in allowed_suffixes]
+    possible_exts = sum([ext.split('|') for ext in fileexts], [])
+    #errors = {}
+    #errors["error_detail"] = []
     errors = []
     if deviation[1] == True: # no data
         return errors
     for filename in files:
         parent_dirs = file.split('/')
-        if raw: # raw directory structure
+        if raw_or_checked == "raw": # raw directory structure
             sub = parent_dirs[-2]
             ses = parent_dirs[-4]
-            datatype = parent_dirs[-3]
-        else: # checked directory structure
+            #datatype = parent_dirs[-3]
+        elif raw_or_checked == "checked": # checked directory structure
             sub = parent_dirs[-4]
             ses = parent_dirs[-3]
-            datatype = parent_dirs[-2]
+            #datatype = parent_dirs[-2]
         file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))(_[a-zA-Z0-9_-]+)?((?:\.[a-zA-Z]+)*)$", filename)
         if file_re:
         #####################
             # all filename checks (not number of files checks, not _data or _status checks), write any errors to "errors"
             #TODO need possible_exts, allowed_vals, allowed_suffixes, possible variable names from dd_df
             if file_re.group(1) != sub:
-                errors.append("Error: file from subject " + file_re.group(1) + " found in " + sub + " folder: " + filename)
+                errors.append(["Error: file from subject " + file_re.group(1) + " found in " + sub + " folder: " + filename, "name"])
             if file_re.group(5) != ses:
-                errors.append("Error: file from session " + file_re.group(5) + " found in " + ses + " folder: " + filename) 
+                errors.append(["Error: file from session " + file_re.group(5) + " found in " + ses + " folder: " + filename, "name"]) 
             if file_re.group(10) not in possible_exts and len(file_re.group(10)) > 0:
-                errors.append("Error: file with extension " + file_re.group(10) + " found, doesn\'t match expected extensions " + ", ".join(possible_exts) + ": " + filename) 
+                errors.append(["Error: file with extension " + file_re.group(10) + " found, doesn\'t match expected extensions " + ", ".join(possible_exts) + ": " + filename, "name"]) 
             if file_re.group(2) != '' and not allowed_val(allowed_subs, file_re.group(2)):
-                errors.append("Error: subject number " + file_re.group(2) + " not an allowed subject value " + allowed_subs + " in file: " + filename)
-            if file_re.group(3) not in dd_dict.keys():
-                errors.append("Error: variable name " + file_re.group(3) + " does not match any datadict variables, in file: " + filename)
+                errors.append(["Error: subject number " + file_re.group(2) + " not an allowed subject value " + allowed_subs + " in file: " + filename, "name"])
+            if file_re.group(3) not in variable_dict.keys():
+                errors.append(["Error: variable name " + file_re.group(3) + " does not match any datadict variables, in file: " + filename, "name"])
             if datatype not in file_re.group(3):
-                errors.append("Error: variable name " + file_re.group(3) +  " does not contain the name of the enclosing datatype folder " + datatype + " in file: " + filename)
+                errors.append(["Error: variable name " + file_re.group(3) +  " does not contain the name of the enclosing datatype folder " + datatype + " in file: " + filename, "name"])
             if file_re.group(4) not in allowed_suffixes:
-                errors.append("Error: suffix " + file_re.group(4) + " not in allowed suffixes " + ", ".join(allowed_suffixes) + " in file: " + filename)
+                errors.append(["Error: suffix " + file_re.group(4) + " not in allowed suffixes " + ", ".join(allowed_suffixes) + " in file: " + filename, "name"])
             if file_re.group(2) == "":
-                errors.append("Error: subject # missing from file: " + filename)
+                errors.append(["Error: subject # missing from file: " + filename, "name"])
             if file_re.group(3) == "":
-                errors.append("Error: variable name missing from file: " + filename)
+                errors.append(["Error: variable name missing from file: " + filename, "name"])
             if file_re.group(6) == "":
-                errors.append("Error: session # missing from file: " + filename)
+                errors.append(["Error: session # missing from file: " + filename, "name"])
             if file_re.group(7) == "":
-                errors.append("Error: run # missing from file: " + filename)
+                errors.append(["Error: run # missing from file: " + filename, "name"])
             if file_re.group(8) == "":
-                errors.append("Error: event # missing from file: " +filename)
+                errors.append(["Error: event # missing from file: " +filename, "name"])
             if file_re.group(10) == "":
-                errors.append("Error: extension missing from file, does\'nt match expected extensions " + ", ".join(possible_exts) + ": " + filename)
-            if datatype == "psychopy" and file_re.group(10) == ".csv" and file_re.group(2) != "":
-
+                errors.append(["Error: extension missing from file, does\'nt match expected extensions " + ", ".join(possible_exts) + ": " + filename, "name"])
+            #TODO check-id.py
+            #if datatype == "psychopy" and file_re.group(10) == ".csv" and file_re.group(2) != "":
+            #
                 # Call check-id.py for psychopy files
-                check_id.check_id(file_re.group(2), filename)
+                #check_id.check_id(file_re.group(2), filename)
         ###########
         else:
-            errors.append("Error: file " + join(path, filename) + " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>")
+            errors.append(["Error: file " + join(path, filename) + " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>", "name"])
     return errors
 
 def get_identifiers(dataset, raw_or_checked):
-    #datadict_path = os.path.join(
-    #    dataset, "data-monitoring", "data-dictionary", "central-tracker_datadict.csv"
-    #)
-    #dd_df = pd.read_csv(datadict_path)
-    ## ignore = ["id", "consent", "assent", "combination"]  # what else?
-    ## dd_df = dd_df[~dd_df["dataType"].isin(ignore)]
-    #
-    ## TODO: Complete this to generate all valid identifiers for a study
-    #
-    #return pd.Series()
-    #if raw_or_checked == "raw":
-    #elif raw_or_checked == "checked":
     raw_or_checked = join(dataset, 'sourcedata', raw_or_checked)
     identifiers_dict = {}
     firstdirs = os.listdir(raw_or_checked)
@@ -147,14 +192,17 @@ def get_identifiers(dataset, raw_or_checked):
 
 
 
-def check_identifiers(dataset, identifiers_dict):
-    for key, vals in identifiers_dict:
-        raw_files = get_identifier_files(dataset, key, vals)
-        deviation = has_deviation(key, vals['parentdirs'])
-        errors = check_filenames(raw_files, deviation)
-        passed = True if len(errors) == 0 else False        
+def check_identifiers(identifiers_dict, source_data, pending_files_df):
+    #for source_data in ["raw", "checked"]:
+        for key, vals in identifiers_dict:
+            var_name = re.match("^sub-[0-9]*_([a-zA-Z0-9_-]*)_s[0-9]*_r[0-9]*_e[0-9]*(_[a-zA-Z0-9_-]+)?(?:\.[a-zA-Z]+)?*$", key).group(1)
+            raw_files = get_identifier_files(key, vals)
+            deviation = has_deviation(key, vals['parentdirs'])
+            errors = check_filenames(var_name, raw_files, deviation, source_data)
+            #passed = True if len(errors) == 0 else False
+            pending_files_df = write_to_pending_files(key, errors, pending_files_df)
 
-def get_identifier_files(dataset, identifier, vals):
+def get_identifier_files(identifier, vals):
     variable = re.match("^sub-[0-9]*_([a-zA-Z0-9_-]*)_s[0-9]*_r[0-9]*_e[0-9]*?$", identifier).group(1)
     exts = dd_df[dd_df['variable'] == variable]['expectedFileExt'].iloc[0]
     exts = exts.split(',')
@@ -168,9 +216,20 @@ def get_identifier_files(dataset, identifier, vals):
 
 
 def handle_raw_unchecked(dataset):
-    record = get_file_record(dataset)
-    identifiers = get_identifiers(dataset, "raw")
-    check_identifiers(identifiers)
+    #record = get_file_record(dataset)
+    timestamp = datetime.datetime.now(pytz.timezone("US/Eastern"))
+    timestamp = timestamp.strftime(DT_FORMAT)
+    pending_files_name = join(dataset, "data-monitoring", "logs", "pending-files-" + timestamp + ".csv")
+    pending_errors_name = join(dataset, "data-monitoring", "logs", "pending-errors-" + timestamp + ".csv")
+    pending_files_df = new_pending_df()
+    for source_data in ["raw", "checked"]:
+        identifiers = get_identifiers(dataset, source_data)
+        check_identifiers(identifiers, source_data, pending_files_df)
+    pending_files_df.set_index('identifier')
+    pending_files_df.to_csv(pending_files_name)
+    pending_errors = pending_files_df[pending_files_df['error_type'] != "NA"]
+    pending_errors.to_csv(pending_errors_name)
+
 
 
 def get_latest_pending(dataset):
@@ -195,14 +254,16 @@ def df_from_colmap(colmap):
 
 def new_pending_df():
     colmap = {
+        "identifier": "str",
         "date-time": "str",
         "user": "str",
         "dataType": "str",
-        "identifier": "str",
         "pass-raw": "int",
         "error-type": "str",
         "error-details": "str",
     }
+    #df = df_from_colmap(colmap)
+    #df.set_index('identifier', inplace=True)
     return df_from_colmap(colmap)
 
 
@@ -286,7 +347,8 @@ if __name__ == "__main__":
     datadict_path = os.path.join(
         dataset, "data-monitoring", "data-dictionary", "central-tracker_datadict.csv"
     )
-    dd_df = pd.read_csv(datadict_path)
+    dd_df = pd.read_csv(datadict_path, index_col = "variable")
+    variable_dict = parse_datadict(dd_df)
 
     # handle raw unchecked identifiers
     handle_raw_unchecked(dataset, args.childdata)
