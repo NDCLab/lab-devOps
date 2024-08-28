@@ -228,8 +228,11 @@ def check_all_data_present(identifiers_dict, source_data, pending_files_df, vari
                             break
                     if not ext_present:
                         allpresent = False
+                        missing_files.append(parent+"/"+sub+"_"+var+"_"+sre+"."+ext)
         if not allpresent:
-            errors.append("")                      # #TODO write error to pending-files csv "not all expected files present"
+            error = "Error: not all expected files seen, " + ", ".join(missing_files) + "not present."
+            pending_files_df = write_to_pending_files(key, error, pending_files_df)
+                                  # #TODO write error to pending-files csv "not all expected files present"
                         #TODO deal with combination rows
                         #TODO deal with deviation files or "no-data"
     ####
