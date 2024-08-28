@@ -60,8 +60,8 @@ def parse_datadict(dd_df):
     # build dict of expected files/datatypes from datadict
     for var, row in df_dd.iterrows():
         if row.name in task_vars:
-            dd_dict[var] = [row["dataType"], row["allowedSuffix"], row["expectedFileExt"], row["allowedValues"]]
-    return dd_dict
+            dd_dict[var] = [row["dataType"], row["allowedSuffix"], row["expectedFileExt"], row["allowedValues"], row["encrypted"]]
+    return dd_dict, combination_rows
 
 def allowed_val(allowed_vals, value):
     allowed_vals = allowed_vals.replace(" ", "")
@@ -201,6 +201,11 @@ def check_identifiers(identifiers_dict, source_data, pending_files_df):
             errors = check_filenames(var_name, raw_files, deviation, source_data)
             #passed = True if len(errors) == 0 else False
             pending_files_df = write_to_pending_files(key, errors, pending_files_df)
+        return pending_files_df
+
+def check_all_data_present(identifiers_dict, source_data, pending_files_df, variable_dict):
+    # check that for each identifier that has data for one variable, it has data for each variable or a "no-data.txt" file #TODO
+    return pending_files_df
 
 def get_identifier_files(identifier, vals):
     variable = re.match("^sub-[0-9]*_([a-zA-Z0-9_-]*)_s[0-9]*_r[0-9]*_e[0-9]*?$", identifier).group(1)
@@ -224,7 +229,8 @@ def handle_raw_unchecked(dataset):
     pending_files_df = new_pending_df()
     for source_data in ["raw", "checked"]:
         identifiers = get_identifiers(dataset, source_data)
-        check_identifiers(identifiers, source_data, pending_files_df)
+        pending_files_df = check_identifiers(identifiers, source_data, pending_files_df)
+        pending_files_df = check_all_data_present(identifiers, source_data, pending_files_df, variable_dict)
     pending_files_df.set_index('identifier')
     pending_files_df.to_csv(pending_files_name)
     pending_errors = pending_files_df[pending_files_df['error_type'] != "NA"]
@@ -348,7 +354,7 @@ if __name__ == "__main__":
         dataset, "data-monitoring", "data-dictionary", "central-tracker_datadict.csv"
     )
     dd_df = pd.read_csv(datadict_path, index_col = "variable")
-    variable_dict = parse_datadict(dd_df)
+    variable_dict, combination_rows_dict = parse_datadict(dd_df)
 
     # handle raw unchecked identifiers
     handle_raw_unchecked(dataset, args.childdata)
