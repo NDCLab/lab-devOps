@@ -61,6 +61,7 @@ def parse_datadict(dd_df):
     for var, row in dd_df.iterrows():
         if row.name in task_vars:
             dd_dict[var] = [row["dataType"], row["allowedSuffix"], row["expectedFileExt"], row["allowedValues"], row["encrypted"]]
+            # parse allowedSuffixes, expectedFileExt, allowedValues further ^^
     return dd_dict, combination_rows
 
 def allowed_val(allowed_vals, value):
@@ -220,9 +221,15 @@ def check_all_data_present(identifiers_dict, source_data, pending_files_df, vari
                 elif source_data == "checked":
                     parent = join(dataset, "sourcedata", source_data, sub, sess, dtype)
                 for ext in exts:
-                    if not isfile(join(parent, sub+"_"+var+"_"+sre+"."+ext)):
+                    ext_present = False
+                    for file in os.listdir(parent):
+                        if re.match("^"+sub+"_"+var+"_"+sre+"(_[a-zA-Z0-9_-]+)?\."+ext, file): # allow deviation str
+                            ext_present = True
+                            break
+                    if not ext_present:
                         allpresent = False
-                        # #TODO write error to pending-files csv "not all expected files present"
+        if not allpresent:
+            errors.append("")                      # #TODO write error to pending-files csv "not all expected files present"
                         #TODO deal with combination rows
                         #TODO deal with deviation files or "no-data"
     ####
