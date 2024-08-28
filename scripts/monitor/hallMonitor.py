@@ -3,7 +3,7 @@
 import argparse
 import datetime
 import os
-from os.path import join, isdir, abspath, dirname, basename
+from os.path import join, isdir, isfile, abspath, dirname, basename
 import re
 
 import pandas as pd
@@ -49,7 +49,7 @@ def parse_datadict(dd_df):
     dd_dict = dict()
     task_vars = []
     combination_rows = {}
-    for _, row in df_dd.iterrows():
+    for _, row in dd_df.iterrows():
         if not isinstance(row["expectedFileExt"], float): # all rows in datadict with extensions i.e. with data files
             task_vars.append(row.name)
         if row["dataType"] == "combination":
@@ -58,7 +58,7 @@ def parse_datadict(dd_df):
             vars = [var.strip("\"") for var in vars]
             combination_rows[row.name] = vars
     # build dict of expected files/datatypes from datadict
-    for var, row in df_dd.iterrows():
+    for var, row in dd_df.iterrows():
         if row.name in task_vars:
             dd_dict[var] = [row["dataType"], row["allowedSuffix"], row["expectedFileExt"], row["allowedValues"], row["encrypted"]]
     return dd_dict, combination_rows
@@ -204,7 +204,28 @@ def check_identifiers(identifiers_dict, source_data, pending_files_df):
         return pending_files_df
 
 def check_all_data_present(identifiers_dict, source_data, pending_files_df, variable_dict):
-    # check that for each identifier that has data for one variable, it has data for each variable or a "no-data.txt" file #TODO
+    # check that for each identifier that has data for one variable, it has data for each variable or a "no-data.txt" file
+    expected_data = set(variable_dict.keys())
+    ####
+    for key, vals in identifiers_dict:
+        allpresent = True
+        identifier_re = re.match("^(sub-[0-9]+)_([a-zA-Z0-9_-]*)_((s[0-9]*_r[0-9]*)_e[0-9])*$", key)
+        if identifier_re:
+            [sub, var, sre, sess] = list(identifier_re.groups())
+            for var in expected_data:
+                dtype = variable_dict[var]["dataType"]
+                exts = variable_dict[var["expectedFileExt"]]
+                if source_data == "raw":
+                    parent = join(dataset, "sourcedata", source_data, sess, dtype, sub)
+                elif source_data == "checked":
+                    parent = join(dataset, "sourcedata", source_data, sub, sess, dtype)
+                for ext in exts:
+                    if not isfile(join(parent, sub+"_"+var+"_"+sre+"."+ext)):
+                        allpresent = False
+                        # #TODO write error to pending-files csv "not all expected files present"
+                        #TODO deal with combination rows
+                        #TODO deal with deviation files or "no-data"
+    ####
     return pending_files_df
 
 def get_identifier_files(identifier, vals):
