@@ -4,6 +4,7 @@ import logging
 import os
 from os.path import join, isdir, isfile, abspath, dirname, basename
 import re
+from getpass import getuser
 
 import pandas as pd
 import pytz
@@ -41,8 +42,6 @@ def write_id_record(dataset, df):
     record_path = os.path.join(dataset, "data-monitoring", "file-record.csv")
     df.to_csv(record_path)
 
-def getuser():
-    return os.getenv('USER')
 
 def parse_datadict(dd_df):
     dd_dict = dict()
