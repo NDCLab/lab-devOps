@@ -8,29 +8,9 @@ from getpass import getuser
 
 import pandas as pd
 import pytz
+from hmutils import *
 
 DT_FORMAT = r"%Y-%m-%d_%H-%M"
-
-
-def get_args():
-    """Get the arguments passed to hallMonitor
-
-    Returns:
-        Namespace: Arguments passed to the script (access using dot notation)
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "dataset", type=str, help="A path to the study's root directory."
-    )
-    parser.add_argument(
-        "--child-data",
-        dest="childdata",
-        action="store_true",
-        help="Include this switch if the study includes child data.",
-    )
-    parser.add_argument_group()  # TODO: -r/-m options
-
-    return parser.parse_args()
 
 
 def get_id_record(dataset):
