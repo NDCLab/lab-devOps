@@ -208,7 +208,7 @@ def check_all_data_present(identifiers_dict, source_data, pending_files_df, vari
     ####
     for key, vals in identifiers_dict:
         allpresent = True
-        identifier_re = re.match("^(sub-[0-9]+)_([a-zA-Z0-9_-]*)_((s[0-9]*_r[0-9]*)_e[0-9])*$", key)
+        identifier_re = re.fullmatch(r"(sub-\d+)_([\w\-]*)_((s\d+_r\d+)_e\d)*", key)
         if identifier_re:
             [sub, var, sre, sess] = list(identifier_re.groups())
             for var in expected_data:
@@ -221,7 +221,8 @@ def check_all_data_present(identifiers_dict, source_data, pending_files_df, vari
                 for ext in exts:
                     ext_present = False
                     for file in os.listdir(parent):
-                        if re.match("^"+sub+"_"+var+"_"+sre+"(_[a-zA-Z0-9_-]+)?\."+ext, file): # allow deviation str
+                        ext_re = sub + "_" + var + "_" + sre + "(_[\w\-]+)?\." + ext
+                        if re.fullmatch(re.escape(ext_re), file):  # allow deviation str
                             ext_present = True
                             break
                     if not ext_present:
