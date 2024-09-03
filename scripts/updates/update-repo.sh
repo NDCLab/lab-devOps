@@ -9,7 +9,7 @@ ARCHIVED_REPOS="rwe-dataset social-context-dataset social-context-beta-dataset s
 ARCHIVED_REPOS+=" post-error-ddm pepper-pipeline"
 ###
 LOG_PATH="/home/data/NDClab/other/logs/repo-updates"
-LAB_MGR="ndclab"
+LAB_MGR=$(grep "lab-manager" $TOOL_PATH/lab-devOps/scripts/configs/config-leads.json | cut -d":" -f2 | tr -d '"",')
 LAB_TECH=$(grep "technician" $TOOL_PATH/lab-devOps/scripts/configs/config-leads.json | cut -d":" -f2 | tr -d '"",')
 repoarr=()
 
