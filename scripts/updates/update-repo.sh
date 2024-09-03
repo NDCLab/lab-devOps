@@ -47,7 +47,7 @@ then
         if [[ $PROJ_LEAD == "" ]]; then
             echo "Can't find proj lead for $repo, emailing lab tech"
             echo "git status detects unpushed changes for $repo, no project lead found in config-leads.json." | mail -s \
-            "$repo needs re-sync with Github" "$LAB_TECH@fiu.edu"
+            "$repo needs re-sync with Github" "$LAB_TECH@fiu.edu" "$LAB_MGR@fiu.edu"
         else
             # email proj lead
             echo "Emailing project lead $PROJ_LEAD for $repo"
