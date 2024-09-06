@@ -60,8 +60,10 @@ def parse_datadict(dd_df):
     # build dict of expected files/datatypes from datadict
     for var, row in dd_df.iterrows():
         if row.name in task_vars:
-            dd_dict[var] = [row["dataType"], row["allowedSuffix"], row["expectedFileExt"], row["allowedValues"], row["encrypted"]]
-            # parse allowedSuffixes, expectedFileExt, allowedValues further ^^
+            #dd_dict[var] = [row["dataType"], allowed_sfxs, expected_exts, row["allowedValues"], row["encrypted"]]
+            allowed_sfxs = [x.strip() for x in row["allowedSuffix"].split(",")]
+            expected_exts = [x.strip() for x in row["expectedFileExt"].split(",")]
+            dd_dict[var] = [row["dataType"], allowed_sfxs, expected_exts, row["allowedValues"]]
     return dd_dict, combination_rows
 
 def allowed_val(allowed_vals, value):
@@ -292,12 +294,12 @@ def df_from_colmap(colmap):
 def new_pending_df():
     colmap = {
         "identifier": "str",
-        "date-time": "str",
+        "datetime": "str",
         "user": "str",
         "dataType": "str",
-        "pass-raw": "int",
-        "error-type": "str",
-        "error-details": "str",
+        "passRaw": "int",
+        "errorType": "str",
+        "errorDetails": "str",
     }
     #df = df_from_colmap(colmap)
     #df.set_index('identifier', inplace=True)
@@ -310,12 +312,12 @@ def get_passed_raw_check(dataset):
 
 def new_qa_checklist():
     colmap = {
-        "date-time": "str",
+        "datetime": "str",
         "user": "str",
         "dataType": "str",
         "identifier": "str",
         "qa": "int",
-        "local-move": "int",
+        "localMove": "int",
     }
     return df_from_colmap(colmap)
 
