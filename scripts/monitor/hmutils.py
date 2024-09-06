@@ -84,7 +84,8 @@ def get_variable_datatype(dd_df, varname):  # TODO: Is this necessary? Remove if
     elif num_rows > 1:
         raise ValueError(f"Multiple variables named {varname}")
     else:
-        return str(var_rows["dataType"][0])
+        return str(var_rows["dataType"][0])        # DH: this gave me an error
+        # return str(var_rows["dataType"].item()) instead?
 
 
 @dataclass
@@ -354,7 +355,7 @@ def get_identifiers(dataset, is_raw=True):
     """
     logger = logging.getLogger()
     # FILE_RE = (identifier)(_info)?(extension)+
-    FILE_RE = r"(sub-\d+_\D+_s\d+_r\d+_e\d+)(?:_\D+)?(?:\.[a-zA-Z0-9]+)+"
+    FILE_RE = r"(sub-\d+_\D+_s\d+_r\d+_e\d+)(?:_\D+)?(?:\.[a-zA-Z0-9]+)+" # DH: I think the "deviation" string can have numbers? Like here /home/data/NDClab/datasets/thrive-dataset/sourcedata/checked/sub-3000114/s1_r1/eeg/ ? Or maybe that part doesn't matter for the purpose of getting the identifiers
     SES_RE = r"s\d+_r\d+"
     DTYPE_RE = r"[\D\-_]+"
     SUB_RE = r"sub-\d+"
@@ -365,7 +366,7 @@ def get_identifiers(dataset, is_raw=True):
         source_dir = os.path.join(dataset, CHECKED_SUBDIR)
 
     id_dict = {}
-    sessions = os.listdir(source_dir)
+    sessions = os.listdir(source_dir) # DH: this is how it is in raw but in checked this will give subjects (then sessions, then dtypes)
     for session in sessions:
         if not re.fullmatch(SES_RE, session) or not os.path.isdir(session):
             continue
@@ -441,7 +442,7 @@ def get_identifier_files(basedir, identifier, raw_order=True):
         return None
 
     # FILE_RE = (identifier)(_info)?(extension)+
-    FILE_RE = re.escape(str(identifier)) + r"(?:_\D+)?(?:\.[a-zA-Z0-9]+)+"
+    FILE_RE = re.escape(str(identifier)) + r"(?:_\D+)?(?:\.[a-zA-Z0-9]+)+" # DH: yeah I think the deviation string can be any alphanumeric char or hyphen
     id_files = [
         os.path.join(dirs[-1], file)
         for file in os.listdir(dirs[-1])
