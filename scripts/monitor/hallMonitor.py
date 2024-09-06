@@ -1,36 +1,16 @@
 #!/bin/python3
 
-import argparse
-import datetime
+import logging
 import os
 from os.path import join, isdir, isfile, abspath, dirname, basename
 import re
+from getpass import getuser
 
 import pandas as pd
 import pytz
+from hmutils import *
 
 DT_FORMAT = r"%Y-%m-%d_%H-%M"
-
-
-def get_args():
-    """Get the arguments passed to hallMonitor
-
-    Returns:
-        Namespace: Arguments passed to the script (access using dot notation)
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "dataset", type=str, help="A path to the study's root directory."
-    )
-    parser.add_argument(
-        "--child-data",
-        dest="childdata",
-        action="store_true",
-        help="Include this switch if the study includes child data.",
-    )
-    parser.add_argument_group()  # TODO: -r/-m options
-
-    return parser.parse_args()
 
 
 def get_id_record(dataset):
@@ -42,8 +22,6 @@ def write_id_record(dataset, df):
     record_path = os.path.join(dataset, "data-monitoring", "file-record.csv")
     df.to_csv(record_path)
 
-def getuser():
-    return os.getenv('USER')
 
 def parse_datadict(dd_df):
     dd_dict = dict()
@@ -212,7 +190,7 @@ def check_all_data_present(identifiers_dict, source_data, pending_files_df, vari
     ####
     for key, vals in identifiers_dict:
         allpresent = True
-        identifier_re = re.match("^(sub-[0-9]+)_([a-zA-Z0-9_-]*)_((s[0-9]*_r[0-9]*)_e[0-9])*$", key)
+        identifier_re = re.fullmatch(r"(sub-\d+)_([\w\-]*)_((s\d+_r\d+)_e\d)*", key)
         if identifier_re:
             [sub, var, sre, sess] = list(identifier_re.groups())
             for var in expected_data:
@@ -225,7 +203,8 @@ def check_all_data_present(identifiers_dict, source_data, pending_files_df, vari
                 for ext in exts:
                     ext_present = False
                     for file in os.listdir(parent):
-                        if re.match("^"+sub+"_"+var+"_"+sre+"(_[a-zA-Z0-9_-]+)?\."+ext, file): # allow deviation str
+                        ext_re = sub + "_" + var + "_" + sre + "(_[\w\-]+)?\." + ext
+                        if re.fullmatch(re.escape(ext_re), file):  # allow deviation str
                             ext_present = True
                             break
                     if not ext_present:
@@ -389,11 +368,25 @@ if __name__ == "__main__":
     dd_df = pd.read_csv(datadict_path, index_col = "variable")
     variable_dict, combination_rows_dict = parse_datadict(dd_df)
 
-    # handle raw unchecked identifiers
-    handle_raw_unchecked(dataset, args.childdata)
+    # set up logging to file and console
 
-    # handle QA unchecked identifiers
-    handle_qa_unchecked(dataset)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
 
-    # handle fully-validated identifiers
-    handle_validated(dataset)
+    log_path = os.path.join(dataset, LOGGING_SUBPATH)
+    file_handler = logging.FileHandler(log_path)
+    file_handler.setLevel(logging.DEBUG)
+    file_formatter = logging.Formatter(
+        "[%(asctime)s] (%(levelname)s)\t%(funcname)s(): %(message)s"
+    )
+    file_handler.setFormatter(file_formatter)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.ERROR)
+    console_formatter = logging.Formatter(
+        "[%(relativeCreated)dms] (%(levelname)s)\t%(message)s"
+    )
+    console_handler.setFormatter(console_formatter)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
