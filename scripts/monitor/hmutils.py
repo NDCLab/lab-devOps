@@ -97,6 +97,11 @@ class Identifier:
     ses_info: str
     datatype: str = field(init=False)  # defer until post-init
 
+    def __init__(self, sub_id, var, sre):
+        self.sub_id = sub_id
+        self.variable = var
+        self.ses_info = sre
+
     def __post_init__(self):
         self.datatype = get_variable_datatype(self.variable)
 
@@ -355,27 +360,29 @@ def get_identifiers(dataset, is_raw=True):
     """
     logger = logging.getLogger()
     # FILE_RE = (identifier)(_info)?(extension)+
-    FILE_RE = r"(sub-\d+_\D+_s\d+_r\d+_e\d+)(?:_\D+)?(?:\.[a-zA-Z0-9]+)+" # DH: I think the "deviation" string can have numbers? Like here /home/data/NDClab/datasets/thrive-dataset/sourcedata/checked/sub-3000114/s1_r1/eeg/ ? Or maybe that part doesn't matter for the purpose of getting the identifiers
+    FILE_RE = r"(sub-\d+_\D+_s\d+_r\d+_e\d+)(?:_[a-zA-Z0-9-]+)?(?:\.[a-zA-Z0-9]+)+"
     SES_RE = r"s\d+_r\d+"
     DTYPE_RE = r"[\D\-_]+"
     SUB_RE = r"sub-\d+"
 
     if is_raw:
         source_dir = os.path.join(dataset, RAW_SUBDIR)
+        [FIRST_RE, SECOND_RE, THIRD_RE] = [SES_RE, DTYPE_RE, SUB_RE]
     else:
         source_dir = os.path.join(dataset, CHECKED_SUBDIR)
+        [FIRST_RE, SECOND_RE, THIRD_RE] = [SUB_RE, SES_RE, DTYPE_RE]
 
     id_dict = {}
-    sessions = os.listdir(source_dir) # DH: this is how it is in raw but in checked this will give subjects (then sessions, then dtypes)
-    for session in sessions:
-        if not re.fullmatch(SES_RE, session) or not os.path.isdir(session):
+    first_dirs = os.listdir(source_dir)
+    for first_dir in first_dirs:
+        if not re.fullmatch(FIRST_RE, first_dir) or not os.path.isdir(os.path.join(source_dir, first_dir)):
             continue
-        for dtype in os.listdir(os.path.join(source_dir, session)):
-            if not re.fullmatch(DTYPE_RE, dtype) or not os.path.isdir(dtype):
+        for second_dir in os.listdir(os.path.join(source_dir, first_dir)):
+            if not re.fullmatch(SECOND_RE, second_dir) or not os.path.isdir(os.path.join(source_dir, first_dir, second_dir)):
                 continue
-            for sub in os.listdir(os.path.join(source_dir, session, dtype)):
-                fq_dir = os.path.join(source_dir, session, dtype, sub)
-                if not re.fullmatch(SUB_RE, sub) or not os.path.isdir(fq_dir):
+            for third_dir in os.listdir(os.path.join(source_dir, first_dir, second_dir)):
+                fq_dir = os.path.join(source_dir, first_dir, second_dir, third_dir)
+                if not re.fullmatch(THIRD_RE, third_dir) or not os.path.isdir(fq_dir):
                     continue
                 for raw_file in os.listdir(fq_dir):
                     file_re = re.fullmatch(FILE_RE, raw_file)

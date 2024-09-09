@@ -150,28 +150,6 @@ def check_filenames(variable, files, deviation, raw_or_checked):
             errors.append(["Error: file " + join(path, filename) + " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>", "name"])
     return errors
 
-def get_identifiers(dataset, raw_or_checked):
-    raw_or_checked = join(dataset, 'sourcedata', raw_or_checked)
-    identifiers_dict = {}
-    firstdirs = os.listdir(raw_or_checked)
-    for firstdir in firstdirs:
-        if isdir(join(raw_or_checked, firstdir)):
-            for secondir in os.listdir(join(raw_or_checked, firstdir)):
-                if isdir(join(raw_or_checked, firstdir, secondir)):
-                    for thirddir in os.listdir(join(raw_or_checked, firstdir, secondir)):
-                        if isdir(join(raw_or_checked, firstdir, secondir, thirddir)):
-                            for raw_file in os.listdir(join(raw_or_checked, firstdir, secondir, thirddir)):
-                                file_re = re.match("^(sub-[0-9]*_[a-zA-Z0-9_-]*_s[0-9]*_r[0-9]*_e[0-9]*)(_[a-zA-Z0-9_-]+)?(?:\.[a-zA-Z]+)*$", raw_file)
-                                if file_re:
-                                    identifier = file_re.group(1)
-                                    if identifier not in identifiers_dict.keys():
-                                        #identifiers_dict[identifier] = {'parentdirs': [], 'deviation_strings': []}
-                                        identifiers_dict[identifier] = {'parentdirs': []} # want to know absolute paths of identifier(s), anything else?
-                                    if join(raw_or_checked, firstdir, secondir, thirddir) not in identifiers_dict[identifier]['parentdirs']:
-                                        identifiers_dict[identifier]['parentdirs'].append(join(raw_or_checked, firstdir, secondir, thirddir)) # dict of all identifiers and their parent dirs
-    return identifiers_dict
-
-
 
 def check_identifiers(identifiers_dict, source_data, pending_files_df):
     #for source_data in ["raw", "checked"]:
