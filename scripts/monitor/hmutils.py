@@ -449,7 +449,7 @@ def get_identifier_files(basedir, identifier, raw_order=True):
         return None
 
     # FILE_RE = (identifier)(_info)?(extension)+
-    FILE_RE = re.escape(str(identifier)) + r"(?:_\D+)?(?:\.[a-zA-Z0-9]+)+" # DH: yeah I think the deviation string can be any alphanumeric char or hyphen
+    FILE_RE = re.escape(str(identifier)) + r"(?:_[a-zA-Z0-9-]+)?(?:\.[a-zA-Z0-9]+)+"
     id_files = [
         os.path.join(dirs[-1], file)
         for file in os.listdir(dirs[-1])
