@@ -9,7 +9,7 @@ ARCHIVED_REPOS="rwe-dataset social-context-dataset social-context-beta-dataset s
 ARCHIVED_REPOS+=" post-error-ddm pepper-pipeline"
 ###
 LOG_PATH="/home/data/NDClab/other/logs/repo-updates"
-LAB_MGR="ndclab"
+LAB_MGR=$(grep "lab-manager" $TOOL_PATH/lab-devOps/scripts/configs/config-leads.json | cut -d":" -f2 | tr -d '"",')
 LAB_TECH=$(grep "technician" $TOOL_PATH/lab-devOps/scripts/configs/config-leads.json | cut -d":" -f2 | tr -d '"",')
 repoarr=()
 
@@ -47,7 +47,7 @@ then
         if [[ $PROJ_LEAD == "" ]]; then
             echo "Can't find proj lead for $repo, emailing lab tech"
             echo "git status detects unpushed changes for $repo, no project lead found in config-leads.json." | mail -s \
-            "$repo needs re-sync with Github" "$LAB_TECH@fiu.edu"
+            "$repo needs re-sync with Github" "$LAB_TECH@fiu.edu" "$LAB_MGR@fiu.edu"
         else
             # email proj lead
             echo "Emailing project lead $PROJ_LEAD for $repo"
