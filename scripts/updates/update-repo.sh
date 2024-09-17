@@ -4,9 +4,9 @@ IFS=$'\n'
 TOOL_PATH="/home/data/NDClab/tools"
 DATA_PATH="/home/data/NDClab/datasets"
 ANA_PATH="/home/data/NDClab/analyses"
-ARCHIVED_REPOS="rwe-dataset social-context-dataset social-context-beta-dataset social-context-gamma-dataset autism-go-academy missing-link-dataset mind-reading"
+IGNORED_REPOS="rwe-dataset social-context-dataset social-context-beta-dataset social-context-gamma-dataset autism-go-academy missing-link-dataset mind-reading bug-testing-dataset"
 ### temporarily adding post-error-ddm, pepper to archived repos
-ARCHIVED_REPOS+=" post-error-ddm pepper-pipeline"
+IGNORED_REPOS+=" post-error-ddm pepper-pipeline"
 ###
 LOG_PATH="/home/data/NDClab/other/logs/repo-updates"
 LAB_MGR=$(grep "lab-manager" $TOOL_PATH/lab-devOps/scripts/configs/config-leads.json | cut -d":" -f2 | tr -d '"",')
@@ -18,7 +18,7 @@ do
 	echo "Checking repos in $DIR"
 	for REPO in `ls $DIR`
 	do
-	  if [[ $ARCHIVED_REPOS != *"$REPO"* ]]; then
+	  if [[ $IGNORED_REPOS != *"$REPO"* ]]; then
 	    echo "Checking $REPO"
 	    if [ -e "$DIR/$REPO/.git" ]
 	      then
@@ -33,7 +33,7 @@ do
 		echo "Not a git repo. Skipping."
 	    fi
 	  else
-	    echo "Skipping archived repo $REPO"
+	    echo "Skipping ignored/archived repo $REPO"
 	  fi
 	done
 done
