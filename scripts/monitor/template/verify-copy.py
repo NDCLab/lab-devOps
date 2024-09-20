@@ -149,11 +149,13 @@ def check_for_files(path, sub, allowed_suffixes, possible_exts, var):
         if not file_present:
                 print(c.RED + "Error: no such file", sub+'_'+var+'_sX_rX_eX'+ext, "can be found in", path + c.ENDC)
 
-def check_vhdr(sub_path, eeg_path, datatype):
+def check_eeg_metadata(sub_path, eeg_path):
+    # Check that DataFile and MarkerFile match up with filename in both .vmrk and .vhdr files
     for sub in listdir(sub_path):
         path = join(sub_path, sub, eeg_path)
         if isdir(path):
             for file in listdir(path):
+                vhdr_fname = splitext(file)[0]
                 if file.endswith('.vhdr'):
                     with open(join(sub_path, sub, eeg_path, file)) as f:
                         for i, line in enumerate(f):
@@ -161,14 +163,24 @@ def check_vhdr(sub_path, eeg_path, datatype):
                                 fname = line.split('=')[1].strip('\n')
                             if i == 6: # "MarkerFile"
                                 vmrk = line.split('=')[1].strip('\n')
+                                break
                     f.close()
-                    vhdr_fname = splitext(file)[0]
                     eeg_fname = splitext(fname)[0]
                     vmrk_fname = splitext(vmrk)[0]
                     if vhdr_fname != eeg_fname:
                         print(c.RED + "Error: DataFile in header " + fname + " does not match up with name of file " + file + " in folder " + path + "." + c.ENDC)
                     if vhdr_fname != vmrk_fname:
                         print(c.RED + "Error: MarkerFile in header " + vmrk + " does not match up with name of file " + file + " in folder " + path + "." + c.ENDC)
+                elif file.endswith('.vmrk'):
+                    with open(join(sub_path, sub, eeg_path, file)) as f:
+                        for i, line in enumerate(f):
+                            if i == 4: # "DataFile"
+                                fname = line.split('=')[1].strip('\n')
+                                break
+                    f.close()
+                    eeg_fname = splitext(fname)[0]
+                    if vhdr_fname != eeg_fname:
+                        print(c.RED + "Error: DataFile in header " + fname + " does not match up with name of file " + file + " in folder " + path + "." + c.ENDC)
 
 if __name__ == "__main__":
     dataset = sys.argv[1]
@@ -239,7 +251,7 @@ if __name__ == "__main__":
                 # for EEG check that filename in vhdr matches up w/ .eeg file
                 if '.eeg' in possible_exts and '.vmrk' in possible_exts and '.vhdr' in possible_exts:
                     path = join(raw, ses, datatype)
-                    check_vhdr(path, "", "eeg")
+                    check_eeg_metadata(path, "")
                 for subject in listdir(join(raw, ses, datatype)):
                     if not re.match("^sub-[0-9]+$", subject):
                         print(c.RED + "Error: subject directory ", subject, " does not match sub-# convention" + c.ENDC)
@@ -361,7 +373,7 @@ if __name__ == "__main__":
         if '.eeg' in possible_exts and '.vmrk' in possible_exts and '.vhdr' in possible_exts:
             for ses in expected_sessions:
                 path = checked
-                check_vhdr(path, join(ses, datatype), "eeg")
+                check_eeg_metadata(path, join(ses, datatype))
         for sub in listdir(checked):
             if sub.startswith("sub-"):
                 for ses in expected_sessions:
