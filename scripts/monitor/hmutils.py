@@ -271,7 +271,7 @@ def datadict_has_changes(dataset):
 
     if not os.path.isfile(latest_dd_path):
         raise FileNotFoundError("Latest data dictionary not found")
-    latest_df = pd.read_csv(latest_df, index_col="variable")
+    latest_df = pd.read_csv(latest_dd_path, index_col="variable")
 
     if not os.path.isfile(dd_path):
         raise FileNotFoundError("Data dictionary not found")
@@ -279,6 +279,7 @@ def datadict_has_changes(dataset):
 
     try:
         dd_diff = dd_df.compare(latest_df)
+        return bool(dd_diff.empty)
     except ValueError:
         return False
 
