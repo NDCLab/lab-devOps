@@ -368,3 +368,12 @@ if __name__ == "__main__":
 
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
+    # check data dictionary
+    try:
+        if datadict_has_changes(dataset):
+            logger.error("Data dictionary has changed. Please rerun setup.sh.")
+            exit(1)
+    except FileNotFoundError as err:
+        logger.error(err)
+        exit(1)
+    logger.debug("No changes to data dictionary")
