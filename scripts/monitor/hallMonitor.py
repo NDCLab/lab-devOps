@@ -395,8 +395,8 @@ if __name__ == "__main__":
     file_handler.setFormatter(file_formatter)
 
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.ERROR)
-    console_formatter = logging.Formatter(
+    console_handler.setLevel(logging.INFO)
+    console_formatter = ColorfulFormatter(
         "[%(relativeCreated)dms] (%(levelname)s)\t%(message)s"
     )
     console_handler.setFormatter(console_formatter)
