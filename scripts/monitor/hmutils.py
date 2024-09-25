@@ -15,6 +15,8 @@ import pytz
 
 DT_FORMAT = r"%Y-%m-%d_%H-%M"
 TZ_INFO = pytz.timezone("US/Eastern")
+IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>\D+)_(?P<sre>(s\d+_r\d+)_e\d+))"
+FILE_RE = IDENTIFIER_RE + r"(?P<info>_[\w\-]+)?(?P<ext>(?:\.[a-zA-Z0-9]+)+)"
 
 FILE_RECORD_SUBPATH = os.path.join("data-monitoring", "validated-file-record.csv")
 DATADICT_SUBPATH = os.path.join(
@@ -341,68 +343,72 @@ def write_file_record(dataset, df):
     logger = logging.getLogger()
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
     df = df[FILE_RECORD_COLS]
-    df.to_csv(record_path)
-    logger.debug("Wrote file record to %s", record_path)
 
+def get_present_identifiers(dataset, is_raw=True):
+    """
+    Extracts and returns a list of present identifiers from a dataset directory.
 
-# TODO: To be honest, I'm not sure that this is how we want to handle misplaced identifiers, but I can talk with David and/or George about it on Monday.
-def get_identifiers(dataset, is_raw=True):
-    """Get all valid identifiers corresponding to a dataset, along with their parent dir(s).
+    This function traverses the directory structure of the given dataset and
+    extracts identifiers from filenames that match a specific pattern. The
+    directory structure and filename patterns differ based on whether the data
+    is raw or checked.
 
     Args:
-        dataset (str): The dataset's base directory (absolute path)
-        is_raw (bool, optional): Whether the identifiers should be found for the raw directory. Defaults to True.
-            If False, identifiers are found under the checked directory instead.
+        dataset (str): The path to the dataset directory.
+        is_raw (bool, optional): A flag indicating whether the dataset is raw
+                                 or checked. Defaults to True.
 
     Returns:
-        dict[str,list[str]]: A dictionary with entries of the form `identifier: [dir1, dir2, ...]`.
-
-        A valid identifier has one and only one item in its list of parent directories.
+        list: A list of identifiers extracted from the filenames in the dataset
+              directory.
     """
-    logger = logging.getLogger()
-    # FILE_RE = (identifier)(_info)?(extension)+
-    FILE_RE = r"(sub-\d+_\D+_s\d+_r\d+_e\d+)(?:_[a-zA-Z0-9-]+)?(?:\.[a-zA-Z0-9]+)+"
     SES_RE = r"s\d+_r\d+"
-    DTYPE_RE = r"[\D\-_]+"
+    DTYPE_RE = r"\D+"
     SUB_RE = r"sub-\d+"
 
     if is_raw:
         source_dir = os.path.join(dataset, RAW_SUBDIR)
-        [FIRST_RE, SECOND_RE, THIRD_RE] = [SES_RE, DTYPE_RE, SUB_RE]
+        FIRST_RE, SECOND_RE, THIRD_RE = SES_RE, DTYPE_RE, SUB_RE
     else:
         source_dir = os.path.join(dataset, CHECKED_SUBDIR)
-        [FIRST_RE, SECOND_RE, THIRD_RE] = [SUB_RE, SES_RE, DTYPE_RE]
+        FIRST_RE, SECOND_RE, THIRD_RE = SUB_RE, SES_RE, DTYPE_RE
 
-    id_dict = {}
-    first_dirs = os.listdir(source_dir)
-    for first_dir in first_dirs:
-        if not re.fullmatch(FIRST_RE, first_dir) or not os.path.isdir(os.path.join(source_dir, first_dir)):
+    dd_df = get_datadict(dataset)
+
+    present_ids = []
+    for path, _, files in os.walk(source_dir):
+        relpath = path.removeprefix(source_dir)
+        dirs = relpath.split("/")
+        if len(dirs) != 3:
             continue
-        for second_dir in os.listdir(os.path.join(source_dir, first_dir)):
-            if not re.fullmatch(SECOND_RE, second_dir) or not os.path.isdir(os.path.join(source_dir, first_dir, second_dir)):
-                continue
-            for third_dir in os.listdir(os.path.join(source_dir, first_dir, second_dir)):
-                fq_dir = os.path.join(source_dir, first_dir, second_dir, third_dir)
-                if not re.fullmatch(THIRD_RE, third_dir) or not os.path.isdir(fq_dir):
+        # Check if directory names match expected format
+        regex_dir_pairs = zip((FIRST_RE, SECOND_RE, THIRD_RE), dirs)
+        if not all(re.fullmatch(regex, dir) for regex, dir in regex_dir_pairs):
+            continue
+        # Extract identifiers from filenames
+        id_matches = [
+            match for filename in files if (match := re.fullmatch(FILE_RE, filename))
+        ]
+        for match in id_matches:
+            identifier = match.group("id")
+            sub = match.group("subject")
+            try:
+                var = match.group("var")
+                dtype = get_variable_datatype(dd_df, var)
+            except KeyError:
+                dtype = ""
+            ses = match.group(5)
+            # Check that each identifier matches the subject, session, and datatype corresponding to its
+            # directory path. If this does not match up, the identifier is not appended to present_ids.
+            if is_raw:
+                if not all(ses == dirs[0], dtype == dirs[1], sub == dirs[2]):
                     continue
-                for raw_file in os.listdir(fq_dir):
-                    file_re = re.fullmatch(FILE_RE, raw_file)
-                    if not file_re:
-                        continue
-                    identifier = file_re.group(1)
-                    if identifier not in id_dict:
-                        id_dict[identifier] = []
-                        logger.debug("Found new identifier %s", identifier)
-                    if fq_dir not in id_dict[identifier]:
-                        # dict of all identifiers and their parent dirs
-                        id_dict[identifier].append(fq_dir)
-                        logger.debug(
-                            "Found new directory %s for identifier %s",
-                            fq_dir,
-                            identifier,
-                        )
-    return id_dict
+            else:
+                if not all(sub == dirs[0], ses == dirs[1], dtype == dirs[2]):
+                    continue
+            present_ids.append(identifier)
 
+    return present_ids
 
 def get_identifier_files(basedir, identifier, raw_order=True):
     """Find all files corresponding to a given identifier under a base directory.
