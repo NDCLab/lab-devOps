@@ -371,13 +371,12 @@ def handle_validated():
 
 
 if __name__ == "__main__":
+    # initialization stage
     args = get_args()
     dataset = os.path.realpath(args.dataset)
-    raw = join(dataset, 'sourcedata/raw')
-    checked = join(dataset, 'sourcedata/checked')
-    datadict_path = os.path.join(
-        dataset, "data-monitoring", "data-dictionary", "central-tracker_datadict.csv"
-    )
+    if not os.path.exists(dataset):
+        raise FileNotFoundError(f"Dataset {dataset} not found")
+    datadict_path = os.path.join(dataset, DATADICT_SUBPATH)
     dd_df = pd.read_csv(datadict_path, index_col = "variable")
     variable_dict, combination_rows_dict = parse_datadict(dd_df)
 
@@ -403,6 +402,12 @@ if __name__ == "__main__":
 
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
+
+    logger.debug("Logging set up")
+
+    # rename redcap columns
+    # TODO: implement this
+
     # check data dictionary
     try:
         if datadict_has_changes(dataset):
@@ -412,3 +417,9 @@ if __name__ == "__main__":
         logger.error(err)
         exit(1)
     logger.debug("No changes to data dictionary")
+
+    checked_pass = checked_data_validation(dataset)
+    raw_data_validation(dataset, checked_pass)
+    qa_validation(dataset)
+
+    exit(0)
