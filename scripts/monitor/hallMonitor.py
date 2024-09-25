@@ -349,12 +349,10 @@ def qa_validation(dataset):
         logger.info("Copied %d files for identifier %s", n_copied, id)
 
     # add new raw-validated identifiers to QA tracker
-    new_qa = new_qa[["identifier", "dataType"]]
-    new_qa["dateTime"] = get_timestamp()
-    new_qa["user"] = getuser()
-    new_qa[["qa", "localMove"]] = 0
-    qa_df = pd.concat([qa_df, new_qa])
-    qa_df.to_csv(qa_checklist_path)
+    new_qa = [new_qa_record(id) for id in new_qa["identifier"]]
+    new_qa_df = pd.DataFrame(new_qa)
+    qa_df = pd.concat([qa_df, new_qa_df])
+    write_qa_tracker(dataset, qa_df)
 
     # recursively clean up empty directories in pending-qa/
     try:
