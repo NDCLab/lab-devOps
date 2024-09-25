@@ -64,7 +64,7 @@ QA_CHECKLIST_COLS = [
 #  :------------------- helper functions and classes -------------------:
 
 
-def get_variable_datatype(dd_df, varname):  # TODO: Is this necessary? Remove if not
+def get_variable_datatype(dd_df, varname):
     """Retrieve a variable's dataType from the data dictionary
 
     Args:
@@ -84,8 +84,7 @@ def get_variable_datatype(dd_df, varname):  # TODO: Is this necessary? Remove if
     elif num_rows > 1:
         raise ValueError(f"Multiple variables named {varname}")
     else:
-        return str(var_rows["dataType"][0])        # DH: this gave me an error
-        # return str(var_rows["dataType"].item()) instead?
+        return str(var_rows["dataType"].iloc[0])
 
 
 @dataclass
