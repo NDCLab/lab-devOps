@@ -496,6 +496,7 @@ def write_pending_files(dataset, df, timestamp):
     logger = logging.getLogger()
     out = os.path.join(dataset, PENDING_SUBDIR, f"pending-files-{timestamp}.csv")
     df = df[PENDING_FILES_COLS]
+    df = df.sort_values(by=["identifier", "datetime"])
     df.to_csv(out)
     logger.debug("Wrote pending files to %s", out)
 
@@ -576,6 +577,7 @@ def write_pending_errors(dataset, df, timestamp):
     logger = logging.getLogger()
     out = os.path.join(dataset, PENDING_SUBDIR, f"pending-errors-{timestamp}.csv")
     df = df[PENDING_ERRORS_COLS]
+    df = df.sort_values(by=["identifier", "datetime"])
     df.to_csv(out)
     logger.debug("Wrote pending errors to %s", out)
 
