@@ -628,15 +628,7 @@ def get_qa_tracker(dataset):
         logger.debug("Read in QA checklist from %s", checklist_path)
     else:
         logger.debug("QA checklist not found at %s, making new", checklist_path)
-        colmap = {
-            "datetime": "str",
-            "user": "str",
-            "dataType": "str",
-            "identifier": "str",
-            "qa": "int",
-            "local-move": "int",
-        }
-        checklist_df = df_from_colmap(colmap)
+        checklist_df = new_qa_checklist()
     return checklist_df
 
 
