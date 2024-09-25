@@ -567,6 +567,44 @@ def new_pass_record(identifier):
     }
 
 
+def new_qa_record(identifier):
+    if isinstance(identifier, str):
+        identifier = Identifier.from_str(identifier)
+    return {
+        "identifier": str(identifier),
+        "datetime": get_timestamp(),
+        "user": getuser(),
+        "qa": 0,
+        "localMove": 0,
+        "dataType": identifier.datatype,
+    }
+
+
+def new_qa_checklist():
+    """
+    Creates a new QA checklist DataFrame with predefined column names and types.
+
+    The columns and their corresponding data types are:
+    - "datetime": str
+    - "user": str
+    - "dataType": str
+    - "identifier": str
+    - "qa": int
+    - "localMove": int
+
+    Returns:
+        pd.DataFrame: A DataFrame with the specified columns and data types.
+    """
+    colmap = {
+        "datetime": "str",
+        "user": "str",
+        "dataType": "str",
+        "identifier": "str",
+        "qa": "int",
+        "localMove": "int",
+    }
+    return df_from_colmap(colmap)
+
 def get_pending_errors(pending_df):
     errors = pending_df[pending_df["passRaw"] == False]
     errors = errors[PENDING_ERRORS_COLS]
