@@ -4,23 +4,36 @@ import logging
 import os
 from os.path import join, isdir, isfile, abspath, dirname, basename
 import re
+import subprocess
 from getpass import getuser
 
 import pandas as pd
-import pytz
-from hmutils import *
 
-DT_FORMAT = r"%Y-%m-%d_%H-%M"
-
-
-def get_id_record(dataset):
-    record_path = os.path.join(dataset, "data-monitoring", "file-record.csv")
-    return pd.read_csv(record_path)
-
-
-def write_id_record(dataset, df):
-    record_path = os.path.join(dataset, "data-monitoring", "file-record.csv")
-    df.to_csv(record_path)
+from hmutils import (
+    CHECKED_SUBDIR,
+    DATADICT_SUBPATH,
+    LOGGING_SUBPATH,
+    PENDING_QA_SUBDIR,
+    QA_CHECKLIST_SUBPATH,
+    RAW_SUBDIR,
+    ColorfulFormatter,
+    Identifier,
+    new_validation_record,
+    clean_empty_dirs,
+    datadict_has_changes,
+    get_args,
+    get_expected_combination_rows,
+    get_expected_identifiers,
+    get_file_record,
+    get_identifier_files,
+    get_pending_files,
+    get_present_identifiers,
+    get_timestamp,
+    new_error_record,
+    new_qa_checklist,
+    write_file_record,
+    write_qa_tracker,
+)
 
 
 def parse_datadict(dd_df):
@@ -267,66 +280,88 @@ def get_passed_raw_check(dataset):
     pass
 
 
-def new_qa_checklist():
-    colmap = {
-        "datetime": "str",
-        "user": "str",
-        "dataType": "str",
-        "identifier": "str",
-        "qa": "int",
-        "localMove": "int",
-    }
-    return df_from_colmap(colmap)
+def qa_validation(dataset):
+    logger.info("Starting QA check...")
 
-
-def handle_qa_unchecked(dataset):
-    print("Starting QA check...")
-
-    record_df = get_id_record(dataset)
-    pending_qa_dir = os.path.join(dataset, "sourcedata", "pending-qa")
-    qa_checklist_path = os.path.join(pending_qa_dir, "qa-checklist.csv")
+    # get QA tracker and identifier record
+    record_df = get_file_record(dataset)
+    pending_qa_dir = os.path.join(dataset, PENDING_QA_SUBDIR)
+    qa_checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
     if os.path.exists(qa_checklist_path):
         qa_df = pd.read_csv(qa_checklist_path)
     else:  # first run
         qa_df = new_qa_checklist()
 
-    # FIXME unsure of proper column vals
-    passed_ids = qa_df[(qa_df["qa"] == 1) & (qa_df["local-move"] == 1)]["identifier"]
-    print(f"Found {len(passed_ids)} new identifiers that passed QA checks")
-    dt = datetime.datetime.now(pytz.timezone("US/Eastern"))
-    dt = dt.strftime(DT_FORMAT)
+    # get fully-verified identifiers
+    passed_ids = qa_df[(qa_df["qa"] == 1) & (qa_df["localMove"] == 1)]["identifier"]
+    logger.info("Found %d new identifiers that passed QA checks", len(passed_ids.index))
 
-    # log QA-passed IDs to identifier record
-    record_df[record_df["identifier"].isin(passed_ids)]["date-time"] = dt
-    write_id_record(dataset, record_df)
-
-    # remove QA-passed files from pending-qa and QA tracker
-    qa_df = qa_df[~qa_df["identifier"].isin(passed_ids)]
+    # move fully-verified files from pending-qa/ to checked/
+    checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
     for id in passed_ids:
-        files = get_identifier_files(id)
-        # TODO Remove files from pending-qa
-    # clean up empty directories
-    subprocess.run(
-        ["find", pending_qa_dir, "-depth", "-empty", "-type", "d", "-delete"]
-    )
+        identifier_subdir = Identifier.from_str(id).to_dir(is_raw=False)
+        dest_path = os.path.join(checked_dir, identifier_subdir)
+        os.makedirs(dest_path, exist_ok=True)
+        id_files = get_identifier_files(pending_qa_dir, id) or []
+        n_moved = 0
+        for file in id_files:
+            try:
+                subprocess.run(["mv", file, dest_path])
+                logger.debug("Moved file %s to %s", file, dest_path)
+                n_moved += 1
+            except subprocess.CalledProcessError as err:
+                logger.error("Could not move file %s to %s (%s)", file, dest_path, err)
+        logger.info("Moved %d files for identifier %s", n_moved, id)
 
-    # stage raw-passed identifiers (no QA check, passed raw check)
-    new_qa = record_df[record_df["qa"].isna()]
-    new_qa = new_qa[~new_qa["raw"].isna()]
+    # remove fully-verified identifiers from QA checklist
+    qa_df = qa_df[~qa_df["identifier"].isin(passed_ids)]
+    write_qa_tracker(dataset, qa_df)
 
-    # TODO Copy files associated with identifiers to pending-qa
+    # add fully-verified identifiers to validated file record
+    val_records = [new_validation_record(id) for id in passed_ids]
+    val_df = pd.DataFrame(val_records)
+    record_df = pd.concat(record_df, val_df)
+    try:
+        write_file_record(dataset, record_df)
+    except Exception as err:
+        logger.error("Error writing to file record: %s", err)
+
+    # get new raw-validated identifiers
+    pending_df = get_pending_files(dataset)
+    pending_ids = pending_df[pending_df["passRaw"] == 1]
+    new_qa = pending_ids[~pending_ids["identifier"].isin(record_df["identifier"])]
+
+    # copy files for new raw-validated identifiers to pending-qa/
+    raw_dir = os.path.join(dataset, RAW_SUBDIR)
     for id in new_qa["identifier"]:
-        files = get_identifier_files(id)
-        # copy to pending-qa, making parent directories if need be
+        identifier_subdir = Identifier.from_str(id).to_dir()
+        dest_path = os.path.join(pending_qa_dir, identifier_subdir)
+        os.makedirs(dest_path, exist_ok=True)
+        id_files = get_identifier_files(raw_dir, id) or []
+        n_copied = 0
+        for file in id_files:
+            try:
+                subprocess.run(["cp", file, dest_path])
+                logger.debug("Copied file %s to %s", file, dest_path)
+                n_copied += 1
+            except subprocess.CalledProcessError as err:
+                logger.error("Could not copy file %s to %s (%s)", file, dest_path, err)
+        logger.info("Copied %d files for identifier %s", n_copied, id)
 
-    # modify and write out QA tracker to reflect changes
+    # add new raw-validated identifiers to QA tracker
     new_qa = new_qa[["identifier", "dataType"]]
-    new_qa["date-time"] = dt
-    # FIXME Should this be filled manually or detected?
+    new_qa["dateTime"] = get_timestamp()
     new_qa["user"] = getuser()
-    new_qa[["qa", "local-move"]] = 0
+    new_qa[["qa", "localMove"]] = 0
     qa_df = pd.concat([qa_df, new_qa])
     qa_df.to_csv(qa_checklist_path)
+
+    # recursively clean up empty directories in pending-qa/
+    try:
+        n_dirs = clean_empty_dirs(pending_qa_dir)
+        logger.info("Cleaned up %d empty directories in pending-qa/", n_dirs)
+    except subprocess.CalledProcessError as err:
+        logger.error("Error cleaning up empty directories: %s", err)
 
     print("QA check done!")
 
