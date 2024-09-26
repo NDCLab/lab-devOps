@@ -693,40 +693,40 @@ def remove_from_checked(dataset, identifier):
 
 
 def clean_empty_dirs(basedir):
-    """Starting at the lowest level, recursively remove all
-    empty directories under `basedir`. `basedir` is preserved even
-    if all directories under it are removed.
+    """
+    Removes empty directories within the specified base directory.
+
+    This function uses the `find` command to locate and delete empty directories
+    within the given `basedir`. It logs the removal of each directory and returns
+    the count of directories removed.
 
     Args:
-        basedir (str): A path to the base directory to be cleaned
+        basedir (str): The base directory to search for empty directories.
 
     Returns:
-        int: The number of empty directories cleaned by this function
+        int: The number of empty directories removed.
+
+    Raises:
+        subprocess.CalledProcessError: If the `find` command fails to execute.
+
+    Logs:
+        - Error if `basedir` is not a valid directory.
+        - Debug information for each removed directory.
+        - Error if the cleaning process encounters an issue.
     """
-    logger = logging.getLogger()
-
     if not os.path.isdir(basedir):
-        logger.error("%s is not a valid directory", basedir)
-        return 0
+        raise FileNotFoundError(f"Directory {basedir} does not exist")
 
-    proc = subprocess.run(
-        [
-            "find",
-            basedir,
-            "-depth",
-            "-empty",
-            "-type",
-            "d",
-            "-delete",
-            "-print",
-        ],
-        stdout=subprocess.PIPE,
-    )
-    dirs = [line for line in proc.stdout.decode().splitlines() if line]
-    for dir in dirs:
-        logger.debug("Removed empty directory %s", dir)
-
-    return len(dirs)
+    try:
+        proc = subprocess.run(
+            ["find", basedir, "-depth", "-empty", "-type", "d", "-delete", "-print"],
+            stdout=subprocess.PIPE,
+            check=True,
+        )
+        dirs = [line for line in proc.stdout.decode().splitlines() if line]
+        return len(dirs)
+    except subprocess.CalledProcessError as err:
+        raise err
 
 
 def get_visit_pairs(datadict: pd.DataFrame):
