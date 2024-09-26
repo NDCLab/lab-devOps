@@ -92,37 +92,34 @@ def get_variable_datatype(dd_df, varname):
 
 @dataclass
 class Identifier:
-    PATTERN = re.compile(r"(sub-\d+)_([a-zA-Z0-9\-_]+)_(s\d+_r\d+_e\d+)")
+    PATTERN = re.compile(IDENTIFIER_RE)
 
-    sub_id: str
+    subject: str
     variable: str
-    ses_info: str
-    datatype: str = field(init=False)  # defer until post-init
-
-    def __init__(self, sub_id, var, sre):
-        self.sub_id = sub_id
-        self.variable = var
-        self.ses_info = sre
-
-    def __post_init__(self):
-        self.datatype = get_variable_datatype(self.variable)
+    session: str
 
     def __str__(self):
-        return f"{self.sub_id}_{self.variable}_{self.ses_info}"
+        s = f"{self.subject}_{self.variable}_{self.session}"
+        return s
 
-    def to_dir(self, is_raw=True):
-        """Convert the identifier to a sub-path
+    def to_dir(self, dataset, is_raw=True):
+        """
+        Generates a directory path for the given dataset based on the data type and whether the data is raw or checked.
 
         Args:
-            is_raw (bool, optional): Whether the Identifier should be output in raw (rather than checked) order. Defaults to True.
+            dataset (str): The dataset's base path.
+            is_raw (bool, optional): Flag indicating if the data is raw. Defaults to True.
 
         Returns:
-            str: A relative path leading to the directory signified by the Identifier instance.
+            str: The generated directory path, rooted at dataset.
         """
+        dd_df = get_datadict(dataset)
+        datatype = get_variable_datatype(dd_df, self.variable)
+        # generate full path based on whether the data is raw or checked
         if is_raw:
-            return os.path.join(self.ses_info, self.datatype, self.sub_id, "")
+            return os.path.join(dataset, self.session, datatype, self.subject, "")
         else:
-            return os.path.join(self.sub_id, self.ses_info, self.datatype, "")
+            return os.path.join(dataset, self.subject, self.session, datatype, "")
 
     @staticmethod
     def from_str(input):
@@ -140,9 +137,9 @@ class Identifier:
         match = Identifier.PATTERN.fullmatch(input)
         if not match:
             raise ValueError("Passed string is not a valid data identifier")
-        sub_id = match.group(1)
-        var = match.group(2)
-        sre = match.group(3)
+        sub_id = match.group("subject")
+        var = match.group("var")
+        sre = match.group("sre")
         return Identifier(sub_id, var, sre)
 
 
