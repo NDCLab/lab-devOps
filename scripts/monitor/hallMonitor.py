@@ -283,10 +283,12 @@ def get_passed_raw_check(dataset):
 def qa_validation(dataset):
     logger.info("Starting QA check...")
 
-    # get QA tracker and identifier record
-    record_df = get_file_record(dataset)
+    # set up paths and dataframes
     pending_qa_dir = os.path.join(dataset, PENDING_QA_SUBDIR)
     qa_checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
+
+    dd_df = get_datadict(dataset)
+    record_df = get_file_record(dataset)
     if os.path.exists(qa_checklist_path):
         qa_df = pd.read_csv(qa_checklist_path)
     else:  # first run
@@ -299,10 +301,12 @@ def qa_validation(dataset):
     # move fully-verified files from pending-qa/ to checked/
     checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
     for id in passed_ids:
+        id = Identifier.from_str(id)
         identifier_subdir = Identifier.from_str(id).to_dir(is_raw=False)
         dest_path = os.path.join(checked_dir, identifier_subdir)
         os.makedirs(dest_path, exist_ok=True)
-        id_files = get_identifier_files(pending_qa_dir, id) or []
+        dtype = get_variable_datatype(dd_df, id.variable)
+        id_files = get_identifier_files(pending_qa_dir, id, dtype)
         n_moved = 0
         for file in id_files:
             try:
@@ -334,10 +338,12 @@ def qa_validation(dataset):
     # copy files for new raw-validated identifiers to pending-qa/
     raw_dir = os.path.join(dataset, RAW_SUBDIR)
     for id in new_qa["identifier"]:
+        id = Identifier.from_str(id)
         identifier_subdir = Identifier.from_str(id).to_dir()
         dest_path = os.path.join(pending_qa_dir, identifier_subdir)
         os.makedirs(dest_path, exist_ok=True)
-        id_files = get_identifier_files(raw_dir, id) or []
+        dtype = get_variable_datatype(dd_df, id.variable)
+        id_files = get_identifier_files(raw_dir, id, dtype)
         n_copied = 0
         for file in id_files:
             try:
