@@ -377,7 +377,7 @@ def get_present_identifiers(dataset, is_raw=True):
 
     present_ids = []
     for path, _, files in os.walk(source_dir):
-        relpath = path.removeprefix(source_dir)
+        relpath = os.path.relpath(path, source_dir)
         dirs = relpath.split("/")
         if len(dirs) != 3:
             continue
