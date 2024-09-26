@@ -707,12 +707,8 @@ def clean_empty_dirs(basedir):
         int: The number of empty directories removed.
 
     Raises:
+        FileNotFoundError: If basedir does not exist.
         subprocess.CalledProcessError: If the `find` command fails to execute.
-
-    Logs:
-        - Error if `basedir` is not a valid directory.
-        - Debug information for each removed directory.
-        - Error if the cleaning process encounters an issue.
     """
     if not os.path.isdir(basedir):
         raise FileNotFoundError(f"Directory {basedir} does not exist")
