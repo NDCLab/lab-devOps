@@ -410,59 +410,57 @@ def get_present_identifiers(dataset, is_raw=True):
 
     return present_ids
 
-def get_identifier_files(basedir, identifier, raw_order=True):
-    """Find all files corresponding to a given identifier under a base directory.
+def get_identifier_files(basedir, identifier, datatype, raw_order=True):
+    """
+    Retrieve files matching a specific identifier within a directory structure.
+
+    This function navigates through a directory structure based on the provided
+    identifier and returns a list of files that match a predefined pattern.
 
     Args:
-        basedir (str): The base path to look for files under
-        identifier (str|Identifier): The identifier whose files should be located
-        raw_order (bool): Whether the raw directory order (session/datatype/subject) should
-            be used when finding files corresponding to an identifier. Defaults to True.
-            If False, checked directory order (subject/session/datatype) is used instead.
+        basedir (str): The base directory from which to start the search.
+        identifier (str or Identifier): The identifier used to navigate the directory
+            structure. If a string is provided, it will be converted to an Identifier object.
+        datatype (str): The identifier's datatype, used to filter the files.
+        raw_order (bool, optional): Determines the order of directory traversal.
+            If True, the order is session/datatype/subject. If False, the order is
+            subject/session/datatype. Defaults to True.
 
     Returns:
-        list[str]|None: A list of filepaths rooted at basedir that belong to the passed identifier. If the
-            passed identifier is invalid or if identifier directories do not exist, returns None.
-    """
-    logger = logging.getLogger()
+        list: A list of file paths, rooted at basedir, that match
+        the identifier pattern within the final directory.
 
+    Raises:
+        ValueError: If the identifier string cannot be converted to an Identifier object.
+        FileNotFoundError: If any of the directories in the path do not exist.
+    """
     if isinstance(identifier, str):
         try:
             identifier = Identifier.from_str(identifier)
         except ValueError as err:
-            logger.error("Passed identifier %s is not valid (%s)", identifier, err)
-            return None
+            raise err
 
     if raw_order:
         # session / datatype / subject
-        dirs = [identifier.ses_info, identifier.datatype, identifier.sub_id]
-        logger.debug("Raw order: %s", "/".join(d for d in dirs))
+        dirs = [identifier.session, datatype, identifier.subject]
     else:
         # subject / session / datatype
-        dirs = [identifier.sub_id, identifier.ses_info, identifier.datatype]
-        logger.debug("Checked order: %s", "/".join(d for d in dirs))
+        dirs = [identifier.subject, identifier.session, datatype]
 
     # root all directories at basedir
     dirs[0] = os.path.join(basedir, dirs[0])
     for idx, dirname in enumerate(dirs, 1):
         dirs[idx] = os.path.join(dirs[idx - 1], dirname)
 
-    invalid_id = False
     for dirname in dirs:
         if not os.path.isdir(dirname):
-            logger.error("Could not find directory %s", dirname)
-            invalid_id = True
-    if invalid_id:
-        return None
+            raise FileNotFoundError(f"Could not find directory {dirname}")
 
-    # FILE_RE = (identifier)(_info)?(extension)+
-    FILE_RE = re.escape(str(identifier)) + r"(?:_[a-zA-Z0-9-]+)?(?:\.[a-zA-Z0-9]+)+"
     id_files = [
         os.path.join(dirs[-1], file)
         for file in os.listdir(dirs[-1])
         if re.fullmatch(FILE_RE, file)
     ]
-    logger.debug("Found %d file(s) for identifier %s", len(id_files), identifier)
 
     return id_files
 
