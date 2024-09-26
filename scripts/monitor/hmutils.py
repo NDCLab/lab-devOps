@@ -407,6 +407,30 @@ def get_present_identifiers(dataset, is_raw=True):
 
     return present_ids
 
+
+def get_unique_sub_ses(identifiers):
+    """Get unique subject-session pairs from a list of identifiers.
+
+    Args:
+        identifiers (list): A list of identifiers, which can be strings or Identifier objects.
+
+    Raises:
+        ValueError: If any of the identifiers are not valid strings.
+
+    Returns:
+        list: A list of unique (subject, session) tuples extracted from the identifiers.
+    """
+    if isinstance(identifiers[0], str):
+        try:
+            identifiers = [Identifier.from_str(id) for id in identifiers]
+        except ValueError as err:
+            raise err
+
+    sub_ses = [(id.subject, id.session) for id in identifiers]
+    sub_ses = list(set(sub_ses))  # remove duplicates
+    return sub_ses
+
+
 def get_identifier_files(basedir, identifier, datatype, raw_order=True):
     """
     Retrieve files matching a specific identifier within a directory structure.
