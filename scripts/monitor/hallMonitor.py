@@ -18,10 +18,10 @@ from hmutils import (
     RAW_SUBDIR,
     ColorfulFormatter,
     Identifier,
-    new_validation_record,
     clean_empty_dirs,
     datadict_has_changes,
     get_args,
+    get_datadict,
     get_expected_combination_rows,
     get_expected_identifiers,
     get_file_record,
@@ -29,9 +29,16 @@ from hmutils import (
     get_pending_files,
     get_present_identifiers,
     get_timestamp,
+    get_variable_datatype,
     new_error_record,
+    new_pass_record,
+    new_pending_df,
     new_qa_checklist,
+    new_qa_record,
+    new_validation_record,
     write_file_record,
+    write_pending_errors,
+    write_pending_files,
     write_qa_tracker,
 )
 
@@ -210,18 +217,6 @@ def check_all_data_present(identifiers_dict, source_data, pending_files_df, vari
     ####
     return pending_files_df
 
-def get_identifier_files(identifier, vals):
-    variable = re.match("^sub-[0-9]*_([a-zA-Z0-9_-]*)_s[0-9]*_r[0-9]*_e[0-9]*?$", identifier).group(1)
-    exts = dd_df[dd_df['variable'] == variable]['expectedFileExt'].iloc[0]
-    exts = exts.split(',')
-    exts = [ext.strip() for ext in exts]
-    expected_files = []
-    for parentdir in vals['parentdirs']:
-        for ext in exts:
-            expected_files.append(join(parentdir, identifier+ext))
-    return expected_files
-    # should return all files expected for the given identifier (minus any "deviation" strings)
-
 
 def handle_raw_unchecked(dataset):
     #record = get_file_record(dataset)
@@ -238,42 +233,6 @@ def handle_raw_unchecked(dataset):
     pending_files_df.to_csv(pending_files_name)
     pending_errors = pending_files_df[pending_files_df['error_type'] != "NA"]
     pending_errors.to_csv(pending_errors_name)
-
-
-
-def get_latest_pending(dataset):
-    pending_path = os.path.join(dataset, "data-monitoring", "pending")
-    pending_files = os.listdir(pending_path)
-    pending_df = pd.read_csv(pending_files[-1])
-    return pending_df
-
-
-def df_from_colmap(colmap):
-    """Generates a Pandas DataFrame from a column-datatype dictionary
-
-    Args:
-        colmap (dict[str, str]): A dictionary containing entries of the form "name": "float|str|int"
-
-    Returns:
-        pandas.DataFrame: An empty DataFrame, generated as specified by colmap
-    """
-    df = pd.DataFrame({c: pd.Series(dtype=t) for c, t in colmap.items()})
-    return df
-
-
-def new_pending_df():
-    colmap = {
-        "identifier": "str",
-        "datetime": "str",
-        "user": "str",
-        "dataType": "str",
-        "passRaw": "int",
-        "errorType": "str",
-        "errorDetails": "str",
-    }
-    #df = df_from_colmap(colmap)
-    #df.set_index('identifier', inplace=True)
-    return df_from_colmap(colmap)
 
 
 def get_passed_raw_check(dataset):
@@ -368,10 +327,6 @@ def qa_validation(dataset):
         logger.error("Error cleaning up empty directories: %s", err)
 
     print("QA check done!")
-
-
-def handle_validated():
-    pass
 
 
 if __name__ == "__main__":
