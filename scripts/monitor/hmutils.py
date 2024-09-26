@@ -715,6 +715,36 @@ def get_datafiles_from_provenance(provenance: str):
     pass
 
 
+def get_expected_files(identifier, dd_df):
+    """
+    Generate a list of expected file names based on the provided identifier and a DataFrame.
+
+    Args:
+        identifier (str | Identifier): The identifier for which to generate expected file names.
+                                        It can be a string or an instance of the Identifier class.
+        dd_df (pd.DataFrame): A DataFrame containing the dataset's data dictionary.
+
+    Returns:
+        list: A list of expected file names with the appropriate extensions.
+
+    Raises:
+        ValueError: If the identifier string or its variable is invalid.
+    """
+    if isinstance(identifier, str):
+        try:
+            identifier = Identifier.from_str(identifier)
+        except ValueError:
+            raise ValueError("Invalid identifier string")
+
+    expected_exts = dd_df[dd_df["variable"] == identifier.variable]["expectedFileExt"]
+    if len(expected_exts.index) == 0:
+        raise ValueError(f"Variable {identifier.variable} not valid")
+    expected_exts = expected_exts[0]
+    expected_exts = str(expected_exts).strip('"').replace(" ", "").split(",")
+    expected_files = [f"{identifier}.{ext}" for ext in expected_exts]
+    return expected_files
+
+
 def meets_naming_conventions(filename, has_deviation=False):
     """
     Check if a filename meets the naming conventions for a data file.
