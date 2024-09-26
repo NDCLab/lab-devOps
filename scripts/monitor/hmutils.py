@@ -540,6 +540,21 @@ def df_from_colmap(colmap):
 
 
 def new_pending_df():
+    """
+    Creates a new DataFrame with predefined columns and their data types.
+
+    The DataFrame will have the following columns:
+    - datetime (str): The date and time of the entry.
+    - user (str): The user associated with the entry.
+    - dataType (str): The type of data.
+    - identifier (str): A unique identifier for the entry.
+    - passRaw (int): A raw pass value.
+    - errorType (str): The type of error, if any.
+    - errorDetails (str): Details about the error, if any.
+
+    Returns:
+        pandas.DataFrame: A DataFrame with the specified columns and data types.
+    """
     colmap = {
         "datetime": "str",
         "user": "str",
