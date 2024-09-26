@@ -574,7 +574,8 @@ def new_error_record(identifier, error_type, error_details):
         identifier (str|Identifier): The identifier that the record is about
         error_type (str): The general class of the error
         error_details (str): A more detailed description of the error
-
+    """
+    Creates a new pass record dictionary with the given identifier.
     Returns:
         dict[str,str]: The error record with all fields populated
     """
@@ -589,13 +590,20 @@ def new_error_record(identifier, error_type, error_details):
 
 
 def new_pass_record(identifier):
-    """Generates and returns a new passing record.
+    """
+    Creates a new pass record dictionary with the given identifier.
 
     Args:
-        identifier (str|Identifier): The identifier that the record is about
+        identifier (str): The unique identifier for the pass record.
 
     Returns:
-        dict: The passing record with all fields populated
+        dict: A dictionary containing the following keys:
+    - "datetime" (str): The current timestamp.
+    - "user" (str): The username of the current user.
+    - "passRaw" (int): Always True, indicating no error has occurred.
+    - "identifier" (str): The provided identifier converted to a string.
+    - "errorType" (None): Placeholder for error type, initially None.
+    - "errorDetails" (None): Placeholder for error details, initially None.
     """
     return {
         "datetime": get_timestamp(),
