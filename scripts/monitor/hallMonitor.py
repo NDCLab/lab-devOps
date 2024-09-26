@@ -65,8 +65,31 @@ def parse_datadict(dd_df):
     return dd_dict, combination_rows
 
 def allowed_val(allowed_vals, value):
+    """
+    Check if a given value is within the intervals specified in allowed_vals.
+
+    Args:
+        allowed_vals (str): A string representing allowed intervals, formatted as "[lower1,upper1][lower2,upper2]..." or "NA, 0, 1".
+        value (int): The value to check against the allowed intervals.
+
+    Returns:
+        bool: True if the value is within any of the allowed intervals, False otherwise.
+
+    Example:
+        allowed_vals = "[1,5][10,15]"
+        value = 3
+        result = allowed_val(allowed_vals, value)  # Returns True
+    """
     allowed_vals = allowed_vals.replace(" ", "")
-    intervals = re.split("[\[\]]", allowed_vals)
+    
+    # Handle case where allowed_vals is a comma-separated list
+    if "," in allowed_vals and "[" not in allowed_vals:
+        allowed_values = allowed_vals.split(",")
+        allowed_values = [val.strip() for val in allowed_values]
+        return str(value) in allowed_values
+
+    # Handle case where allowed_vals is a list of intervals
+    intervals = re.split(r"[\[\]]", allowed_vals)
     intervals = list(filter(lambda x: x not in [",", ""], intervals))
     allowed = False
     for interval in intervals:
