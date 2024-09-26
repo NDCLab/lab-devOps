@@ -713,3 +713,24 @@ def get_visit_pairs(datadict: pd.DataFrame):
 def get_datafiles_from_provenance(provenance: str):
     # TODO: Write this method
     pass
+
+
+def meets_naming_conventions(filename, has_deviation=False):
+    """
+    Check if a filename meets the naming conventions for a data file.
+
+    Args:
+        filename (str): The name of the file to check.
+        has_deviation (bool, optional): A flag indicating if the file has a deviation. Defaults to False.
+
+    Returns:
+        bool: True if the filename meets the naming conventions, False otherwise.
+    """
+    file_match = re.fullmatch(FILE_RE, filename)
+    if not file_match:
+        return False
+    elif not has_deviation and file_match.group("info"):
+        return False
+    else:
+        return True
+
