@@ -246,25 +246,19 @@ def check_all_data_present(identifiers_dict, source_data, pending_files_df, vari
     return pending_files_df
 
 
-def handle_raw_unchecked(dataset):
-    #record = get_file_record(dataset)
-    timestamp = datetime.datetime.now(pytz.timezone("US/Eastern"))
-    timestamp = timestamp.strftime(DT_FORMAT)
-    pending_files_name = join(dataset, "data-monitoring", "logs", "pending-files-" + timestamp + ".csv")
-    pending_errors_name = join(dataset, "data-monitoring", "logs", "pending-errors-" + timestamp + ".csv")
-    pending_files_df = new_pending_df()
-    for source_data in ["raw", "checked"]:
-        identifiers = get_identifiers(dataset, source_data)
-        pending_files_df = check_identifiers(identifiers, source_data, pending_files_df)
-        pending_files_df = check_all_data_present(identifiers, source_data, pending_files_df, variable_dict)
-    pending_files_df.set_index('identifier')
-    pending_files_df.to_csv(pending_files_name)
-    pending_errors = pending_files_df[pending_files_df['error_type'] != "NA"]
-    pending_errors.to_csv(pending_errors_name)
+def checked_data_validation(dataset):
+    # initialize variables
+    logger = logging.getLogger(__name__)
+    errors = []
+    dd_df = get_datadict(dataset)
+    checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
 
+    logger.info("Starting checked data validation")
 
-def get_passed_raw_check(dataset):
-    pass
+    # create present and implied identifier lists
+    present_ids = get_present_identifiers(dataset, is_raw=False)
+    expected_ids = get_expected_identifiers(dataset, present_ids)
+    missing_ids = list(set(present_ids) - set(expected_ids))
 
 
 def qa_validation(dataset):
