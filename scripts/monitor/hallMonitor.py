@@ -446,6 +446,19 @@ def checked_data_validation(dataset):
             logger.debug("Found %d psychopy error(s)", len(psychopy_errors))
 
         continue  # go to next present identifier
+
+    # write errors to pending-errors-[datetime].csv
+    error_df = pd.DataFrame(errors)
+    timestamp = get_timestamp()
+    write_pending_errors(dataset, error_df, timestamp)
+
+    # remove failing identifiers from validated file record
+    failing_ids = error_df["identifier"].unique()
+    record_df = get_file_record(dataset)
+    record_df = record_df[~record_df["identifier"].isin(failing_ids)]
+    write_file_record(dataset, record_df)
+
+    return
 def qa_validation(dataset):
     logger.info("Starting QA check...")
 
