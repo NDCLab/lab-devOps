@@ -267,18 +267,14 @@ def qa_validation(dataset):
 
     # set up paths and dataframes
     pending_qa_dir = os.path.join(dataset, PENDING_QA_SUBDIR)
-    qa_checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
 
     dd_df = get_datadict(dataset)
     record_df = get_file_record(dataset)
-    if os.path.exists(qa_checklist_path):
-        qa_df = pd.read_csv(qa_checklist_path)
-    else:  # first run
-        qa_df = new_qa_checklist()
+    qa_df = get_qa_checklist(dataset)
 
     # get fully-verified identifiers
     passed_ids = qa_df[(qa_df["qa"] == 1) & (qa_df["localMove"] == 1)]["identifier"]
-    logger.info("Found %d new identifiers that passed QA checks", len(passed_ids.index))
+    logger.info("Found %d identifier(s) that passed QA checks", len(passed_ids.index))
 
     # move fully-verified files from pending-qa/ to checked/
     checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
@@ -304,7 +300,7 @@ def qa_validation(dataset):
     write_qa_tracker(dataset, qa_df)
 
     # add fully-verified identifiers to validated file record
-    val_records = [new_validation_record(id) for id in passed_ids]
+    val_records = [new_validation_record(dd_df, id) for id in passed_ids]
     val_df = pd.DataFrame(val_records)
     record_df = pd.concat(record_df, val_df)
     try:
@@ -321,7 +317,7 @@ def qa_validation(dataset):
     raw_dir = os.path.join(dataset, RAW_SUBDIR)
     for id in new_qa["identifier"]:
         id = Identifier.from_str(id)
-        identifier_subdir = Identifier.from_str(id).to_dir()
+        identifier_subdir = id.to_dir(dataset, is_raw=True)
         dest_path = os.path.join(pending_qa_dir, identifier_subdir)
         os.makedirs(dest_path, exist_ok=True)
         dtype = get_variable_datatype(dd_df, id.variable)
@@ -359,12 +355,11 @@ if __name__ == "__main__":
     if not os.path.exists(dataset):
         raise FileNotFoundError(f"Dataset {dataset} not found")
     datadict_path = os.path.join(dataset, DATADICT_SUBPATH)
-    dd_df = pd.read_csv(datadict_path, index_col = "variable")
-    variable_dict, combination_rows_dict = parse_datadict(dd_df)
+    dd_df = pd.read_csv(datadict_path, index_col="variable")
 
     # set up logging to file and console
 
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
     log_path = os.path.join(dataset, LOGGING_SUBPATH)
@@ -403,5 +398,7 @@ if __name__ == "__main__":
     checked_pass = checked_data_validation(dataset)
     raw_data_validation(dataset, checked_pass)
     qa_validation(dataset)
+
+    logger.info("All checks complete")
 
     exit(0)
