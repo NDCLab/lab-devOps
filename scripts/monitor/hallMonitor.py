@@ -380,6 +380,54 @@ def checked_data_validation(dataset):
                 # TODO: Add errors for missing identifiers that should be in this directory
 
         logger.debug("Found %d misplaced file(s)", n_misplaced)
+
+        # --- check file presence & count ---
+
+        # handle exception file flags
+        if has_no_data:
+            # only expect one file called [identifier]-no-data.txt
+            expected_files = [f"{id}-no-data.txt"]
+        elif has_deviation:
+            # expect at least 2 appropriately-named files
+            # (deviation.txt and at least one other file)
+            expected_files = id_files
+            if len(expected_files) == 1:
+                errors.append(
+                    new_error_record(
+                        id,
+                        "Improper exception files",
+                        "deviation.txt cannot signify only 1 file; use no-data.txt.",
+                    )
+                )
+                logger.debug("Found only deviation.txt; expected more files")
+        else:  # normal case
+            expected_files = get_expected_files(id, dd_df)
+
+        logger.debug("Expect %d file(s) for identifier %s", len(expected_files), id)
+
+        # check for missing expected files
+        n_missing = 0
+        for file in expected_files:
+            if file not in id_files:
+                errors.append(
+                    new_error_record(
+                        id, "Missing file", f"Expected file {file} not found"
+                    )
+                )
+                n_missing += 1
+        logger.debug("Found %d missing files", n_missing)
+
+        # check for unexpected file presence
+        n_unexpected = 0
+        for file in id_files:
+            if file not in expected_files:
+                errors.append(
+                    new_error_record(
+                        id, "Unexpected file", f"Unexpected file {file} found"
+                    )
+                )
+                n_unexpected += 1
+        logger.debug("Found %d unexpected files", n_unexpected)
 def qa_validation(dataset):
     logger.info("Starting QA check...")
 
