@@ -341,9 +341,29 @@ def write_file_record(dataset, df):
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
     df = df[FILE_RECORD_COLS]
 
+def is_combination_var(variable, dd_df):
+    """Returns bool for whether a variable is present in a combination row
+    """
+    dtype = dd_df[dd_df["variable"] == variable]["dataType"]
+    if len(dtype.index) == 0:
+        raise ValueError(f"Variable {variable} not valid")
+    combos_df = dd_df[dd_df["dataType"] == "combination"]
+    all_combo_vars = []
+    for index, row in combos_df.iterrows():
+        if "variables:" in row["provenance"]:
+            vars = row["provenance"].split("variables:")[1:][0]
+            vars = vars.replace("\"", "").replace(" ", "")
+            vars = vars.split(",")
+            all_combo_vars.extend(vars)
+    all_combo_vars = list(set(all_combo_vars))
+    if variable in all_combo_vars:
+        return True
+    else:
+        return False
+
 def get_present_identifiers(dataset, is_raw=True):
     """
-    Extracts and returns a list of present identifiers from a dataset directory.
+    Extracts and returns a list of present identifiers from a dataset directory, excluding combination variables.
 
     This function traverses the directory structure of the given dataset and
     extracts identifiers from filenames that match a specific pattern. The
@@ -395,13 +415,16 @@ def get_present_identifiers(dataset, is_raw=True):
             except KeyError:
                 dtype = ""
             ses = match.group(5)
+            # Ignore combination rows for now
+            if is_combination_var(var, dd_df):
+                continue
             # Check that each identifier matches the subject, session, and datatype corresponding to its
             # directory path. If this does not match up, the identifier is not appended to present_ids.
             if is_raw:
-                if not all(ses == dirs[0], dtype == dirs[1], sub == dirs[2]):
+                if not all([ses == dirs[0], dtype == dirs[1], sub == dirs[2]]):
                     continue
             else:
-                if not all(sub == dirs[0], ses == dirs[1], dtype == dirs[2]):
+                if not all([sub == dirs[0], ses == dirs[1], dtype == dirs[2]]):
                     continue
             present_ids.append(identifier)
 
@@ -776,7 +799,7 @@ def get_expected_files(identifier, dd_df):
     expected_exts = dd_df[dd_df["variable"] == identifier.variable]["expectedFileExt"]
     if len(expected_exts.index) == 0:
         raise ValueError(f"Variable {identifier.variable} not valid")
-    expected_exts = expected_exts[0]
+    expected_exts = expected_exts.iloc[0]
     expected_exts = str(expected_exts).strip('"').replace(" ", "").split(",")
     expected_files = [f"{identifier}.{ext}" for ext in expected_exts]
     return expected_files
