@@ -459,6 +459,19 @@ def checked_data_validation(dataset):
     write_file_record(dataset, record_df)
 
     return
+
+
+def raw_data_validation(dataset):
+    # initialize variables
+    logger = logging.getLogger(__name__)
+    pending_df = get_pending_files(dataset)
+    logger.info("Starting raw data validation...")
+
+    # create present and implied identifier lists
+    present_ids = get_present_identifiers(dataset, is_raw=True)
+
+    # handle missing identifiers
+    expected_ids = get_expected_identifiers(dataset, present_ids)
 def qa_validation(dataset):
     logger.info("Starting QA check...")
 
