@@ -307,6 +307,79 @@ def checked_data_validation(dataset):
                 )
             )
 
+        # --- check naming conventions ---
+
+        # get all files in identifier's directory
+        try:
+            id_dir = id.to_dir(dataset, is_raw=False)
+            dir_files = os.listdir(id_dir)
+            logger.debug("Found %d file(s) in directory %s", len(dir_files), id_dir)
+        except FileNotFoundError as err:
+            errors.append(
+                new_error_record(id, "Improper directory structure", str(err))
+            )
+            logging.error("Error getting files for identifier %s: %s", id, err)
+            continue
+
+        # construct list of missing identifiers that should be in this directory
+        dir_missing_ids = [
+            id for id in missing_ids if id.to_dir(dataset, is_raw=False) == id_dir
+        ]
+
+        # handle misnamed files
+        misnamed_files = [
+            file
+            for file in dir_files
+            if not meets_naming_conventions(file, has_deviation)
+        ]
+        logger.debug("Found %d misnamed file(s)", len(misnamed_files))
+        for file in misnamed_files:
+            if file == "issue.txt":
+                err_type = "Issue file"
+                err = new_error_record(
+                    id, err_type, "Found issue.txt in identifier's directory"
+                )
+            else:
+                err_type = "Improper file name"
+                err = new_error_record(
+                    id, err_type, "Found file with improper name: " + file
+                )
+            errors.append(err)
+
+            # TODO: Figure out how to make this work
+            if id_dir not in logged_missing_ids:
+                logged_missing_ids[id_dir] = [err_type]
+            elif err_type not in logged_missing_ids[id_dir]:
+                logged_missing_ids[id_dir].append(err_type)
+
+            # raise errors for missing identifiers that should be in this directory
+            for missing_id in dir_missing_ids:
+                err[id] = str(missing_id)
+                errors.append(err)
+
+        # handle appropriately named but misplaced files
+        correct_files = list(set(id_files) - set(misnamed_files))
+        logger.debug("Found %d correctly named file(s)", len(correct_files))
+        n_misplaced = 0
+        for file in correct_files:
+            # figure out which directory the file should be in
+            id_match = re.fullmatch(FILE_RE, file)
+            file_id = Identifier.from_str(id_match.group("id"))
+            correct_dir = os.path.realpath(file_id.to_dir(dataset, is_raw=False))
+
+            # if the file is not in the right directory, raise errors
+            if os.path.realpath(id_dir) != correct_dir:
+                errors.append(
+                    new_error_record(
+                        id,
+                        "Misplaced file",
+                        f"Found file in wrong directory: {file} found in {id_dir}",
+                    )
+                )
+                n_misplaced += 1
+                # TODO: Add errors for missing identifiers that should be in this directory
+
+        logger.debug("Found %d misplaced file(s)", n_misplaced)
 def qa_validation(dataset):
     logger.info("Starting QA check...")
 
