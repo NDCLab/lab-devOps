@@ -401,4 +401,32 @@ if __name__ == "__main__":
 
     logger.info("All checks complete")
 
+    # update central tracker
+    script_location = os.path.join(dataset, UPDATE_TRACKER_SUBPATH)
+    if not os.path.exists(script_location):
+        logger.critical("update-tracker.py does not exist at expected location.")
+        exit(1)
+    try:
+        logger.info("Running update-tracker.py...")
+        start_time = time.perf_counter()
+        subprocess.check_call(
+            [
+                "python",
+                script_location,
+                os.path.join(dataset, CHECKED_SUBDIR),
+                dataset,
+                "redcap files",  # FIXME what is expected here?
+                "none",
+                "true" if args.child_data else "false",
+            ]
+        )
+        logger.info(
+            "Finished running update-tracker.py (took %dms)",
+            1000 * (time.perf_counter() - start_time),
+        )
+    except subprocess.CalledProcessError as err:
+        logger.critical("Could not update central tracker (%s)", err)
+        exit(1)
+
+    # everything completed successfully, exit with success
     exit(0)
