@@ -2,9 +2,9 @@
 
 import logging
 import os
-from os.path import join, isdir, isfile, abspath, dirname, basename
 import re
 import subprocess
+import time
 from getpass import getuser
 
 import pandas as pd
@@ -12,28 +12,33 @@ import pandas as pd
 from hmutils import (
     CHECKED_SUBDIR,
     DATADICT_SUBPATH,
+    FILE_RE,
     LOGGING_SUBPATH,
     PENDING_QA_SUBDIR,
-    QA_CHECKLIST_SUBPATH,
     RAW_SUBDIR,
+    UPDATE_TRACKER_SUBPATH,
     ColorfulFormatter,
     Identifier,
     clean_empty_dirs,
     datadict_has_changes,
     get_args,
     get_datadict,
+    get_eeg_errors,
     get_expected_combination_rows,
+    get_expected_files,
     get_expected_identifiers,
     get_file_record,
     get_identifier_files,
     get_pending_files,
     get_present_identifiers,
+    get_psychopy_errors,
+    get_qa_checklist,
     get_timestamp,
+    get_unique_sub_ses,
     get_variable_datatype,
+    meets_naming_conventions,
     new_error_record,
     new_pass_record,
-    new_pending_df,
-    new_qa_checklist,
     new_qa_record,
     new_validation_record,
     write_file_record,
