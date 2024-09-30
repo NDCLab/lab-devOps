@@ -260,6 +260,52 @@ def checked_data_validation(dataset):
     expected_ids = get_expected_identifiers(dataset, present_ids)
     missing_ids = list(set(present_ids) - set(expected_ids))
 
+    # add errors for missing identifiers
+    for id in missing_ids:
+        errors.append(
+            new_error_record(
+                id, "Missing identifier", "Missing identifier in sourcedata/checked/"
+            )
+        )
+
+    sub_sessions = get_unique_sub_ses(present_ids)
+
+    # handle combination rows
+    combo_rows = get_expected_combination_rows(dataset)
+    for combo in combo_rows:
+        for sub_ses in sub_sessions:
+            # TODO: Write this
+            pass
+
+    logged_missing_ids = {}  # allow for multiple types of non-identifier-specific errors
+
+    # loop over present identifiers (as Identifier objects)
+    present_ids = [Identifier.from_str(id) for id in present_ids]
+    missing_ids = [Identifier.from_str(id) for id in missing_ids]
+    for id in present_ids:
+        # get files for identifier
+        try:
+            id_files = get_identifier_files(checked_dir, id, is_raw=False)
+            logger.debug("Found %d file(s) for identifier %s", len(id_files), id)
+        except FileNotFoundError as err:
+            errors.append(
+                new_error_record(id, "Improper directory structure", str(err))
+            )
+            logging.error("Error getting files for identifier %s: %s", id, err)
+            continue
+
+        # --- check for exception files, set flags ---
+        has_deviation = str(id) + "-deviation.txt" in id_files
+        has_no_data = str(id) + "-no-data.txt" in id_files
+        logger.debug("has_deviation=%s, has_no_data=%s", has_deviation, has_no_data)
+        if has_deviation and has_no_data:
+            errors.append(
+                new_error_record(
+                    id,
+                    "Improper exception files",
+                    "Both deviation and no-data files present for identifier",
+                )
+            )
 
 def qa_validation(dataset):
     logger.info("Starting QA check...")
