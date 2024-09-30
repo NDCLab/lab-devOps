@@ -496,22 +496,16 @@ def get_pending_files(dataset):
     Returns:
         pd.DataFrame: The pending file DataFrame
     """
-    logger = logging.getLogger()
-
     pending_dir = os.path.join(dataset, PENDING_SUBDIR)
     pending_files = os.listdir(pending_dir)
-    logger.debug("Found %d file(s) in %s", len(pending_files), pending_dir)
 
     PF_RE = r"pending-files-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}\.csv"
     pending_files = [f for f in pending_files if re.fullmatch(PF_RE, f)]
-    logger.debug("Found %d pending file(s) in %s", len(pending_files), pending_dir)
 
     if pending_files:
         latest_pending = os.path.join(pending_dir, pending_files[-1])
         pending_df = pd.read_csv(latest_pending)
-        logger.debug("Read in pending file from %s", latest_pending)
     else:
-        logger.debug("Existing pending file not found, making new")
         pending_df = new_pending_df()
 
     return pending_df
