@@ -90,7 +90,7 @@ def get_variable_datatype(dd_df, varname):
         return str(var_rows["dataType"].iloc[0])
 
 
-def get_allowed_suffixes(dd_df: pd.DataFrame, variable: str):
+def get_allowed_suffixes(dd_df, variable):
     """
     Retrieve the allowed suffixes for a given variable from a data dictionary DataFrame.
 
@@ -116,7 +116,7 @@ def get_allowed_suffixes(dd_df: pd.DataFrame, variable: str):
     return allowed
 
 
-def get_possible_exts(dd_df: pd.DataFrame, variable: str):
+def get_possible_exts(dd_df, variable):
     """
     Retrieve possible file extensions for a given variable from a data dictionary DataFrame.
 
