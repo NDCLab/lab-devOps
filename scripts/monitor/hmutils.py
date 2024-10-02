@@ -404,10 +404,12 @@ def is_combination_var(variable, dd_df):
         raise ValueError(f"Variable {variable} not valid")
     combos_df = dd_df[dd_df["dataType"] == "combination"]
     for _, row in combos_df.iterrows():
-        if "variables:" in row["provenance"]:
-            vars = row["provenance"].split("variables:")[1:][0]
-            vars = vars.replace("\"", "").replace(" ", "")
+        prov = str(row["provenance"])
+        if "variables:" in prov:
+            vars = prov.removeprefix("variables:").strip()
+            vars = vars.replace('"', "")
             vars = vars.split(",")
+            vars = [v.strip() for v in vars]
             if variable in vars:
                 return True
     return False
