@@ -163,7 +163,7 @@ class Identifier:
         Generates a directory path based on the provided DataFrame and whether the data is raw or checked.
 
         Args:
-            dd_df (pandas.DataFrame): The DataFrame containing the data.
+            dd_df (pandas.DataFrame): The DataFrame containing the data dictionary.
             is_raw (bool, optional): Flag indicating if the data is raw. Defaults to True.
 
         Returns:
