@@ -400,21 +400,17 @@ def is_combination_var(variable, dd_df):
     """Returns bool for whether a variable is present in a combination row
     """
     dtype = dd_df[dd_df["variable"] == variable]["dataType"]
-    if len(dtype.index) == 0:
+    if dtype.empty:
         raise ValueError(f"Variable {variable} not valid")
     combos_df = dd_df[dd_df["dataType"] == "combination"]
-    all_combo_vars = []
-    for index, row in combos_df.iterrows():
+    for _, row in combos_df.iterrows():
         if "variables:" in row["provenance"]:
             vars = row["provenance"].split("variables:")[1:][0]
             vars = vars.replace("\"", "").replace(" ", "")
             vars = vars.split(",")
-            all_combo_vars.extend(vars)
-    all_combo_vars = list(set(all_combo_vars))
-    if variable in all_combo_vars:
-        return True
-    else:
-        return False
+            if variable in vars:
+                return True
+    return False
 
 def get_present_identifiers(dataset, is_raw=True):
     """
