@@ -284,7 +284,7 @@ def checked_data_validation(dataset):
     missing_ids = [Identifier.from_str(id) for id in missing_ids]
     for id in present_ids:
         # initialize error tracking for this directory if it doesn't exist
-        id_dir = id.to_dir(dataset, is_raw=False)
+        id_dir = id.to_dir(dd_df, is_raw=False)
         if id_dir not in logged_missing_ids:
             logged_missing_ids[id_dir] = set()
 
@@ -327,7 +327,7 @@ def checked_data_validation(dataset):
 
         # construct list of missing identifiers that should be in this directory
         dir_missing_ids = [
-            id for id in missing_ids if id.to_dir(dataset, is_raw=False) == id_dir
+            id for id in missing_ids if id.to_dir(dd_df, is_raw=False) == id_dir
         ]
 
         # handle misnamed files
@@ -365,7 +365,7 @@ def checked_data_validation(dataset):
             # figure out which directory the file should be in
             id_match = re.fullmatch(FILE_RE, file)
             file_id = Identifier.from_str(id_match.group("id"))
-            correct_dir = os.path.realpath(file_id.to_dir(dataset, is_raw=False))
+            correct_dir = os.path.realpath(file_id.to_dir(dd_df, is_raw=False))
 
             # if the file is not in the right directory, raise errors
             if os.path.realpath(id_dir) != correct_dir:
@@ -496,7 +496,7 @@ def qa_validation(dataset):
     checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
     for id in passed_ids:
         id = Identifier.from_str(id)
-        identifier_subdir = Identifier.from_str(id).to_dir(is_raw=False)
+        identifier_subdir = Identifier.from_str(id).to_dir(dd_df, is_raw=False)
         dest_path = os.path.join(checked_dir, identifier_subdir)
         os.makedirs(dest_path, exist_ok=True)
         dtype = get_variable_datatype(dd_df, id.variable)
@@ -533,7 +533,7 @@ def qa_validation(dataset):
     raw_dir = os.path.join(dataset, RAW_SUBDIR)
     for id in new_qa["identifier"]:
         id = Identifier.from_str(id)
-        identifier_subdir = id.to_dir(dataset, is_raw=True)
+        identifier_subdir = id.to_dir(dd_df, is_raw=True)
         dest_path = os.path.join(pending_qa_dir, identifier_subdir)
         os.makedirs(dest_path, exist_ok=True)
         dtype = get_variable_datatype(dd_df, id.variable)
