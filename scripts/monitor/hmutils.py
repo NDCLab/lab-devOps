@@ -155,6 +155,9 @@ class Identifier:
         s = f"{self.subject}_{self.variable}_{self.session}"
         return s
 
+    def __eq__(self, other):
+        return str(self) == str(other)
+
     def to_dir(self, dataset, is_raw=True):
         """
         Generates a directory path for the given dataset based on the data type and whether the data is raw or checked.
