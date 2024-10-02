@@ -478,6 +478,7 @@ def raw_data_validation(dataset):
     # handle missing identifiers
     expected_ids = get_expected_identifiers(dataset, present_ids)
 def qa_validation(dataset):
+    logger = logging.getLogger(__name__)
     logger.info("Starting QA check...")
 
     # set up paths and dataframes
