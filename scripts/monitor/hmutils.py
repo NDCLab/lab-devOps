@@ -158,24 +158,23 @@ class Identifier:
     def __eq__(self, other):
         return str(self) == str(other)
 
-    def to_dir(self, dataset, is_raw=True):
+    def to_dir(self, dd_df, is_raw=True):
         """
-        Generates a directory path for the given dataset based on the data type and whether the data is raw or checked.
+        Generates a directory path based on the provided DataFrame and whether the data is raw or checked.
 
         Args:
-            dataset (str): The dataset's base path.
+            dd_df (pandas.DataFrame): The DataFrame containing the data.
             is_raw (bool, optional): Flag indicating if the data is raw. Defaults to True.
 
         Returns:
-            str: The generated directory path, rooted at dataset.
+            str: The generated directory path.
         """
-        dd_df = get_datadict(dataset)
         datatype = get_variable_datatype(dd_df, self.variable)
         # generate full path based on whether the data is raw or checked
         if is_raw:
-            return os.path.join(dataset, self.session, datatype, self.subject, "")
+            return os.path.join(self.session, datatype, self.subject, "")
         else:
-            return os.path.join(dataset, self.subject, self.session, datatype, "")
+            return os.path.join(self.subject, self.session, datatype, "")
 
     @staticmethod
     def from_str(input):
