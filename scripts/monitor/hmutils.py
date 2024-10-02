@@ -90,6 +90,58 @@ def get_variable_datatype(dd_df, varname):
         return str(var_rows["dataType"].iloc[0])
 
 
+def get_allowed_suffixes(dd_df: pd.DataFrame, variable: str):
+    """
+    Retrieve the allowed suffixes for a given variable from a data dictionary DataFrame.
+
+    Args:
+        dd_df (pd.DataFrame): The data dictionary DataFrame containing variable information.
+        variable (str): The variable name for which allowed suffixes are to be retrieved.
+
+    Returns:
+        List[str]: A list of allowed suffixes for the specified variable. If no suffixes are allowed,
+                   an empty list is returned.
+
+    Raises:
+        ValueError: If the specified variable is not found in the data dictionary.
+    """
+    var_row = dd_df[dd_df["variable"] == variable]
+    if var_row.empty:
+        raise ValueError(f"Variable {variable} not found in data dictionary")
+    allowed = str(var_row["allowedSuffixes"].iloc[0])
+    if allowed == "NA":
+        return []
+    allowed = allowed.split(",") if allowed else []
+    allowed = [suffix.strip() for suffix in allowed]
+    return allowed
+
+
+def get_possible_exts(dd_df: pd.DataFrame, variable: str):
+    """
+    Retrieve possible file extensions for a given variable from a data dictionary DataFrame.
+
+    Args:
+        dd_df (pd.DataFrame): The data dictionary DataFrame containing variable information.
+        variable (str): The variable name for which to retrieve possible file extensions.
+
+    Returns:
+        list: A list of possible file extensions for the given variable. If no extensions are found,
+              an empty list is returned.
+
+    Raises:
+        ValueError: If the specified variable is not found in the data dictionary.
+    """
+    var_row = dd_df[dd_df["variable"] == variable]
+    if var_row.empty:
+        raise ValueError(f"Variable {variable} not found in data dictionary")
+    exts = str(var_row["expectedFileExt"].iloc[0])
+    if exts == "NA":
+        return []
+    exts = exts.split(",") if exts else []
+    exts = [ext.strip() for ext in exts]
+    return exts
+
+
 @dataclass
 class Identifier:
     PATTERN = re.compile(IDENTIFIER_RE)
