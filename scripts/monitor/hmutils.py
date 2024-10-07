@@ -235,22 +235,22 @@ def dataset(input):
     return dataset
 
 
-def redcap_replace(input):
-    map_re = r"[^:]+"
-    if not re.fullmatch(map_re, input):
+def validated_redcap_replace(input):
+    col_re = r"[^:\s]+"
+    if not re.fullmatch(col_re, input):
         raise argparse.ArgumentTypeError(
             f"{input} is not a valid replacement column map"
         )
     return input
 
 
-def redcap_modify(input):
+def validated_redcap_map(input):
     map_re = r"[^:\s]+:[^:\s]+"
     if not re.fullmatch(map_re, input):
         raise argparse.ArgumentTypeError(
             f"{input} is not a valid modification column map"
         )
-    return input
+    return tuple(input.split(":"))
 
 
 def get_args():
@@ -292,15 +292,15 @@ def get_args():
         "-r",
         "--replace",
         nargs="+",
-        type=redcap_replace,
+        type=validated_redcap_replace,
         help="replace all REDCap columns with the passed values. e.g. col1 col2 ...",
     )
     redcap_colmap.add_argument(
         "-m",
-        "--modify",
+        "--map",
         nargs="+",
-        type=redcap_modify,
-        help="modify the names of specified REDCap columns. e.g. old1:new1 old2:new2 ...",
+        type=validated_redcap_map,
+        help="remap the names of specified REDCap columns. e.g. old1:new1 old2:new2 ...",
     )
 
     return parser.parse_args()
