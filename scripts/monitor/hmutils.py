@@ -176,6 +176,23 @@ class Identifier:
         else:
             return os.path.join(self.subject, self.session, datatype, "")
 
+    def to_detailed_str(self, dataset):
+        """
+        Provides detailed information for the Data Monitor.
+
+        Args:
+            dataset (str): The path to the dataset directory.
+
+        Returns:
+            str: A string representation of the detailed information, including
+                 subject, variable, session, datatype, and whether it is a combination variable.
+        """
+        datatype = get_variable_datatype(dataset, self.variable)
+        s = f"{self.subject}/{self.variable}/{self.session} ({datatype})"
+        if is_combination_var(dataset, self.variable):
+            s += " (combination)"
+        return s
+
     @staticmethod
     def from_str(input):
         """Instantiate an Identifier from an identifier string
