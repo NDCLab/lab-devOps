@@ -674,18 +674,41 @@ def new_pending_df():
     return df_from_colmap(colmap)
 
 
-def new_error_record(identifier, error_type, error_details):
-    """Generates and returns a new error record.
+def new_error_record(logger, dataset, identifier, error_type, error_details):
+    """
+    Creates a new error record with the given details and logs it to the logger object.
 
     Args:
-        identifier (str|Identifier): The identifier that the record is about
-        error_type (str): The general class of the error
-        error_details (str): A more detailed description of the error
-    """
-    Creates a new pass record dictionary with the given identifier.
+        logger (logging.Logger): The logger object used to log the error.
+        dataset (str): The path to the dataset directory.
+        identifier (str or Identifier): A unique identifier for the error.
+        error_type (str): The type/category of the error.
+        error_details (str): Detailed information about the error.
+
     Returns:
-        dict[str,str]: The error record with all fields populated
+        dict: A dictionary containing the error record with the following keys:
+    - "datetime" (str): The timestamp when the error occurred.
+    - "user" (str): The user who encountered the error.
+    - "passRaw" (bool): Always False, indicating that an error has occurred.
+    - "identifier" (str): The unique identifier for the error.
+    - "errorType" (str): The type/category of the error.
+    - "errorDetails" (str): Detailed information about the error.
+
+    Raises:
+        ValueError: If the identifier string cannot be converted to an Identifier object.
     """
+    if isinstance(identifier, str):
+        try:
+            identifier = Identifier.from_str(identifier)
+        except ValueError as err:
+            raise err
+
+    logger.error(
+        "Error occurred with identifier %s: %s - %s",
+        identifier.to_detailed_str(dataset),
+        error_type,
+        error_details,
+    )
     return {
         "datetime": get_timestamp(),
         "user": getuser(),
@@ -915,11 +938,13 @@ def meets_naming_conventions(filename, has_deviation=False):
         return True
 
 
-def get_eeg_errors(files):
+def get_eeg_errors(logger, dataset, files):
     """
     Checks for errors in EEG files by verifying the consistency of header (.vhdr), marker (.vmrk), and data (.eeg) files.
 
     Args:
+        logger (logging.Logger): The logger object used to log errors.
+        dataset (str): The path to the dataset directory.
         files (list of str): List of file paths to check. The list should contain paths to .vhdr, .vmrk, and .eeg files.
 
     Returns:
@@ -935,7 +960,7 @@ def get_eeg_errors(files):
     id = id.group("id")
 
     # don't error on missing files here, since they are handled in presence checks
-    headerfile = markerfile = datafile = None
+    headerfile = markerfile = datafile = ""
     for file in files:
         file_ext = os.path.splitext(file)[1]
         if file_ext == ".vhdr":
@@ -953,9 +978,11 @@ def get_eeg_errors(files):
         marker_match = re.match(r"MarkerFile=(.+)", contents)
         if marker_match is not None:
             found_markerfile = marker_match.group(1).strip()
-            if found_markerfile != markerfile:
+            if found_markerfile != os.path.basename(markerfile):
                 errors.append(
                     new_error_record(
+                        logger,
+                        dataset,
                         id,
                         "EEG error",
                         f"Incorrect MarkerFile {found_markerfile} in .vhdr file, expected {markerfile}",
@@ -964,6 +991,8 @@ def get_eeg_errors(files):
         else:
             errors.append(
                 new_error_record(
+                    logger,
+                    dataset,
                     id,
                     "EEG error",
                     "No MarkerFile found in .vhdr file",
@@ -974,9 +1003,11 @@ def get_eeg_errors(files):
         data_match = re.search(r"DataFile=(.+)", contents)
         if data_match is not None:
             found_datafile = data_match.group(1).strip("'\" ")
-            if found_datafile != datafile:
+            if found_datafile != os.path.basename(datafile or ""):
                 errors.append(
                     new_error_record(
+                        logger,
+                        dataset,
                         id,
                         "EEG error",
                         f"Incorrect DataFile {found_datafile} in .vhdr file, expected {datafile}",
@@ -984,7 +1015,11 @@ def get_eeg_errors(files):
                 )
         else:
             errors.append(
-                new_error_record(id, "EEG error", "No DataFile found in .vhdr file")
+                logger,
+                dataset,
+                new_error_record(
+                    logger, dataset, id, "EEG error", "No DataFile found in .vhdr file"
+                ),
             )
 
     if markerfile:
@@ -995,9 +1030,11 @@ def get_eeg_errors(files):
         data_match = re.search(r"DataFile=(.+)", contents)
         if data_match:
             found_datafile = data_match.group(1).strip("'\" ")
-            if found_datafile != datafile:
+            if found_datafile != os.path.basename(datafile):
                 errors.append(
                     new_error_record(
+                        logger,
+                        dataset,
                         id,
                         "EEG error",
                         f"Incorrect DataFile {found_datafile} in marker file, expected {datafile}",
@@ -1005,13 +1042,15 @@ def get_eeg_errors(files):
                 )
         else:
             errors.append(
-                new_error_record(id, "EEG error", "No DataFile found in .vmrk file")
+                new_error_record(
+                    logger, dataset, id, "EEG error", "No DataFile found in .vmrk file"
+                )
             )
 
     return errors
 
 
-def get_psychopy_errors(files):
+def get_psychopy_errors(logger, dataset, files):
     """
     Checks for errors in PsychoPy output files.
 
@@ -1020,6 +1059,8 @@ def get_psychopy_errors(files):
     .log, .csv, and .psydat files.
 
     Args:
+        logger (logging.Logger): The logger object used to log errors.
+        dataset (str): The path to the dataset directory.
         files (list of str): List of file paths to check. The list can contain
                              .csv, .log, and .psydat files.
 
@@ -1038,7 +1079,7 @@ def get_psychopy_errors(files):
     id = id.group("id")
 
     # don't error on missing files here, since they are handled in presence checks
-    csvfile = logfile = psydatfile = None
+    csvfile = logfile = psydatfile = ""
     for file in files:
         file_ext = os.path.splitext(file)[1]
         if file_ext == ".csv":
@@ -1056,9 +1097,11 @@ def get_psychopy_errors(files):
         if psydat_match is not None:
             found_psydat = psydat_match.group(1).strip("'\" ")
             found_psydat = os.path.basename(found_psydat)
-            if found_psydat != psydatfile:
+            if found_psydat != os.path.basename(psydatfile):
                 errors.append(
                     new_error_record(
+                        logger,
+                        dataset,
                         id,
                         "Psychopy error",
                         f"Incorrect .psydat file {found_psydat} in .log file, expected {psydatfile}",
@@ -1067,7 +1110,11 @@ def get_psychopy_errors(files):
         else:
             errors.append(
                 new_error_record(
-                    id, "Psychopy error", "No .psydat file found in .log file"
+                    logger,
+                    dataset,
+                    id,
+                    "Psychopy error",
+                    "No .psydat file found in .log file",
                 )
             )
 
@@ -1075,9 +1122,11 @@ def get_psychopy_errors(files):
         if csv_match is not None:
             found_csv = csv_match.group(1).strip("'\" ")
             found_csv = os.path.basename(found_csv)
-            if found_csv != csvfile:
+            if found_csv != os.path.basename(csvfile):
                 errors.append(
                     new_error_record(
+                        logger,
+                        dataset,
                         id,
                         "Psychopy error",
                         f"Incorrect .csv file {found_csv} in .log file, expected {csvfile}",
@@ -1086,7 +1135,11 @@ def get_psychopy_errors(files):
         else:
             errors.append(
                 new_error_record(
-                    id, "Psychopy error", "No .csv file found in .log file"
+                    logger,
+                    dataset,
+                    id,
+                    "Psychopy error",
+                    "No .csv file found in .log file",
                 )
             )
 
