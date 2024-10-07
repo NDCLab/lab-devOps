@@ -441,13 +441,13 @@ def checked_data_validation(dataset):
 
         if datatype == "eeg":
             # do EEG-specific checks
-            eeg_errors = get_eeg_errors(id_files)
+            eeg_errors = get_eeg_errors(logger, dataset, id_files)
             errors.extend(eeg_errors)
             logger.debug("Found %d EEG error(s)", len(eeg_errors))
 
         elif datatype == "psychopy":
             # do psychopy-specific checks
-            psychopy_errors = get_psychopy_errors(id_files)
+            psychopy_errors = get_psychopy_errors(logger, dataset, id_files)
             errors.extend(psychopy_errors)
             logger.debug("Found %d psychopy error(s)", len(psychopy_errors))
 
