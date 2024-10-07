@@ -67,6 +67,22 @@ QA_CHECKLIST_COLS = [
 
 #  :------------------- helper functions and classes -------------------:
 
+
+def cache_with_metadata(maxsize=64):
+    # wrap a function with an lru_cache decorator, carrying over all
+    # metadata / docstring information from the original function.
+    def decorator(func):
+        @lru_cache(maxsize=maxsize)
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+@cache_with_metadata(maxsize=64)
 def get_variable_datatype(dataset, varname):
     """Retrieve a variable's dataType from the data dictionary
 
@@ -362,6 +378,7 @@ def get_timestamp():
     return dt.strftime(DT_FORMAT)
 
 
+@cache_with_metadata(maxsize=2)
 def get_datadict(dataset):
     """Get the data dictionary for the specified dataset.
 
@@ -411,6 +428,8 @@ def write_file_record(dataset, df):
     """
     logger = logging.getLogger()
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
+
+@cache_with_metadata(maxsize=64)
 def is_combination_var(dataset, variable):
     """Returns bool for whether a variable is present in a combination row
     """
@@ -430,6 +449,8 @@ def is_combination_var(dataset, variable):
                 return True
     return False
 
+
+@cache_with_metadata(maxsize=64)
 def get_present_identifiers(dataset, is_raw=True):
     """
     Extracts and returns a list of present identifiers from a dataset directory, excluding combination variables.
