@@ -67,12 +67,11 @@ QA_CHECKLIST_COLS = [
 
 #  :------------------- helper functions and classes -------------------:
 
-
-def get_variable_datatype(dd_df, varname):
+def get_variable_datatype(dataset, varname):
     """Retrieve a variable's dataType from the data dictionary
 
     Args:
-        dd_df (pd.DataFrame): The project's data dictionary as a DataFrame
+        dataset (str): The path to the dataset directory.
         varname (str): The name of the variable to be checked in dd_df
 
     Raises:
@@ -81,6 +80,7 @@ def get_variable_datatype(dd_df, varname):
     Returns:
         str: The dataType associated with varname
     """
+    dd_df = get_datadict(dataset)
     var_rows = dd_df[dd_df["variable"] == varname]
     num_rows = len(var_rows.index)
     if num_rows == 0:
@@ -158,18 +158,18 @@ class Identifier:
     def __eq__(self, other):
         return str(self) == str(other)
 
-    def to_dir(self, dd_df, is_raw=True):
+    def to_dir(self, dataset, is_raw=True):
         """
         Generates a directory path based on the provided DataFrame and whether the data is raw or checked.
 
         Args:
-            dd_df (pandas.DataFrame): The DataFrame containing the data dictionary.
+            dataset (str): The path to the dataset directory.
             is_raw (bool, optional): Flag indicating if the data is raw. Defaults to True.
 
         Returns:
             str: The generated directory path.
         """
-        datatype = get_variable_datatype(dd_df, self.variable)
+        datatype = get_variable_datatype(dataset, self.variable)
         # generate full path based on whether the data is raw or checked
         if is_raw:
             return os.path.join(self.session, datatype, self.subject, "")
@@ -394,11 +394,10 @@ def write_file_record(dataset, df):
     """
     logger = logging.getLogger()
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
-    df = df[FILE_RECORD_COLS]
-
-def is_combination_var(variable, dd_df):
+def is_combination_var(dataset, variable):
     """Returns bool for whether a variable is present in a combination row
     """
+    dd_df = get_datadict(dataset)
     dtype = dd_df[dd_df["variable"] == variable]["dataType"]
     if dtype.empty:
         raise ValueError(f"Variable {variable} not valid")
