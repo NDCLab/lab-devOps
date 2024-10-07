@@ -650,23 +650,23 @@ if __name__ == "__main__":
         logger.critical("update-tracker.py does not exist at expected location.")
         exit(1)
     try:
+        redcaps = get_new_redcaps(os.path.join(dataset, CHECKED_SUBDIR))
         logger.info("Running update-tracker.py...")
-        start_time = time.perf_counter()
         subprocess.check_call(
             [
                 "python",
                 script_location,
                 os.path.join(dataset, CHECKED_SUBDIR),
                 dataset,
-                "redcap files",  # FIXME what is expected here?
+                ",".join(redcaps),
                 "none",
                 "true" if args.child_data else "false",
             ]
         )
-        logger.info(
-            "Finished running update-tracker.py (took %dms)",
-            1000 * (time.perf_counter() - start_time),
-        )
+        logger.info("Finished running update-tracker.py")
+    except ValueError as err:
+        logger.critical("Could not get redcap files (%s)", err)
+        exit(1)
     except subprocess.CalledProcessError as err:
         logger.critical("Could not update central tracker (%s)", err)
         exit(1)
