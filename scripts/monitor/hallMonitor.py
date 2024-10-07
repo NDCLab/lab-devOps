@@ -599,7 +599,33 @@ if __name__ == "__main__":
     logger.debug("Logging set up")
 
     # rename redcap columns
-    # TODO: implement this
+    redcaps = get_new_redcaps(dataset)
+
+    if args.map:
+        for rc_file in redcaps:
+            df = pd.read_csv(rc_file)
+            # build the mapping dictionary
+            col_map = {}
+            for orig, new in args.map:  # args.map is a list of tuples
+                for col in df.columns:
+                    if col.startswith(orig + "_"):
+                        col_map[col] = re.sub("^" + orig + "_", new + "_", col)
+            df.rename(columns=col_map, inplace=True)
+            df.to_csv(rc_file, index=False)
+
+    elif args.replace:
+        for rc_file in redcaps:
+            df = pd.read_csv(rc_file)
+            if len(df.columns) != len(args.replace):
+                logger.critical(
+                    "Column count mismatch in %s: %d vs %d",
+                    rc_file,
+                    len(df.columns),
+                    len(args.replace),
+                )
+                exit(1)
+            df.columns = args.replace
+            df.to_csv(rc_file, index=False)
 
     # check data dictionary
     try:
