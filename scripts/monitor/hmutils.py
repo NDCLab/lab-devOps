@@ -1054,3 +1054,60 @@ def get_psychopy_errors(files):
             )
 
     return errors
+
+
+def get_new_redcaps(basedir):
+    """
+    Retrieves the newest REDCap files from a given directory.
+
+    This function searches through the specified dataset directory for files
+    that match a specific naming convention, extracts the unique stems, and
+    returns the most recent file for each unique stem.
+
+    Args:
+        basedir (str): The path to the directory to search for REDCap files.
+
+    Returns:
+        list[str]: A list of the newest REDCap files for each unique stem.
+
+    Raises:
+        ValueError: If a file does not follow the expected naming convention.
+    """
+    redcaps = []
+    for root, _, files in os.walk(basedir):
+        for file in files:
+            redcaps.append(os.path.join(root, file))
+
+    time_stamp_re = r"\d{4}-\d{2}-\d{2}_\d{4}"
+    stem_re = r"_DATA_" + time_stamp_re + r"\.csv$"
+
+    rc_arr = []
+    for file in redcaps:
+        stem = re.search(stem_re, file)
+        if stem:
+            rc_arr.append(file[: stem.start()])
+
+    unique_rcs = sorted(set(rc_arr))
+
+    newest_files = []
+    for unique_rc in unique_rcs:
+        newest_time = None
+        newest_file = None
+        for file in redcaps:
+            if file.startswith(unique_rc):
+                file_time = re.search(time_stamp_re, file)
+                if file_time:
+                    file_time = file_time.group()
+                    if not newest_time or file_time > newest_time:
+                        newest_time = file_time
+                        newest_file = file
+
+        if newest_file:
+            segment = re.search(stem_re, newest_file)
+            if not segment:
+                raise ValueError(
+                    f"Error: Improper stem name in {newest_file}, does not follow convention."
+                )
+            newest_files.append(newest_file)
+
+    return newest_files
