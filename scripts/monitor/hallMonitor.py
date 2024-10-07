@@ -29,6 +29,7 @@ from hmutils import (
     get_expected_identifiers,
     get_file_record,
     get_identifier_files,
+    get_new_redcaps,
     get_pending_files,
     get_present_identifiers,
     get_psychopy_errors,
@@ -599,7 +600,7 @@ if __name__ == "__main__":
     logger.debug("Logging set up")
 
     # rename redcap columns
-    redcaps = get_new_redcaps(dataset)
+    redcaps = get_new_redcaps(os.path.join(dataset, RAW_SUBDIR))
 
     if args.map:
         for rc_file in redcaps:
