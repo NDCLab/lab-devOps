@@ -541,7 +541,7 @@ def get_present_identifiers(dataset, is_raw=True):
     return present_ids
 
 
-def get_expected_identifiers(present_ids, dd_df):
+def get_expected_identifiers(dataset, present_ids):
     """
     Generate a list of expected identifiers based on the provided present identifiers and data dictionary DataFrame.
 
@@ -564,23 +564,33 @@ def get_expected_identifiers(present_ids, dd_df):
     except ValueError as err:
         raise err
 
+    dd_df = get_datadict(dataset)
+
     # get rows for visit variables, e.g. iqs_status, bbs_status
     visit_vars = dd_df[dd_df["dataType"] == "visit_data"]
 
-    expected_vars = []
-    for _, var in visit_vars.iterrows():
-        var_prov = Provenance.from_str(var["provenance"], dd_df)
-        expect = [
-            prov_var
-            for prov_var in var_prov.variables
-            if get_variable_datatype(dd_df, prov_var) != "combination"
-        ]
-        expected_vars.extend(expect)
+    visit_prov = visit_vars["provenance"]
+    visit_prov = visit_prov[visit_prov.str.startswith("variables:")]
+    visit_prov = visit_prov.str.removeprefix("variables:").str.strip()
+    visit_prov = visit_prov.str.replace('"', "")
 
-    expected_ids = []
-    for sub_ses in present_sub_ses:
-        for var in expected_vars:
-            expected_ids.append(Identifier(sub_ses[0], var, sub_ses[1]))
+    expected_vars = []
+    for prov in visit_prov:
+        variables = str(prov).split(",")
+        variables = [v.strip() for v in variables]
+        # exclude combination variables
+        for v in variables:
+            try:
+                if get_variable_datatype(dataset, v) != "combination":
+                    expected_vars.append(v)
+            except ValueError:  # problematic variable in visit data
+                continue
+
+    expected_ids = [
+        Identifier(sub, var, ses)
+        for sub, ses in present_sub_ses
+        for var in expected_vars
+    ]
 
     return expected_ids
 
