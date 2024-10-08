@@ -271,12 +271,46 @@ def checked_data_validation(dataset):
 
     sub_sessions = get_unique_sub_ses(present_ids)
 
-    # handle combination rows
+    # check conditions for combination rows
     combo_rows = get_expected_combination_rows(dataset)
     for combo in combo_rows:
-        for sub_ses in sub_sessions:
-            # TODO: Write this
-            pass
+        for sub, ses in sub_sessions:
+            present_combo_ids = [
+                id
+                for id in present_ids
+                if id.variable in combo.variables
+                and id.sub == sub
+                and id.session == ses
+            ]
+            num_combo_vars = len(present_combo_ids)
+
+            if num_combo_vars == 1: # expected case
+                continue  
+
+            elif num_combo_vars == 0:  # raise an error for each possible identifier
+                for var in combo.variables:
+                    identifier = Identifier(sub, var, ses)
+                    errors.append(
+                        new_error_record(
+                            logger,
+                            dataset,
+                            identifier,
+                            "Combination variable error",
+                            f"Combination row {combo.name} has no variables present.",
+                        )
+                    )
+
+            else:  # more than one combination variable present; raise an error for each
+                for identifier in present_combo_ids:
+                    errors.append(
+                        new_error_record(
+                            logger,
+                            dataset,
+                            identifier,
+                            "Combination variable error"
+                            f"Multiple variables present for combination row {combo.name}, expected one.",
+                        )
+                    )
 
     logged_missing_ids = {}  # allow for multiple types of non-identifier-specific errors
 
