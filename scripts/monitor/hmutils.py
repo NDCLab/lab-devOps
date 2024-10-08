@@ -971,19 +971,26 @@ def write_pending_errors(dataset, df, timestamp):
     df = df[PENDING_ERRORS_COLS]
     df = df.sort_values(by=["identifier", "datetime"])
     df.to_csv(out)
-    logger.debug("Wrote pending errors to %s", out)
 
 
-def get_qa_tracker(dataset):
-    logger = logging.getLogger()
+def get_qa_checklist(dataset):
+    """
+    Retrieves or creates a QA checklist for the given dataset.
+
+    This function attempts to read a QA checklist from a specified subpath within the dataset directory.
+    If the checklist does not exist, it creates a new one with predefined columns.
+
+    Args:
+        dataset (str): The path to the dataset directory.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the QA checklist.
+    """
     checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
     if os.path.exists(checklist_path):
-        checklist_df = pd.read_csv(checklist_path)
-        logger.debug("Read in QA checklist from %s", checklist_path)
+        return pd.read_csv(checklist_path)
     else:
-        logger.debug("QA checklist not found at %s, making new", checklist_path)
-        checklist_df = new_qa_checklist()
-    return checklist_df
+        return new_qa_checklist()
 
 
 def write_qa_tracker(dataset, df):
