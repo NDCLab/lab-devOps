@@ -555,31 +555,54 @@ def validate_data(logger, dataset, is_raw=True):
 
     return pending
 
+
+def checked_data_validation(dataset):
+    logger = logging.getLogger(__name__)
+    logger.info("Starting checked data validation...")
+
+    # perform data validation for checked directory
+    pending = validate_data(logger, dataset, is_raw=False)
+
+    logger.info("Checked data validation complete, found %d errors", len(pending))
+
     # write errors to pending-errors-[datetime].csv
-    error_df = pd.DataFrame(errors)
+    # (checked data validation does not have "pending" files)
+    pending_df = pd.DataFrame(pending)
     timestamp = SharedTimestamp()
-    write_pending_errors(dataset, error_df, timestamp)
+    write_pending_errors(dataset, pending_df, timestamp)
 
     # remove failing identifiers from validated file record
-    failing_ids = error_df["identifier"].unique()
+    failing_ids = pending_df["identifier"].unique()
     record_df = get_file_record(dataset)
     record_df = record_df[~record_df["identifier"].isin(failing_ids)]
     write_file_record(dataset, record_df)
 
-    return
+    return  # go to raw data validation
 
 
 def raw_data_validation(dataset):
-    # initialize variables
     logger = logging.getLogger(__name__)
-    pending_df = get_pending_files(dataset)
     logger.info("Starting raw data validation...")
 
-    # create present and implied identifier lists
-    present_ids = get_present_identifiers(dataset, is_raw=True)
+    # perform data validation for raw directory
+    pending = validate_data(logger, dataset, is_raw=True)
 
-    # handle missing identifiers
-    expected_ids = get_expected_identifiers(dataset, present_ids)
+    errors = [r for r in pending if not r["passRaw"]]
+    logger.info("Raw data validation complete, found %d errors", len(errors))
+
+    # add pending rows to pending-files-[datetime].csv
+    pending_df = get_pending_files(dataset)
+    temp_df = pd.DataFrame(pending)
+    pending_df = pd.concat([pending_df, temp_df])
+    write_pending_files(dataset, pending_df)
+
+    # copy errors to pending-errors-[datetime].csv
+    timestamp = SharedTimestamp()
+    write_pending_errors(dataset, pending_df, timestamp)
+
+    return  # go to QA checks
+
+
 def qa_validation(dataset):
     logger = logging.getLogger(__name__)
     logger.info("Starting QA check...")
