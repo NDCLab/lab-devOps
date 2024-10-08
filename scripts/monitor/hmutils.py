@@ -1200,8 +1200,6 @@ def get_eeg_errors(logger, dataset, files):
                 )
         else:
             errors.append(
-                logger,
-                dataset,
                 new_error_record(
                     logger, dataset, id, "EEG error", "No DataFile found in .vhdr file"
                 ),
