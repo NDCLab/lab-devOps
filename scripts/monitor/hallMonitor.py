@@ -252,12 +252,12 @@ def validate_data(logger, dataset, is_raw=True):
     Validates the data in the specified dataset.
 
     Parameters:
-    logger (logging.Logger): Logger object for logging information and errors.
-    dataset (str): Path to the dataset to be validated.
-    is_raw (bool): Flag indicating whether the dataset is raw or checked. Defaults to True.
+        logger (logging.Logger): Logger object for logging information and errors.
+        dataset (str): Path to the dataset to be validated.
+        is_raw (bool): Flag indicating whether the dataset is raw or checked. Defaults to True.
 
     Returns:
-    list[dict]: A list of error records found during validation.
+        list[dict]: A list of error records found during validation.
 
     The function performs the following checks:
     - Initializes variables and sets the base directory based on the dataset type.
