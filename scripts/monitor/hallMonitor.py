@@ -494,7 +494,7 @@ def validate_data(logger, dataset, is_raw=True):
                 )
                 logger.debug("Found only deviation.txt; expected more files")
         else:  # normal case
-            expected_files = get_expected_files(id, dd_df)
+            expected_files = get_expected_files(dataset, id)
 
         logger.debug("Expect %d file(s) for identifier %s", len(expected_files), id)
 
