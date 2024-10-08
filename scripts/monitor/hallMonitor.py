@@ -247,25 +247,59 @@ def check_all_data_present(identifiers_dict, source_data, pending_files_df, vari
     return pending_files_df
 
 
-def checked_data_validation(dataset):
+def validate_data(logger, dataset, is_raw=True):
+    """
+    Validates the data in the specified dataset.
+
+    Parameters:
+    logger (logging.Logger): Logger object for logging information and errors.
+    dataset (str): Path to the dataset to be validated.
+    is_raw (bool): Flag indicating whether the dataset is raw or checked. Defaults to True.
+
+    Returns:
+    list[dict]: A list of error records found during validation.
+
+    The function performs the following checks:
+    - Initializes variables and sets the base directory based on the dataset type.
+    - Logs the start of the data validation process.
+    - Creates lists of present and expected identifiers, and identifies missing identifiers.
+    - Adds errors for missing identifiers.
+    - Checks conditions for combination rows and adds errors for combination variable issues.
+    - Loops over present identifiers to:
+        - Initialize error tracking for directories.
+        - Get files for each identifier and handle exceptions.
+        - Check for exception files and set flags.
+        - Check naming conventions and handle misnamed files.
+        - Handle appropriately named but misplaced files.
+        - Check file presence and count.
+        - Perform special data checks based on the datatype (e.g., EEG, psychopy).
+
+    The function logs detailed debug information and errors throughout the validation process.
+    """
     # initialize variables
-    logger = logging.getLogger(__name__)
-    errors = []
+    pending = []
     dd_df = get_datadict(dataset)
-    checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
+    if is_raw:
+        base_dir = os.path.join(dataset, RAW_SUBDIR)
+    else:
+        base_dir = os.path.join(dataset, CHECKED_SUBDIR)
 
     logger.info("Starting checked data validation")
 
     # create present and implied identifier lists
-    present_ids = get_present_identifiers(dataset, is_raw=False)
+    present_ids = get_present_identifiers(dataset, is_raw=is_raw)
     expected_ids = get_expected_identifiers(dataset, present_ids)
     missing_ids = list(set(present_ids) - set(expected_ids))
 
     # add errors for missing identifiers
     for id in missing_ids:
-        errors.append(
+        pending.append(
             new_error_record(
-                id, "Missing identifier", "Missing identifier in sourcedata/checked/"
+                logger,
+                dataset,
+                id,
+                "Missing identifier",
+                f"Missing identifier in {base_dir}",
             )
         )
 
@@ -290,7 +324,7 @@ def checked_data_validation(dataset):
             elif num_combo_vars == 0:  # raise an error for each possible identifier
                 for var in combo.variables:
                     identifier = Identifier(sub, var, ses)
-                    errors.append(
+                    pending.append(
                         new_error_record(
                             logger,
                             dataset,
@@ -302,7 +336,7 @@ def checked_data_validation(dataset):
 
             else:  # more than one combination variable present; raise an error for each
                 for identifier in present_combo_ids:
-                    errors.append(
+                    pending.append(
                         new_error_record(
                             logger,
                             dataset,
@@ -319,17 +353,19 @@ def checked_data_validation(dataset):
     missing_ids = [Identifier.from_str(id) for id in missing_ids]
     for id in present_ids:
         # initialize error tracking for this directory if it doesn't exist
-        id_dir = id.to_dir(dd_df, is_raw=False)
+        id_dir = id.to_dir(dd_df, is_raw=is_raw)
         if id_dir not in logged_missing_ids:
             logged_missing_ids[id_dir] = set()
 
         # get files for identifier
         try:
-            id_files = get_identifier_files(checked_dir, id, is_raw=False)
+            id_files = get_identifier_files(base_dir, id, is_raw=is_raw)
             logger.debug("Found %d file(s) for identifier %s", len(id_files), id)
         except FileNotFoundError as err:
-            errors.append(
-                new_error_record(id, "Improper directory structure", str(err))
+            pending.append(
+                new_error_record(
+                    logger, dataset, id, "Improper directory structure", str(err)
+                )
             )
             logging.error("Error getting files for identifier %s: %s", id, err)
             continue
@@ -339,8 +375,10 @@ def checked_data_validation(dataset):
         has_no_data = str(id) + "-no-data.txt" in id_files
         logger.debug("has_deviation=%s, has_no_data=%s", has_deviation, has_no_data)
         if has_deviation and has_no_data:
-            errors.append(
+            pending.append(
                 new_error_record(
+                    logger,
+                    dataset,
                     id,
                     "Improper exception files",
                     "Both deviation and no-data files present for identifier",
@@ -354,18 +392,21 @@ def checked_data_validation(dataset):
             dir_files = os.listdir(id_dir)
             logger.debug("Found %d file(s) in directory %s", len(dir_files), id_dir)
         except FileNotFoundError as err:
-            errors.append(
-                new_error_record(id, "Improper directory structure", str(err))
+            pending.append(
+                new_error_record(
+                    logger, dataset, id, "Improper directory structure", str(err)
+                )
             )
             logging.error("Error getting files for identifier %s: %s", id, err)
             continue
 
         # construct list of missing identifiers that should be in this directory
         dir_missing_ids = [
-            id for id in missing_ids if id.to_dir(dd_df, is_raw=False) == id_dir
+            id for id in missing_ids if id.to_dir(dataset, is_raw=is_raw) == id_dir
         ]
 
         # handle misnamed files
+        # TODO: Replace this with check_filenames() once rewrite is done (see #266)
         misnamed_files = [
             file
             for file in dir_files
@@ -376,20 +417,28 @@ def checked_data_validation(dataset):
             if file == "issue.txt":
                 err_type = "Issue file"
                 err = new_error_record(
-                    id, err_type, "Found issue.txt in identifier's directory"
+                    logger,
+                    dataset,
+                    id,
+                    err_type,
+                    "Found issue.txt in identifier's directory",
                 )
             else:
                 err_type = "Improper file name"
                 err = new_error_record(
-                    id, err_type, "Found file with improper name: " + file
+                    logger,
+                    dataset,
+                    id,
+                    err_type,
+                    "Found file with improper name: " + file,
                 )
-            errors.append(err)
+            pending.append(err)
 
             # log missing identifiers once for this directory and error type
             if err_type not in logged_missing_ids[id_dir]:
                 for missing_id in dir_missing_ids:
                     err[id] = str(missing_id)
-                    errors.append(err)
+                    pending.append(err)
                 logged_missing_ids[id_dir].add(err_type)
 
         # handle appropriately named but misplaced files
@@ -400,23 +449,25 @@ def checked_data_validation(dataset):
             # figure out which directory the file should be in
             id_match = re.fullmatch(FILE_RE, file)
             file_id = Identifier.from_str(id_match.group("id"))
-            correct_dir = os.path.realpath(file_id.to_dir(dd_df, is_raw=False))
+            correct_dir = os.path.realpath(file_id.to_dir(dd_df, is_raw=is_raw))
 
             # if the file is not in the right directory, raise errors
             if os.path.realpath(id_dir) != correct_dir:
                 n_misplaced += 1
                 err = new_error_record(
+                    logger,
+                    dataset,
                     id,
                     "Misplaced file",
                     f"Found file in wrong directory: {file} found in {id_dir}",
                 )
-                errors.append(err)
+                pending.append(err)
 
                 # log missing identifiers once for this directory and error type
                 if err_type not in logged_missing_ids[id_dir]:
                     for missing_id in dir_missing_ids:
                         err[id] = str(missing_id)
-                        errors.append(err)
+                        pending.append(err)
                     logged_missing_ids[id_dir].add(err_type)
 
         logger.debug("Found %d misplaced file(s)", n_misplaced)
@@ -432,8 +483,10 @@ def checked_data_validation(dataset):
             # (deviation.txt and at least one other file)
             expected_files = id_files
             if len(expected_files) == 1:
-                errors.append(
+                pending.append(
                     new_error_record(
+                        logger,
+                        dataset,
                         id,
                         "Improper exception files",
                         "deviation.txt cannot signify only 1 file; use no-data.txt.",
@@ -449,9 +502,13 @@ def checked_data_validation(dataset):
         n_missing = 0
         for file in expected_files:
             if file not in id_files:
-                errors.append(
+                pending.append(
                     new_error_record(
-                        id, "Missing file", f"Expected file {file} not found"
+                        logger,
+                        dataset,
+                        id,
+                        "Missing file",
+                        f"Expected file {file} not found",
                     )
                 )
                 n_missing += 1
@@ -461,9 +518,13 @@ def checked_data_validation(dataset):
         n_unexpected = 0
         for file in id_files:
             if file not in expected_files:
-                errors.append(
+                pending.append(
                     new_error_record(
-                        id, "Unexpected file", f"Unexpected file {file} found"
+                        logger,
+                        dataset,
+                        id,
+                        "Unexpected file",
+                        f"Unexpected file {file} found",
                     )
                 )
                 n_unexpected += 1
@@ -471,21 +532,28 @@ def checked_data_validation(dataset):
 
         # --- special data checks ---
 
-        datatype = get_variable_datatype(dd_df, id.variable)
+        datatype = get_variable_datatype(dataset, id.variable)
 
         if datatype == "eeg":
             # do EEG-specific checks
             eeg_errors = get_eeg_errors(logger, dataset, id_files)
-            errors.extend(eeg_errors)
+            pending.extend(eeg_errors)
             logger.debug("Found %d EEG error(s)", len(eeg_errors))
 
         elif datatype == "psychopy":
             # do psychopy-specific checks
             psychopy_errors = get_psychopy_errors(logger, dataset, id_files)
-            errors.extend(psychopy_errors)
+            pending.extend(psychopy_errors)
             logger.debug("Found %d psychopy error(s)", len(psychopy_errors))
 
+        if is_raw:  # only log pass rows for raw data
+            # check if this identifier has any errors
+            if not any(row["id"] == id and row["passRaw"] == 0 for row in pending):
+                pending.append(new_pass_record(id))
+
         continue  # go to next present identifier
+
+    return pending
 
     # write errors to pending-errors-[datetime].csv
     error_df = pd.DataFrame(errors)
