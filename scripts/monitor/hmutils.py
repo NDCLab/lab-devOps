@@ -852,6 +852,53 @@ def new_pass_record(identifier):
     }
 
 
+def new_validation_record(dd_df, identifier):
+    """
+    Creates a new validation record.
+
+    This function generates a dictionary containing validation information
+    based on the provided data dictionary DataFrame and identifier. The
+    identifier can be either a string or an instance of the Identifier class.
+
+    Args:
+        dd_df (pd.DataFrame): The data dictionary DataFrame.
+        identifier (str or Identifier): The identifier for which the validation
+                                        record is being created. If a string is
+                                        provided, it will be converted to an
+                                        Identifier instance.
+
+    Returns:
+        dict: A dictionary containing the following keys:
+            - "datetime" (str): The current timestamp.
+            - "user" (str): The username of the current user.
+            - "dataType" (str): The data type of the variable associated with
+                                the identifier.
+            - "identifier" (str): The string representation of the identifier.
+
+    Raises:
+        ValueError: If the identifier string cannot be converted to an
+                    Identifier instance or if the data type of the variable
+                    cannot be determined.
+    """
+    if isinstance(identifier, str):
+        try:
+            identifier = Identifier.from_str(identifier)
+        except ValueError as err:
+            raise err
+
+    try:
+        datatype = get_variable_datatype(dd_df, identifier.variable)
+    except ValueError as err:
+        raise err
+
+    return {
+        "datetime": get_timestamp(),
+        "user": getuser(),
+        "dataType": datatype,
+        "identifier": str(identifier),
+    }
+
+
 def new_qa_record(identifier):
     if isinstance(identifier, str):
         identifier = Identifier.from_str(identifier)
