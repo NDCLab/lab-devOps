@@ -353,7 +353,7 @@ def validate_data(logger, dataset, is_raw=True):
     missing_ids = [Identifier.from_str(id) for id in missing_ids]
     for id in present_ids:
         # initialize error tracking for this directory if it doesn't exist
-        id_dir = id.to_dir(dd_df, is_raw=is_raw)
+        id_dir = id.to_dir(dataset, is_raw=is_raw)
         if id_dir not in logged_missing_ids:
             logged_missing_ids[id_dir] = set()
 
@@ -449,7 +449,7 @@ def validate_data(logger, dataset, is_raw=True):
             # figure out which directory the file should be in
             id_match = re.fullmatch(FILE_RE, file)
             file_id = Identifier.from_str(id_match.group("id"))
-            correct_dir = os.path.realpath(file_id.to_dir(dd_df, is_raw=is_raw))
+            correct_dir = os.path.realpath(file_id.to_dir(dataset, is_raw=is_raw))
 
             # if the file is not in the right directory, raise errors
             if os.path.realpath(id_dir) != correct_dir:
@@ -622,10 +622,10 @@ def qa_validation(dataset):
     checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
     for id in passed_ids:
         id = Identifier.from_str(id)
-        identifier_subdir = Identifier.from_str(id).to_dir(dd_df, is_raw=False)
+        identifier_subdir = Identifier.from_str(id).to_dir(dataset, is_raw=False)
         dest_path = os.path.join(checked_dir, identifier_subdir)
         os.makedirs(dest_path, exist_ok=True)
-        dtype = get_variable_datatype(dd_df, id.variable)
+        dtype = get_variable_datatype(dataset, id.variable)
         id_files = get_identifier_files(pending_qa_dir, id, dtype)
         n_moved = 0
         for file in id_files:
@@ -659,10 +659,10 @@ def qa_validation(dataset):
     raw_dir = os.path.join(dataset, RAW_SUBDIR)
     for id in new_qa["identifier"]:
         id = Identifier.from_str(id)
-        identifier_subdir = id.to_dir(dd_df, is_raw=True)
+        identifier_subdir = id.to_dir(dataset, is_raw=True)
         dest_path = os.path.join(pending_qa_dir, identifier_subdir)
         os.makedirs(dest_path, exist_ok=True)
-        dtype = get_variable_datatype(dd_df, id.variable)
+        dtype = get_variable_datatype(dataset, id.variable)
         id_files = get_identifier_files(raw_dir, id, dtype)
         n_copied = 0
         for file in id_files:
@@ -763,8 +763,8 @@ if __name__ == "__main__":
         exit(1)
     logger.debug("No changes to data dictionary")
 
-    checked_pass = checked_data_validation(dataset)
-    raw_data_validation(dataset, checked_pass)
+    checked_data_validation(dataset)
+    raw_data_validation(dataset)
     qa_validation(dataset)
 
     logger.info("All checks complete")
