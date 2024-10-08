@@ -52,9 +52,8 @@ PENDING_FILES_COLS = [
 PENDING_ERRORS_COLS = [
     "datetime",
     "user",
-    "dataType",
-    "errorType",
     "identifier",
+    "errorType",
     "errorDetails",
 ]
 QA_CHECKLIST_COLS = [
