@@ -521,6 +521,50 @@ def get_present_identifiers(dataset, is_raw=True):
     return present_ids
 
 
+def get_expected_identifiers(present_ids, dd_df):
+    """
+    Generate a list of expected identifiers based on the provided present identifiers and data dictionary DataFrame.
+
+    More specifically, get unique pairs of subject and session from the present identifiers, then get all expected
+    variables from the data dictionary that are associated with visit data. Finally, generate all possible combinations
+    of subject, session, and variable to create a list of expected identifiers.
+
+    Args:
+        present_ids: A list of present identifier strings or Identifier objects.
+        dd_df (pandas.DataFrame): A DataFrame containing the data dictionary.
+
+    Returns:
+        list of Identifier: A list of expected Identifier objects based on the present identifiers and data dictionary.
+
+    Raises:
+        ValueError: If any of the present_ids are not valid strings.
+    """
+    try:
+        present_sub_ses = get_unique_sub_ses(present_ids)
+    except ValueError as err:
+        raise err
+
+    # get rows for visit variables, e.g. iqs_status, bbs_status
+    visit_vars = dd_df[dd_df["dataType"] == "visit_data"]
+
+    expected_vars = []
+    for _, var in visit_vars.iterrows():
+        var_prov = Provenance.from_str(var["provenance"], dd_df)
+        expect = [
+            prov_var
+            for prov_var in var_prov.variables
+            if get_variable_datatype(dd_df, prov_var) != "combination"
+        ]
+        expected_vars.extend(expect)
+
+    expected_ids = []
+    for sub_ses in present_sub_ses:
+        for var in expected_vars:
+            expected_ids.append(Identifier(sub_ses[0], var, sub_ses[1]))
+
+    return expected_ids
+
+
 def get_unique_sub_ses(identifiers):
     """Get unique subject-session pairs from a list of identifiers.
 
