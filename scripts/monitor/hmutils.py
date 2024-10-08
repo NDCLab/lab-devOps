@@ -370,8 +370,6 @@ def datadict_has_changes(dataset):
     except ValueError:
         return False
 
-    return bool(dd_diff.empty)
-
 
 def get_timestamp():
     dt = datetime.datetime.now(TZ_INFO)
