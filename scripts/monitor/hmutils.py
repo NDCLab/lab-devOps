@@ -378,6 +378,28 @@ def get_timestamp():
     return dt.strftime(DT_FORMAT)
 
 
+class SharedTimestamp:
+    """
+    A singleton class to ensure a shared timestamp across different instances.
+
+    This class is critical to ensure that the timestamp portion of pending-files
+    and pending-errors CSVs are identical.
+
+    Attributes:
+        _ts (str): A class-level attribute to store the shared timestamp.
+
+    Methods:
+        __new__(cls): Overrides the default new method to ensure a single instance
+                      of the timestamp is created and shared.
+    """
+    _ts = None
+
+    def __new__(cls):
+        if cls._ts is None:
+            cls._ts = get_timestamp()
+        return cls._ts
+
+
 @cache_with_metadata(maxsize=2)
 def get_datadict(dataset):
     """Get the data dictionary for the specified dataset.

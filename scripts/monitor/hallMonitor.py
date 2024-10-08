@@ -19,6 +19,7 @@ from hmutils import (
     UPDATE_TRACKER_SUBPATH,
     ColorfulFormatter,
     Identifier,
+    SharedTimestamp,
     clean_empty_dirs,
     datadict_has_changes,
     get_args,
@@ -34,7 +35,6 @@ from hmutils import (
     get_present_identifiers,
     get_psychopy_errors,
     get_qa_checklist,
-    get_timestamp,
     get_unique_sub_ses,
     get_variable_datatype,
     meets_naming_conventions,
@@ -489,7 +489,7 @@ def checked_data_validation(dataset):
 
     # write errors to pending-errors-[datetime].csv
     error_df = pd.DataFrame(errors)
-    timestamp = get_timestamp()
+    timestamp = SharedTimestamp()
     write_pending_errors(dataset, error_df, timestamp)
 
     # remove failing identifiers from validated file record
