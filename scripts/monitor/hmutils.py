@@ -565,6 +565,39 @@ def get_expected_identifiers(present_ids, dd_df):
     return expected_ids
 
 
+@dataclass
+class CombinationRow:
+    name: str
+    variables: list[str]
+
+
+def get_expected_combination_rows(dataset) -> list[CombinationRow]:
+    """
+    Extracts and returns a list of expected combination rows from the given dataset.
+
+    Args:
+        dataset (str): The dataset's base directory path.
+
+    Returns:
+        A list of CombinationRow objects, each representing a combination variable
+        and its associated variables as specified in the dataset's data dictionary.
+    """
+    dd_df = get_datadict(dataset)
+    combo_vars = dd_df[dd_df["dataType"] == "combination"]
+
+    expected_combos = []
+    for _, row in combo_vars.iterrows():
+        prov = str(row["provenance"])
+        if prov.startswith("variables:"):
+            vars = prov.removeprefix("variables:").strip()
+            vars = vars.replace('"', "")
+            vars = vars.split(",")
+            vars = [v.strip() for v in vars]
+            expected_combos.append(CombinationRow(row["variable"], vars))
+
+    return expected_combos
+
+
 def get_unique_sub_ses(identifiers):
     """Get unique subject-session pairs from a list of identifiers.
 
