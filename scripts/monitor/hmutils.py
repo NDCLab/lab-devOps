@@ -900,8 +900,30 @@ def new_validation_record(dd_df, identifier):
 
 
 def new_qa_record(identifier):
+    """
+    Creates a new QA record dictionary with the provided identifier.
+
+    Args:
+        identifier (str or Identifier): The identifier for the QA record. If a string is provided,
+                                        it will be converted to an Identifier object.
+
+    Returns:
+        dict: A dictionary containing the QA record with the following keys:
+    - "identifier" (str): The string representation of the identifier.
+    - "datetime" (str): The current timestamp.
+    - "user" (str): The username of the current user.
+    - "qa" (int): The QA status, initialized to 0.
+    - "localMove" (int): The local move status, initialized to 0.
+    - "dataType" (str): The data type of the identifier.
+
+    Raises:
+        ValueError: If the identifier string cannot be converted to an Identifier object.
+    """
     if isinstance(identifier, str):
-        identifier = Identifier.from_str(identifier)
+        try:
+            identifier = Identifier.from_str(identifier)
+        except ValueError as err:
+            raise err
     return {
         "identifier": str(identifier),
         "datetime": get_timestamp(),
