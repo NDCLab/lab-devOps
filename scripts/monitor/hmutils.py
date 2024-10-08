@@ -994,15 +994,22 @@ def get_qa_checklist(dataset):
 
 
 def write_qa_tracker(dataset, df):
-    logger = logging.getLogger()
+    """
+    Writes a QA checklist to a CSV file within the specified dataset directory.
+
+    Args:
+        dataset (str): The path to the dataset directory where the QA checklist will be saved.
+        df (pandas.DataFrame): The DataFrame containing the QA checklist data.
+
+    Returns:
+        None
+    """
     checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
-    df = df[QA_CHECKLIST_COLS]
+    if set(df.columns) <= set(QA_CHECKLIST_COLS):  # df has at least QA_CHECKLIST_COLS
+        df = df[QA_CHECKLIST_COLS]
+    else:
+        raise KeyError("DataFrame does not contain required columns for a QA checklist")
     df.to_csv(checklist_path)
-    logger.debug("Wrote QA checklist to %s", checklist_path)
-
-
-def remove_from_checked(dataset, identifier):
-    pass
 
 
 def clean_empty_dirs(basedir):
