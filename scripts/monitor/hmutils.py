@@ -545,7 +545,11 @@ def get_present_identifiers(dataset, is_raw=True):
             else:
                 if not all([sub == dirs[0], ses == dirs[1], dtype == dirs[2]]):
                     continue
-            present_ids.append(identifier)
+
+            try:
+                present_ids.append(Identifier.from_str(identifier))
+            except ValueError:
+                continue
 
     return present_ids
 
