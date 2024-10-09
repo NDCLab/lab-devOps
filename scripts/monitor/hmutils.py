@@ -259,7 +259,7 @@ class ColorfulFormatter(logging.Formatter):
         return logging.Formatter.format(self, color_record)
 
 
-def dataset(input):
+def validated_dataset(input):
     dataset = os.path.realpath(input)
     # only run on direct children of /home/data/NDClab/datasets
     parent_dir = os.path.abspath(os.path.join(dataset, os.pardir))
@@ -292,16 +292,17 @@ def get_args():
     Returns:
         Namespace: Arguments passed to the script (access using dot notation)
     """
-    parser = argparse.ArgumentParser(description="")  # TODO: Write a short description
+    parser = argparse.ArgumentParser(
+        description="The hallMonitor.py script ensures data integrity by validating files within raw and checked directories against a central tracker and data dictionary. It performs checks for expected files, naming conventions, and handles exceptions such as no-data.txt and deviation.txt files. It logs errors for missing, extra, or misnamed files, runs special checks for data types like EEG and Psychopy, and prepares valid files for QA. The script outputs errors and updates logs to assist the data monitor in verifying and resolving issues."
+    )
     parser.add_argument(
         "dataset",
-        type=dataset,
+        type=validated_dataset,
         help="path to the dataset's root directory (can be relative)",
     )
     parser.add_argument(
         "-c",
         "--child-data",
-        dest="childdata",  # could this be removed? will default be child_data?
         action="store_true",
         help="dataset includes child data",
     )
