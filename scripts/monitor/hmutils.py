@@ -423,21 +423,11 @@ def get_file_record(dataset):
     Returns:
         pd.DataFrame: The file record DataFrame
     """
-    logger = logging.getLogger()
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
     if os.path.exists(record_path):
-        record_df = pd.read_csv(record_path)
-        logger.debug("Read in existing file record from %s", record_path)
+        return pd.read_csv(record_path)
     else:
-        logger.debug("Existing file record not found at %s, making new", record_path)
-        colmap = {
-            "datetime": "str",
-            "user": "str",
-            "dataType": "str",
-            "identifier": "str",
-        }
-        record_df = df_from_colmap(colmap)
-    return record_df
+        return new_file_record_df()
 
 
 def write_file_record(dataset, df):
@@ -750,8 +740,17 @@ def df_from_colmap(colmap):
     Returns:
         pandas.DataFrame: An empty DataFrame, generated as specified by colmap
     """
-    df = pd.DataFrame({c: pd.Series(dtype=t) for c, t in colmap.items()})
-    return df
+    return pd.DataFrame({col: pd.Series(dtype=dtype) for col, dtype in colmap.items()})
+
+
+def new_file_record_df():
+    colmap = {
+        "datetime": "str",
+        "user": "str",
+        "dataType": "str",
+        "identifier": "str",
+    }
+    return df_from_colmap(colmap)
 
 
 def new_pending_df():
