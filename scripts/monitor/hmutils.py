@@ -436,9 +436,27 @@ def write_file_record(dataset, df):
     Args:
         dataset (str): The dataset's base directory path
         df (pandas.DataFrame): The file record to be written out
+
+    Raises:
+        KeyError: If the DataFrame does not contain the required columns for a file record DataFrame.
+
+    Notes:
+    - The DataFrame is first filtered to include only the columns specified in FILE_RECORD_COLS.
+    - The DataFrame is then sorted by the 'datetime' and 'identifier' columns before being written to the CSV file.
     """
-    logger = logging.getLogger()
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
+    if set(df.columns) <= set(FILE_RECORD_COLS):  # df has at least FILE_RECORD_COLS
+        df = df[FILE_RECORD_COLS]
+    else:
+        missing_cols = set(FILE_RECORD_COLS) - set(df.columns)
+        missing_cols = ", ".join(missing_cols)
+        raise KeyError(
+            f"DataFrame does not contain required columns for a file record (missing {missing_cols})"
+        )
+
+    df = df.sort_values(by=["datetime", "identifier"])
+    df.to_csv(record_path, index=False)
+
 
 @cache_with_metadata(maxsize=64)
 def is_combination_var(dataset, variable):
@@ -723,12 +741,32 @@ def get_pending_files(dataset):
 
 
 def write_pending_files(dataset, df, timestamp):
-    logger = logging.getLogger()
+    """
+    Writes a DataFrame of pending files to a CSV file in a specified dataset directory.
+
+    Args:
+        dataset (str): The path to the dataset directory where the CSV file will be saved.
+        df (pandas.DataFrame): The DataFrame containing the pending files data.
+        timestamp (str): A timestamp string to be included in the output filename.
+
+    Raises:
+        KeyError: If the DataFrame does not contain the required columns specified in PENDING_FILES_COLS.
+
+    The output CSV file will be named in the format 'pending-files-{timestamp}.csv' and will be saved
+    in the 'PENDING_SUBDIR' subdirectory of the specified dataset directory. The DataFrame will be
+    sorted by 'identifier' and 'datetime' columns before being written to the CSV file.
+    """
     out = os.path.join(dataset, PENDING_SUBDIR, f"pending-files-{timestamp}.csv")
-    df = df[PENDING_FILES_COLS]
+    if set(df.columns) <= set(PENDING_FILES_COLS):  # df has at least PENDING_FILES_COLS
+        df = df[PENDING_FILES_COLS]
+    else:
+        missing_cols = set(PENDING_FILES_COLS) - set(df.columns)
+        missing_cols = ", ".join(missing_cols)
+        raise KeyError(
+            f"DataFrame does not contain required columns for a QA checklist (missing {missing_cols})"
+        )
     df = df.sort_values(by=["identifier", "datetime"])
     df.to_csv(out)
-    logger.debug("Wrote pending files to %s", out)
 
 
 def df_from_colmap(colmap):
@@ -1008,7 +1046,11 @@ def write_qa_tracker(dataset, df):
     if set(df.columns) <= set(QA_CHECKLIST_COLS):  # df has at least QA_CHECKLIST_COLS
         df = df[QA_CHECKLIST_COLS]
     else:
-        raise KeyError("DataFrame does not contain required columns for a QA checklist")
+        missing_cols = set(QA_CHECKLIST_COLS) - set(df.columns)
+        missing_cols = ", ".join(missing_cols)
+        raise KeyError(
+            f"DataFrame does not contain required columns for a QA checklist (missing {missing_cols})"
+        )
     df.to_csv(checklist_path)
 
 
