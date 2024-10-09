@@ -186,11 +186,12 @@ class Identifier:
             str: The generated directory path.
         """
         datatype = get_variable_datatype(dataset, self.variable)
+        ses = re.fullmatch(r"(s\d+_r\d+)_e\d+", self.session).group(1)
         # generate full path based on whether the data is raw or checked
         if is_raw:
-            return os.path.join(self.session, datatype, self.subject, "")
+            return os.path.join(ses, datatype, self.subject, "")
         else:
-            return os.path.join(self.subject, self.session, datatype, "")
+            return os.path.join(self.subject, ses, datatype, "")
 
     def to_detailed_str(self, dataset):
         """
