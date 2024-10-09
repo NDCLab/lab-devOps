@@ -770,7 +770,7 @@ def write_pending_files(dataset, df, timestamp):
             f"DataFrame does not contain required columns for a QA checklist (missing {missing_cols})"
         )
     df = df.sort_values(by=["identifier", "datetime"])
-    df.to_csv(out)
+    df.to_csv(out, index=False)
 
 
 def df_from_colmap(colmap):
@@ -1019,7 +1019,7 @@ def write_pending_errors(dataset, df, timestamp):
     out = os.path.join(dataset, PENDING_SUBDIR, f"pending-errors-{timestamp}.csv")
     df = df[PENDING_ERRORS_COLS]
     df = df.sort_values(by=["identifier", "datetime"])
-    df.to_csv(out)
+    df.to_csv(out, index=False)
 
 
 def get_qa_checklist(dataset):
@@ -1062,7 +1062,7 @@ def write_qa_tracker(dataset, df):
         raise KeyError(
             f"DataFrame does not contain required columns for a QA checklist (missing {missing_cols})"
         )
-    df.to_csv(checklist_path)
+    df.to_csv(checklist_path, index=False)
 
 
 def clean_empty_dirs(basedir):
