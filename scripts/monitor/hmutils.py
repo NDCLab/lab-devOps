@@ -254,7 +254,7 @@ class ColorfulFormatter(logging.Formatter):
         color_record = copy(record)
         levelname = color_record.levelname
         seq = self.COLORMAP.get(levelname, 37)  # default white
-        color_levelname = "\033[{1}m{2}\033[0m".format(seq, levelname)
+        color_levelname = "\033[{0}m{1}\033[0m".format(seq, levelname)
         color_record.levelname = color_levelname
         return logging.Formatter.format(self, color_record)
 
