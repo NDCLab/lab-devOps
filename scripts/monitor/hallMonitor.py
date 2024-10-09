@@ -31,6 +31,7 @@ from hmutils import (
     get_file_record,
     get_identifier_files,
     get_new_redcaps,
+    get_pending_errors,
     get_pending_files,
     get_present_identifiers,
     get_psychopy_errors,
@@ -598,7 +599,8 @@ def raw_data_validation(dataset):
 
     # copy errors to pending-errors-[datetime].csv
     timestamp = SharedTimestamp()
-    write_pending_errors(dataset, pending_df, timestamp)
+    error_df = get_pending_errors(pending_df)
+    write_pending_errors(dataset, error_df, timestamp)
 
     return  # go to QA checks
 
