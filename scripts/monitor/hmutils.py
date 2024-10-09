@@ -1002,9 +1002,16 @@ def new_qa_checklist():
     return df_from_colmap(colmap)
 
 def get_pending_errors(pending_df):
-    errors = pending_df[pending_df["passRaw"] == False]
-    errors = errors[PENDING_ERRORS_COLS]
-    return errors
+    errors = pending_df[pending_df["passRaw"] == 0]
+    # errors has at least PENDING_ERRORS_COLS
+    if set(errors.columns) <= set(PENDING_ERRORS_COLS):
+        return errors[PENDING_ERRORS_COLS]
+    else:
+        missing_cols = set(PENDING_ERRORS_COLS) - set(errors.columns)
+        missing_cols = ", ".join(missing_cols)
+        raise KeyError(
+            f"DataFrame does not contain required columns for a pending error CSV (missing {missing_cols})"
+        )
 
 
 def write_pending_errors(dataset, df, timestamp):
