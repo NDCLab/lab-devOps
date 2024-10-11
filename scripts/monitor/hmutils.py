@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import logging
+import math
 import os
 import re
 import subprocess
@@ -1387,6 +1388,36 @@ def get_psychopy_errors(logger, dataset, files):
                 )
             )
 
+    if csvfile:
+        file_df = pd.read_csv(csvfile)
+        id_num = id.group('subject')[4:]
+        if "id" in file_df:
+            id_col = file_df["id"]
+        # Column sometimes called "participant"
+        elif "participant" in file_df:
+            id_col = file_df["participant"]
+        else:
+        if isinstance(id_col[0], float) and math.isnan(id_col[0]):
+            errors.append(
+                new_error_record(
+                    logger,
+                    dataset,
+                    id,
+                    "Psychopy error",
+                    f"NaN value seen under ID in .csv file, expected {id_num}"
+                )
+            )
+        else:
+            if not int(id_col[0]) == int(id):
+                errors.append(
+                    new_error_record(
+                        logger,
+                        dataset,
+                        id,
+                        "Psychopy error",
+                        f"ID value in csvfile {id_col[0]} doesn't match ID in filename {id_num}"
+                    )
+                )
     return errors
 
 
