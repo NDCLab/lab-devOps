@@ -402,7 +402,7 @@ class SharedTimestamp:
 
 
 @cache_with_metadata(maxsize=2)
-def get_datadict(dataset):
+def get_datadict(dataset, index_col=None):
     """Get the data dictionary for the specified dataset.
 
     Args:
@@ -412,7 +412,10 @@ def get_datadict(dataset):
         pd.DataFrame: The data dictionary DataFrame
     """
     datadict_path = os.path.join(dataset, DATADICT_SUBPATH)
-    return pd.read_csv(datadict_path)
+    if index_col:
+        return pd.read_csv(datadict_path, index_col=index_col)
+    else:
+        return pd.read_csv(datadict_path)
 
 
 def get_file_record(dataset):
@@ -1164,26 +1167,139 @@ def get_expected_files(dataset, identifier):
     expected_files = [f"{identifier}.{ext}" for ext in expected_exts]
     return expected_files
 
+def allowed_val(allowed_vals, value):
+    """
+    Check if a given value is within the intervals specified in allowed_vals.
 
-def meets_naming_conventions(filename, has_deviation=False):
+    Args:
+        allowed_vals (str): A string representing allowed intervals, formatted as "[lower1,upper1][lower2,upper2]..." or "NA, 0, 1".
+        value (int): The value to check against the allowed intervals.
+
+    Returns:
+        bool: True if the value is within any of the allowed intervals, False otherwise.
+
+    Example:
+        allowed_vals = "[1,5][10,15]"
+        value = 3
+        result = allowed_val(allowed_vals, value)  # Returns True
+    """
+    allowed_vals = allowed_vals.replace(" ", "")
+    
+    # Handle case where allowed_vals is a comma-separated list
+    if "," in allowed_vals and "[" not in allowed_vals:
+        allowed_values = allowed_vals.split(",")
+        allowed_values = [val.strip() for val in allowed_values]
+        return str(value) in allowed_values
+
+    # Handle case where allowed_vals is a list of intervals
+    intervals = re.split(r"[\[\]]", allowed_vals)
+    intervals = list(filter(lambda x: x not in [",", ""], intervals))
+    allowed = False
+    for interval in intervals:
+        lower = float(interval.split(",")[0])
+        upper = float(interval.split(",")[1])
+        if lower <= int(value) <= upper:
+            allowed = True
+            break
+    return allowed
+
+def parse_datadict(dd_df):
+    dd_dict = dict()
+    task_vars = []
+    combination_rows = {}
+    allowed_subs = dd_df.loc["id", "allowedValues"]
+    for _, row in dd_df.iterrows():
+        if not isinstance(row["expectedFileExt"], float): # all rows in datadict with extensions i.e. with data files
+            task_vars.append(row.name)
+        if row["dataType"] == "combination":
+            idx = row["provenance"].split(" ").index("variables:")
+            vars = "".join(row["provenance"].split(" ")[idx+1:]).split(",")
+            vars = [var.strip("\"") for var in vars]
+            combination_rows[row.name] = vars
+    # build dict of expected files/datatypes from datadict
+    for var, row in dd_df.iterrows():
+        if row.name in task_vars:
+            #dd_dict[var] = [row["dataType"], allowed_sfxs, expected_exts, row["encrypted"]]
+            allowed_sfxs = [x.strip() for x in row["allowedSuffix"].split(",")]
+            expected_exts = [x.strip() for x in row["expectedFileExt"].split(",")]
+            dd_dict[var] = [row["dataType"], allowed_sfxs, expected_exts]
+    return dd_dict, combination_rows, allowed_subs
+
+def meets_naming_conventions(logger, dataset, filename, dd_dict, allowed_subs, has_deviation=False):
     """
     Check if a filename meets the naming conventions for a data file.
 
     Args:
+        logger (logging.Logger): The logger object used to log the error.
+        dataset (str): The path to the dataset directory.
         filename (str): The name of the file to check.
+        dd_dict (dict): Dictionary containing information about each variable drawn from the datadict.
+        allowed_subs (str): String of allowed values for a subject ID in interval notation
         has_deviation (bool, optional): A flag indicating if the file has a deviation. Defaults to False.
 
     Returns:
-        bool: True if the filename meets the naming conventions, False otherwise.
+        errors: List of errors associated with the file name.
     """
+    errors = []
     file_match = re.fullmatch(FILE_RE, filename)
     if not file_match:
-        return False
-    elif not has_deviation and file_match.group("info"):
-        return False
-    else:
-        return True
-
+        errors.append(
+            new_error_record(
+                logger,
+                dataset,
+                "Unknown", #? I forget how we said we'd deal with this
+                "Naming error",
+                f"File {filename} does not match expected identifier format"
+            )
+        )
+        return errors
+    id = file_match.group("id")
+    var = file_match.group("var")
+    datatype, allowed_suffixes, possible_exts = dd_dict[var]
+    allowed_subs = allowed_subs
+    combination_rows = {}
+    if file_match.group('ext') not in dd_dict[var][2] and len(file_match.group('ext')) > 0:
+        errors.append(
+            new_error_record(
+                logger,
+                dataset,
+                id,
+                "Naming error",
+                f"File extension {file_match.group('ext')} doesn't match expected extensions {str(dd_dict[var][2])} in file {filename}"
+            )
+        )
+    if file_match.group('subject')[4:] != '' and not allowed_val(allowed_subs, file_match.group('subject')[4:]):
+        errors.append(
+            new_error_record(
+                logger,
+                dataset,
+                id,
+                "Naming error",
+                f"Subject number {file_match.group('subject')[4:]} not an allowed subject value {str(allowed_subs)} in file {filename}"
+            )
+        )
+    if datatype not in file_match.group('var'):
+        errors.append(
+            new_error_record(
+                logger,
+                dataset,
+                id,
+                "Naming error",
+                f"Variable name {file_match.group('var')} does not contain the name of the variable datatype {datatype}"
+            )
+        )
+    if file_match.group('sre') not in allowed_suffixes:
+        errors.append(
+            new_error_record(
+                logger,
+                dataset,
+                id,
+                "Naming error",
+                f"Suffix {file_match.group('sre')} not in allowed suffixes {str(allowed_suffixes)}"
+            )
+        )
+    # Other checks to perform elsewhere: session matches enclosing folder, datatype matches enclosing folder, subject matches enclosing folder
+    return errors
 
 def get_eeg_errors(logger, dataset, files):
     """

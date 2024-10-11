@@ -43,69 +43,12 @@ from hmutils import (
     new_pass_record,
     new_qa_record,
     new_validation_record,
+    parse_datadict,
     write_file_record,
     write_pending_errors,
     write_pending_files,
     write_qa_tracker,
 )
-
-
-def parse_datadict(dd_df):
-    dd_dict = dict()
-    task_vars = []
-    combination_rows = {}
-    for _, row in dd_df.iterrows():
-        if not isinstance(row["expectedFileExt"], float): # all rows in datadict with extensions i.e. with data files
-            task_vars.append(row.name)
-        if row["dataType"] == "combination":
-            idx = row["provenance"].split(" ").index("variables:")
-            vars = "".join(row["provenance"].split(" ")[idx+1:]).split(",")
-            vars = [var.strip("\"") for var in vars]
-            combination_rows[row.name] = vars
-    # build dict of expected files/datatypes from datadict
-    for var, row in dd_df.iterrows():
-        if row.name in task_vars:
-            #dd_dict[var] = [row["dataType"], allowed_sfxs, expected_exts, row["allowedValues"], row["encrypted"]]
-            allowed_sfxs = [x.strip() for x in row["allowedSuffix"].split(",")]
-            expected_exts = [x.strip() for x in row["expectedFileExt"].split(",")]
-            dd_dict[var] = [row["dataType"], allowed_sfxs, expected_exts, row["allowedValues"]]
-    return dd_dict, combination_rows
-
-def allowed_val(allowed_vals, value):
-    """
-    Check if a given value is within the intervals specified in allowed_vals.
-
-    Args:
-        allowed_vals (str): A string representing allowed intervals, formatted as "[lower1,upper1][lower2,upper2]..." or "NA, 0, 1".
-        value (int): The value to check against the allowed intervals.
-
-    Returns:
-        bool: True if the value is within any of the allowed intervals, False otherwise.
-
-    Example:
-        allowed_vals = "[1,5][10,15]"
-        value = 3
-        result = allowed_val(allowed_vals, value)  # Returns True
-    """
-    allowed_vals = allowed_vals.replace(" ", "")
-    
-    # Handle case where allowed_vals is a comma-separated list
-    if "," in allowed_vals and "[" not in allowed_vals:
-        allowed_values = allowed_vals.split(",")
-        allowed_values = [val.strip() for val in allowed_values]
-        return str(value) in allowed_values
-
-    # Handle case where allowed_vals is a list of intervals
-    intervals = re.split(r"[\[\]]", allowed_vals)
-    intervals = list(filter(lambda x: x not in [",", ""], intervals))
-    allowed = False
-    for interval in intervals:
-        lower = float(interval.split(",")[0])
-        upper = float(interval.split(",")[1])
-        if lower <= int(value) <= upper:
-            allowed = True
-            break
-    return allowed
 
 def has_deviation(identifier, parentdirs):
     # is there a deviation.txt in the folder
@@ -138,67 +81,6 @@ def write_to_pending_files(identifier, errors, pending_df):
             pending_df.loc[idx] = [identifier, dt, user, datatype, pass_raw, error[1], error[0]]
             idx+=1
     return pending_df
-
-def check_filenames(variable, files, deviation, raw_or_checked):
-    [datatype, allowed_suffixes, possible_exts, allowed_subs] = variable_dict[identifier]
-    allowed_suffixes = allowed_suffixes.split(",")
-    allowed_suffixes = [x.strip() for x in allowed_suffixes]
-    possible_exts = sum([ext.split('|') for ext in fileexts], [])
-    #errors = {}
-    #errors["error_detail"] = []
-    errors = []
-    if deviation[1] == True: # no data
-        return errors
-    for filename in files:
-        parent_dirs = file.split('/')
-        if raw_or_checked == "raw": # raw directory structure
-            sub = parent_dirs[-2]
-            ses = parent_dirs[-4]
-            #datatype = parent_dirs[-3]
-        elif raw_or_checked == "checked": # checked directory structure
-            sub = parent_dirs[-4]
-            ses = parent_dirs[-3]
-            #datatype = parent_dirs[-2]
-        file_re = re.match("^(sub-([0-9]*))_([a-zA-Z0-9_-]*)_((s([0-9]*)_r([0-9]*))_e([0-9]*))(_[a-zA-Z0-9_-]+)?((?:\.[a-zA-Z]+)*)$", filename)
-        if file_re:
-        #####################
-            # all filename checks (not number of files checks, not _data or _status checks), write any errors to "errors"
-            #TODO need possible_exts, allowed_vals, allowed_suffixes, possible variable names from dd_df
-            if file_re.group(1) != sub:
-                errors.append(["Error: file from subject " + file_re.group(1) + " found in " + sub + " folder: " + filename, "name"])
-            if file_re.group(5) != ses:
-                errors.append(["Error: file from session " + file_re.group(5) + " found in " + ses + " folder: " + filename, "name"]) 
-            if file_re.group(10) not in possible_exts and len(file_re.group(10)) > 0:
-                errors.append(["Error: file with extension " + file_re.group(10) + " found, doesn\'t match expected extensions " + ", ".join(possible_exts) + ": " + filename, "name"]) 
-            if file_re.group(2) != '' and not allowed_val(allowed_subs, file_re.group(2)):
-                errors.append(["Error: subject number " + file_re.group(2) + " not an allowed subject value " + allowed_subs + " in file: " + filename, "name"])
-            if file_re.group(3) not in variable_dict.keys():
-                errors.append(["Error: variable name " + file_re.group(3) + " does not match any datadict variables, in file: " + filename, "name"])
-            if datatype not in file_re.group(3):
-                errors.append(["Error: variable name " + file_re.group(3) +  " does not contain the name of the enclosing datatype folder " + datatype + " in file: " + filename, "name"])
-            if file_re.group(4) not in allowed_suffixes:
-                errors.append(["Error: suffix " + file_re.group(4) + " not in allowed suffixes " + ", ".join(allowed_suffixes) + " in file: " + filename, "name"])
-            if file_re.group(2) == "":
-                errors.append(["Error: subject # missing from file: " + filename, "name"])
-            if file_re.group(3) == "":
-                errors.append(["Error: variable name missing from file: " + filename, "name"])
-            if file_re.group(6) == "":
-                errors.append(["Error: session # missing from file: " + filename, "name"])
-            if file_re.group(7) == "":
-                errors.append(["Error: run # missing from file: " + filename, "name"])
-            if file_re.group(8) == "":
-                errors.append(["Error: event # missing from file: " +filename, "name"])
-            if file_re.group(10) == "":
-                errors.append(["Error: extension missing from file, does\'nt match expected extensions " + ", ".join(possible_exts) + ": " + filename, "name"])
-            #TODO check-id.py
-            #if datatype == "psychopy" and file_re.group(10) == ".csv" and file_re.group(2) != "":
-            #
-                # Call check-id.py for psychopy files
-                #check_id.check_id(file_re.group(2), filename)
-        ###########
-        else:
-            errors.append(["Error: file " + join(path, filename) + " does not match naming convention <sub-#>_<variable/task-name>_<session>.<ext>", "name"])
-    return errors
 
 
 def check_identifiers(identifiers_dict, source_data, pending_files_df):
@@ -279,7 +161,8 @@ def validate_data(logger, dataset, is_raw=True):
     """
     # initialize variables
     pending = []
-    dd_df = get_datadict(dataset)
+    dd_df = get_datadict(dataset, index_col="variable")
+    dd_dict, combination_rows, allowed_subs = parse_datadict(dd_df)
     if is_raw:
         base_dir = os.path.join(dataset, RAW_SUBDIR)
     else:
@@ -357,6 +240,13 @@ def validate_data(logger, dataset, is_raw=True):
         id_dir = id.to_dir(dataset, is_raw=is_raw)
         if id_dir not in logged_missing_ids:
             logged_missing_ids[id_dir] = set()
+        if id.variable not in dd_dict.keys():
+            pending.append(
+                new_error_record(
+                    logger, dataset, id, "Improper variable name"
+                )
+            )
+            logging.error("Variable %s not found in datadict", id.variable)
 
         # get files for identifier
         try:
@@ -408,11 +298,15 @@ def validate_data(logger, dataset, is_raw=True):
 
         # handle misnamed files
         # TODO: Replace this with check_filenames() once rewrite is done (see #266)
-        misnamed_files = [
-            file
-            for file in dir_files
-            if not meets_naming_conventions(file, has_deviation)
-        ]
+        
+        misnamed_files = []
+        for file in dir_files:
+            naming_errors = meets_naming_conventions(logger, dataset, file, dd_dict, allowed_subs, has_deviation)
+            if len(naming_errors) > 0:
+                pending.extend(naming_errors)
+                logger.debug("Found %d naming error(s) in file %s", len(naming_errors), file)
+                misnamed_files.append(file)
+
         logger.debug("Found %d misnamed file(s)", len(misnamed_files))
         for file in misnamed_files:
             if file == "issue.txt":
