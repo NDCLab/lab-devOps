@@ -1321,6 +1321,7 @@ def get_psychopy_errors(logger, dataset, files):
     id = re.match(FILE_RE, files[0])
     if id is None:
         raise ValueError("Invalid EEG file name")
+    id_num = id.group("subject")[4:]
     id = id.group("id")
 
     # don't error on missing files here, since they are handled in presence checks
@@ -1390,7 +1391,6 @@ def get_psychopy_errors(logger, dataset, files):
 
     if csvfile:
         file_df = pd.read_csv(csvfile)
-        id_num = id.group('subject')[4:]
         if "id" in file_df:
             id_col = file_df["id"]
         # Column sometimes called "participant"
