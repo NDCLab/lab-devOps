@@ -1416,7 +1416,7 @@ def get_eeg_errors(logger, dataset, files):
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect DataFile {found_datafile} in marker file, expected {expected_eeg or "(no file)"}",
+                        f"Incorrect DataFile {found_datafile} in .vmrk file, expected {expected_eeg or "(no file)"}",
                     )
                 )
         else:
