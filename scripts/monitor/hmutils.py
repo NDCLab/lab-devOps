@@ -1335,6 +1335,9 @@ def get_eeg_errors(logger, dataset, files):
         elif file_ext == ".eeg":
             datafile = file
 
+    expected_eeg = os.path.basename(datafile)
+    expected_vmrk = os.path.basename(markerfile)
+
     if headerfile:
         with open(headerfile, "r") as f:
             contents = f.read()
@@ -1343,14 +1346,14 @@ def get_eeg_errors(logger, dataset, files):
         marker_match = re.match(r"MarkerFile=(.+)", contents)
         if marker_match is not None:
             found_markerfile = marker_match.group(1).strip()
-            if found_markerfile != os.path.basename(markerfile):
+            if found_markerfile != expected_vmrk:
                 errors.append(
                     new_error_record(
                         logger,
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect MarkerFile {found_markerfile} in .vhdr file, expected {markerfile}",
+                        f"Incorrect MarkerFile {found_markerfile} in .vhdr file, expected {expected_vmrk}",
                     )
                 )
         else:
@@ -1367,15 +1370,15 @@ def get_eeg_errors(logger, dataset, files):
         # look for .eeg file in header file
         data_match = re.search(r"DataFile=(.+)", contents)
         if data_match is not None:
-            found_datafile = data_match.group(1).strip("'\" ")
-            if found_datafile != os.path.basename(datafile or ""):
+            found_datafile = data_match.group(1)
+            if found_datafile != expected_eeg:
                 errors.append(
                     new_error_record(
                         logger,
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect DataFile {found_datafile} in .vhdr file, expected {datafile}",
+                        f"Incorrect DataFile {found_datafile} in .vhdr file, expected {expected_eeg}",
                     )
                 )
         else:
@@ -1393,14 +1396,14 @@ def get_eeg_errors(logger, dataset, files):
         data_match = re.search(r"DataFile=(.+)", contents)
         if data_match:
             found_datafile = data_match.group(1).strip("'\" ")
-            if found_datafile != os.path.basename(datafile):
+            if found_datafile != expected_eeg:
                 errors.append(
                     new_error_record(
                         logger,
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect DataFile {found_datafile} in marker file, expected {datafile}",
+                        f"Incorrect DataFile {found_datafile} in marker file, expected {expected_eeg}",
                     )
                 )
         else:
