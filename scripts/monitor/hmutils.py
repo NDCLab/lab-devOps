@@ -1431,7 +1431,7 @@ def get_psychopy_errors(logger, dataset, files):
               found.
 
     Raises:
-        ValueError: If the identifier found in the file name is invalid.
+        ValueError: If the identifier found in the file name is invalid, or if no ID column is found.
     """
     errors = []
     id = re.match(FILE_RE, files[0])
@@ -1513,27 +1513,30 @@ def get_psychopy_errors(logger, dataset, files):
         elif "participant" in file_df:
             id_col = file_df["participant"]
         else:
-        if isinstance(id_col[0], float) and math.isnan(id_col[0]):
+            raise ValueError("No ID column found in .csv file")
+
+        if id_col.isna().any():
             errors.append(
                 new_error_record(
                     logger,
                     dataset,
                     id,
                     "Psychopy error",
-                    f"NaN value seen under ID in .csv file, expected {id_num}"
+                    f"NaN value seen under ID in .csv file, expected {id_num}",
                 )
             )
-        else:
-            if not int(id_col[0]) == int(id):
-                errors.append(
-                    new_error_record(
-                        logger,
-                        dataset,
-                        id,
-                        "Psychopy error",
-                        f"ID value in csvfile {id_col[0]} doesn't match ID in filename {id_num}"
-                    )
+
+        elif int(id_col[0]) != int(id_num):
+            errors.append(
+                new_error_record(
+                    logger,
+                    dataset,
+                    id,
+                    "Psychopy error",
+                    f"ID value in csvfile {id_col[0]} doesn't match ID in filename {id_num}",
                 )
+            )
+
     return errors
 
 
