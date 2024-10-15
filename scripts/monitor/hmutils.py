@@ -535,7 +535,7 @@ def get_present_identifiers(dataset, is_raw=True):
             sub = match.group("subject")
             try:
                 var = match.group("var")
-                dtype = get_variable_datatype(dd_df, var)
+                dtype = get_variable_datatype(dataset, var)
             except KeyError:
                 dtype = ""
             ses = match.group(5)
@@ -901,7 +901,7 @@ def new_pass_record(identifier):
     }
 
 
-def new_validation_record(dd_df, identifier):
+def new_validation_record(dataset, identifier):
     """
     Creates a new validation record.
 
@@ -910,7 +910,7 @@ def new_validation_record(dd_df, identifier):
     identifier can be either a string or an instance of the Identifier class.
 
     Args:
-        dd_df (pd.DataFrame): The data dictionary DataFrame.
+        dataset (str): The path to the dataset directory.
         identifier (str or Identifier): The identifier for which the validation
                                         record is being created. If a string is
                                         provided, it will be converted to an
@@ -929,6 +929,7 @@ def new_validation_record(dd_df, identifier):
                     Identifier instance or if the data type of the variable
                     cannot be determined.
     """
+    dd_df = get_datadict(dataset)
     if isinstance(identifier, str):
         try:
             identifier = Identifier.from_str(identifier)
@@ -936,7 +937,7 @@ def new_validation_record(dd_df, identifier):
             raise err
 
     try:
-        datatype = get_variable_datatype(dd_df, identifier.variable)
+        datatype = get_variable_datatype(dataset, identifier.variable)
     except ValueError as err:
         raise err
 
