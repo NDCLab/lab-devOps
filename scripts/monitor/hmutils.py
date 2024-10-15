@@ -660,9 +660,9 @@ def get_unique_sub_ses(identifiers):
     """
     if not identifiers:
         return []
-    if isinstance(identifiers[0], str):
+    if any([isinstance(id, str) for id in identifiers]):
         try:
-            identifiers = [Identifier.from_str(id) for id in identifiers]
+            identifiers = [Identifier.from_str(str(id)) for id in identifiers]
         except ValueError as err:
             raise err
 
