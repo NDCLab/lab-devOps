@@ -5,6 +5,10 @@ import pytest
 from hmutils import DT_FORMAT, SharedTimestamp, get_timestamp
 
 
+def setup_function():
+    SharedTimestamp._ts = None
+
+
 def test_get_timestamp_format():
     with mock.patch("hmutils.datetime") as mock_datetime:
         mock_dt = datetime.datetime(2024, 1, 1, 12, 0, 0)
