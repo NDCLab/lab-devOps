@@ -1441,7 +1441,7 @@ def get_psychopy_errors(logger, dataset, files):
     errors = []
     id = re.match(FILE_RE, files[0])
     if id is None:
-        raise ValueError("Invalid EEG file name")
+        raise ValueError("Invalid Psychopy file name")
     id_num = id.group("subject")[4:]
     id = id.group("id")
 
