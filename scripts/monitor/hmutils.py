@@ -1337,7 +1337,7 @@ def get_eeg_errors(logger, dataset, files):
     id = ids[0]
 
     # don't error on missing files here, since they are handled in presence checks
-    headerfile = markerfile = datafile = "(no file)"
+    headerfile = markerfile = datafile = ""
     for file in files:
         file_ext = os.path.splitext(file)[1]
         if file_ext == ".vhdr":
@@ -1365,7 +1365,7 @@ def get_eeg_errors(logger, dataset, files):
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect MarkerFile {found_markerfile} in .vhdr file, expected {expected_vmrk}",
+                        f"Incorrect MarkerFile {found_markerfile} in .vhdr file, expected {expected_vmrk or "(no file)"}",
                     )
                 )
         else:
@@ -1390,7 +1390,7 @@ def get_eeg_errors(logger, dataset, files):
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect DataFile {found_datafile} in .vhdr file, expected {expected_eeg}",
+                        f"Incorrect DataFile {found_datafile} in .vhdr file, expected {expected_eeg or "(no file)"}",
                     )
                 )
         else:
@@ -1415,7 +1415,7 @@ def get_eeg_errors(logger, dataset, files):
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect DataFile {found_datafile} in marker file, expected {expected_eeg}",
+                        f"Incorrect DataFile {found_datafile} in marker file, expected {expected_eeg or "(no file)"}",
                     )
                 )
         else:
@@ -1461,7 +1461,7 @@ def get_psychopy_errors(logger, dataset, files):
     id = id.group("id")
 
     # don't error on missing files here, since they are handled in presence checks
-    csvfile = logfile = psydatfile = "(no file)"
+    csvfile = logfile = psydatfile = ""
     for file in files:
         file_ext = os.path.splitext(file)[1]
         if file_ext == ".csv":
@@ -1486,7 +1486,7 @@ def get_psychopy_errors(logger, dataset, files):
                         dataset,
                         id,
                         "Psychopy error",
-                        f"Incorrect .psydat file {found_psydat} in .log file, expected {psydatfile}",
+                        f"Incorrect .psydat file {found_psydat} in .log file, expected {psydatfile or "(no file)"}",
                     )
                 )
         else:
@@ -1511,7 +1511,7 @@ def get_psychopy_errors(logger, dataset, files):
                         dataset,
                         id,
                         "Psychopy error",
-                        f"Incorrect .csv file {found_csv} in .log file, expected {csvfile}",
+                        f"Incorrect .csv file {found_csv} in .log file, expected {csvfile or "(no file)"}",
                     )
                 )
         else:
