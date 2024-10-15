@@ -1324,7 +1324,7 @@ def get_eeg_errors(logger, dataset, files):
 
 
     # don't error on missing files here, since they are handled in presence checks
-    headerfile = markerfile = datafile = ""
+    headerfile = markerfile = datafile = "(no file)"
     for file in files:
         file_ext = os.path.splitext(file)[1]
         if file_ext == ".vhdr":
@@ -1448,7 +1448,7 @@ def get_psychopy_errors(logger, dataset, files):
     id = id.group("id")
 
     # don't error on missing files here, since they are handled in presence checks
-    csvfile = logfile = psydatfile = ""
+    csvfile = logfile = psydatfile = "(no file)"
     for file in files:
         file_ext = os.path.splitext(file)[1]
         if file_ext == ".csv":
