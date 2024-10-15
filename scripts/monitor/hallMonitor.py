@@ -538,7 +538,7 @@ def qa_validation(dataset):
     write_qa_tracker(dataset, qa_df)
 
     # add fully-verified identifiers to validated file record
-    val_records = [new_validation_record(dd_df, id) for id in passed_ids]
+    val_records = [new_validation_record(dataset, id) for id in passed_ids]
     val_df = pd.DataFrame(val_records)
     record_df = pd.concat(record_df, val_df)
     try:
