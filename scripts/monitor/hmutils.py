@@ -658,6 +658,8 @@ def get_unique_sub_ses(identifiers):
     Returns:
         list: A list of unique (subject, session) tuples extracted from the identifiers.
     """
+    if not identifiers:
+        return []
     if isinstance(identifiers[0], str):
         try:
             identifiers = [Identifier.from_str(id) for id in identifiers]
