@@ -1348,8 +1348,8 @@ def get_eeg_errors(logger, dataset, files):
         elif file_ext == ".eeg":
             datafile = file
 
-    expected_eeg = os.path.basename(datafile)
-    expected_vmrk = os.path.basename(markerfile)
+    expected_eeg = os.path.basename(datafile) if datafile else "(no file)"
+    expected_vmrk = os.path.basename(markerfile) if markerfile else "(no file)"
 
     if headerfile:
         with open(headerfile, "r") as f:
@@ -1366,7 +1366,7 @@ def get_eeg_errors(logger, dataset, files):
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect MarkerFile {found_markerfile} in .vhdr file, expected {expected_vmrk or "(no file)"}",
+                        f"Incorrect MarkerFile {found_markerfile} in .vhdr file, expected {expected_vmrk}",
                     )
                 )
         else:
@@ -1391,7 +1391,7 @@ def get_eeg_errors(logger, dataset, files):
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect DataFile {found_datafile} in .vhdr file, expected {expected_eeg or "(no file)"}",
+                        f"Incorrect DataFile {found_datafile} in .vhdr file, expected {expected_eeg}",
                     )
                 )
         else:
@@ -1416,7 +1416,7 @@ def get_eeg_errors(logger, dataset, files):
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect DataFile {found_datafile} in .vmrk file, expected {expected_eeg or "(no file)"}",
+                        f"Incorrect DataFile {found_datafile} in .vmrk file, expected {expected_eeg}",
                     )
                 )
         else:
