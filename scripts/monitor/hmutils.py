@@ -1319,10 +1319,9 @@ def get_eeg_errors(logger, dataset, files):
         ValueError: If the identifier found in the file name is invalid.
     """
     errors = []
-    id = re.match(FILE_RE, os.path.basename(files[0]))
-    if id is None:
-        raise ValueError("Invalid EEG file name")
-    id = id.group("id")
+    if not files:
+        return []
+
 
     # don't error on missing files here, since they are handled in presence checks
     headerfile = markerfile = datafile = ""
@@ -1439,6 +1438,9 @@ def get_psychopy_errors(logger, dataset, files):
         ValueError: If the identifier found in the file name is invalid, or if no ID column is found.
     """
     errors = []
+    if not files:
+        return []
+
     id = re.match(FILE_RE, files[0])
     if id is None:
         raise ValueError("Invalid Psychopy file name")
