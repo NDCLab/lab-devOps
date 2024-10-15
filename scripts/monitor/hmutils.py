@@ -1356,7 +1356,7 @@ def get_eeg_errors(logger, dataset, files):
             contents = f.read()
 
         # look for .vmrk file in header file
-        marker_match = re.match(r"MarkerFile=(.+)", contents)
+        marker_match = re.search(r"MarkerFile=(.+)", contents)
         if marker_match is not None:
             found_markerfile = marker_match.group(1).strip()
             if found_markerfile != expected_vmrk:
