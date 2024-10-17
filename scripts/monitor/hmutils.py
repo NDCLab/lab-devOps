@@ -1455,15 +1455,24 @@ def get_psychopy_errors(logger, dataset, files):
     if not files:
         return []
 
-    id = re.match(FILE_RE, files[0])
-    if id is None:
-        raise ValueError("Invalid Psychopy file name")
-    id_num = id.group("subject")[4:]
-    id = id.group("id")
+    ids = []
+    misnamed = []
+    for file in files:
+        id_match = re.match(FILE_RE, os.path.basename(file))
+        if id_match is None:
+            misnamed.append(file)
+        else:
+            ids.append(id_match.group("id"))
+
+    if misnamed:
+        raise ValueError(f"Invalid Psychopy file name(s) {", ".join(misnamed)}")
+
+    id_num = int(ids[0])
 
     # don't error on missing files here, since they are handled in presence checks
     csvfile = logfile = psydatfile = ""
     for file in files:
+        file = str(file)
         file_ext = os.path.splitext(file)[1]
         if file_ext == ".csv":
             csvfile = file
@@ -1471,6 +1480,9 @@ def get_psychopy_errors(logger, dataset, files):
             logfile = file
         elif file_ext == ".psydat":
             psydatfile = file
+
+    expected_csv = os.path.basename(csvfile) if csvfile else "(no file)"
+    expected_psydat = os.path.basename(psydatfile) if psydatfile else "(no file)"
 
     if logfile:
         with open(logfile, "r") as f:
@@ -1480,14 +1492,14 @@ def get_psychopy_errors(logger, dataset, files):
         if psydat_match is not None:
             found_psydat = psydat_match.group(1).strip("'\" ")
             found_psydat = os.path.basename(found_psydat)
-            if found_psydat != os.path.basename(psydatfile):
+            if found_psydat != expected_psydat:
                 errors.append(
                     new_error_record(
                         logger,
                         dataset,
                         id,
                         "Psychopy error",
-                        f"Incorrect .psydat file {found_psydat} in .log file, expected {psydatfile or "(no file)"}",
+                        f"Incorrect .psydat file {found_psydat} in .log file, expected {expected_psydat}",
                     )
                 )
         else:
@@ -1505,14 +1517,14 @@ def get_psychopy_errors(logger, dataset, files):
         if csv_match is not None:
             found_csv = csv_match.group(1).strip("'\" ")
             found_csv = os.path.basename(found_csv)
-            if found_csv != os.path.basename(csvfile):
+            if found_csv != expected_csv:
                 errors.append(
                     new_error_record(
                         logger,
                         dataset,
                         id,
                         "Psychopy error",
-                        f"Incorrect .csv file {found_csv} in .log file, expected {csvfile or "(no file)"}",
+                        f"Incorrect .csv file {found_csv} in .log file, expected {expected_csv}",
                     )
                 )
         else:
@@ -1526,6 +1538,8 @@ def get_psychopy_errors(logger, dataset, files):
                 )
             )
 
+    # functionality ported from check-id.py:
+    #   if csv is present, make sure id inside matches file name
     if csvfile:
         file_df = pd.read_csv(csvfile)
         if "id" in file_df:
@@ -1547,16 +1561,18 @@ def get_psychopy_errors(logger, dataset, files):
                 )
             )
 
-        elif int(id_col[0]) != int(id_num):
-            errors.append(
-                new_error_record(
-                    logger,
-                    dataset,
-                    id,
-                    "Psychopy error",
-                    f"ID value in csvfile {id_col[0]} doesn't match ID in filename {id_num}",
+        else:
+            bad_ids = id_col[id_col != id_num]
+            if not bad_ids.empty:
+                errors.append(
+                    new_error_record(
+                        logger,
+                        dataset,
+                        id,
+                        "Psychopy error",
+                        f"ID value(s) {list(bad_ids)} in csvfile different from ID in filename {id_num}",
+                    )
                 )
-            )
 
     return errors
 
