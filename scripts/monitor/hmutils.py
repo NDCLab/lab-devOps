@@ -1467,7 +1467,7 @@ def get_psychopy_errors(logger, dataset, files):
     if misnamed:
         raise ValueError(f"Invalid Psychopy file name(s) {", ".join(misnamed)}")
 
-    id_num = int(ids[0])
+    id_num = ids[0]
 
     # don't error on missing files here, since they are handled in presence checks
     csvfile = logfile = psydatfile = ""
@@ -1541,7 +1541,8 @@ def get_psychopy_errors(logger, dataset, files):
     # functionality ported from check-id.py:
     #   if csv is present, make sure id inside matches file name
     if csvfile:
-        file_df = pd.read_csv(csvfile)
+        # leading zeroes are significant for subject ID, so read as string
+        file_df = pd.read_csv(csvfile, dtype=str)
         if "id" in file_df:
             id_col = file_df["id"]
         # Column sometimes called "participant"
@@ -1570,7 +1571,7 @@ def get_psychopy_errors(logger, dataset, files):
                         dataset,
                         id,
                         "Psychopy error",
-                        f"ID value(s) {list(bad_ids)} in csvfile different from ID in filename {id_num}",
+                        f"ID value(s) [{", ".join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
                     )
                 )
 
