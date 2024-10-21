@@ -374,6 +374,9 @@ def datadict_has_changes(dataset):
         raise FileNotFoundError("Data dictionary not found")
     dd_df = pd.read_csv(dd_path)
 
+    if latest_df.empty and dd_df.empty:
+        return False
+
     try:
         dd_diff = dd_df.compare(latest_df)
         return bool(dd_diff.empty)
