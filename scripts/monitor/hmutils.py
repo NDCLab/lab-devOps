@@ -460,7 +460,7 @@ def write_file_record(dataset, df):
     - The DataFrame is then sorted by the 'datetime' and 'identifier' columns before being written to the CSV file.
     """
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
-    if set(df.columns) <= set(FILE_RECORD_COLS):  # df has at least FILE_RECORD_COLS
+    if set(FILE_RECORD_COLS).issubset(set(df.columns)):  # df has at least FILE_RECORD_COLS
         df = df[FILE_RECORD_COLS]
     else:
         missing_cols = set(FILE_RECORD_COLS) - set(df.columns)
@@ -783,7 +783,7 @@ def write_pending_files(dataset, df, timestamp):
     sorted by 'identifier' and 'datetime' columns before being written to the CSV file.
     """
     out = os.path.join(dataset, PENDING_SUBDIR, f"pending-files-{timestamp}.csv")
-    if set(df.columns) <= set(PENDING_FILES_COLS):  # df has at least PENDING_FILES_COLS
+    if set(PENDING_FILES_COLS).issubset(set(df.columns)):  # df has at least PENDING_FILES_COLS
         df = df[PENDING_FILES_COLS]
     else:
         missing_cols = set(PENDING_FILES_COLS) - set(df.columns)
@@ -1027,7 +1027,7 @@ def new_qa_checklist():
 def get_pending_errors(pending_df):
     errors = pending_df[pending_df["passRaw"] == 0]
     # errors has at least PENDING_ERRORS_COLS
-    if set(errors.columns) <= set(PENDING_ERRORS_COLS):
+    if set(PENDING_ERRORS_COLS).issubset(set(errors.columns)):
         return errors[PENDING_ERRORS_COLS]
     else:
         missing_cols = set(PENDING_ERRORS_COLS) - set(errors.columns)
@@ -1077,7 +1077,7 @@ def write_qa_tracker(dataset, df):
         None
     """
     checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
-    if set(df.columns) <= set(QA_CHECKLIST_COLS):  # df has at least QA_CHECKLIST_COLS
+    if set(QA_CHECKLIST_COLS).issubset(set(df.columns)):  # df has at least QA_CHECKLIST_COLS
         df = df[QA_CHECKLIST_COLS]
     else:
         missing_cols = set(QA_CHECKLIST_COLS) - set(df.columns)
