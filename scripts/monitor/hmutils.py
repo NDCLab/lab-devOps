@@ -17,7 +17,7 @@ import pytz
 
 DT_FORMAT = r"%Y-%m-%d_%H-%M"
 TZ_INFO = pytz.timezone("US/Eastern")
-IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>\D+)_(?P<sre>(s\d+_r\d+)_e\d+))"
+IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>[\w\-]+)_(?P<sre>(s\d+_r\d+)_e\d+))"
 FILE_RE = IDENTIFIER_RE + r"(?P<info>_[\w\-]+)?(?P<ext>(?:\.[a-zA-Z0-9]+)+)"
 
 FILE_RECORD_SUBPATH = os.path.join("data-monitoring", "validated-file-record.csv")
@@ -1340,7 +1340,7 @@ def get_eeg_errors(logger, dataset, files):
             ids.append(id_match.group("id"))
 
     if misnamed:
-        raise ValueError(f"Invalid EEG file name(s) {", ".join(misnamed)}")
+        raise ValueError(f"Invalid EEG file name(s) {', '.join(misnamed)}")
 
     id = ids[0]
 
@@ -1472,7 +1472,7 @@ def get_psychopy_errors(logger, dataset, files):
             ids.append(id_match.group("id"))
 
     if misnamed:
-        raise ValueError(f"Invalid Psychopy file name(s) {", ".join(misnamed)}")
+        raise ValueError(f"Invalid Psychopy file name(s) {', '.join(misnamed)}")
 
     id_num = ids[0]
 
@@ -1578,7 +1578,7 @@ def get_psychopy_errors(logger, dataset, files):
                         dataset,
                         id,
                         "Psychopy error",
-                        f"ID value(s) [{", ".join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
+                        f"ID value(s) [{', '.join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
                     )
                 )
 
