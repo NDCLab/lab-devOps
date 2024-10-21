@@ -378,10 +378,10 @@ def datadict_has_changes(dataset):
         return False
 
     try:
-        dd_diff = dd_df.compare(latest_df)
-        return bool(dd_diff.empty)
+        dd_diff = dd_df.compare(latest_df, align_axis="index")
+        return not dd_diff.empty
     except ValueError:
-        return False
+        return True
 
 
 def get_timestamp():
