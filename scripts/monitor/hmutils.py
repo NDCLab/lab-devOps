@@ -73,10 +73,17 @@ def cache_with_metadata(maxsize=64):
     # wrap a function with an lru_cache decorator, carrying over all
     # metadata / docstring information from the original function.
     def decorator(func):
-        @lru_cache(maxsize=maxsize)
+        cached_func = lru_cache(maxsize=maxsize)(func)
+
         @wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
+        def wrapper(*args, use_cache=True, **kwargs):
+            if use_cache:
+                return cached_func(*args, **kwargs)
+            else:
+                return func(*args, **kwargs)
+
+        # allows us to clear the cache externally
+        wrapper.cache_clear = cached_func.cache_clear
 
         return wrapper
 
