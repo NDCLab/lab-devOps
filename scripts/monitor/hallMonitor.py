@@ -32,6 +32,7 @@ from hmutils import (
     get_pending_files,
     get_present_identifiers,
     get_psychopy_errors,
+    get_timestamp,
     get_qa_checklist,
     get_unique_sub_ses,
     get_variable_datatype,
@@ -519,7 +520,11 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
 
     log_path = os.path.join(dataset, LOGGING_SUBPATH)
-    file_handler = logging.FileHandler(log_path)
+    os.makedirs(log_path, exist_ok=True)
+    file_name = f"hallMonitor-{get_timestamp()}.log"
+    log_file = os.path.join(log_path, file_name)
+    
+    file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter(
         "[%(asctime)s]\t(%(levelname)s)\t%(message)s"
