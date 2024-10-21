@@ -522,7 +522,7 @@ if __name__ == "__main__":
     file_handler = logging.FileHandler(log_path)
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter(
-        "[%(asctime)s] (%(levelname)s)\t%(funcname)s(): %(message)s"
+        "[%(asctime)s]\t(%(levelname)s)\t%(message)s"
     )
     file_handler.setFormatter(file_formatter)
 
