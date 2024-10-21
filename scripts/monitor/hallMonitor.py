@@ -150,8 +150,6 @@ def validate_data(logger, dataset, is_raw=True):
     logged_missing_ids = {}  # allow for multiple types of non-identifier-specific errors
 
     # loop over present identifiers (as Identifier objects)
-    present_ids = [Identifier.from_str(id) for id in present_ids]
-    missing_ids = [Identifier.from_str(id) for id in missing_ids]
     for id in present_ids:
         # initialize error tracking for this directory if it doesn't exist
         id_dir = id.to_dir(dataset, is_raw=is_raw)
