@@ -165,7 +165,8 @@ def validate_data(logger, dataset, is_raw=True):
 
         # get files for identifier
         try:
-            id_files = get_identifier_files(base_dir, id, is_raw=is_raw)
+            datatype = get_variable_datatype(dataset, id.variable)
+            id_files = get_identifier_files(base_dir, id, datatype, is_raw=is_raw)
             logger.debug("Found %d file(s) for identifier %s", len(id_files), id)
         except FileNotFoundError as err:
             pending.append(
