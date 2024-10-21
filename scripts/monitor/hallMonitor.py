@@ -162,7 +162,6 @@ def validate_data(logger, dataset, is_raw=True):
                     logger, dataset, id, "Improper variable name"
                 )
             )
-            logger.error("Variable %s not found in datadict", id.variable)
 
         # get files for identifier
         try:
@@ -175,7 +174,6 @@ def validate_data(logger, dataset, is_raw=True):
                     logger, dataset, id, "Improper directory structure", str(err)
                 )
             )
-            logger.error("Error getting files for identifier %s: %s", id, err)
             continue
 
         # --- check for exception files, set flags ---
@@ -205,7 +203,6 @@ def validate_data(logger, dataset, is_raw=True):
                     logger, dataset, id, "Improper directory structure", str(err)
                 )
             )
-            logger.error("Error getting files for identifier %s: %s", id, err)
             continue
 
         # construct list of missing identifiers that should be in this directory
