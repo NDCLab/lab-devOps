@@ -32,7 +32,7 @@ RAW_SUBDIR = os.path.join("sourcedata", "raw", "")
 CHECKED_SUBDIR = os.path.join("sourcedata", "checked", "")
 PENDING_QA_SUBDIR = os.path.join("sourcedata", "pending-qa", "")
 QA_CHECKLIST_SUBPATH = os.path.join(PENDING_QA_SUBDIR, "qa-checklist.csv")
-DATASET_DIR = os.path.join("/home", "data", "NDClab", "datasets", "")
+DATASET_DIR = os.path.join("/home", "data", "NDClab", "datasets")
 LOGGING_SUBPATH = os.path.join("data-monitoring", "logs", "")
 UPDATE_TRACKER_SUBPATH = os.path.join("data-monitoring", "update-tracker.py")
 
@@ -271,7 +271,7 @@ class ColorfulFormatter(logging.Formatter):
 def validated_dataset(input):
     dataset = os.path.realpath(input)
     # only run on direct children of /home/data/NDClab/datasets
-    parent_dir = os.path.abspath(os.path.join(dataset, os.pardir))
+    parent_dir = os.path.realpath(os.path.join(dataset, os.pardir))
     if parent_dir != DATASET_DIR:
         raise argparse.ArgumentTypeError(f"{dataset} is not a valid dataset")
     return dataset
