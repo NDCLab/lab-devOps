@@ -3,7 +3,7 @@ from unittest import mock
 
 import pandas as pd
 import pytest
-from hmutils import datadict_has_changes, get_datadict, parse_datadict
+from hmutils import datadict_has_changes, get_datadict
 
 
 @pytest.fixture
