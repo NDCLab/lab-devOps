@@ -87,8 +87,6 @@ def validate_data(logger, dataset, is_raw=True):
     else:
         base_dir = os.path.join(dataset, CHECKED_SUBDIR)
 
-    logger.info("Starting checked data validation")
-
     # create present and implied identifier lists
     present_ids = get_present_identifiers(dataset, is_raw=is_raw)
     expected_ids = get_expected_identifiers(dataset, present_ids)
