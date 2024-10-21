@@ -22,6 +22,9 @@ def datadict():
         {
             "col1": [1, 5, 7],
             "col2": [2, 3, 5],
+            "variable": ["var1", "var3", "var5"],
+            "type": ["int", "str", "float"],
+            "description": ["Variable 1", "Variable 3", "Variable 5"],
         }
     )
     return df
@@ -41,7 +44,6 @@ def mock_local_datadict(monkeypatch, dataset, datadict):
 
 def test_get_datadict_valid(dataset, mock_read_csv):
     df = get_datadict(dataset, use_cache=False)
-    assert list(df.columns) == ["col1", "col2"]
     assert list(df.col1) == [1, 5, 7]
     assert list(df.col2) == [2, 3, 5]
 
@@ -86,4 +88,152 @@ def test_get_datadict_no_index_col(dataset, mock_local_datadict):
     # ensure default index if index_col not passed
     df = get_datadict(dataset, use_cache=False)
     assert list(df.index) == [0, 1, 2]
+
+
+# -- test datadict_has_changes() --
+
+
+@pytest.fixture
+def latest_datadict():
+    df = pd.DataFrame(
+        {
+            "variable": ["var1", "var2"],
+            "type": ["int", "float"],
+            "description": ["Variable 1", "Variable 2"],
+        }
+    ).set_index("variable")
+    return df
+
+
+@pytest.fixture
+def matching_datadict():
+    # exact copy of latest_datadict
+    df = pd.DataFrame(
+        {
+            "variable": ["var1", "var2"],
+            "type": ["int", "float"],
+            "description": ["Variable 1", "Variable 2"],
+        }
+    ).set_index("variable")
+    return df
+
+
+@pytest.fixture
+def mock_local_data_dictionaries(
+    monkeypatch,
+    dataset,
+    matching_datadict,
+    latest_datadict,
+):
+    dd_path = "datadict.csv"
+    latest_dd_path = "latest_datadict.csv"
+
+    matching_datadict.to_csv(os.path.join(dataset, dd_path))
+    latest_datadict.to_csv(os.path.join(dataset, latest_dd_path))
+
+    monkeypatch.setattr("hmutils.DATADICT_SUBPATH", dd_path)
+    monkeypatch.setattr("hmutils.DATADICT_LATEST_SUBPATH", latest_dd_path)
+
+
+def test_datadict_has_changes_no_change(mock_local_data_dictionaries, dataset):
+    assert not datadict_has_changes(dataset)
+
+
+def test_datadict_has_changes_change(mock_local_data_dictionaries, dataset):
+    # introduce a change to the datadict
+    dd_path = os.path.join(dataset, "datadict.csv")
+    dd_df = pd.read_csv(dd_path, index_col="variable")
+    dd_df.at["var1", "description"] = "Modified Variable 1"
+    dd_df.to_csv(dd_path)
+
+    assert datadict_has_changes(dataset)
+
+
+def test_datadict_has_changes_dd_missing(mock_local_data_dictionaries, dataset):
+    dd_path = os.path.join(dataset, "datadict.csv")
+    os.remove(dd_path)
+
+    with pytest.raises(FileNotFoundError, match="Data dictionary not found"):
+        datadict_has_changes(dataset)
+
+
+def test_datadict_has_changes_latest_dd_missing(mock_local_data_dictionaries, dataset):
+    latest_dd_path = os.path.join(dataset, "latest_datadict.csv")
+    os.remove(latest_dd_path)
+
+    with pytest.raises(FileNotFoundError, match="Latest data dictionary not found"):
+        datadict_has_changes(dataset)
+
+
+def test_datadict_has_changes_latest_dd_empty(mock_local_data_dictionaries, dataset):
+    latest_dd_path = os.path.join(dataset, "latest_datadict.csv")
+    pd.DataFrame().to_csv(latest_dd_path)
+    assert datadict_has_changes(dataset)
+
+
+def test_datadict_has_changes_dd_empty(mock_local_data_dictionaries, dataset):
+    dd_path = os.path.join(dataset, "datadict.csv")
+    pd.DataFrame().to_csv(dd_path)
+    assert datadict_has_changes(dataset)
+
+
+def test_datadict_has_changes_both_empty(mock_local_data_dictionaries, dataset):
+    dd_path = os.path.join(dataset, "datadict.csv")
+    latest_dd_path = os.path.join(dataset, "latest_datadict.csv")
+    pd.DataFrame().to_csv(dd_path)
+    pd.DataFrame().to_csv(latest_dd_path)
+    assert not datadict_has_changes(dataset)
+
+
+def test_datadict_has_changes_different_columns(mock_local_data_dictionaries, dataset):
+    dd_path = os.path.join(dataset, "datadict.csv")
+    datadict = pd.DataFrame(
+        {
+            "variable": ["var1", "var2"],
+            "type": ["int", "float"],
+            "label": ["Label 1", "Label 2"],  # new column "label"
+        }
+    ).set_index("variable")
+    datadict.to_csv(dd_path)
+
+    assert datadict_has_changes(dataset)
+
+
+def test_datadict_has_changes_different_variables(
+    mock_local_data_dictionaries, dataset
+):
+    latest_dd_path = os.path.join(dataset, "latest_datadict.csv")
+    latest_datadict = pd.DataFrame(
+        {
+            "variable": ["var1", "var3"],  # different set of variables
+            "type": ["int", "str"],
+            "description": ["Variable 1", "Variable 3"],
+        }
+    ).set_index("variable")
+    latest_datadict.to_csv(latest_dd_path)
+
+    assert datadict_has_changes(dataset)
+
+
+def test_datadict_has_changes_partial_match(mock_local_data_dictionaries, dataset):
+    latest_dd_path = os.path.join(dataset, "latest_datadict.csv")
+    latest_datadict = pd.DataFrame(
+        {
+            "variable": ["var1", "var2", "var4"],  # Added var4
+            "type": ["int", "float", "str"],
+            "description": ["Variable 1", "Variable 2", "Variable 4"],
+        }
+    ).set_index("variable")
+    latest_datadict.to_csv(latest_dd_path)
+
+    assert datadict_has_changes(dataset)
+
+
+def test_datadict_has_changes_dd_has_new_column(mock_local_data_dictionaries, dataset):
+    dd_path = os.path.join(dataset, "datadict.csv")
+    datadict = pd.read_csv(dd_path, index_col="variable")
+    datadict["new_column"] = ["data1", "data2"]
+    datadict.to_csv(dd_path)
+
+    assert datadict_has_changes(dataset)
 
