@@ -173,7 +173,7 @@ def validate_data(logger, dataset, is_raw=True):
     # create present and implied identifier lists
     present_ids = get_present_identifiers(dataset, is_raw=is_raw)
     expected_ids = get_expected_identifiers(dataset, present_ids)
-    missing_ids = list(set(present_ids) - set(expected_ids))
+    missing_ids = list(set(expected_ids) - set(present_ids))
 
     # add errors for missing identifiers
     for id in missing_ids:
