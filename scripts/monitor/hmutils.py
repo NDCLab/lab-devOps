@@ -683,7 +683,7 @@ def get_unique_sub_ses(identifiers):
     return sub_ses
 
 
-def get_identifier_files(basedir, identifier, datatype, raw_order=True):
+def get_identifier_files(basedir, identifier, datatype, is_raw=True):
     """
     Retrieve files matching a specific identifier within a directory structure.
 
@@ -695,7 +695,7 @@ def get_identifier_files(basedir, identifier, datatype, raw_order=True):
         identifier (str or Identifier): The identifier used to navigate the directory
             structure. If a string is provided, it will be converted to an Identifier object.
         datatype (str): The identifier's datatype, used to filter the files.
-        raw_order (bool, optional): Determines the order of directory traversal.
+        is_raw (bool, optional): Determines the order of directory traversal.
             If True, the order is session/datatype/subject. If False, the order is
             subject/session/datatype. Defaults to True.
 
@@ -713,7 +713,7 @@ def get_identifier_files(basedir, identifier, datatype, raw_order=True):
         except ValueError as err:
             raise err
 
-    if raw_order:
+    if is_raw:
         # session / datatype / subject
         dirs = [identifier.session, datatype, identifier.subject]
     else:
