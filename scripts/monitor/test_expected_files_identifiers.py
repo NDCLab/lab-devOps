@@ -26,7 +26,7 @@ def mock_datadict(monkeypatch):
 
 
 @pytest.fixture
-def mock_dataset(tmp_path, monkeypatch, mock_datadict, mock_Identifier_re):
+def mock_dataset(tmp_path, mock_datadict, mock_Identifier_re):
     dataset_path = tmp_path / "mock_dataset"
     os.makedirs(dataset_path)
     return str(dataset_path)
