@@ -713,16 +713,19 @@ def get_identifier_files(basedir, identifier, datatype, is_raw=True):
         except ValueError as err:
             raise err
 
+    ses_run_re = r"(s\d+_r\d+)_e\d+"
+    ses_run = re.fullmatch(ses_run_re, identifier.session).group(1)
+
     if is_raw:
         # session / datatype / subject
-        dirs = [identifier.session, datatype, identifier.subject]
+        dirs = [ses_run, datatype, identifier.subject]
     else:
         # subject / session / datatype
-        dirs = [identifier.subject, identifier.session, datatype]
+        dirs = [identifier.subject, ses_run, datatype]
 
     # root all directories at basedir
     dirs[0] = os.path.join(basedir, dirs[0])
-    for idx, dirname in enumerate(dirs, 1):
+    for idx, dirname in enumerate(dirs[1:], start=1):
         dirs[idx] = os.path.join(dirs[idx - 1], dirname)
 
     for dirname in dirs:
