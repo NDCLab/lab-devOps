@@ -545,6 +545,8 @@ def get_present_identifiers(dataset, is_raw=True):
                 dtype = get_variable_datatype(dataset, var)
             except KeyError:
                 dtype = ""
+            except ValueError:  # variable does not exist
+                continue
             ses = match.group(5)
             # Ignore combination rows for now
             if is_combination_var(dataset, var):
