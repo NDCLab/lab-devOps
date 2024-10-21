@@ -182,6 +182,9 @@ class Identifier:
     def __eq__(self, other):
         return str(self) == str(other)
 
+    def __hash__(self):
+        return hash((self.subject, self.variable, self.session))
+
     def to_dir(self, dataset, is_raw=True):
         """
         Generates a directory path based on the provided DataFrame and whether the data is raw or checked.
