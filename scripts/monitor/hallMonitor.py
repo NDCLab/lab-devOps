@@ -544,7 +544,7 @@ if __name__ == "__main__":
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
-    logger.debug("Logging set up")
+    logger.info("Logging initialized")
 
     # rename redcap columns
     redcaps = get_new_redcaps(os.path.join(dataset, RAW_SUBDIR))
