@@ -523,6 +523,7 @@ if __name__ == "__main__":
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
+    logger.propagate = False
 
     log_path = os.path.join(dataset, LOGGING_SUBPATH)
     os.makedirs(log_path, exist_ok=True)
