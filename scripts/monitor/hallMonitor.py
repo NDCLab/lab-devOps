@@ -458,7 +458,7 @@ def qa_validation(dataset):
     # add fully-verified identifiers to validated file record
     val_records = [new_validation_record(dataset, id) for id in passed_ids]
     val_df = pd.DataFrame(val_records)
-    record_df = pd.concat(record_df, val_df)
+    record_df = pd.concat([record_df, val_df])
     try:
         write_file_record(dataset, record_df)
     except Exception as err:
