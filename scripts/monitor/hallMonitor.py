@@ -32,6 +32,7 @@ from hmutils import (
     get_pending_files,
     get_present_identifiers,
     get_psychopy_errors,
+    get_timestamp,
     get_qa_checklist,
     get_unique_sub_ses,
     get_variable_datatype,
@@ -85,8 +86,6 @@ def validate_data(logger, dataset, is_raw=True):
         base_dir = os.path.join(dataset, RAW_SUBDIR)
     else:
         base_dir = os.path.join(dataset, CHECKED_SUBDIR)
-
-    logger.info("Starting checked data validation")
 
     # create present and implied identifier lists
     present_ids = get_present_identifiers(dataset, is_raw=is_raw)
@@ -519,10 +518,14 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
 
     log_path = os.path.join(dataset, LOGGING_SUBPATH)
-    file_handler = logging.FileHandler(log_path)
+    os.makedirs(log_path, exist_ok=True)
+    file_name = f"hallMonitor-{get_timestamp()}.log"
+    log_file = os.path.join(log_path, file_name)
+    
+    file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter(
-        "[%(asctime)s] (%(levelname)s)\t%(funcname)s(): %(message)s"
+        "[%(asctime)s]\t(%(levelname)s)\t%(message)s"
     )
     file_handler.setFormatter(file_formatter)
 

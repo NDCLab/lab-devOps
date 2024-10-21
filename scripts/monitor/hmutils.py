@@ -17,7 +17,7 @@ import pytz
 
 DT_FORMAT = r"%Y-%m-%d_%H-%M"
 TZ_INFO = pytz.timezone("US/Eastern")
-IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>\D+)_(?P<sre>(s\d+_r\d+)_e\d+))"
+IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>[\w\-]+)_(?P<sre>(s\d+_r\d+)_e\d+))"
 FILE_RE = IDENTIFIER_RE + r"(?P<info>_[\w\-]+)?(?P<ext>(?:\.[a-zA-Z0-9]+)+)"
 
 FILE_RECORD_SUBPATH = os.path.join("data-monitoring", "validated-file-record.csv")
@@ -32,7 +32,7 @@ RAW_SUBDIR = os.path.join("sourcedata", "raw", "")
 CHECKED_SUBDIR = os.path.join("sourcedata", "checked", "")
 PENDING_QA_SUBDIR = os.path.join("sourcedata", "pending-qa", "")
 QA_CHECKLIST_SUBPATH = os.path.join(PENDING_QA_SUBDIR, "qa-checklist.csv")
-DATASET_DIR = os.path.join("/home", "data", "NDClab", "datasets", "")
+DATASET_DIR = os.path.join("/home", "data", "NDClab", "datasets")
 LOGGING_SUBPATH = os.path.join("data-monitoring", "logs", "")
 UPDATE_TRACKER_SUBPATH = os.path.join("data-monitoring", "update-tracker.py")
 
@@ -271,7 +271,7 @@ class ColorfulFormatter(logging.Formatter):
 def validated_dataset(input):
     dataset = os.path.realpath(input)
     # only run on direct children of /home/data/NDClab/datasets
-    parent_dir = os.path.abspath(os.path.join(dataset, os.pardir))
+    parent_dir = os.path.realpath(os.path.join(dataset, os.pardir))
     if parent_dir != DATASET_DIR:
         raise argparse.ArgumentTypeError(f"{dataset} is not a valid dataset")
     return dataset
@@ -1340,7 +1340,7 @@ def get_eeg_errors(logger, dataset, files):
             ids.append(id_match.group("id"))
 
     if misnamed:
-        raise ValueError(f"Invalid EEG file name(s) {", ".join(misnamed)}")
+        raise ValueError(f"Invalid EEG file name(s) {', '.join(misnamed)}")
 
     id = ids[0]
 
@@ -1472,7 +1472,7 @@ def get_psychopy_errors(logger, dataset, files):
             ids.append(id_match.group("id"))
 
     if misnamed:
-        raise ValueError(f"Invalid Psychopy file name(s) {", ".join(misnamed)}")
+        raise ValueError(f"Invalid Psychopy file name(s) {', '.join(misnamed)}")
 
     id_num = ids[0]
 
@@ -1578,7 +1578,7 @@ def get_psychopy_errors(logger, dataset, files):
                         dataset,
                         id,
                         "Psychopy error",
-                        f"ID value(s) [{", ".join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
+                        f"ID value(s) [{', '.join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
                     )
                 )
 
