@@ -405,7 +405,8 @@ def raw_data_validation(dataset):
     pending_df = get_pending_files(dataset)
     temp_df = pd.DataFrame(pending)
     pending_df = pd.concat([pending_df, temp_df])
-    write_pending_files(dataset, pending_df)
+    timestamp = SharedTimestamp()
+    write_pending_files(dataset, pending_df, timestamp)
 
     # copy errors to pending-errors-[datetime].csv
     timestamp = SharedTimestamp()
