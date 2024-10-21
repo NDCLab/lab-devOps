@@ -12,6 +12,7 @@ from hmutils import (
     FILE_RE,
     LOGGING_SUBPATH,
     PENDING_QA_SUBDIR,
+    PENDING_SUBDIR,
     RAW_SUBDIR,
     UPDATE_TRACKER_SUBPATH,
     ColorfulFormatter,
