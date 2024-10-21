@@ -4,11 +4,8 @@ import logging
 import os
 import re
 import subprocess
-import time
-from getpass import getuser
 
 import pandas as pd
-
 from hmutils import (
     CHECKED_SUBDIR,
     DATADICT_SUBPATH,
