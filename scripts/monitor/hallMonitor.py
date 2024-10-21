@@ -501,7 +501,7 @@ def qa_validation(dataset):
     except subprocess.CalledProcessError as err:
         logger.error("Error cleaning up empty directories: %s", err)
 
-    print("QA check done!")
+    logger.info("QA check done!")
 
 
 if __name__ == "__main__":
