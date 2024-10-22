@@ -12,6 +12,7 @@ from hmutils import (
     FILE_RE,
     LOGGING_SUBPATH,
     PENDING_QA_SUBDIR,
+    PENDING_SUBDIR,
     RAW_SUBDIR,
     UPDATE_TRACKER_SUBPATH,
     ColorfulFormatter,
@@ -32,6 +33,7 @@ from hmutils import (
     get_pending_files,
     get_present_identifiers,
     get_psychopy_errors,
+    get_timestamp,
     get_qa_checklist,
     get_unique_sub_ses,
     get_variable_datatype,
@@ -85,8 +87,6 @@ def validate_data(logger, dataset, is_raw=True):
         base_dir = os.path.join(dataset, RAW_SUBDIR)
     else:
         base_dir = os.path.join(dataset, CHECKED_SUBDIR)
-
-    logger.info("Starting checked data validation")
 
     # create present and implied identifier lists
     present_ids = get_present_identifiers(dataset, is_raw=is_raw)
@@ -151,8 +151,6 @@ def validate_data(logger, dataset, is_raw=True):
     logged_missing_ids = {}  # allow for multiple types of non-identifier-specific errors
 
     # loop over present identifiers (as Identifier objects)
-    present_ids = [Identifier.from_str(id) for id in present_ids]
-    missing_ids = [Identifier.from_str(id) for id in missing_ids]
     for id in present_ids:
         # initialize error tracking for this directory if it doesn't exist
         id_dir = id.to_dir(dataset, is_raw=is_raw)
@@ -164,11 +162,11 @@ def validate_data(logger, dataset, is_raw=True):
                     logger, dataset, id, "Improper variable name"
                 )
             )
-            logging.error("Variable %s not found in datadict", id.variable)
 
         # get files for identifier
         try:
-            id_files = get_identifier_files(base_dir, id, is_raw=is_raw)
+            datatype = get_variable_datatype(dataset, id.variable)
+            id_files = get_identifier_files(base_dir, id, datatype, is_raw=is_raw)
             logger.debug("Found %d file(s) for identifier %s", len(id_files), id)
         except FileNotFoundError as err:
             pending.append(
@@ -176,7 +174,6 @@ def validate_data(logger, dataset, is_raw=True):
                     logger, dataset, id, "Improper directory structure", str(err)
                 )
             )
-            logging.error("Error getting files for identifier %s: %s", id, err)
             continue
 
         # --- check for exception files, set flags ---
@@ -206,7 +203,6 @@ def validate_data(logger, dataset, is_raw=True):
                     logger, dataset, id, "Improper directory structure", str(err)
                 )
             )
-            logging.error("Error getting files for identifier %s: %s", id, err)
             continue
 
         # construct list of missing identifiers that should be in this directory
@@ -407,7 +403,8 @@ def raw_data_validation(dataset):
     pending_df = get_pending_files(dataset)
     temp_df = pd.DataFrame(pending)
     pending_df = pd.concat([pending_df, temp_df])
-    write_pending_files(dataset, pending_df)
+    timestamp = SharedTimestamp()
+    write_pending_files(dataset, pending_df, timestamp)
 
     # copy errors to pending-errors-[datetime].csv
     timestamp = SharedTimestamp()
@@ -458,7 +455,7 @@ def qa_validation(dataset):
     # add fully-verified identifiers to validated file record
     val_records = [new_validation_record(dataset, id) for id in passed_ids]
     val_df = pd.DataFrame(val_records)
-    record_df = pd.concat(record_df, val_df)
+    record_df = pd.concat([record_df, val_df])
     try:
         write_file_record(dataset, record_df)
     except Exception as err:
@@ -501,7 +498,7 @@ def qa_validation(dataset):
     except subprocess.CalledProcessError as err:
         logger.error("Error cleaning up empty directories: %s", err)
 
-    print("QA check done!")
+    logger.info("QA check done!")
 
 
 if __name__ == "__main__":
@@ -512,17 +509,28 @@ if __name__ == "__main__":
         raise FileNotFoundError(f"Dataset {dataset} not found")
     datadict_path = os.path.join(dataset, DATADICT_SUBPATH)
     dd_df = pd.read_csv(datadict_path, index_col="variable")
+    
+    pending_dir = os.path.join(dataset, PENDING_SUBDIR)
+    os.makedirs(pending_dir, exist_ok=True)
+
+    pending_qa_dir = os.path.join(dataset, PENDING_QA_SUBDIR)
+    os.makedirs(pending_qa_dir, exist_ok=True)
 
     # set up logging to file and console
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
+    logger.propagate = False
 
     log_path = os.path.join(dataset, LOGGING_SUBPATH)
-    file_handler = logging.FileHandler(log_path)
+    os.makedirs(log_path, exist_ok=True)
+    file_name = f"hallMonitor-{get_timestamp()}.log"
+    log_file = os.path.join(log_path, file_name)
+    
+    file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter(
-        "[%(asctime)s] (%(levelname)s)\t%(funcname)s(): %(message)s"
+        "[%(asctime)s]\t(%(levelname)s)\t%(message)s"
     )
     file_handler.setFormatter(file_formatter)
 

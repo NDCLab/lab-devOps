@@ -32,7 +32,7 @@ RAW_SUBDIR = os.path.join("sourcedata", "raw", "")
 CHECKED_SUBDIR = os.path.join("sourcedata", "checked", "")
 PENDING_QA_SUBDIR = os.path.join("sourcedata", "pending-qa", "")
 QA_CHECKLIST_SUBPATH = os.path.join(PENDING_QA_SUBDIR, "qa-checklist.csv")
-DATASET_DIR = os.path.join("/home", "data", "NDClab", "datasets", "")
+DATASET_DIR = os.path.join("/home", "data", "NDClab", "datasets")
 LOGGING_SUBPATH = os.path.join("data-monitoring", "logs", "")
 UPDATE_TRACKER_SUBPATH = os.path.join("data-monitoring", "update-tracker.py")
 
@@ -182,6 +182,9 @@ class Identifier:
     def __eq__(self, other):
         return str(self) == str(other)
 
+    def __hash__(self):
+        return hash((self.subject, self.variable, self.session))
+
     def to_dir(self, dataset, is_raw=True):
         """
         Generates a directory path based on the provided DataFrame and whether the data is raw or checked.
@@ -271,7 +274,7 @@ class ColorfulFormatter(logging.Formatter):
 def validated_dataset(input):
     dataset = os.path.realpath(input)
     # only run on direct children of /home/data/NDClab/datasets
-    parent_dir = os.path.abspath(os.path.join(dataset, os.pardir))
+    parent_dir = os.path.realpath(os.path.join(dataset, os.pardir))
     if parent_dir != DATASET_DIR:
         raise argparse.ArgumentTypeError(f"{dataset} is not a valid dataset")
     return dataset
@@ -457,7 +460,7 @@ def write_file_record(dataset, df):
     - The DataFrame is then sorted by the 'datetime' and 'identifier' columns before being written to the CSV file.
     """
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
-    if set(df.columns) <= set(FILE_RECORD_COLS):  # df has at least FILE_RECORD_COLS
+    if set(FILE_RECORD_COLS).issubset(set(df.columns)):  # df has at least FILE_RECORD_COLS
         df = df[FILE_RECORD_COLS]
     else:
         missing_cols = set(FILE_RECORD_COLS) - set(df.columns)
@@ -545,6 +548,8 @@ def get_present_identifiers(dataset, is_raw=True):
                 dtype = get_variable_datatype(dataset, var)
             except KeyError:
                 dtype = ""
+            except ValueError:  # variable does not exist
+                continue
             ses = match.group(5)
             # Ignore combination rows for now
             if is_combination_var(dataset, var):
@@ -678,7 +683,7 @@ def get_unique_sub_ses(identifiers):
     return sub_ses
 
 
-def get_identifier_files(basedir, identifier, datatype, raw_order=True):
+def get_identifier_files(basedir, identifier, datatype, is_raw=True):
     """
     Retrieve files matching a specific identifier within a directory structure.
 
@@ -690,7 +695,7 @@ def get_identifier_files(basedir, identifier, datatype, raw_order=True):
         identifier (str or Identifier): The identifier used to navigate the directory
             structure. If a string is provided, it will be converted to an Identifier object.
         datatype (str): The identifier's datatype, used to filter the files.
-        raw_order (bool, optional): Determines the order of directory traversal.
+        is_raw (bool, optional): Determines the order of directory traversal.
             If True, the order is session/datatype/subject. If False, the order is
             subject/session/datatype. Defaults to True.
 
@@ -708,16 +713,19 @@ def get_identifier_files(basedir, identifier, datatype, raw_order=True):
         except ValueError as err:
             raise err
 
-    if raw_order:
+    ses_run_re = r"(s\d+_r\d+)_e\d+"
+    ses_run = re.fullmatch(ses_run_re, identifier.session).group(1)
+
+    if is_raw:
         # session / datatype / subject
-        dirs = [identifier.session, datatype, identifier.subject]
+        dirs = [ses_run, datatype, identifier.subject]
     else:
         # subject / session / datatype
-        dirs = [identifier.subject, identifier.session, datatype]
+        dirs = [identifier.subject, ses_run, datatype]
 
     # root all directories at basedir
     dirs[0] = os.path.join(basedir, dirs[0])
-    for idx, dirname in enumerate(dirs, 1):
+    for idx, dirname in enumerate(dirs[1:], start=1):
         dirs[idx] = os.path.join(dirs[idx - 1], dirname)
 
     for dirname in dirs:
@@ -775,7 +783,7 @@ def write_pending_files(dataset, df, timestamp):
     sorted by 'identifier' and 'datetime' columns before being written to the CSV file.
     """
     out = os.path.join(dataset, PENDING_SUBDIR, f"pending-files-{timestamp}.csv")
-    if set(df.columns) <= set(PENDING_FILES_COLS):  # df has at least PENDING_FILES_COLS
+    if set(PENDING_FILES_COLS).issubset(set(df.columns)):  # df has at least PENDING_FILES_COLS
         df = df[PENDING_FILES_COLS]
     else:
         missing_cols = set(PENDING_FILES_COLS) - set(df.columns)
@@ -1019,7 +1027,7 @@ def new_qa_checklist():
 def get_pending_errors(pending_df):
     errors = pending_df[pending_df["passRaw"] == 0]
     # errors has at least PENDING_ERRORS_COLS
-    if set(errors.columns) <= set(PENDING_ERRORS_COLS):
+    if set(PENDING_ERRORS_COLS).issubset(set(errors.columns)):
         return errors[PENDING_ERRORS_COLS]
     else:
         missing_cols = set(PENDING_ERRORS_COLS) - set(errors.columns)
@@ -1069,7 +1077,7 @@ def write_qa_tracker(dataset, df):
         None
     """
     checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
-    if set(df.columns) <= set(QA_CHECKLIST_COLS):  # df has at least QA_CHECKLIST_COLS
+    if set(QA_CHECKLIST_COLS).issubset(set(df.columns)):  # df has at least QA_CHECKLIST_COLS
         df = df[QA_CHECKLIST_COLS]
     else:
         missing_cols = set(QA_CHECKLIST_COLS) - set(df.columns)
