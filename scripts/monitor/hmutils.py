@@ -1115,7 +1115,7 @@ def clean_empty_dirs(basedir):
 
 def get_visit_pairs(datadict: pd.DataFrame):
     vars = datadict[["variable", "dataType", "provenance"]]
-    vars["root"] = vars["variable"].str.removesuffix("_status")
+    vars["root"] = vars["variable"].str.removesuffix("_status").str.removesuffix("_data")
 
     # get visit status vars, strip out type suffix
     status_vars = vars[vars["dataType"] == "visit_status"]
@@ -1124,26 +1124,30 @@ def get_visit_pairs(datadict: pd.DataFrame):
     # disregard provenance column for status vars
     status_vars = status_vars.drop(columns=["provenance"])
     # rename column to avoid collision on merge
-    status_vars.rename(columns={"variable": "statusvar"})
+    status_vars.rename(columns={"variable": "statusvar"}, inplace=True)
 
     data_vars = vars[vars["dataType"] == "visit_data"]
-    data_vars = data_vars[data_vars["root"] != data_vars["variable"]]
-    data_vars.rename(columns={"variable": "datavar"})
+    data_vars.rename(columns={"variable": "datavar"}, inplace=True)
 
     # TODO Does this drop all rows without root match? It should, so figure out how to make that happen if not.
-    var_pairs = list(status_vars.merge(data_vars, on="root"))
+    var_pairs = status_vars.merge(data_vars, on="root")
 
     visit_pairs = []
-    for pair in var_pairs:
-        data_files = get_datafiles_from_provenance(pair["provenance"])
-        visit_pairs += VisitPair(pair["datavar"], pair["statusvar"], data_files)
-
+    for _, pair in var_pairs.iterrows():
+        if "variables:" in pair["provenance"]:
+            data_files = get_datafiles_from_provenance(pair["provenance"])
+            visit_pairs += VisitPair(pair["datavar"], pair["statusvar"], data_files)
     return visit_pairs
 
 
 def get_datafiles_from_provenance(provenance: str):
-    # TODO: Write this method
-    pass
+    idx = provenance.find('variables:') + len('variables:')
+    provenance = provenance[idx:] # take the substring after "variables"
+    task_files = []
+    for task in provenance.split(","):
+        task = task.strip("\";, ")
+        task_files.append(task)
+    return task_files
 
 
 def get_expected_files(dataset, identifier):
