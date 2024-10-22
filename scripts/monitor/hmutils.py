@@ -551,9 +551,6 @@ def get_present_identifiers(dataset, is_raw=True):
             except ValueError:  # variable does not exist
                 continue
             ses = match.group(5)
-            # Ignore combination rows for now
-            if is_combination_var(dataset, var):
-                continue
             # Check that each identifier matches the subject, session, and datatype corresponding to its
             # directory path. If this does not match up, the identifier is not appended to present_ids.
             if is_raw:
