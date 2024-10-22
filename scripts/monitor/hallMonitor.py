@@ -533,16 +533,19 @@ if __name__ == "__main__":
         "[%(asctime)s]\t(%(levelname)s)\t%(message)s"
     )
     file_handler.setFormatter(file_formatter)
-
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_formatter = ColorfulFormatter(
-        "[%(relativeCreated)dms] (%(levelname)s)\t%(message)s"
-    )
-    console_handler.setFormatter(console_formatter)
-
     logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
+
+    if not args.quiet:
+        console_handler = logging.StreamHandler()
+        if args.verbose:
+            console_handler.setLevel(logging.DEBUG)
+        else:
+            console_handler.setLevel(logging.INFO)
+        console_formatter = ColorfulFormatter(
+            "[%(relativeCreated)dms] (%(levelname)s)\t%(message)s"
+        )
+        console_handler.setFormatter(console_formatter)
+        logger.addHandler(console_handler)
 
     logger.info("Logging initialized")
 
