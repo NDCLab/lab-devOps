@@ -526,7 +526,7 @@ def get_present_identifiers(dataset, is_raw=True):
 
     dd_df = get_datadict(dataset)
 
-    present_ids = []
+    present_ids = set()
     for path, _, files in os.walk(source_dir):
         relpath = os.path.relpath(path, source_dir)
         dirs = relpath.split("/")
@@ -561,11 +561,12 @@ def get_present_identifiers(dataset, is_raw=True):
                     continue
 
             try:
-                present_ids.append(Identifier.from_str(identifier))
+                new_id = Identifier.from_str(identifier)
+                present_ids.add(new_id)
             except ValueError:
                 continue
 
-    return present_ids
+    return list(present_ids)
 
 
 def get_expected_identifiers(dataset, present_ids):
