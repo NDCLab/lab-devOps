@@ -1290,7 +1290,6 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
     sub = file_match.group("subject")
     sub_num = sub.removeprefix("sub-")
     dd_df = get_datadict(dataset)
-    allowed_suffixes = get_allowed_suffixes(dd_df, var)
     possible_exts = get_possible_exts(dd_df, var)
     allowed_subs = dd_df[dd_df["variable"] == "id"]["allowedValues"].astype(str).iloc[0]
 
@@ -1326,6 +1325,18 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
                     f"Variable name {var} does not contain the name of the variable datatype {datatype}",
                 )
             )
+
+        allowed_suffixes = get_allowed_suffixes(dd_df, var)
+        if sre not in allowed_suffixes:
+            errors.append(
+                new_error_record(
+                    logger,
+                    dataset,
+                    id,
+                    "Naming error",
+                    f"Suffix {sre} not in allowed suffixes {str(allowed_suffixes)}",
+                )
+            )
     except ValueError:
         errors.append(
             new_error_record(
@@ -1334,16 +1345,6 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
                 id,
                 "Naming error",
                 f"Invalid variable name {var}",
-            )
-        )
-    if sre not in allowed_suffixes:
-        errors.append(
-            new_error_record(
-                logger,
-                dataset,
-                id,
-                "Naming error",
-                f"Suffix {sre} not in allowed suffixes {str(allowed_suffixes)}",
             )
         )
     if info is not None and not has_deviation:
