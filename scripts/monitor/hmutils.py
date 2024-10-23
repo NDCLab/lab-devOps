@@ -896,8 +896,8 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
     - "errorDetails" (str): Detailed information about the error.
     """
     try:
-        if isinstance(identifier, str):
-            identifier = Identifier.from_str(identifier)
+        if not isinstance(identifier, Identifier):
+            identifier = Identifier.from_str(str(identifier))
         id_str = identifier.to_detailed_str(dataset)
     except ValueError:
         id_str = "Unknown Identifier"
