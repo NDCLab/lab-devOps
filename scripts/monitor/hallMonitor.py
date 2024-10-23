@@ -92,11 +92,18 @@ def validate_data(logger, dataset, is_raw=True):
     present_ids = get_present_identifiers(dataset, is_raw=is_raw)
     expected_ids = get_expected_identifiers(dataset, present_ids)
     missing_ids = list(set(expected_ids) - set(present_ids))
+    logger.debug(
+        "Found %d present id(s), %d expected id(s), %d missing id(s)",
+        len(present_ids),
+        len(expected_ids),
+        len(missing_ids),
+    )
 
     # raise errors for missing identifiers without a no-data.txt
     for id in missing_ids:
         id_as_dir = id.to_dir(dataset, is_raw=is_raw)
         if any([re.match(f"{id}-no-data.txt", file) for file in os.listdir(id_as_dir)]):
+            logger.debug("Skipping %s, no-data.txt found", str(id))
             continue
         pending.append(
             new_error_record(
@@ -109,6 +116,7 @@ def validate_data(logger, dataset, is_raw=True):
         )
 
     sub_ses_run = get_unique_sub_ses_run(present_ids)
+    logger.debug("Found %d unique subject/session/run combinations", len(sub_ses_run))
 
     # check conditions for combination rows
     combo_rows = get_expected_combination_rows(dataset)
@@ -141,6 +149,11 @@ def validate_data(logger, dataset, is_raw=True):
                     )
 
             else:  # more than one combination variable present; raise an error for each
+                logger.debug(
+                    "Found %d combination variables for combination row %s",
+                    num_combo_vars,
+                    combo.name,
+                )
                 for identifier in present_combo_ids:
                     pending.append(
                         new_error_record(
@@ -156,8 +169,10 @@ def validate_data(logger, dataset, is_raw=True):
 
     # loop over present identifiers (as Identifier objects)
     for id in present_ids:
+        logger.debug("Checking identifier %s", str(id))
         # initialize error tracking for this directory if it doesn't exist
         id_dir = id.to_dir(dataset, is_raw=is_raw)
+        logger.debug("Initialized id_dir as %s", id_dir)
         if id_dir not in logged_missing_ids:
             logged_missing_ids[id_dir] = set()
         if id.variable not in dd_dict.keys():
@@ -170,6 +185,7 @@ def validate_data(logger, dataset, is_raw=True):
         # get files for identifier
         try:
             datatype = get_variable_datatype(dataset, id.variable)
+            logger.debug("Identifier datatype is %s", datatype)
             id_files = get_identifier_files(base_dir, id, datatype, is_raw=is_raw)
             id_files_basename = [os.path.basename(file) for file in id_files]
             logger.debug("Found %d file(s) for identifier %s", len(id_files), id)
@@ -214,6 +230,7 @@ def validate_data(logger, dataset, is_raw=True):
         dir_missing_ids = [
             id for id in missing_ids if id.to_dir(dataset, is_raw=is_raw) == id_dir
         ]
+        logger.debug("Found %d missing identifier(s)", len(dir_missing_ids))
 
         # handle misnamed files
         # TODO: Replace this with check_filenames() once rewrite is done (see #266)
@@ -254,6 +271,11 @@ def validate_data(logger, dataset, is_raw=True):
                     err[id] = str(missing_id)
                     pending.append(err)
                 logged_missing_ids[id_dir].add(err_type)
+                logger.debug(
+                    "Logged error %s for missing identifiers in dir %s",
+                    err_type,
+                    id_dir,
+                )
 
         # handle appropriately named but misplaced files
         correct_files = list(set(id_files) - set(misnamed_files))
@@ -264,6 +286,7 @@ def validate_data(logger, dataset, is_raw=True):
             id_match = re.fullmatch(FILE_RE, os.path.basename(file))
             file_id = Identifier.from_str(id_match.group("id"))
             correct_dir = os.path.realpath(file_id.to_dir(dataset, is_raw=is_raw))
+            logger.debug("Identifier's correct directory is %s", correct_dir)
 
             # if the file is not in the right directory, raise errors
             if os.path.realpath(id_dir) != correct_dir:
@@ -306,11 +329,15 @@ def validate_data(logger, dataset, is_raw=True):
                         "deviation.txt cannot signify only 1 file; use no-data.txt.",
                     )
                 )
-                logger.debug("Found only deviation.txt; expected more files")
         else:  # normal case
             expected_files = get_expected_files(dataset, id)
 
-        logger.debug("Expect %d file(s) for identifier %s", len(expected_files), id)
+        logger.debug(
+            "Expect %d file(s) for identifier %s: %s",
+            len(expected_files),
+            id,
+            expected_files,
+        )
 
         # check for missing expected files
         n_missing = 0
@@ -326,7 +353,7 @@ def validate_data(logger, dataset, is_raw=True):
                     )
                 )
                 n_missing += 1
-        logger.debug("Found %d missing files", n_missing)
+        logger.debug("Found %d missing file(s)", n_missing)
 
         # check for unexpected file presence
         n_unexpected = 0
@@ -342,7 +369,7 @@ def validate_data(logger, dataset, is_raw=True):
                     )
                 )
                 n_unexpected += 1
-        logger.debug("Found %d unexpected files", n_unexpected)
+        logger.debug("Found %d unexpected file(s)", n_unexpected)
 
         # --- special data checks ---
 
@@ -364,6 +391,7 @@ def validate_data(logger, dataset, is_raw=True):
             # check if this identifier has any errors
             if not any(row["id"] == id and row["passRaw"] == 0 for row in pending):
                 pending.append(new_pass_record(id))
+                logger.debug("Identifier %s had no errors", str(id))
 
         continue  # go to next present identifier
 
