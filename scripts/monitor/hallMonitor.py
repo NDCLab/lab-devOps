@@ -143,7 +143,7 @@ def validate_data(logger, dataset, is_raw=True):
                             logger,
                             dataset,
                             identifier,
-                            "Combination variable error"
+                            "Combination variable error",
                             f"Multiple variables present for combination row {combo.name}, expected one.",
                         )
                     )
