@@ -1583,38 +1583,52 @@ def get_psychopy_errors(logger, dataset, files):
     #   if csv is present, make sure id inside matches file name
     if csvfile:
         # leading zeroes are significant for subject ID, so read as string
-        file_df = pd.read_csv(csvfile, dtype=str)
-        if "id" in file_df:
-            id_col = file_df["id"]
-        # Column sometimes called "participant"
-        elif "participant" in file_df:
-            id_col = file_df["participant"]
-        else:
-            raise ValueError("No ID column found in .csv file")
+        try:
+            file_df = pd.read_csv(csvfile, dtype=str)
 
-        if id_col.isna().any():
+        except pd.errors.ParserError:
             errors.append(
                 new_error_record(
                     logger,
                     dataset,
                     identifier,
                     "Psychopy error",
-                    f"NaN value seen under ID in .csv file, expected {id_num}",
+                    f"Could not read {csvfile}",
                 )
             )
 
         else:
-            bad_ids = id_col[id_col != id_num].unique()
-            if bad_ids.size != 0:
+            if "id" in file_df:
+                id_col = file_df["id"]
+            # Column sometimes called "participant"
+            elif "participant" in file_df:
+                id_col = file_df["participant"]
+            else:
+                raise ValueError("No ID column found in .csv file")
+
+            if id_col.isna().any():
                 errors.append(
                     new_error_record(
                         logger,
                         dataset,
                         identifier,
                         "Psychopy error",
-                        f"ID value(s) [{', '.join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
+                        f"NaN value seen under ID in .csv file, expected {id_num}",
                     )
                 )
+
+            else:
+                bad_ids = id_col[id_col != id_num].unique()
+                if bad_ids.size != 0:
+                    errors.append(
+                        new_error_record(
+                            logger,
+                            dataset,
+                            identifier,
+                            "Psychopy error",
+                            f"ID value(s) [{', '.join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
+                        )
+                    )
 
     return errors
 
