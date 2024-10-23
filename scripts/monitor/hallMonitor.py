@@ -171,6 +171,7 @@ def validate_data(logger, dataset, is_raw=True):
         try:
             datatype = get_variable_datatype(dataset, id.variable)
             id_files = get_identifier_files(base_dir, id, datatype, is_raw=is_raw)
+            id_files_basename = [os.path.basename(file) for file in id_files]
             logger.debug("Found %d file(s) for identifier %s", len(id_files), id)
         except FileNotFoundError as err:
             pending.append(
@@ -181,8 +182,8 @@ def validate_data(logger, dataset, is_raw=True):
             continue
 
         # --- check for exception files, set flags ---
-        has_deviation = str(id) + "-deviation.txt" in id_files
-        has_no_data = str(id) + "-no-data.txt" in id_files
+        has_deviation = str(id) + "-deviation.txt" in id_files_basename
+        has_no_data = str(id) + "-no-data.txt" in id_files_basename
         logger.debug("has_deviation=%s, has_no_data=%s", has_deviation, has_no_data)
         if has_deviation and has_no_data:
             pending.append(
@@ -314,7 +315,7 @@ def validate_data(logger, dataset, is_raw=True):
         # check for missing expected files
         n_missing = 0
         for file in expected_files:
-            if file not in id_files:
+            if file not in id_files_basename:
                 pending.append(
                     new_error_record(
                         logger,
@@ -329,7 +330,7 @@ def validate_data(logger, dataset, is_raw=True):
 
         # check for unexpected file presence
         n_unexpected = 0
-        for file in id_files:
+        for file in id_files_basename:
             if file not in expected_files:
                 pending.append(
                     new_error_record(
