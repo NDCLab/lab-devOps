@@ -894,16 +894,7 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
     - "identifier" (str): The unique identifier for the error.
     - "errorType" (str): The type/category of the error.
     - "errorDetails" (str): Detailed information about the error.
-
-    Raises:
-        ValueError: If the identifier string cannot be converted to an Identifier object.
     """
-    if isinstance(identifier, str):
-        try:
-            identifier = Identifier.from_str(identifier)
-        except ValueError as err:
-            raise err
-
     logger.error(
         "Error occurred with identifier %s: %s - %s",
         identifier.to_detailed_str(dataset),
