@@ -115,7 +115,7 @@ def validate_data(logger, dataset, is_raw=True):
                 id
                 for id in present_ids
                 if id.variable in combo.variables
-                and id.sub == sub
+                and id.subject == sub
                 and id.session == ses
             ]
             num_combo_vars = len(present_combo_ids)
