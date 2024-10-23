@@ -395,7 +395,7 @@ def validate_data(logger, dataset, is_raw=True):
 
         if is_raw:  # only log pass rows for raw data
             # check if this identifier has any errors
-            if not any(row["id"] == id and row["passRaw"] == 0 for row in pending):
+            if not any(p["identifier"] == id and p["passRaw"] == 0 for p in pending):
                 pending.append(new_pass_record(id))
                 logger.debug("Identifier %s had no errors", str(id))
 
