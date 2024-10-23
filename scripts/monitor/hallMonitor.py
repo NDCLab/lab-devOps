@@ -287,7 +287,11 @@ def validate_data(logger, dataset, is_raw=True):
             base_name = os.path.basename(file)
             id_match = re.fullmatch(FILE_RE, base_name)
             file_id = Identifier.from_str(id_match.group("id"))
-            correct_dir = os.path.realpath(file_id.to_dir(dataset, is_raw=is_raw))
+            try:
+                correct_dir = os.path.realpath(file_id.to_dir(dataset, is_raw=is_raw))
+            except ValueError:
+                logger.debug("File %s contains bad variable name", base_name)
+                continue
             logger.debug("Correct directory for file %s is %s", base_name, correct_dir)
 
             # if the file is not in the right directory, raise errors
