@@ -1315,14 +1315,26 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
                 f"Subject number {sub_num} not an allowed subject value {str(allowed_subs)} in file {filename}",
             )
         )
-    if datatype not in var:
+    try:
+        datatype = get_variable_datatype(dataset, var)
+        if datatype not in var:
+            errors.append(
+                new_error_record(
+                    logger,
+                    dataset,
+                    id,
+                    "Naming error",
+                    f"Variable name {var} does not contain the name of the variable datatype {datatype}",
+                )
+            )
+    except ValueError:
         errors.append(
             new_error_record(
                 logger,
                 dataset,
                 id,
                 "Naming error",
-                f"Variable name {var} does not contain the name of the variable datatype {datatype}",
+                f"Invalid variable name {var}",
             )
         )
     if sre not in allowed_suffixes:
