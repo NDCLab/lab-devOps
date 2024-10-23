@@ -895,9 +895,16 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
     - "errorType" (str): The type/category of the error.
     - "errorDetails" (str): Detailed information about the error.
     """
+    try:
+        if isinstance(identifier, str):
+            identifier = Identifier.from_str(identifier)
+        id_str = identifier.to_detailed_str(dataset)
+    except ValueError:
+        id_str = "Unknown Identifier"
+
     logger.error(
         "Error occurred with identifier %s: %s - %s",
-        identifier.to_detailed_str(dataset),
+        id_str,
         error_type,
         error_details,
     )
