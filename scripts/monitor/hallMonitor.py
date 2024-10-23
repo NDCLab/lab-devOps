@@ -173,7 +173,7 @@ def validate_data(logger, dataset, is_raw=True):
         logger.debug("Initialized id_dir as %s", id_dir)
         if id_dir not in logged_missing_ids:
             logged_missing_ids[id_dir] = set()
-        if id.variable not in dd_df["variable"]:
+        if dd_df[dd_df["variable"] == id.variable].empty:
             pending.append(
                 new_error_record(
                     logger,
