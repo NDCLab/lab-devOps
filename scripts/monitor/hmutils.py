@@ -1290,7 +1290,6 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
     sub = file_match.group("subject")
     sub_num = sub.removeprefix("sub-")
     dd_df = get_datadict(dataset)
-    datatype = get_variable_datatype(dataset, var)
     allowed_suffixes = get_allowed_suffixes(dd_df, var)
     possible_exts = get_possible_exts(dd_df, var)
     allowed_subs = dd_df[dd_df["variable"] == "id"]["allowedValues"].astype(str).iloc[0]
