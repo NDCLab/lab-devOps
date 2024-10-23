@@ -1597,6 +1597,17 @@ def get_psychopy_errors(logger, dataset, files):
                 )
             )
 
+        except pd.errors.EmptyDataError:
+            errors.append(
+                new_error_record(
+                    logger,
+                    dataset,
+                    identifier,
+                    "Psychopy error",
+                    f"No data found in {csvfile}",
+                )
+            )
+
         else:
             if "id" in file_df:
                 id_col = file_df["id"]
