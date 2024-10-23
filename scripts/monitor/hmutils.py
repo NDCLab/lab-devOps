@@ -1302,7 +1302,7 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
                 dataset,
                 id,
                 "Naming error",
-                f"File extension {file_ext} doesn't match expected extensions {", ".join(possible_exts)} in file {filename}",
+                f"File extension {file_ext} doesn't match expected extensions {', '.join(possible_exts)} in file {filename}",
             )
         )
     if sub_num and not allowed_val(allowed_subs, sub_num):
