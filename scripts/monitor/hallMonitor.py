@@ -42,7 +42,6 @@ from hmutils import (
     new_pass_record,
     new_qa_record,
     new_validation_record,
-    parse_datadict,
     write_file_record,
     write_pending_errors,
     write_pending_files,
@@ -82,7 +81,6 @@ def validate_data(logger, dataset, is_raw=True):
     # initialize variables
     pending = []
     dd_df = get_datadict(dataset, index_col="variable")
-    dd_dict, combination_rows, allowed_subs = parse_datadict(dd_df)
     if is_raw:
         base_dir = os.path.join(dataset, RAW_SUBDIR)
     else:
@@ -175,7 +173,7 @@ def validate_data(logger, dataset, is_raw=True):
         logger.debug("Initialized id_dir as %s", id_dir)
         if id_dir not in logged_missing_ids:
             logged_missing_ids[id_dir] = set()
-        if id.variable not in dd_dict.keys():
+        if id.variable not in dd_df["variable"]:
             pending.append(
                 new_error_record(
                     logger, dataset, id, "Improper variable name"

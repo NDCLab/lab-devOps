@@ -1253,28 +1253,6 @@ def allowed_val(allowed_vals, value):
             break
     return allowed
 
-def parse_datadict(dd_df):
-    dd_dict = dict()
-    task_vars = []
-    combination_rows = {}
-    allowed_subs = dd_df.loc["id", "allowedValues"]
-    for _, row in dd_df.iterrows():
-        if not isinstance(row["expectedFileExt"], float): # all rows in datadict with extensions i.e. with data files
-            task_vars.append(row.name)
-        if row["dataType"] == "combination":
-            idx = row["provenance"].split(" ").index("variables:")
-            vars = "".join(row["provenance"].split(" ")[idx+1:]).split(",")
-            vars = [var.strip("\"") for var in vars]
-            combination_rows[row.name] = vars
-    # build dict of expected files/datatypes from datadict
-    for var, row in dd_df.iterrows():
-        if row.name in task_vars:
-            #dd_dict[var] = [row["dataType"], allowed_sfxs, expected_exts, row["encrypted"]]
-            allowed_sfxs = [x.strip() for x in row["allowedSuffix"].split(",")]
-            expected_exts = [x.strip() for x in row["expectedFileExt"].split(",")]
-            dd_dict[var] = [row["dataType"], allowed_sfxs, expected_exts]
-    return dd_dict, combination_rows, allowed_subs
-
 
 def get_naming_errors(logger, dataset, filename, has_deviation=False):
     """
