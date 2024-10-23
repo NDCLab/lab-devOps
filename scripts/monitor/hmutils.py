@@ -174,7 +174,7 @@ class Identifier:
     variable: str
     session: str
     run: str
-    event: str
+    event: str = None
 
     def __str__(self):
         s = f"{self.subject}_{self.variable}_{self.session}_{self.event}"
