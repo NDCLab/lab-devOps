@@ -132,7 +132,7 @@ def get_allowed_suffixes(dd_df, variable):
     var_row = dd_df[dd_df["variable"] == variable]
     if var_row.empty:
         raise ValueError(f"Variable {variable} not found in data dictionary")
-    allowed = str(var_row["allowedSuffixes"].iloc[0])
+    allowed = str(var_row["allowedSuffix"].iloc[0])
     if allowed == "NA":
         return []
     allowed = allowed.split(",") if allowed else []
