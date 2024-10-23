@@ -1508,7 +1508,7 @@ def get_psychopy_errors(logger, dataset, files):
 
     id_str = re.fullmatch(FILE_RE, os.path.basename(files[0])).group("id")
     identifier = Identifier.from_str(id_str)
-    id_num = int(identifier.subject.removeprefix("sub-"))
+    id_num = identifier.subject.removeprefix("sub-")
 
     # don't error on missing files here, since they are handled in presence checks
     csvfile = logfile = psydatfile = ""
@@ -1604,8 +1604,8 @@ def get_psychopy_errors(logger, dataset, files):
             )
 
         else:
-            bad_ids = id_col[id_col != id_num]
-            if not bad_ids.empty:
+            bad_ids = id_col[id_col != id_num].unique()
+            if bad_ids.size != 0:
                 errors.append(
                     new_error_record(
                         logger,
