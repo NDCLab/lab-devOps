@@ -437,6 +437,7 @@ def raw_data_validation(dataset):
 
     errors = [r for r in pending if not r["passRaw"]]
     logger.info("Raw data validation complete, found %d errors", len(errors))
+    logger.info("Found %d identifiers with no errors", len(pending) - len(errors))
 
     # add pending rows to pending-files-[datetime].csv
     pending_df = get_pending_files(dataset)
