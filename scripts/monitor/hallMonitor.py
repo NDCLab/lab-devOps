@@ -176,7 +176,11 @@ def validate_data(logger, dataset, is_raw=True):
         if id.variable not in dd_df["variable"]:
             pending.append(
                 new_error_record(
-                    logger, dataset, id, "Improper variable name"
+                    logger,
+                    dataset,
+                    id,
+                    "Improper variable name",
+                    f"{id.variable} is not a valid variable name",
                 )
             )
 
