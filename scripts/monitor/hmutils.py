@@ -744,8 +744,7 @@ def get_identifier_files(basedir, identifier, datatype, is_raw=True):
         except ValueError as err:
             raise err
 
-    ses_run_re = r"(s\d+_r\d+)_e\d+"
-    ses_run = re.fullmatch(ses_run_re, identifier.session).group(1)
+    ses_run = f"{identifier.session}_{identifier.run}"
 
     if is_raw:
         # session / datatype / subject
