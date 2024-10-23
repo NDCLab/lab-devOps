@@ -317,6 +317,12 @@ def get_args():
         action="store_true",
         help="dataset includes child data",
     )
+    parser.add_argument(
+        "-n",
+        "--no-color",
+        action="store_true",
+        help="disable color in output, useful for logging or plain-text environments",
+    )
 
     verbosity = parser.add_mutually_exclusive_group()
     verbosity.add_argument(
