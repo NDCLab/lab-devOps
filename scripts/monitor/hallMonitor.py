@@ -28,16 +28,16 @@ from hmutils import (
     get_expected_identifiers,
     get_file_record,
     get_identifier_files,
+    get_naming_errors,
     get_new_redcaps,
     get_pending_errors,
     get_pending_files,
     get_present_identifiers,
     get_psychopy_errors,
-    get_timestamp,
     get_qa_checklist,
+    get_timestamp,
     get_unique_sub_ses_run,
     get_variable_datatype,
-    meets_naming_conventions,
     new_error_record,
     new_pass_record,
     new_qa_record,
@@ -233,11 +233,10 @@ def validate_data(logger, dataset, is_raw=True):
         logger.debug("Found %d missing identifier(s)", len(dir_missing_ids))
 
         # handle misnamed files
-        # TODO: Replace this with check_filenames() once rewrite is done (see #266)
         
         misnamed_files = []
         for file in dir_files:
-            naming_errors = meets_naming_conventions(logger, dataset, file, dd_dict, allowed_subs, has_deviation)
+            naming_errors = get_naming_errors(logger, dataset, file, has_deviation)
             if len(naming_errors) > 0:
                 pending.extend(naming_errors)
                 logger.debug("Found %d naming error(s) in file %s", len(naming_errors), file)
