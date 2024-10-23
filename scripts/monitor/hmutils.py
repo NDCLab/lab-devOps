@@ -177,7 +177,7 @@ class Identifier:
     event: str = None
 
     def __str__(self):
-        s = f"{self.subject}_{self.variable}_{self.session}_{self.event}"
+        s = f"{self.subject}_{self.variable}_{self.session}_{self.run}_{self.event}"
         return s
 
     def __eq__(self, other):
