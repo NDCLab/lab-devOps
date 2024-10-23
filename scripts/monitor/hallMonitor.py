@@ -93,15 +93,18 @@ def validate_data(logger, dataset, is_raw=True):
     expected_ids = get_expected_identifiers(dataset, present_ids)
     missing_ids = list(set(expected_ids) - set(present_ids))
 
-    # add errors for missing identifiers
+    # raise errors for missing identifiers without a no-data.txt
     for id in missing_ids:
+        id_as_dir = id.to_dir(dataset, is_raw=is_raw)
+        if any([re.match(f"{id}-no-data.txt", file) for file in os.listdir(id_as_dir)]):
+            continue
         pending.append(
             new_error_record(
                 logger,
                 dataset,
                 id,
                 "Missing identifier",
-                f"Missing identifier in {base_dir}",
+                f"Missing identifier in {id_as_dir}",
             )
         )
 
