@@ -323,6 +323,12 @@ def get_args():
         action="store_true",
         help="disable color in output, useful for logging or plain-text environments",
     )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        help="file path for logger output (defaults to timestamped file in data-monitoring/logs/).",
+    )
 
     verbosity = parser.add_mutually_exclusive_group()
     verbosity.add_argument(
