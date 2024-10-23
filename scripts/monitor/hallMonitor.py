@@ -257,7 +257,7 @@ def validate_data(logger, dataset, is_raw=True):
         n_misplaced = 0
         for file in correct_files:
             # figure out which directory the file should be in
-            id_match = re.fullmatch(FILE_RE, file)
+            id_match = re.fullmatch(FILE_RE, os.path.basename(file))
             file_id = Identifier.from_str(id_match.group("id"))
             correct_dir = os.path.realpath(file_id.to_dir(dataset, is_raw=is_raw))
 
