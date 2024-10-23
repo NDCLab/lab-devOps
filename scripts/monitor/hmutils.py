@@ -1275,7 +1275,8 @@ def parse_datadict(dd_df):
             dd_dict[var] = [row["dataType"], allowed_sfxs, expected_exts]
     return dd_dict, combination_rows, allowed_subs
 
-def meets_naming_conventions(logger, dataset, filename, dd_dict, allowed_subs, has_deviation=False):
+
+def get_naming_errors(logger, dataset, filename, has_deviation=False):
     """
     Check if a filename meets the naming conventions for a data file.
 
@@ -1305,51 +1306,70 @@ def meets_naming_conventions(logger, dataset, filename, dd_dict, allowed_subs, h
         return errors
     id = file_match.group("id")
     var = file_match.group("var")
-    datatype, allowed_suffixes, possible_exts = dd_dict[var]
-    allowed_subs = allowed_subs
-    combination_rows = {}
-    if file_match.group('ext') not in dd_dict[var][2] and len(file_match.group('ext')) > 0:
+    sre = file_match.group("sre")
+    info = file_match.group("info")
+    file_ext = file_match.group("ext")
+    sub = file_match.group("subject")
+    sub_num = sub.removeprefix("sub-")
+    dd_df = get_datadict(dataset)
+    datatype = get_variable_datatype(dataset, var)
+    allowed_suffixes = get_allowed_suffixes(dd_df, var)
+    possible_exts = get_possible_exts(dd_df, var)
+    allowed_subs = dd_df[dd_df["variable"] == "id"]["allowedValues"]
+
+    if file_ext and file_ext not in possible_exts:
         errors.append(
             new_error_record(
                 logger,
                 dataset,
                 id,
                 "Naming error",
-                f"File extension {file_match.group('ext')} doesn't match expected extensions {str(dd_dict[var][2])} in file {filename}"
+                f"File extension {file_ext} doesn't match expected extensions {", ".join(possible_exts)} in file {filename}",
             )
         )
-    if file_match.group('subject')[4:] != '' and not allowed_val(allowed_subs, file_match.group('subject')[4:]):
+    if sub_num and not allowed_val(allowed_subs, sub_num):
         errors.append(
             new_error_record(
                 logger,
                 dataset,
                 id,
                 "Naming error",
-                f"Subject number {file_match.group('subject')[4:]} not an allowed subject value {str(allowed_subs)} in file {filename}"
+                f"Subject number {sub_num} not an allowed subject value {str(allowed_subs)} in file {filename}",
             )
         )
-    if datatype not in file_match.group('var'):
+    if datatype not in var:
         errors.append(
             new_error_record(
                 logger,
                 dataset,
                 id,
                 "Naming error",
-                f"Variable name {file_match.group('var')} does not contain the name of the variable datatype {datatype}"
+                f"Variable name {var} does not contain the name of the variable datatype {datatype}",
             )
         )
-    if file_match.group('sre') not in allowed_suffixes:
+    if sre not in allowed_suffixes:
         errors.append(
             new_error_record(
                 logger,
                 dataset,
                 id,
                 "Naming error",
-                f"Suffix {file_match.group('sre')} not in allowed suffixes {str(allowed_suffixes)}"
+                f"Suffix {sre} not in allowed suffixes {str(allowed_suffixes)}",
             )
         )
-    # Other checks to perform elsewhere: session matches enclosing folder, datatype matches enclosing folder, subject matches enclosing folder
+    if info is not None and not has_deviation:
+        errors.append(
+            new_error_record(
+                logger,
+                dataset,
+                id,
+                "Naming error",
+                f"File name {filename} contains additional information ({info}), but deviation.txt is missing",
+            )
+        )
+
     return errors
+
 
 def get_eeg_errors(logger, dataset, files):
     """
