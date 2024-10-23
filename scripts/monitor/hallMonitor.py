@@ -286,7 +286,7 @@ def validate_data(logger, dataset, is_raw=True):
             id_match = re.fullmatch(FILE_RE, os.path.basename(file))
             file_id = Identifier.from_str(id_match.group("id"))
             correct_dir = os.path.realpath(file_id.to_dir(dataset, is_raw=is_raw))
-            logger.debug("Identifier's correct directory is %s", correct_dir)
+            logger.debug("Correct directory for file %s is %s", file, correct_dir)
 
             # if the file is not in the right directory, raise errors
             if os.path.realpath(id_dir) != correct_dir:
