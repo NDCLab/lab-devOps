@@ -1293,7 +1293,7 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
     datatype = get_variable_datatype(dataset, var)
     allowed_suffixes = get_allowed_suffixes(dd_df, var)
     possible_exts = get_possible_exts(dd_df, var)
-    allowed_subs = dd_df[dd_df["variable"] == "id"]["allowedValues"]
+    allowed_subs = dd_df[dd_df["variable"] == "id"]["allowedValues"].astype(str).iloc[0]
 
     if file_ext and file_ext not in possible_exts:
         errors.append(
