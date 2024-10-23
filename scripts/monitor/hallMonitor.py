@@ -126,7 +126,7 @@ def validate_data(logger, dataset, is_raw=True):
 
             elif num_combo_vars == 0:  # raise an error for each possible identifier
                 for var in combo.variables:
-                    identifier = Identifier(sub, var, ses)
+                    identifier = Identifier(sub, var, run, ses)
                     pending.append(
                         new_error_record(
                             logger,
