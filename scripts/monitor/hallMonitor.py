@@ -522,10 +522,13 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     logger.propagate = False
 
-    log_path = os.path.join(dataset, LOGGING_SUBPATH)
-    os.makedirs(log_path, exist_ok=True)
-    file_name = f"hallMonitor-{get_timestamp()}.log"
-    log_file = os.path.join(log_path, file_name)
+    if args.output:
+        log_file = args.output
+    else:
+        log_path = os.path.join(dataset, LOGGING_SUBPATH)
+        os.makedirs(log_path, exist_ok=True)
+        file_name = f"hallMonitor-{get_timestamp()}.log"
+        log_file = os.path.join(log_path, file_name)
     
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
