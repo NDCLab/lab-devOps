@@ -173,16 +173,30 @@ class Identifier:
     subject: str
     variable: str
     session: str
+    run: str
+    event: str
 
     def __str__(self):
-        s = f"{self.subject}_{self.variable}_{self.session}"
+        s = f"{self.subject}_{self.variable}_{self.session}_{self.event}"
         return s
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        if not isinstance(other, self.__class__):
+            return False
+        return (
+            self.subject,
+            self.variable,
+            self.session,
+            self.run,
+        ) == (
+            other.subject,
+            other.variable,
+            other.session,
+            other.run,
+        )
 
     def __hash__(self):
-        return hash((self.subject, self.variable, self.session))
+        return hash((self.subject, self.variable, self.session, self.run))
 
     def to_dir(self, dataset, is_raw=True):
         """
@@ -196,14 +210,14 @@ class Identifier:
             str: The generated directory path.
         """
         datatype = get_variable_datatype(dataset, self.variable)
-        ses = re.fullmatch(r"(s\d+_r\d+)_e\d+", self.session).group(1)
+        ses_run = f"{self.session}_{self.run}"
         # generate full path based on whether the data is raw or checked
         if is_raw:
-            data_path = os.path.join(ses, datatype, self.subject, "")
+            data_path = os.path.join(ses_run, datatype, self.subject, "")
             full_path = os.path.join(dataset, RAW_SUBDIR, data_path)
             return full_path
         else:
-            data_path = os.path.join(self.subject, ses, datatype, "")
+            data_path = os.path.join(self.subject, ses_run, datatype, "")
             full_path = os.path.join(dataset, CHECKED_SUBDIR, data_path)
             return full_path
 
@@ -219,7 +233,7 @@ class Identifier:
                  subject, variable, session, datatype, and whether it is a combination variable.
         """
         datatype = get_variable_datatype(dataset, self.variable)
-        s = f"{self.subject}/{self.variable}/{self.session} ({datatype})"
+        s = f"{self.subject}/{self.variable}/{self.session}_{self.run}_{self.event} ({datatype})"
         if is_combination_var(dataset, self.variable):
             s += " (combination)"
         return s
@@ -243,7 +257,11 @@ class Identifier:
         sub_id = match.group("subject")
         var = match.group("var")
         sre = match.group("sre")
-        return Identifier(sub_id, var, sre)
+        sre_match = re.fullmatch(r"(s\d+)_(r\d+)_(e\d+)", sre)
+        ses = sre_match.group(1)
+        run = sre_match.group(2)
+        event = sre_match.group(3)
+        return Identifier(sub_id, var, ses, run, event)
 
 
 @dataclass
