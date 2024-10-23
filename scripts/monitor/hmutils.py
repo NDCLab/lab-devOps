@@ -1290,19 +1290,8 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
     sub = file_match.group("subject")
     sub_num = sub.removeprefix("sub-")
     dd_df = get_datadict(dataset)
-    possible_exts = get_possible_exts(dd_df, var)
     allowed_subs = dd_df[dd_df["variable"] == "id"]["allowedValues"].astype(str).iloc[0]
 
-    if file_ext and file_ext not in possible_exts:
-        errors.append(
-            new_error_record(
-                logger,
-                dataset,
-                id,
-                "Naming error",
-                f"File extension {file_ext} doesn't match expected extensions {', '.join(possible_exts)} in file {filename}",
-            )
-        )
     if sub_num and not allowed_val(allowed_subs, sub_num):
         errors.append(
             new_error_record(
@@ -1335,6 +1324,18 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
                     id,
                     "Naming error",
                     f"Suffix {sre} not in allowed suffixes {str(allowed_suffixes)}",
+                )
+            )
+
+        possible_exts = get_possible_exts(dd_df, var)
+        if file_ext and file_ext not in possible_exts:
+            errors.append(
+                new_error_record(
+                    logger,
+                    dataset,
+                    id,
+                    "Naming error",
+                    f"File extension {file_ext} doesn't match expected extensions {', '.join(possible_exts)} in file {filename}",
                 )
             )
     except ValueError:
