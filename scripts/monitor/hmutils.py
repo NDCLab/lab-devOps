@@ -1216,7 +1216,7 @@ def get_expected_files(dataset, identifier):
         raise ValueError(f"Variable {identifier.variable} has no extensions")
     expected_exts = expected_exts.iloc[0]
     expected_exts = str(expected_exts).strip('"').replace(" ", "").split(",")
-    expected_files = [f"{identifier}.{ext}" for ext in expected_exts if ext]
+    expected_files = [str(identifier) + ext for ext in expected_exts if ext]
     return expected_files
 
 def allowed_val(allowed_vals, value):
