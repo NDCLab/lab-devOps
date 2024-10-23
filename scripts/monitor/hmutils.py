@@ -199,9 +199,13 @@ class Identifier:
         ses = re.fullmatch(r"(s\d+_r\d+)_e\d+", self.session).group(1)
         # generate full path based on whether the data is raw or checked
         if is_raw:
-            return os.path.join(ses, datatype, self.subject, "")
+            data_path = os.path.join(ses, datatype, self.subject, "")
+            full_path = os.path.join(dataset, RAW_SUBDIR, data_path)
+            return full_path
         else:
-            return os.path.join(self.subject, ses, datatype, "")
+            data_path = os.path.join(self.subject, ses, datatype, "")
+            full_path = os.path.join(dataset, CHECKED_SUBDIR, data_path)
+            return full_path
 
     def to_detailed_str(self, dataset):
         """
