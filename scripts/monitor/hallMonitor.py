@@ -541,9 +541,11 @@ if __name__ == "__main__":
             console_handler.setLevel(logging.DEBUG)
         else:
             console_handler.setLevel(logging.INFO)
-        console_formatter = ColorfulFormatter(
-            "[%(relativeCreated)dms] (%(levelname)s)\t%(message)s"
-        )
+        console_format = "[%(relativeCreated)-6dms] (%(levelname)s)\t%(message)s"
+        if args.no_color:
+            console_formatter = logging.Formatter(console_format)
+        else:
+            console_formatter = ColorfulFormatter(console_format)
         console_handler.setFormatter(console_formatter)
         logger.addHandler(console_handler)
 
