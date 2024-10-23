@@ -35,7 +35,7 @@ from hmutils import (
     get_psychopy_errors,
     get_timestamp,
     get_qa_checklist,
-    get_unique_sub_ses,
+    get_unique_sub_ses_run,
     get_variable_datatype,
     meets_naming_conventions,
     new_error_record,
@@ -105,18 +105,19 @@ def validate_data(logger, dataset, is_raw=True):
             )
         )
 
-    sub_sessions = get_unique_sub_ses(present_ids)
+    sub_ses_run = get_unique_sub_ses_run(present_ids)
 
     # check conditions for combination rows
     combo_rows = get_expected_combination_rows(dataset)
     for combo in combo_rows:
-        for sub, ses in sub_sessions:
+        for sub, ses, run in sub_ses_run:
             present_combo_ids = [
                 id
                 for id in present_ids
                 if id.variable in combo.variables
                 and id.subject == sub
                 and id.session == ses
+                and id.run == run
             ]
             num_combo_vars = len(present_combo_ids)
 

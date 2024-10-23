@@ -621,7 +621,7 @@ def get_expected_identifiers(dataset, present_ids):
         ValueError: If any of the present_ids are not valid strings.
     """
     try:
-        present_sub_ses = get_unique_sub_ses(present_ids)
+        present_sub_ses_run = get_unique_sub_ses_run(present_ids)
     except ValueError as err:
         raise err
 
@@ -648,8 +648,8 @@ def get_expected_identifiers(dataset, present_ids):
                 continue
 
     expected_ids = [
-        Identifier(sub, var, ses)
-        for sub, ses in present_sub_ses
+        Identifier(sub, var, ses, run)
+        for sub, ses, run in present_sub_ses_run
         for var in expected_vars
     ]
 
@@ -689,8 +689,8 @@ def get_expected_combination_rows(dataset) -> list[CombinationRow]:
     return expected_combos
 
 
-def get_unique_sub_ses(identifiers):
-    """Get unique subject-session pairs from a list of identifiers.
+def get_unique_sub_ses_run(identifiers):
+    """Get unique subject/session/run tuples from a list of identifiers.
 
     Args:
         identifiers (list): A list of identifiers, which can be strings or Identifier objects.
@@ -699,7 +699,7 @@ def get_unique_sub_ses(identifiers):
         ValueError: If any of the identifiers are not valid strings.
 
     Returns:
-        list: A list of unique (subject, session) tuples extracted from the identifiers.
+        list: A list of unique (subject, session, run) tuples extracted from the identifiers.
     """
     if not identifiers:
         return []
@@ -709,7 +709,7 @@ def get_unique_sub_ses(identifiers):
         except ValueError as err:
             raise err
 
-    sub_ses = [(id.subject, id.session) for id in identifiers]
+    sub_ses = [(id.subject, id.session, id.run) for id in identifiers]
     sub_ses = list(set(sub_ses))  # remove duplicates
     return sub_ses
 
