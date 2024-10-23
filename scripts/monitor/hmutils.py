@@ -1502,19 +1502,12 @@ def get_psychopy_errors(logger, dataset, files):
     if not files:
         return []
 
-    ids = []
-    misnamed = []
-    for file in files:
-        id_match = re.match(FILE_RE, os.path.basename(file))
-        if id_match is None:
-            misnamed.append(file)
-        else:
-            ids.append(id_match.group("id"))
-
+    misnamed = [f for f in files if re.match(FILE_RE, os.path.basename(f)) is None]
     if misnamed:
         raise ValueError(f"Invalid Psychopy file name(s) {', '.join(misnamed)}")
 
-    id_num = ids[0]
+    identifier = Identifier.from_str(os.path.basename(files[0]))
+    id_num = int(identifier.subject.removeprefix("sub-"))
 
     # don't error on missing files here, since they are handled in presence checks
     csvfile = logfile = psydatfile = ""
@@ -1544,7 +1537,7 @@ def get_psychopy_errors(logger, dataset, files):
                     new_error_record(
                         logger,
                         dataset,
-                        id,
+                        identifier,
                         "Psychopy error",
                         f"Incorrect .psydat file {found_psydat} in .log file, expected {expected_psydat}",
                     )
@@ -1554,7 +1547,7 @@ def get_psychopy_errors(logger, dataset, files):
                 new_error_record(
                     logger,
                     dataset,
-                    id,
+                    identifier,
                     "Psychopy error",
                     "No .psydat file found in .log file",
                 )
@@ -1569,7 +1562,7 @@ def get_psychopy_errors(logger, dataset, files):
                     new_error_record(
                         logger,
                         dataset,
-                        id,
+                        identifier,
                         "Psychopy error",
                         f"Incorrect .csv file {found_csv} in .log file, expected {expected_csv}",
                     )
@@ -1579,7 +1572,7 @@ def get_psychopy_errors(logger, dataset, files):
                 new_error_record(
                     logger,
                     dataset,
-                    id,
+                    identifier,
                     "Psychopy error",
                     "No .csv file found in .log file",
                 )
@@ -1603,7 +1596,7 @@ def get_psychopy_errors(logger, dataset, files):
                 new_error_record(
                     logger,
                     dataset,
-                    id,
+                    identifier,
                     "Psychopy error",
                     f"NaN value seen under ID in .csv file, expected {id_num}",
                 )
@@ -1616,7 +1609,7 @@ def get_psychopy_errors(logger, dataset, files):
                     new_error_record(
                         logger,
                         dataset,
-                        id,
+                        identifier,
                         "Psychopy error",
                         f"ID value(s) [{', '.join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
                     )
