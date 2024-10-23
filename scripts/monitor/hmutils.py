@@ -1506,7 +1506,8 @@ def get_psychopy_errors(logger, dataset, files):
     if misnamed:
         raise ValueError(f"Invalid Psychopy file name(s) {', '.join(misnamed)}")
 
-    identifier = Identifier.from_str(os.path.basename(files[0]))
+    id_str = re.fullmatch(FILE_RE, os.path.basename(files[0])).group("id")
+    identifier = Identifier.from_str(id_str)
     id_num = int(identifier.subject.removeprefix("sub-"))
 
     # don't error on missing files here, since they are handled in presence checks
