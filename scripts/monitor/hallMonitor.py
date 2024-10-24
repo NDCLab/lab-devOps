@@ -461,7 +461,6 @@ def qa_validation(dataset):
     # set up paths and dataframes
     pending_qa_dir = os.path.join(dataset, PENDING_QA_SUBDIR)
 
-    dd_df = get_datadict(dataset)
     record_df = get_file_record(dataset)
     qa_df = get_qa_checklist(dataset)
 
