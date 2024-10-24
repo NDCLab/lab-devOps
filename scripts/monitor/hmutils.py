@@ -557,8 +557,6 @@ def get_present_identifiers(dataset, is_raw=True):
         source_dir = os.path.join(dataset, CHECKED_SUBDIR)
         FIRST_RE, SECOND_RE, THIRD_RE = SUB_RE, SES_RE, DTYPE_RE
 
-    dd_df = get_datadict(dataset)
-
     present_ids = set()
     for path, _, files in os.walk(source_dir):
         relpath = os.path.relpath(path, source_dir)
@@ -972,7 +970,6 @@ def new_validation_record(dataset, identifier):
                     Identifier instance or if the data type of the variable
                     cannot be determined.
     """
-    dd_df = get_datadict(dataset)
     if isinstance(identifier, str):
         try:
             identifier = Identifier.from_str(identifier)
@@ -1066,7 +1063,6 @@ def get_pending_errors(pending_df):
 
 
 def write_pending_errors(dataset, df, timestamp):
-    logger = logging.getLogger()
     out = os.path.join(dataset, PENDING_SUBDIR, f"pending-errors-{timestamp}.csv")
     df = df[PENDING_ERRORS_COLS]
     df = df.sort_values(by=["identifier", "datetime"])
