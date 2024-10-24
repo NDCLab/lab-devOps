@@ -340,6 +340,12 @@ def get_args():
         help="dataset includes child data",
     )
     parser.add_argument(
+        "-l",
+        "--legacy-exceptions",
+        action="store_true",
+        help="use legacy exception file behavior (deviation.txt and no-data.txt do not include identifier name)",
+    )
+    parser.add_argument(
         "-n",
         "--no-color",
         action="store_true",
