@@ -49,7 +49,7 @@ from hmutils import (
 )
 
 
-def validate_data(logger, dataset, is_raw=True):
+def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
     """
     Validates the data in the specified dataset.
 
