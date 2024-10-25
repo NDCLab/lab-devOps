@@ -666,31 +666,41 @@ if __name__ == "__main__":
     logger.info("All checks complete")
 
     # update central tracker
+
     script_location = os.path.join(dataset, UPDATE_TRACKER_SUBPATH)
     if not os.path.exists(script_location):
         logger.critical("update-tracker.py does not exist at expected location.")
         exit(1)
+
+    checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
+
     try:
-        redcaps = get_new_redcaps(os.path.join(dataset, CHECKED_SUBDIR))
-        logger.info("Running update-tracker.py...")
-        subprocess.check_call(
-            [
-                "python",
-                script_location,
-                os.path.join(dataset, CHECKED_SUBDIR),
-                dataset,
-                ",".join(redcaps),
-                "none",
-                "true" if args.child_data else "false",
-            ]
-        )
-        logger.info("Finished running update-tracker.py")
+        redcaps = get_new_redcaps(checked_dir)
     except ValueError as err:
-        logger.critical("Could not get redcap files (%s)", err)
+        logger.critical("Could not get new redcaps: %s", err)
         exit(1)
-    except subprocess.CalledProcessError as err:
-        logger.critical("Could not update central tracker (%s)", err)
-        exit(1)
+
+    ids = get_present_identifiers(dataset)
+    unique_sre = set((id.session, id.run, id.event) for id in ids)
+
+    for ses, run, event in unique_sre:
+        sre = f"{ses}{run}{event}"
+        sr_redcaps = [rc for rc in redcaps if f"{ses}{run}" in os.path.basename(rc)]
+        try:
+            logger.info("Running update-tracker.py for session/run/event %s...", sre)
+            subprocess.check_call(
+                [
+                    "python",
+                    script_location,
+                    checked_dir,
+                    dataset,
+                    ",".join(sr_redcaps),
+                    sre,
+                    "true" if args.child_data else "false",
+                ]
+            )
+        except subprocess.CalledProcessError as err:
+            logger.error("Could not update central tracker for s/r/e %s (%s)", sre, err)
 
     # everything completed successfully, exit with success
     exit(0)
