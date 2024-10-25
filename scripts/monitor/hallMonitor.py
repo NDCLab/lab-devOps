@@ -537,7 +537,8 @@ def qa_validation(dataset):
         id = Identifier.from_str(id)
         identifier_dir = id.to_dir(dataset, is_raw=True)
         identifier_subdir = os.path.relpath(identifier_dir, raw_dir)
-        dest_path = os.path.join(pending_qa_dir, identifier_subdir)
+        dest_path = os.path.join(pending_qa_dir, identifier_subdir, os.pardir)
+        dest_path = os.path.abspath(dest_path)
         os.makedirs(dest_path, exist_ok=True)
         try:
             subprocess.run(["cp", "-R", identifier_dir, dest_path], check=True)
