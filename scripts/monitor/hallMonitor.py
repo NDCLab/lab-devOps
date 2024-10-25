@@ -554,7 +554,7 @@ def qa_validation(dataset):
         logger.info("Copied %d files for identifier %s", n_copied, id)
 
     # add new raw-validated identifiers to QA tracker
-    new_qa = [new_qa_record(id) for id in new_qa["identifier"]]
+    new_qa = [new_qa_record(id, dataset) for id in new_qa["identifier"]]
     new_qa_df = pd.DataFrame(new_qa)
     qa_df = pd.concat([qa_df, new_qa_df])
     write_qa_tracker(dataset, qa_df)
