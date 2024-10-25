@@ -321,11 +321,12 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
             # if the file is not in the right directory, raise errors
             if os.path.realpath(id_dir) != correct_dir:
                 n_misplaced += 1
+                err_type = "Misplaced file"
                 err = new_error_record(
                     logger,
                     dataset,
                     id,
-                    "Misplaced file",
+                    err_type,
                     f"Found file in wrong directory: {os.path.basename(file)} found in {id_dir}",
                 )
                 pending.append(err)
