@@ -326,7 +326,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
                     dataset,
                     id,
                     "Misplaced file",
-                    f"Found file in wrong directory: {file} found in {id_dir}",
+                    f"Found file in wrong directory: {os.path.basename(file)} found in {id_dir}",
                 )
                 pending.append(err)
 
