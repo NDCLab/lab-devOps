@@ -49,7 +49,7 @@ from hmutils import (
 )
 
 
-def validate_data(logger, dataset, is_raw=True):
+def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
     """
     Validates the data in the specified dataset.
 
@@ -100,7 +100,13 @@ def validate_data(logger, dataset, is_raw=True):
     # raise errors for missing identifiers without a no-data.txt
     for id in missing_ids:
         id_as_dir = id.to_dir(dataset, is_raw=is_raw)
-        if any([re.match(f"{id}-no-data.txt", file) for file in os.listdir(id_as_dir)]):
+
+        if legacy_exceptions:
+            no_data_file = "no-data.txt"
+        else:
+            no_data_file = f"{id}-no-data.txt"
+
+        if any([file == no_data_file for file in os.listdir(id_as_dir)]):
             logger.debug("Skipping %s, no-data.txt found", str(id))
             continue
         pending.append(
@@ -200,8 +206,13 @@ def validate_data(logger, dataset, is_raw=True):
             continue
 
         # --- check for exception files, set flags ---
-        has_deviation = str(id) + "-deviation.txt" in id_files_basename
-        has_no_data = str(id) + "-no-data.txt" in id_files_basename
+        if legacy_exceptions:
+            has_deviation = "deviation.txt" in id_files_basename
+            has_no_data = "no-data.txt" in id_files_basename
+        else:
+            has_deviation = f"{id}-deviation.txt" in id_files_basename
+            has_no_data = f"{id}-no-data.txt" in id_files_basename
+
         logger.debug("has_deviation=%s, has_no_data=%s", has_deviation, has_no_data)
         if has_deviation and has_no_data:
             pending.append(
@@ -235,9 +246,17 @@ def validate_data(logger, dataset, is_raw=True):
         logger.debug("Found %d missing identifier(s)", len(dir_missing_ids))
 
         # handle misnamed files
-        
+
+        if legacy_exceptions:
+            deviation_file = "deviation.txt"
+        else:
+            deviation_file = f"{id}-deviation.txt"
+
         misnamed_files = []
         for file in dir_files:
+            if file == deviation_file:
+                continue
+
             naming_errors = get_naming_errors(logger, dataset, file, has_deviation)
             if len(naming_errors) > 0:
                 pending.extend(naming_errors)
@@ -319,8 +338,11 @@ def validate_data(logger, dataset, is_raw=True):
 
         # handle exception file flags
         if has_no_data:
-            # only expect one file called [identifier]-no-data.txt
-            expected_files = [f"{id}-no-data.txt"]
+            # only expect the "no data" exception file
+            if legacy_exceptions:
+                expected_files = ["no-data.txt"]
+            else:
+                expected_files = [f"{id}-no-data.txt"]
         elif has_deviation:
             # expect at least 2 appropriately-named files
             # (deviation.txt and at least one other file)
@@ -404,12 +426,12 @@ def validate_data(logger, dataset, is_raw=True):
     return pending
 
 
-def checked_data_validation(dataset):
+def checked_data_validation(dataset, legacy_exceptions=False):
     logger = logging.getLogger(__name__)
     logger.info("Starting checked data validation...")
 
     # perform data validation for checked directory
-    pending = validate_data(logger, dataset, is_raw=False)
+    pending = validate_data(logger, dataset, legacy_exceptions, is_raw=False)
 
     logger.info("Checked data validation complete, found %d errors", len(pending))
 
@@ -428,12 +450,12 @@ def checked_data_validation(dataset):
     return  # go to raw data validation
 
 
-def raw_data_validation(dataset):
+def raw_data_validation(dataset, legacy_exceptions=False):
     logger = logging.getLogger(__name__)
     logger.info("Starting raw data validation...")
 
     # perform data validation for raw directory
-    pending = validate_data(logger, dataset, is_raw=True)
+    pending = validate_data(logger, dataset, legacy_exceptions, is_raw=True)
 
     errors = [r for r in pending if not r["passRaw"]]
     logger.info("Raw data validation complete, found %d errors", len(errors))
@@ -632,8 +654,13 @@ if __name__ == "__main__":
         exit(1)
     logger.debug("No changes to data dictionary")
 
-    checked_data_validation(dataset)
-    raw_data_validation(dataset)
+    legacy_exceptions = bool(args.legacy_exceptions)
+    logger.debug(
+        "Using %s exception file naming", "legacy" if legacy_exceptions else "standard"
+    )
+
+    checked_data_validation(dataset, legacy_exceptions)
+    raw_data_validation(dataset, legacy_exceptions)
     qa_validation(dataset)
 
     logger.info("All checks complete")
