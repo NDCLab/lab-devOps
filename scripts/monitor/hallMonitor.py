@@ -489,6 +489,7 @@ def qa_validation(dataset):
 
     # set up paths and dataframes
     pending_qa_dir = os.path.join(dataset, PENDING_QA_SUBDIR)
+    raw_dir = os.path.join(dataset, RAW_SUBDIR)
 
     record_df = get_file_record(dataset)
     qa_df = get_qa_checklist(dataset)
@@ -538,7 +539,8 @@ def qa_validation(dataset):
     raw_dir = os.path.join(dataset, RAW_SUBDIR)
     for id in new_qa["identifier"]:
         id = Identifier.from_str(id)
-        identifier_subdir = id.to_dir(dataset, is_raw=True)
+        identifier_dir = id.to_dir(dataset, is_raw=True)
+        identifier_subdir = os.path.relpath(identifier_dir, raw_dir)
         dest_path = os.path.join(pending_qa_dir, identifier_subdir)
         os.makedirs(dest_path, exist_ok=True)
         dtype = get_variable_datatype(dataset, id.variable)
@@ -546,12 +548,12 @@ def qa_validation(dataset):
         n_copied = 0
         for file in id_files:
             try:
-                subprocess.run(["cp", file, dest_path])
+                subprocess.run(["cp", file, dest_path], check=True)
                 logger.debug("Copied file %s to %s", file, dest_path)
                 n_copied += 1
             except subprocess.CalledProcessError as err:
                 logger.error("Could not copy file %s to %s (%s)", file, dest_path, err)
-        logger.info("Copied %d files for identifier %s", n_copied, id)
+        logger.info("Copied %d file(s) for identifier %s", n_copied, id)
 
     # add new raw-validated identifiers to QA tracker
     new_qa = [new_qa_record(id, dataset) for id in new_qa["identifier"]]
