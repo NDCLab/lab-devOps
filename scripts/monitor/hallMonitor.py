@@ -363,7 +363,9 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
                     )
                 )
         else:  # normal case
-            expected_files = get_expected_files(dataset, id)
+            expected_files = [
+                os.path.basename(file) for file in get_expected_files(dataset, id)
+            ]
 
         logger.debug(
             "Expect %d file(s) for identifier %s: %s",
