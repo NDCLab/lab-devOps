@@ -996,7 +996,7 @@ def new_validation_record(dataset, identifier):
     }
 
 
-def new_qa_record(identifier):
+def new_qa_record(identifier, dataset):
     """
     Creates a new QA record dictionary with the provided identifier.
 
@@ -1027,7 +1027,7 @@ def new_qa_record(identifier):
         "user": getuser(),
         "qa": False,
         "localMove": False,
-        "dataType": identifier.datatype,
+        "dataType": get_variable_datatype(dataset, identifier.variable),
     }
 
 
