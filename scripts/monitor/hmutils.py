@@ -793,7 +793,7 @@ def get_pending_files(dataset):
 
     if pending_files:
         latest_pending = os.path.join(pending_dir, pending_files[-1])
-        pending_df = pd.read_csv(latest_pending)
+        pending_df = pd.read_csv(latest_pending, dtype={"passRaw": bool})
     else:
         pending_df = new_pending_df()
 
@@ -833,7 +833,7 @@ def df_from_colmap(colmap):
     """Generates a Pandas DataFrame from a column-datatype dictionary
 
     Args:
-        colmap (dict[str,str]): A dictionary containing entries of the form "name": "float|str|int"
+        colmap (dict[str,str]): A dictionary containing entries of the form "name": "float|str|int|bool"
 
     Returns:
         pandas.DataFrame: An empty DataFrame, generated as specified by colmap
@@ -860,7 +860,7 @@ def new_pending_df():
     - user (str): The user associated with the entry.
     - dataType (str): The type of data.
     - identifier (str): A unique identifier for the entry.
-    - passRaw (int): A raw pass value.
+    - passRaw (bool): True for pass rows, False for error rows
     - errorType (str): The type of error, if any.
     - errorDetails (str): Details about the error, if any.
 
@@ -872,7 +872,7 @@ def new_pending_df():
         "user": "str",
         "dataType": "str",
         "identifier": "str",
-        "passRaw": "int",
+        "passRaw": "bool",
         "errorType": "str",
         "errorDetails": "str",
     }
@@ -933,7 +933,7 @@ def new_pass_record(identifier):
         dict: A dictionary containing the following keys:
     - "datetime" (str): The current timestamp.
     - "user" (str): The username of the current user.
-    - "passRaw" (int): Always True, indicating no error has occurred.
+    - "passRaw" (bool): Always True, indicating no error has occurred.
     - "identifier" (str): The provided identifier converted to a string.
     - "errorType" (None): Placeholder for error type, initially None.
     - "errorDetails" (None): Placeholder for error details, initially None.
@@ -941,7 +941,7 @@ def new_pass_record(identifier):
     return {
         "datetime": get_timestamp(),
         "user": getuser(),
-        "passRaw": 1,
+        "passRaw": True,
         "identifier": str(identifier),
         "errorType": None,
         "errorDetails": None,
@@ -1008,8 +1008,8 @@ def new_qa_record(identifier):
     - "identifier" (str): The string representation of the identifier.
     - "datetime" (str): The current timestamp.
     - "user" (str): The username of the current user.
-    - "qa" (int): The QA status, initialized to 0.
-    - "localMove" (int): The local move status, initialized to 0.
+    - "qa" (bool): The QA status, initialized to False.
+    - "localMove" (bool): The local move status, initialized to False.
     - "dataType" (str): The data type of the identifier.
 
     Raises:
@@ -1024,8 +1024,8 @@ def new_qa_record(identifier):
         "identifier": str(identifier),
         "datetime": get_timestamp(),
         "user": getuser(),
-        "qa": 0,
-        "localMove": 0,
+        "qa": False,
+        "localMove": False,
         "dataType": identifier.datatype,
     }
 
@@ -1039,8 +1039,8 @@ def new_qa_checklist():
     - "user": str
     - "dataType": str
     - "identifier": str
-    - "qa": int
-    - "localMove": int
+    - "qa": bool
+    - "localMove": bool
 
     Returns:
         pd.DataFrame: A DataFrame with the specified columns and data types.
@@ -1050,13 +1050,14 @@ def new_qa_checklist():
         "user": "str",
         "dataType": "str",
         "identifier": "str",
-        "qa": "int",
-        "localMove": "int",
+        "qa": "bool",
+        "localMove": "bool",
     }
     return df_from_colmap(colmap)
 
+
 def get_pending_errors(pending_df):
-    errors = pending_df[pending_df["passRaw"] == 0]
+    errors = pending_df[~pending_df["passRaw"]]
     # errors has at least PENDING_ERRORS_COLS
     if set(PENDING_ERRORS_COLS).issubset(set(errors.columns)):
         return errors[PENDING_ERRORS_COLS]
@@ -1090,7 +1091,7 @@ def get_qa_checklist(dataset):
     """
     checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
     if os.path.exists(checklist_path):
-        return pd.read_csv(checklist_path)
+        return pd.read_csv(checklist_path, dtype={"qa": bool, "localMove": bool})
     else:
         return new_qa_checklist()
 
