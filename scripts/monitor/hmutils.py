@@ -793,7 +793,8 @@ def get_pending_files(dataset):
 
     if pending_files:
         latest_pending = os.path.join(pending_dir, pending_files[-1])
-        pending_df = pd.read_csv(latest_pending, dtype={"passRaw": bool})
+        pending_df = pd.read_csv(latest_pending)
+        pending_df["passRaw"] = pending_df["passRaw"].astype(bool)
     else:
         pending_df = new_pending_df()
 
@@ -1091,7 +1092,10 @@ def get_qa_checklist(dataset):
     """
     checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
     if os.path.exists(checklist_path):
-        return pd.read_csv(checklist_path, dtype={"qa": bool, "localMove": bool})
+        df = pd.read_csv(checklist_path)
+        df["qa"] = df["qa"].astype(bool)
+        df["localMove"] = df["localMove"].astype(bool)
+        return df
     else:
         return new_qa_checklist()
 
