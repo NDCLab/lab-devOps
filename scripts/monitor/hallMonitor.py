@@ -538,10 +538,11 @@ def qa_validation(dataset):
         identifier_dir = id.to_dir(dataset, is_raw=True)
         identifier_subdir = os.path.relpath(identifier_dir, raw_dir)
         dest_path = os.path.join(pending_qa_dir, identifier_subdir)
+        os.makedirs(dest_path, exist_ok=True)
         try:
-            shutil.copytree(identifier_dir, dest_path, dirs_exist_ok=True)
+            subprocess.run(["cp", "-R", identifier_dir, dest_path], check=True)
             logger.debug("Copied file(s) for ID %s to %s", id, dest_path)
-        except shutil.Error as err:
+        except subprocess.CalledProcessError as err:
             logger.error("Could not copy file(s) for %s to %s (%s)", id, dest_path, err)
 
     # add new raw-validated identifiers to QA tracker
