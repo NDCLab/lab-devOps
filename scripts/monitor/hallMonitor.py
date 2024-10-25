@@ -492,6 +492,7 @@ def qa_validation(dataset):
     # set up paths and dataframes
     pending_qa_dir = os.path.join(dataset, PENDING_QA_SUBDIR)
     raw_dir = os.path.join(dataset, RAW_SUBDIR)
+    checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
 
     record_df = get_file_record(dataset)
     qa_df = get_qa_checklist(dataset)
@@ -501,23 +502,17 @@ def qa_validation(dataset):
     logger.info("Found %d identifier(s) that passed QA checks", len(passed_ids.index))
 
     # move fully-verified files from pending-qa/ to checked/
-    checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
     for id in passed_ids:
         id = Identifier.from_str(id)
-        identifier_subdir = Identifier.from_str(id).to_dir(dataset, is_raw=False)
+        identifier_dir = id.to_dir(dataset, is_raw=True)
+        identifier_subdir = os.path.relpath(identifier_dir, raw_dir)
+        src_path = os.path.join(pending_qa_dir, identifier_subdir)
         dest_path = os.path.join(checked_dir, identifier_subdir)
-        os.makedirs(dest_path, exist_ok=True)
-        dtype = get_variable_datatype(dataset, id.variable)
-        id_files = get_identifier_files(pending_qa_dir, id, dtype)
-        n_moved = 0
-        for file in id_files:
-            try:
-                subprocess.run(["mv", file, dest_path])
-                logger.debug("Moved file %s to %s", file, dest_path)
-                n_moved += 1
-            except subprocess.CalledProcessError as err:
-                logger.error("Could not move file %s to %s (%s)", file, dest_path, err)
-        logger.info("Moved %d files for identifier %s", n_moved, id)
+        try:
+            shutil.move(src_path, dest_path)
+            logger.debug("Moved file(s) for ID %s to %s", id, dest_path)
+        except shutil.Error as err:
+            logger.error("Could not move file(s) for %s to %s (%s)", id, dest_path, err)
 
     # remove fully-verified identifiers from QA checklist
     qa_df = qa_df[~qa_df["identifier"].isin(passed_ids)]
@@ -538,7 +533,6 @@ def qa_validation(dataset):
     new_qa = pending_ids[~pending_ids["identifier"].isin(record_df["identifier"])]
 
     # copy files for new raw-validated identifiers to pending-qa/
-    raw_dir = os.path.join(dataset, RAW_SUBDIR)
     for id in new_qa["identifier"]:
         id = Identifier.from_str(id)
         identifier_dir = id.to_dir(dataset, is_raw=True)
