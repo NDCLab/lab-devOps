@@ -205,26 +205,6 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
             )
             continue
 
-        # --- check for exception files, set flags ---
-        if legacy_exceptions:
-            has_deviation = "deviation.txt" in id_files_basename
-            has_no_data = "no-data.txt" in id_files_basename
-        else:
-            has_deviation = f"{id}-deviation.txt" in id_files_basename
-            has_no_data = f"{id}-no-data.txt" in id_files_basename
-
-        logger.debug("has_deviation=%s, has_no_data=%s", has_deviation, has_no_data)
-        if has_deviation and has_no_data:
-            pending.append(
-                new_error_record(
-                    logger,
-                    dataset,
-                    id,
-                    "Improper exception files",
-                    "Both deviation and no-data files present for identifier",
-                )
-            )
-
         # --- check naming conventions ---
 
         # get all files in identifier's directory
@@ -238,6 +218,26 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
                 )
             )
             continue
+
+        # --- check for exception files, set flags ---
+        if legacy_exceptions:
+            has_deviation = "deviation.txt" in dir_files
+            has_no_data = "no-data.txt" in dir_files
+        else:
+            has_deviation = f"{id}-deviation.txt" in dir_files
+            has_no_data = f"{id}-no-data.txt" in dir_files
+
+        logger.debug("has_deviation=%s, has_no_data=%s", has_deviation, has_no_data)
+        if has_deviation and has_no_data:
+            pending.append(
+                new_error_record(
+                    logger,
+                    dataset,
+                    id,
+                    "Improper exception files",
+                    "Both deviation and no-data files present for identifier",
+                )
+            )
 
         # construct list of missing identifiers that should be in this directory
         dir_missing_ids = [
