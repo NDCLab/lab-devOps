@@ -424,7 +424,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
 
         if is_raw:  # only log pass rows for raw data
             # check if this identifier has any errors
-            if not any(p["identifier"] == id and p["passRaw"] == 0 for p in pending):
+            if not any(p["identifier"] == id and not p["passRaw"] for p in pending):
                 pending.append(new_pass_record(id))
                 logger.debug("Identifier %s had no errors", str(id))
 
@@ -494,7 +494,7 @@ def qa_validation(dataset):
     qa_df = get_qa_checklist(dataset)
 
     # get fully-verified identifiers
-    passed_ids = qa_df[(qa_df["qa"] == 1) & (qa_df["localMove"] == 1)]["identifier"]
+    passed_ids = qa_df[qa_df["qa"] & qa_df["localMove"]]["identifier"]
     logger.info("Found %d identifier(s) that passed QA checks", len(passed_ids.index))
 
     # move fully-verified files from pending-qa/ to checked/
@@ -531,7 +531,7 @@ def qa_validation(dataset):
 
     # get new raw-validated identifiers
     pending_df = get_pending_files(dataset)
-    pending_ids = pending_df[pending_df["passRaw"] == 1]
+    pending_ids = pending_df[pending_df["passRaw"]]
     new_qa = pending_ids[~pending_ids["identifier"].isin(record_df["identifier"])]
 
     # copy files for new raw-validated identifiers to pending-qa/
