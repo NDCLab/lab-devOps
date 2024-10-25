@@ -351,7 +351,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
         elif has_deviation:
             # expect at least 2 appropriately-named files
             # (deviation.txt and at least one other file)
-            expected_files = id_files
+            expected_files = id_files_basename
             if len(expected_files) == 1:
                 pending.append(
                     new_error_record(
