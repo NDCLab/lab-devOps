@@ -210,7 +210,12 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
         # get all files in identifier's directory
         try:
             dir_files = os.listdir(id_dir)
-            logger.debug("Found %d file(s) in directory %s", len(dir_files), id_dir)
+            logger.debug(
+                "Found %d file(s) in directory %s: %s",
+                len(dir_files),
+                id_dir,
+                dir_files,
+            )
         except FileNotFoundError as err:
             pending.append(
                 new_error_record(
