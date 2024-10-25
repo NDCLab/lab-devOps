@@ -509,7 +509,7 @@ def qa_validation(dataset):
         src_path = os.path.join(pending_qa_dir, identifier_subdir)
         dest_path = os.path.join(checked_dir, identifier_subdir)
         try:
-            shutil.move(src_path, dest_path)
+            subprocess.run(["mv", src_path, dest_path], check=True)
             logger.debug("Moved file(s) for ID %s to %s", id, dest_path)
         except shutil.Error as err:
             logger.error("Could not move file(s) for %s to %s (%s)", id, dest_path, err)
