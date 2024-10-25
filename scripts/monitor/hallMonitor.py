@@ -3,6 +3,7 @@
 import logging
 import os
 import re
+import shutil
 import subprocess
 
 import pandas as pd
@@ -543,18 +544,11 @@ def qa_validation(dataset):
         identifier_dir = id.to_dir(dataset, is_raw=True)
         identifier_subdir = os.path.relpath(identifier_dir, raw_dir)
         dest_path = os.path.join(pending_qa_dir, identifier_subdir)
-        os.makedirs(dest_path, exist_ok=True)
-        dtype = get_variable_datatype(dataset, id.variable)
-        id_files = get_identifier_files(raw_dir, id, dtype)
-        n_copied = 0
-        for file in id_files:
-            try:
-                subprocess.run(["cp", file, dest_path], check=True)
-                logger.debug("Copied file %s to %s", file, dest_path)
-                n_copied += 1
-            except subprocess.CalledProcessError as err:
-                logger.error("Could not copy file %s to %s (%s)", file, dest_path, err)
-        logger.info("Copied %d file(s) for identifier %s", n_copied, id)
+        try:
+            shutil.copytree(identifier_dir, dest_path, dirs_exist_ok=True)
+            logger.debug("Copied file(s) for ID %s to %s", id, dest_path)
+        except shutil.Error as err:
+            logger.error("Could not copy file(s) for %s to %s (%s)", id, dest_path, err)
 
     # add new raw-validated identifiers to QA tracker
     new_qa = [new_qa_record(id, dataset) for id in new_qa["identifier"]]
