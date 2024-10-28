@@ -541,8 +541,8 @@ def qa_validation(dataset):
         dest_path = os.path.abspath(dest_path)
         os.makedirs(dest_path, exist_ok=True)
         try:
-            subprocess.run(["cp", "-R", identifier_dir, dest_path], check=True)
-            logger.debug("Copied file(s) for ID %s to %s", id, dest_path)
+            subprocess.run(["cp", "-uR", identifier_dir, dest_path], check=True)
+            logger.debug("Copied ID %s to %s, or no update was needed", id, dest_path)
         except subprocess.CalledProcessError as err:
             logger.error("Could not copy file(s) for %s to %s (%s)", id, dest_path, err)
 
