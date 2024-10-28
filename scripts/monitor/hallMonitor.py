@@ -262,6 +262,17 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
         for file in dir_files:
             if file == deviation_file:
                 continue
+            elif file == "issue.txt":
+                pending.append(
+                    new_error_record(
+                        logger,
+                        dataset,
+                        id,
+                        "Issue file",
+                        "Found issue.txt in identifier's directory",
+                    )
+                )
+                continue
 
             naming_errors = get_naming_errors(logger, dataset, file, has_deviation)
             if len(naming_errors) > 0:
