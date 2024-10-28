@@ -282,31 +282,21 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
 
         logger.debug("Found %d misnamed file(s)", len(misnamed_files))
         for file in misnamed_files:
-            if file == "issue.txt":
-                err_type = "Issue file"
-                err = new_error_record(
-                    logger,
-                    dataset,
-                    id,
-                    err_type,
-                    "Found issue.txt in identifier's directory",
-                )
-            else:
-                err_type = "Improper file name"
-                err = new_error_record(
-                    logger,
-                    dataset,
-                    id,
-                    err_type,
-                    "Found file with improper name: " + file,
-                )
-            pending.append(err)
+            err_type = "Improper file name"
+            err_msg = f"Found file with improper name: {file}"
 
             # log missing identifiers once for this directory and error type
             if err_type not in logged_missing_ids[id_dir]:
                 for missing_id in dir_missing_ids:
-                    err[id] = str(missing_id)
-                    pending.append(err)
+                    pending.append(
+                        new_error_record(
+                            logger,
+                            dataset,
+                            missing_id,
+                            err_type,
+                            err_msg,
+                        )
+                    )
                 logged_missing_ids[id_dir].add(err_type)
                 logger.debug(
                     "Logged error %s for missing identifiers in dir %s",
