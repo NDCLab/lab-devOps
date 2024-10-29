@@ -100,6 +100,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
 
     # raise errors for missing identifiers without a no-data.txt
     for id in missing_ids:
+        id.is_missing = True  # included in detailed stringification
         id_as_dir = id.to_dir(dataset, is_raw=is_raw)
 
         if legacy_exceptions:
