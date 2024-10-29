@@ -175,6 +175,7 @@ class Identifier:
     session: str
     run: str
     event: str = None
+    is_missing: bool = False
 
     def __str__(self):
         s = f"{self.subject}_{self.variable}_{self.session}_{self.run}_{self.event}"
@@ -236,6 +237,8 @@ class Identifier:
         s = f"{self.subject}/{self.variable}/{self.session}_{self.run}_{self.event} ({datatype})"
         if is_combination_var(dataset, self.variable):
             s += " (combination)"
+        if self.is_missing:
+            s += " (missing)"
         return s
 
     @staticmethod
