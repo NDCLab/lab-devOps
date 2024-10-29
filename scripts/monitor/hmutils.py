@@ -917,7 +917,7 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
         "datetime": get_timestamp(),
         "user": getuser(),
         "passRaw": False,
-        "identifier": str(identifier),
+        "identifier": id_str,
         "errorType": error_type,
         "errorDetails": error_details,
     }
