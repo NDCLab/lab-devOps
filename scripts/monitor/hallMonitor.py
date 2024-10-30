@@ -197,7 +197,6 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
             datatype = get_variable_datatype(dataset, id.variable)
             logger.debug("Identifier datatype is %s", datatype)
             id_files = get_identifier_files(base_dir, id, datatype, is_raw=is_raw)
-            id_files_basename = [os.path.basename(file) for file in id_files]
             logger.debug("Found %d file(s) for identifier %s", len(id_files), id)
         except FileNotFoundError as err:
             pending.append(
@@ -207,16 +206,29 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
             )
             continue
 
+        # --- check for empty files ---
+        for file in id_files:
+            if os.path.getsize(file) == 0:
+                pending.append(
+                    new_error_record(
+                        logger,
+                        dataset,
+                        id,
+                        "Empty file",
+                        f"Found empty file {file}",
+                    )
+                )
+
         # --- check naming conventions ---
 
         # get all files in identifier's directory
         try:
-            dir_files = os.listdir(id_dir)
+            dir_filenames = os.listdir(id_dir)
             logger.debug(
                 "Found %d file(s) in directory %s: %s",
-                len(dir_files),
+                len(dir_filenames),
                 id_dir,
-                dir_files,
+                dir_filenames,
             )
         except FileNotFoundError as err:
             pending.append(
@@ -228,11 +240,11 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
 
         # --- check for exception files, set flags ---
         if legacy_exceptions:
-            has_deviation = "deviation.txt" in dir_files
-            has_no_data = "no-data.txt" in dir_files
+            has_deviation = "deviation.txt" in dir_filenames
+            has_no_data = "no-data.txt" in dir_filenames
         else:
-            has_deviation = f"{id}-deviation.txt" in dir_files
-            has_no_data = f"{id}-no-data.txt" in dir_files
+            has_deviation = f"{id}-deviation.txt" in dir_filenames
+            has_no_data = f"{id}-no-data.txt" in dir_filenames
 
         logger.debug("has_deviation=%s, has_no_data=%s", has_deviation, has_no_data)
         if has_deviation and has_no_data:
@@ -260,7 +272,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
             deviation_file = f"{id}-deviation.txt"
 
         misnamed_files = []
-        for file in dir_files:
+        for file in dir_filenames:
             if file == deviation_file:
                 continue
             elif file == "issue.txt":
@@ -355,7 +367,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
         elif has_deviation:
             # expect at least 2 appropriately-named files
             # (deviation.txt and at least one other file)
-            expected_files = id_files_basename
+            expected_files = dir_filenames
             if len(expected_files) == 1:
                 pending.append(
                     new_error_record(
@@ -381,7 +393,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
         # check for missing expected files
         n_missing = 0
         for file in expected_files:
-            if file not in id_files_basename:
+            if file not in dir_filenames:
                 pending.append(
                     new_error_record(
                         logger,
@@ -396,7 +408,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
 
         # check for unexpected file presence
         n_unexpected = 0
-        for file in id_files_basename:
+        for file in dir_filenames:
             if file not in expected_files:
                 pending.append(
                     new_error_record(
