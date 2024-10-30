@@ -206,6 +206,19 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
             )
             continue
 
+        # --- check for empty files ---
+        for file in id_files:
+            if os.path.getsize(file) == 0:
+                pending.append(
+                    new_error_record(
+                        logger,
+                        dataset,
+                        id,
+                        "Empty file",
+                        f"Found empty file {file}",
+                    )
+                )
+
         # --- check naming conventions ---
 
         # get all files in identifier's directory
