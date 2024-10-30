@@ -1532,73 +1532,12 @@ def get_psychopy_errors(logger, dataset, files):
     id_num = identifier.subject.removeprefix("sub-")
 
     # don't error on missing files here, since they are handled in presence checks
-    csvfile = logfile = psydatfile = ""
+    csvfile = ""
     for file in files:
         file = str(file)
         file_ext = os.path.splitext(file)[1]
         if file_ext == ".csv":
             csvfile = file
-        elif file_ext == ".log":
-            logfile = file
-        elif file_ext == ".psydat":
-            psydatfile = file
-
-    expected_csv = os.path.basename(csvfile) if csvfile else "(no file)"
-    expected_psydat = os.path.basename(psydatfile) if psydatfile else "(no file)"
-
-    if logfile:
-        with open(logfile, "r") as f:
-            contents = f.read()
-
-        psydat_match = re.search(r"saved data to\s(.+\.psydat)", contents)
-        if psydat_match is not None:
-            found_psydat = psydat_match.group(1).strip("'\" ")
-            found_psydat = os.path.basename(found_psydat)
-            if found_psydat != expected_psydat:
-                errors.append(
-                    new_error_record(
-                        logger,
-                        dataset,
-                        identifier,
-                        "Psychopy error",
-                        f"Incorrect .psydat file {found_psydat} in .log file, expected {expected_psydat}",
-                    )
-                )
-        else:
-            errors.append(
-                new_error_record(
-                    logger,
-                    dataset,
-                    identifier,
-                    "Psychopy error",
-                    "No .psydat file found in .log file",
-                )
-            )
-
-        csv_match = re.search(r"saved data to\s(.+\.csv)", contents)
-        if csv_match is not None:
-            found_csv = csv_match.group(1).strip("'\" ")
-            found_csv = os.path.basename(found_csv)
-            if found_csv != expected_csv:
-                errors.append(
-                    new_error_record(
-                        logger,
-                        dataset,
-                        identifier,
-                        "Psychopy error",
-                        f"Incorrect .csv file {found_csv} in .log file, expected {expected_csv}",
-                    )
-                )
-        else:
-            errors.append(
-                new_error_record(
-                    logger,
-                    dataset,
-                    identifier,
-                    "Psychopy error",
-                    "No .csv file found in .log file",
-                )
-            )
 
     # functionality ported from check-id.py:
     #   if csv is present, make sure id inside matches file name
