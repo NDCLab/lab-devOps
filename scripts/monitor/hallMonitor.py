@@ -582,8 +582,6 @@ if __name__ == "__main__":
     dataset = os.path.realpath(args.dataset)
     if not os.path.exists(dataset):
         raise FileNotFoundError(f"Dataset {dataset} not found")
-    datadict_path = os.path.join(dataset, DATADICT_SUBPATH)
-    dd_df = pd.read_csv(datadict_path, index_col="variable")
     
     pending_dir = os.path.join(dataset, PENDING_SUBDIR)
     os.makedirs(pending_dir, exist_ok=True)
