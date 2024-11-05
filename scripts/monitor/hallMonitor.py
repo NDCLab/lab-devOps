@@ -10,7 +10,6 @@ from datetime import datetime
 import pandas as pd
 from hmutils import (
     CHECKED_SUBDIR,
-    DATADICT_SUBPATH,
     FILE_RE,
     LOGGING_SUBPATH,
     PENDING_QA_SUBDIR,
