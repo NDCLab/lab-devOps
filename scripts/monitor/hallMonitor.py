@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import subprocess
+from datetime import datetime
 
 import pandas as pd
 from hmutils import (
@@ -628,7 +629,9 @@ if __name__ == "__main__":
     logger.info("Logging initialized")
 
     # rename redcap columns
-    redcaps = get_new_redcaps(os.path.join(dataset, RAW_SUBDIR))
+    raw_dir = os.path.join(dataset, RAW_SUBDIR)
+    checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
+    redcaps = get_new_redcaps(raw_dir)
 
     if args.map:
         for rc_file in redcaps:
@@ -639,8 +642,15 @@ if __name__ == "__main__":
                 for col in df.columns:
                     if col.startswith(orig + "_"):
                         col_map[col] = re.sub("^" + orig + "_", new + "_", col)
-            df.rename(columns=col_map, inplace=True)
-            df.to_csv(rc_file, index=False)
+            df = df.rename(columns=col_map)
+
+            # output RedCAP should be in checked directory with current datetime in file name
+            current_dt = datetime.now().strftime("%Y-%m-%d_%H%M")  # 2024-03-20_1522
+            rc_base = os.path.basename(rc_file)
+            old_dt = re.fullmatch(r".*_DATA_(.+)\.csv", rc_base).group(1)
+            rc_base = rc_base.replace(old_dt, current_dt)
+            rc_out = os.path.join(checked_dir, "redcap", rc_base)
+            df.to_csv(rc_out, index=False)
 
     elif args.replace:
         for rc_file in redcaps:
@@ -654,17 +664,14 @@ if __name__ == "__main__":
                 )
                 exit(1)
             df.columns = args.replace
-            df.to_csv(rc_file, index=False)
 
-    # check data dictionary
-    try:
-        if datadict_has_changes(dataset):
-            logger.error("Data dictionary has changed. Please rerun setup.sh.")
-            exit(1)
-    except FileNotFoundError as err:
-        logger.error(err)
-        exit(1)
-    logger.debug("No changes to data dictionary")
+            # see above
+            current_dt = datetime.now().strftime("%Y-%m-%d_%H%M")  # 2024-03-20_1522
+            rc_base = os.path.basename(rc_file)
+            old_dt = re.fullmatch(r".*_DATA_(.+)\.csv", rc_base).group(1)
+            rc_base = rc_base.replace(old_dt, current_dt)
+            rc_out = os.path.join(checked_dir, "redcap", rc_base)
+            df.to_csv(rc_out, index=False)
 
     legacy_exceptions = bool(args.legacy_exceptions)
     logger.debug(
