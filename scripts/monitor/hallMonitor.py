@@ -484,15 +484,12 @@ def raw_data_validation(dataset, legacy_exceptions=False):
     logger.info("Raw data validation complete, found %d errors", len(errors))
     logger.info("Found %d identifiers with no errors", len(pending) - len(errors))
 
-    # add pending rows to pending-files-[datetime].csv
-    pending_df = get_pending_files(dataset)
-    temp_df = pd.DataFrame(pending)
-    pending_df = pd.concat([pending_df, temp_df])
+    # write pending rows to pending-files-[datetime].csv
+    pending_df = pd.DataFrame(pending)
     timestamp = SharedTimestamp()
     write_pending_files(dataset, pending_df, timestamp)
 
-    # copy errors to pending-errors-[datetime].csv
-    timestamp = SharedTimestamp()
+    # append errors to pending-errors-[datetime].csv (populated by checked data validation step)
     error_df = get_pending_errors(pending_df)
     write_pending_errors(dataset, error_df, timestamp)
 

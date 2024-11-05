@@ -1074,8 +1074,14 @@ def get_pending_errors(pending_df):
 
 
 def write_pending_errors(dataset, df, timestamp):
-    out = os.path.join(dataset, PENDING_SUBDIR, f"pending-errors-{timestamp}.csv")
+    """
+    Write to pending-errors-[timestamp].csv, appending if data is already present
+    """
     df = df[PENDING_ERRORS_COLS]
+    out = os.path.join(dataset, PENDING_SUBDIR, f"pending-errors-{timestamp}.csv")
+    if os.path.exists(out):
+        old_df = pd.read_csv(out)
+        df = pd.concat([df, old_df])
     df = df.sort_values(by=["identifier", "datetime"])
     df.to_csv(out, index=False)
 
