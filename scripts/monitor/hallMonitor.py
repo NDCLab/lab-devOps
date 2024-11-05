@@ -672,6 +672,16 @@ if __name__ == "__main__":
             rc_out = os.path.join(checked_dir, "redcap", rc_base)
             df.to_csv(rc_out, index=False)
 
+    # check data dictionary
+    try:
+        if datadict_has_changes(dataset):
+            logger.error("Data dictionary has changed. Please rerun setup.sh.")
+            exit(1)
+    except FileNotFoundError as err:
+        logger.error(err)
+        exit(1)
+    logger.debug("No changes to data dictionary")
+
     legacy_exceptions = bool(args.legacy_exceptions)
     logger.debug(
         "Using %s exception file naming", "legacy" if legacy_exceptions else "standard"
