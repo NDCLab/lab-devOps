@@ -699,14 +699,23 @@ if __name__ == "__main__":
         logger.critical("Could not get new redcaps: %s", err)
         exit(1)
 
-    ids = get_present_identifiers(dataset)
-    unique_sre = set((id.session, id.run, id.event) for id in ids)
+    universal_redcaps = [
+        rc for rc in redcaps if not re.fullmatch(r".*s\d+.*", os.path.basename(rc))
+    ]
 
-    for ses, run, event in unique_sre:
-        sre = f"{ses}{run}{event}"
-        sr_redcaps = [rc for rc in redcaps if f"{ses}{run}" in os.path.basename(rc)]
+    ids = get_present_identifiers(dataset)
+    unique_sr = set((id.session, id.run) for id in ids)
+
+    for ses, run in sorted(unique_sr):
+        sr = f"{ses}_{run}"
+        sr_redcaps = [
+            rc
+            for rc in redcaps
+            if re.fullmatch(rf".*{ses}({run})?_DATA.*", os.path.basename(rc))
+        ]
+        sr_redcaps += universal_redcaps
         try:
-            logger.info("Running update-tracker.py for session/run/event %s...", sre)
+            logger.info("Running update-tracker.py for session/run %s...", sr)
             subprocess.check_call(
                 [
                     "python",
@@ -714,12 +723,12 @@ if __name__ == "__main__":
                     checked_dir,
                     dataset,
                     ",".join(sr_redcaps),
-                    sre,
+                    sr,
                     "true" if args.child_data else "false",
                 ]
             )
         except subprocess.CalledProcessError as err:
-            logger.error("Could not update central tracker for s/r/e %s (%s)", sre, err)
+            logger.error("Could not update central tracker for ses/r %s (%s)", sr, err)
 
     # everything completed successfully, exit with success
     exit(0)
