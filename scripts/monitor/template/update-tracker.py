@@ -222,6 +222,18 @@ if __name__ == "__main__":
     session = sys.argv[4]
     child = sys.argv[5]
 
+    passed_ids = [Identifier.from_str(s) for s in sys.argv[6].split(",")]
+    id_df = pd.DataFrame(
+        [
+            {
+                "id": id.subject.removeprefix("sub-"),
+                "colname": f"{id.variable}_{id.session}_{id.run}_{id.event}",
+                "datatype": get_variable_datatype(dataset, id.variable),
+            }
+            for id in passed_ids
+        ]
+    )
+
     redcaps = redcaps.split(',')
     if session == "none":
       session = ""
@@ -232,7 +244,6 @@ if __name__ == "__main__":
     DATA_DICT = dataset + "/data-monitoring/data-dictionary/central-tracker_datadict.csv"
     df_dd = pd.read_csv(DATA_DICT)
     redcheck_columns, allowed_duplicate_columns = get_redcap_columns(df_dd)
-    tasks_dict = get_tasks(df_dd)
     ids = get_IDs(df_dd)
     study_no = get_study_no(df_dd)
     
@@ -401,50 +412,21 @@ if __name__ == "__main__":
     else:
         sys.exit('Can\'t find redcaps in ' + dataset + '/sourcedata/raw/redcap, skipping ')
 
-    for task, values in tasks_dict.items():
-        datatype = values[0]
-        file_exts = values[1].split(", ")
-        file_sfxs = values[2].split(", ")
-        for subj in subjects:
-            no_data = False
-            subdir = "sub-" + str(subj)
-            dir_id = int(subj)
-            for sfx in file_sfxs:
-                suf_re = re.match('^(s[0-9]+_r[0-9]+)_e[0-9]+$', sfx)
-                if suf_re and suf_re.group(1) == session:
-                    try:
-                        corrected = False
-                        for filename in listdir(join(checked_path, subdir, session, datatype)):
-                            if re.match('^.*[Dd]eviation\.txt$', filename):
-                                corrected = True
-                                break
-                            if re.match('^.*no-data\.txt$', filename):
-                                tracker_df.loc[dir_id, task + "_" + sfx] = "0"
-                                no_data = True
-                                break
-                        if no_data:
-                            break
-                        all_files_present = True
-                        for ext in file_exts:
-                            file_present = False
-                            for filename in listdir(join(checked_path, subdir, session, datatype)):
-                                if corrected:
-                                    if re.match('^sub-' + str(dir_id) + '_' + task + '_' + sfx + '[a-zA-Z0-9_-]*\\' + ext + '$', filename):
-                                    # when deviation.txt file present allow string between suffix and ext (e.g. "s1_r1_e1_firstrun_practice.eeg")
-                                        file_present = True
-                                        break
-                                else:
-                                    if re.match('^sub-' + str(dir_id) + '_' + task + '_' + sfx + '\\' + ext + '$', filename):
-                                        file_present = True
-                                        break
-                            if not file_present:
-                                all_files_present = False
-                        if all_files_present:
-                            tracker_df.loc[dir_id, task + "_" + sfx] = "1"
-                        else:
-                            tracker_df.loc[dir_id, task + "_" + sfx] = "0"
-                    except:
-                        tracker_df.loc[dir_id, task + "_" + sfx] = "0"
+    # update central tracker with a 1 for each fully-verified identifier
+
+    # ...but first, make sure all column names are valid
+    invalid_cols = id_df[~id_df["colname"].isin(tracker_df.columns)]["colname"]
+    if not invalid_cols.empty:
+        raise ValueError(f"Invalid column(s) found: {', '.join(invalid_cols.unique())}")
+
+    # ...and do the same for subject IDs
+    invalid_ids = id_df[~id_df["id"].isin(tracker_df["id"])]["id"]
+    if not invalid_ids.empty:
+        raise ValueError(f"Invalid ID(s) found: {', '.join(invalid_ids.unique())}")
+
+    # we're all set, update the tracker with a value of 1 for each verified identifier
+    for _, row in id_df.iterrows():
+        tracker_df.loc[tracker_df["id"] == row["id"], row["colname"]] = 1
 
     fill_combination_columns(tracker_df, df_dd)
 
@@ -460,4 +442,10 @@ if __name__ == "__main__":
             # make remaining empty values equal to 0
             # tracker_df[collabel] = tracker_df[collabel].fillna("0")
 
-    print(c.GREEN + "Success: {} data tracker updated.".format(', '.join([dtype[0] for dtype in list(tasks_dict.values())])) + c.ENDC)
+    print(
+        c.GREEN
+        + "Success: {} data tracker updated.".format(
+            ", ".join(id_df["datatype"].unique())
+        )
+        + c.ENDC
+    )
