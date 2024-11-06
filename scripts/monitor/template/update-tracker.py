@@ -222,15 +222,18 @@ if __name__ == "__main__":
     session = sys.argv[4]
     child = sys.argv[5]
 
-    passed_ids = [Identifier.from_str(s) for s in sys.argv[6].split(",")]
+    passed_ids = [(Identifier.from_str(s), 1) for s in sys.argv[6].split(",")]
+    failed_ids = [(Identifier.from_str(s), 0) for s in sys.argv[7].split(",")]
+    all_ids = passed_ids + failed_ids
     id_df = pd.DataFrame(
         [
             {
                 "id": id.subject.removeprefix("sub-"),
                 "colname": f"{id.variable}_{id.session}_{id.run}_{id.event}",
                 "datatype": get_variable_datatype(dataset, id.variable),
+                "passed": pass_val,  # 1 for verified IDs, 0 for failing IDs
             }
-            for id in passed_ids
+            for id, pass_val in all_ids
         ]
     )
 
@@ -426,7 +429,7 @@ if __name__ == "__main__":
 
     # we're all set, update the tracker with a value of 1 for each verified identifier
     for _, row in id_df.iterrows():
-        tracker_df.loc[tracker_df["id"] == row["id"], row["colname"]] = 1
+        tracker_df.loc[tracker_df["id"] == row["id"], row["colname"]] = row["passed"]
 
     fill_combination_columns(tracker_df, df_dd)
 
