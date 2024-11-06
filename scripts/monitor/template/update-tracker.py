@@ -427,7 +427,7 @@ if __name__ == "__main__":
     if not invalid_ids.empty:
         raise ValueError(f"Invalid ID(s) found: {', '.join(invalid_ids.unique())}")
 
-    # we're all set, update the tracker with a value of 1 for each verified identifier
+    # we're all set, update the tracker with an appropriate pass/fail value
     for _, row in id_df.iterrows():
         tracker_df.loc[tracker_df["id"] == row["id"], row["colname"]] = row["passed"]
 
