@@ -441,7 +441,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
         if is_raw:  # only log pass rows for raw data
             # check if this identifier has any errors
             if not any(p["identifier"] == id and not p["passRaw"] for p in pending):
-                pending.append(new_pass_record(id))
+                pending.append(new_pass_record(dataset, id))
                 logger.debug("Identifier %s had no errors", str(id))
 
         continue  # go to next present identifier
@@ -558,7 +558,7 @@ def qa_validation(dataset):
             logger.error("Could not copy file(s) for %s to %s (%s)", id, dest_path, err)
 
     # add new raw-validated identifiers to QA tracker
-    new_qa = [new_qa_record(id, dataset) for id in new_qa["identifier"]]
+    new_qa = [new_qa_record(dataset, id) for id in new_qa["identifier"]]
     new_qa_df = pd.DataFrame(new_qa)
     qa_df = pd.concat([qa_df, new_qa_df])
     write_qa_tracker(dataset, qa_df)
