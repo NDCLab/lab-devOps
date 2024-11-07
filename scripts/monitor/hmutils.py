@@ -38,14 +38,15 @@ UPDATE_TRACKER_SUBPATH = os.path.join("data-monitoring", "update-tracker.py")
 FILE_RECORD_COLS = [
     "datetime",
     "user",
-    "dataType",
     "identifier",
+    "identifierDetails",
 ]
 PENDING_FILES_COLS = [
     "datetime",
     "user",
     "passRaw",
     "identifier",
+    "identifierDetails",
     "errorType",
     "errorDetails",
 ]
@@ -53,14 +54,15 @@ PENDING_ERRORS_COLS = [
     "datetime",
     "user",
     "identifier",
+    "identifierDetails",
     "errorType",
     "errorDetails",
 ]
 QA_CHECKLIST_COLS = [
     "datetime",
     "user",
-    "dataType",
     "identifier",
+    "identifierDetails",
     "qa",
     "localMove",
 ]
@@ -849,8 +851,8 @@ def new_file_record_df():
     colmap = {
         "datetime": "str",
         "user": "str",
-        "dataType": "str",
         "identifier": "str",
+        "identifierDetails": "str",
     }
     return df_from_colmap(colmap)
 
@@ -863,7 +865,8 @@ def new_pending_df():
     - datetime (str): The date and time of the entry.
     - user (str): The user associated with the entry.
     - dataType (str): The type of data.
-    - identifier (str): A unique identifier for the entry.
+    - identifier (str): A unique identifier for the entry (machine-readable).
+    - identifierDetails (str): Human-readable information about the identifier.
     - passRaw (bool): True for pass rows, False for error rows
     - errorType (str): The type of error, if any.
     - errorDetails (str): Details about the error, if any.
@@ -874,8 +877,8 @@ def new_pending_df():
     colmap = {
         "datetime": "str",
         "user": "str",
-        "dataType": "str",
         "identifier": "str",
+        "identifierDetails": "str",
         "passRaw": "bool",
         "errorType": "str",
         "errorDetails": "str",
@@ -899,16 +902,18 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
     - "datetime" (str): The timestamp when the error occurred.
     - "user" (str): The user who encountered the error.
     - "passRaw" (bool): Always False, indicating that an error has occurred.
-    - "identifier" (str): The unique identifier for the error.
+    - identifier (str): A unique identifier for the entry (machine-readable).
+    - identifierDetails (str): Human-readable information about the identifier.
     - "errorType" (str): The type/category of the error.
     - "errorDetails" (str): Detailed information about the error.
     """
     try:
         if not isinstance(identifier, Identifier):
             identifier = Identifier.from_str(str(identifier))
-        id_str = identifier.to_detailed_str(dataset)
+        id_str = str(identifier)
+        detailed_str = identifier.to_detailed_str(dataset)
     except ValueError:
-        id_str = "Unknown Identifier"
+        id_str = detailed_str = "Unknown Identifier"
 
     logger.error(
         "Error occurred with identifier %s: %s - %s",
@@ -921,32 +926,44 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
         "user": getuser(),
         "passRaw": False,
         "identifier": id_str,
+        "identifierDetails": detailed_str,
         "errorType": error_type,
         "errorDetails": error_details,
     }
 
 
-def new_pass_record(identifier):
+def new_pass_record(dataset, identifier):
     """
     Creates a new pass record dictionary with the given identifier.
 
     Args:
-        identifier (str): The unique identifier for the pass record.
+        dataset (str): A path to the dataset's base directory.
+        identifier (str|Identifier): The unique identifier for the pass record.
 
     Returns:
         dict: A dictionary containing the following keys:
     - "datetime" (str): The current timestamp.
     - "user" (str): The username of the current user.
     - "passRaw" (bool): Always True, indicating no error has occurred.
-    - "identifier" (str): The provided identifier converted to a string.
+    - identifier (str): A unique identifier for the entry (machine-readable).
+    - identifierDetails (str): Human-readable information about the identifier.
     - "errorType" (None): Placeholder for error type, initially None.
     - "errorDetails" (None): Placeholder for error details, initially None.
     """
+    try:
+        if not isinstance(identifier, Identifier):
+            identifier = Identifier.from_str(str(identifier))
+        id_str = str(identifier)
+        detailed_str = identifier.to_detailed_str(dataset)
+    except ValueError:
+        id_str = detailed_str = "Unknown Identifier"
+
     return {
         "datetime": get_timestamp(),
         "user": getuser(),
         "passRaw": True,
-        "identifier": str(identifier),
+        "identifier": id_str,
+        "identifierDetails": detailed_str,
         "errorType": None,
         "errorDetails": None,
     }
@@ -971,66 +988,66 @@ def new_validation_record(dataset, identifier):
         dict: A dictionary containing the following keys:
             - "datetime" (str): The current timestamp.
             - "user" (str): The username of the current user.
-            - "dataType" (str): The data type of the variable associated with
-                                the identifier.
-            - "identifier" (str): The string representation of the identifier.
+            - identifier (str): A unique identifier for the entry (machine-readable).
+            - identifierDetails (str): Human-readable information about the identifier.
 
     Raises:
         ValueError: If the identifier string cannot be converted to an
                     Identifier instance or if the data type of the variable
                     cannot be determined.
     """
-    if isinstance(identifier, str):
-        try:
-            identifier = Identifier.from_str(identifier)
-        except ValueError as err:
-            raise err
-
     try:
-        datatype = get_variable_datatype(dataset, identifier.variable)
+        if not isinstance(identifier, Identifier):
+            identifier = Identifier.from_str(str(identifier))
+        id_str = str(identifier)
+        detailed_str = identifier.to_detailed_str(dataset)
     except ValueError as err:
         raise err
 
     return {
         "datetime": get_timestamp(),
         "user": getuser(),
-        "dataType": datatype,
-        "identifier": str(identifier),
+        "identifier": id_str,
+        "identifierDetails": detailed_str,
     }
 
 
-def new_qa_record(identifier, dataset):
+def new_qa_record(dataset, identifier):
     """
     Creates a new QA record dictionary with the provided identifier.
 
     Args:
+        dataset (str): The path to the dataset directory.
         identifier (str or Identifier): The identifier for the QA record. If a string is provided,
                                         it will be converted to an Identifier object.
 
     Returns:
         dict: A dictionary containing the QA record with the following keys:
-    - "identifier" (str): The string representation of the identifier.
+    - identifier (str): A unique identifier for the entry (machine-readable).
+    - identifierDetails (str): Human-readable information about the identifier.
     - "datetime" (str): The current timestamp.
     - "user" (str): The username of the current user.
     - "qa" (bool): The QA status, initialized to False.
     - "localMove" (bool): The local move status, initialized to False.
-    - "dataType" (str): The data type of the identifier.
 
     Raises:
         ValueError: If the identifier string cannot be converted to an Identifier object.
     """
-    if isinstance(identifier, str):
-        try:
-            identifier = Identifier.from_str(identifier)
-        except ValueError as err:
-            raise err
+    try:
+        if not isinstance(identifier, Identifier):
+            identifier = Identifier.from_str(str(identifier))
+        id_str = str(identifier)
+        detailed_str = identifier.to_detailed_str(dataset)
+    except ValueError:
+        id_str = detailed_str = "Unknown Identifier"
+
     return {
-        "identifier": str(identifier),
+        "identifier": id_str,
+        "identifierDetails": detailed_str,
         "datetime": get_timestamp(),
         "user": getuser(),
         "qa": False,
         "localMove": False,
-        "dataType": get_variable_datatype(dataset, identifier.variable),
     }
 
 
@@ -1041,8 +1058,8 @@ def new_qa_checklist():
     The columns and their corresponding data types are:
     - "datetime": str
     - "user": str
-    - "dataType": str
     - "identifier": str
+    - "identifierDetails": str
     - "qa": bool
     - "localMove": bool
 
@@ -1052,8 +1069,8 @@ def new_qa_checklist():
     colmap = {
         "datetime": "str",
         "user": "str",
-        "dataType": "str",
         "identifier": "str",
+        "identifierDetails": "str",
         "qa": "bool",
         "localMove": "bool",
     }
