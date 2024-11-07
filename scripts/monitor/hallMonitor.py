@@ -697,6 +697,12 @@ if __name__ == "__main__":
         logger.critical("update-tracker.py does not exist at expected location.")
         exit(1)
 
+    # get passed/failed IDs as specified by pending-files.csv
+    pending = get_pending_files(dataset)
+    failed_ids = pending[pending["passRaw"] == 0]["identifier"].unique()
+    failed_ids = list(failed_ids)
+    passed_ids = pending[~pending["identifier"].isin(failed_ids)]["identifier"].tolist()
+
     checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
 
     try:
@@ -731,6 +737,8 @@ if __name__ == "__main__":
                     ",".join(sr_redcaps),
                     sr,
                     "true" if args.child_data else "false",
+                    ",".join(passed_ids),
+                    ",".join(failed_ids),
                 ]
             )
         except subprocess.CalledProcessError as err:
