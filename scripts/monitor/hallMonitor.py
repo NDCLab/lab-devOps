@@ -704,6 +704,7 @@ if __name__ == "__main__":
     ]["identifier"].unique()
     failed_ids = list(failed_ids)
     passed_ids = pending[~pending["identifier"].isin(failed_ids)]["identifier"].tolist()
+    passed_ids = [p for p in passed_ids if Identifier.PATTERN.fullmatch(p)]
 
     checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
 
