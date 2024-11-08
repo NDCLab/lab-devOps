@@ -699,7 +699,9 @@ if __name__ == "__main__":
 
     # get passed/failed IDs as specified by pending-files.csv
     pending = get_pending_files(dataset)
-    failed_ids = pending[pending["passRaw"] == 0]["identifier"].unique()
+    failed_ids = pending[
+        (pending["passRaw"] == 0) & (pending["identifier"] != "Unknown Identifier")
+    ]["identifier"].unique()
     failed_ids = list(failed_ids)
     passed_ids = pending[~pending["identifier"].isin(failed_ids)]["identifier"].tolist()
 
