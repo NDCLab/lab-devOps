@@ -420,12 +420,14 @@ if __name__ == "__main__":
     # ...but first, make sure all column names are valid
     invalid_cols = id_df[~id_df["colname"].isin(tracker_df.columns)]["colname"]
     if not invalid_cols.empty:
-        raise ValueError(f"Invalid column(s) found: {', '.join(invalid_cols.unique())}")
+        print(f"Invalid column(s) found: {', '.join(invalid_cols.unique())}, skipping")
+        id_df = id_df[~id_df["colname"].isin(invalid_cols)]
 
     # ...and do the same for subject IDs
     invalid_ids = id_df[~id_df["id"].isin(tracker_df["id"])]["id"]
     if not invalid_ids.empty:
-        raise ValueError(f"Invalid ID(s) found: {', '.join(invalid_ids.unique())}")
+        print(f"Invalid ID(s) found: {', '.join(invalid_ids.unique())}, skipping")
+        id_df = id_df[~id_df["id"].isin(invalid_ids)]
 
     # we're all set, update the tracker with an appropriate pass/fail value
     for _, row in id_df.iterrows():
