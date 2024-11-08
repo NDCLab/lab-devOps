@@ -794,7 +794,7 @@ def get_pending_files(dataset):
     pending_files = os.listdir(pending_dir)
 
     PF_RE = r"pending-files-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}\.csv"
-    pending_files = [f for f in pending_files if re.fullmatch(PF_RE, f)]
+    pending_files = sorted([f for f in pending_files if re.fullmatch(PF_RE, f)])
 
     if pending_files:
         latest_pending = os.path.join(pending_dir, pending_files[-1])
