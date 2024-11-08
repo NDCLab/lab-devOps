@@ -831,6 +831,7 @@ def write_pending_files(dataset, df, timestamp):
         raise KeyError(
             f"DataFrame does not contain required columns for a QA checklist (missing {missing_cols})"
         )
+    df["passRaw"] = df["passRaw"].astype(int)
     df = df.sort_values(by=["identifier", "datetime"])
     df.to_csv(out, index=False)
 
