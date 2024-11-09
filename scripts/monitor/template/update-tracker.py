@@ -1,8 +1,8 @@
 import pandas as pd
 import sys
-from os.path import basename, normpath, join, isdir, isfile, splitext
-from os import listdir, walk
-import pathlib
+from os.path import basename, normpath, join, isfile, splitext
+from os import listdir
+from ..hmutils import get_variable_datatype, Identifier
 import re
 import math
 import datetime
@@ -43,7 +43,7 @@ def get_redcap_columns(datadict_df):
             rc_variable = prov[idx+1].strip("\";,")
             if rc_variable == "":
                 rc_variable = row["variable"].lower()
-            if not rc_filename in cols.keys():
+            if rc_filename not in cols.keys():
                 cols[rc_filename] = {}
             if "id:" in prov:
                 idx = prov.index("id:")
@@ -147,15 +147,15 @@ def fill_combination_columns(tracker_df, dd_df):
             present = False
             for col in cols:
                 try:
-                    if str(tracker_df.loc[id, col]) == "1":
+                    if tracker_df.loc[id, col] == 1:
                         present = True
                 except KeyError as e_msg:
                     sys.exit(c.RED + "Error: KeyError:" + e_msg + ", please fix central tracker." + c.ENDC)
             if present:
-                tracker_df.loc[id, combined_col] = "1"
+                tracker_df.loc[id, combined_col] = 1
             else:
-                tracker_df.loc[id, combined_col] = "0"
-        if not any(tracker_df.loc[:, combined_col] == "1"):
+                tracker_df.loc[id, combined_col] = 1
+        if not any(tracker_df.loc[:, combined_col] == 1):
             tracker_df.loc[:, combined_col] = "" # all zeros columns leave blank
 
 def parent_columns(datadict_df):
@@ -204,7 +204,7 @@ def parent_columns(datadict_df):
                         if re.search(study_no + '[089](\d{4})', str(rc_row.name)):
                             child_id = study_no + '0' + re.search(study_no + '([089])(\d{4})', str(rc_row.name)).group(2)
                             child_id = int(child_id)
-                            if str(rc_row[col]) == "1" or str(rc_row[col]) == "2":
+                            if rc_row[col] == 1 or rc_row[col] == 2:
                                 try:
                                     for suf in row["allowedSuffix"].split(", "):
                                         if re.match("^" + session + "_e[0-9]+$", suf):
@@ -275,13 +275,13 @@ if __name__ == "__main__":
         for expected_rc in redcheck_columns.keys():
             present = False
             for redcap in redcaps:
-                if expected_rc in basename(redcap.lower()) and present == False:
+                if expected_rc in basename(redcap.lower()) and not present:
                     redcap_path = redcap
                     all_redcap_paths[expected_rc] = redcap_path
                     present = True
-                elif expected_rc in basename(redcap.lower()) and present == True:
+                elif expected_rc in basename(redcap.lower()) and present:
                     sys.exit(c.RED + "Error: multiple redcaps found with name specified in datadict, " + redcap_path + " and " + redcap + ", exiting." + c.ENDC)
-            if present == False:
+            if not present:
                 sys.exit(c.RED + "Error: can't find redcap specified in datadict " + expected_rc + ", exiting." + c.ENDC)
             if "id_column" in redcheck_columns[expected_rc].keys():
                 id_col = redcheck_columns[expected_rc]["id_column"]
@@ -357,13 +357,13 @@ if __name__ == "__main__":
                         val = rc_df.loc[id, key]
                         keys_in_redcap[key] = value
                         try:
-                            if tracker_df.loc[child_id, value] == "1":
+                            if tracker_df.loc[child_id, value] == 1:
                                 # if value already set continue
                                 continue
                             else:
-                                tracker_df.loc[child_id, value] = "1" if val == 2 else "0"
+                                tracker_df.loc[child_id, value] = 1 if val == 2 else 0
                         except:
-                            tracker_df.loc[child_id, value] = "1" if val == 2 else "0"
+                            tracker_df.loc[child_id, value] = 1 if val == 2 else 0
                     except Exception as e_msg:
                         continue
 
@@ -372,7 +372,7 @@ if __name__ == "__main__":
                 for key, value in keys_in_redcap.items():
                     if re.match('^.*' + session + '_e[0-9]+$', value):
                         try:
-                            tracker_df.loc[subj, value] = "0"
+                            tracker_df.loc[subj, value] = 0
                         except Exception as e_msg:
                             continue
 
