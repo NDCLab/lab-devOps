@@ -721,6 +721,7 @@ if __name__ == "__main__":
     ids = get_present_identifiers(dataset)
     unique_sr = set((id.session, id.run) for id in ids)
 
+    failed_sr = []
     for ses, run in sorted(unique_sr):
         sr = f"{ses}_{run}"
         sr_redcaps = [
@@ -745,7 +746,17 @@ if __name__ == "__main__":
                 ]
             )
         except subprocess.CalledProcessError as err:
-            logger.error("Could not update central tracker for ses/r %s (%s)", sr, err)
+            logger.error("update-tracker.py failed for ses/run %s (%s)", sr, err)
+            failed_sr.append(sr)
+
+    if failed_sr:
+        failed_sr = ", ".join(failed_sr)
+        logger.critical("Could not update tracker for %s, exiting", failed_sr)
+        exit(1)
+
+    success_sr = ", ".join(f"{s}_{r}" for s, r in unique_sr)
+    logger.info("Successfully updated tracker for %s ", success_sr)
 
     # everything completed successfully, exit with success
+    logger.info("hallMonitor pipeline complete, exiting")
     exit(0)
