@@ -5,9 +5,13 @@ function [] = MADE_pipeline(dataset, subjects, session)
 cluster = parcluster('local');
 
 % start matlabpool with max workers set in the slurm file
-%parpool(cluster, str2num(getenv('SLURM_CPUS_PER_TASK'))) % this should be same as --cpus-per-task
-workersAvailable = maxNumCompThreads;
-parpool(cluster, workersAvailable)
+N_CPUS = str2double(getenv('SLURM_CPUS_PER_TASK'));
+
+if isnan(N_CPUS) || N_CPUS <= 0
+    N_CPUS = maxNumCompThreads; % fallback value
+end
+
+parpool(cluster, N_CPUS)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This script was initially edited by George Buzzell for the NDC Lab EEG
@@ -173,7 +177,19 @@ cd (rawdata_location_parent)
 subjects_to_process = string(split(subjects, "/"));
 subjects_to_process = subjects_to_process(subjects_to_process~=""); %nvm not necessary
 subjects_to_process = strcat("sub-", subjects_to_process);
+
+% if job was run as a task array, divide up subjects; otherwise, process everyone
+n_tasks = str2double(getenv('SLURM_ARRAY_TASK_COUNT'));
+if ~isnan(n_tasks)
+    task_idx = str2double(getenv('SLURM_ARRAY_TASK_ID')); % index must start at 1
+    % take all subjects where subIndex = taskCount mod taskIndex
+    % (remember to adjust for MATLAB's 1-based indexing) 
+    subjects_to_process = subjects_to_process(mod((1:length(subjects_to_process)) - 1, n_tasks) == (task_idx - 1));
+end
+
 %for file_locater_counter = 1:length(subjects_to_process) % This for loop lists the folders containing the main data files
+threadsPerWorker = max(1, floor(N_CPUS / numSubjects));
+maxNumCompThreads(threadsPerWorker); % set max CPUs for each worker
 parfor file_locater_counter = 1:length(subjects_to_process) %1:4
         try
         subjStart = tic;
