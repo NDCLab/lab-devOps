@@ -188,7 +188,7 @@ if ~isnan(n_tasks)
 end
 
 %for file_locater_counter = 1:length(subjects_to_process) % This for loop lists the folders containing the main data files
-threadsPerWorker = max(1, floor(N_CPUS / numSubjects));
+threadsPerWorker = max(1, floor(N_CPUS / length(subjects_to_process)));
 maxNumCompThreads(threadsPerWorker); % set max CPUs for each worker
 parfor file_locater_counter = 1:length(subjects_to_process) %1:4
         try
