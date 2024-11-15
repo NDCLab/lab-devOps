@@ -21,11 +21,13 @@ fi
 # Generate sub file
 sub_file="${file_name%.*}.sub"
 
+CONDA_MODULE="miniconda3-4.5.11-gcc-8.2.0-oqs2mbg"
+
 echo -e  "#!/bin/bash\\n
 #SBATCH --nodes=$NODES\\n
 #SBATCH --ntasks=1\\n
 #SBATCH --time=$WALLTIME\\n
-module load miniconda3-4.5.11-gcc-8.2.0-oqs2mbg\\n
+module load $CONDA_MODULE\\n
 python3 ${file_name}" >| $sub_file
 
 # Submit sub file
