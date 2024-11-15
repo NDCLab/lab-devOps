@@ -335,15 +335,27 @@ if __name__ == "__main__":
                 id_col = "record_id"
 
             rc_df = pd.read_csv(redcap_path)
-            if remote_rc:  # if there is both a remote and in-person redcap...
-                # ...append remote RC to in-person RC, since variables are the same
-                remote_df = pd.read_csv(remote_rc)
-                rc_df = pd.concat([rc_df, remote_df])
 
+            # get matching ID column
             rc_cols = rc_df.columns
             col_matches = rc_cols[rc_cols.str.startswith(id_col)]
             if not col_matches:  # column match not found, raise an error
                 raise ValueError(f"Column {id_col} not found for RedCAP {redcap_path}")
+            rc_id_col = col_matches[0]
+
+            if remote_rc:  # if there is both a remote and in-person redcap...
+                remote_df = pd.read_csv(remote_rc)
+
+                # ...ensure that each subject is only in one redcap or the other, then...
+                duped_subs = set(remote_df[rc_id_col]) & set(rc_df[rc_id_col])
+                if duped_subs:
+                    raise ValueError(
+                        f"The following subjects are in the remote-only and in-person REDCaps: {', '.join(duped_subs)}"
+                    )
+
+                # ...append remote RC to in-person RC, since variables are the same
+                rc_df = pd.concat([rc_df, remote_df])
+
             # re-index rc_df on the selected column
             rc_id_col = col_matches[0]
             all_rc_dfs[expected_rc] = rc_df.set_index(rc_id_col)
