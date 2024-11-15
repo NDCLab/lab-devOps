@@ -21,6 +21,16 @@ class c:
 
 # TODO: Make this occur once during construction
 def get_redcap_columns(datadict_df):
+    """Obtains column mappings for all Redcap columns from the data dictionary.
+
+    Args:
+        datadict_df (pd.DataFrame): Data dictionary dataframe
+
+    Returns:
+        dict[dict[str, str]]: A dict of expected redcaps, and dicts of column mappings from column
+        names in the redcap (including Sp. language surveys) to column names in the central tracker,
+        drawn from the provenance column in the datadict.
+    """
     df = datadict_df
     # filter for prov
     cols = {}
@@ -73,6 +83,9 @@ def get_redcap_columns(datadict_df):
     return cols, allowed_duplicate_columns
 
 def get_tasks(datadict_df):
+    """ Returns a dict of expected variables that have files (e.g. "all_eeg", "all_digi") with information
+    about them (their datatypes, file extensions, allowed suffixes)
+    """
     df = datadict_df
     tasks_dict = dict()
     task_vars = []
@@ -88,6 +101,8 @@ def get_tasks(datadict_df):
     return tasks_dict
 
 def get_IDs(datadict_df):
+    """Returns list of subject IDs from the Redcap and column specified in the "id" row in the datadict
+    """
     df_dd = datadict_df
     id_desc = df_dd.set_index("variable").loc["id", "provenance"].split(" ")
     # ID description column should contain redcap and variable from which to read IDs, in format 'file: "{name of redcap}"; variable: "{column name}"'
@@ -123,6 +138,7 @@ def get_IDs(datadict_df):
     return ids
 
 def get_study_no(datadict_df):
+    """Get two-digit study number from id allowedValues in datadict"""
     allowed_vals = datadict_df.set_index("variable").loc["id", "allowedValues"]
     allowed_vals = allowed_vals.replace(" ", "")
     intervals = re.split("[\[\]]", allowed_vals)
@@ -130,6 +146,8 @@ def get_study_no(datadict_df):
     return intervals[0][0:2] # first two digits should be study no.
 
 def fill_combination_columns(tracker_df, dd_df):
+    """Fills in combination columns, i.e. checks for the presence of one or more combination variables
+    """
     combos_dict = dict()
     for _, row in dd_df.iterrows():
         if row["dataType"] == "combination":
@@ -159,6 +177,10 @@ def fill_combination_columns(tracker_df, dd_df):
             tracker_df.loc[:, combined_col] = "" # all zeros columns leave blank
 
 def parent_columns(datadict_df):
+    """
+    Populate parent_identity (pidentity) and parent_language (plang) columns in central tracker (8 = primary
+    parent, 9 = secondary parent), return a dict of Redcaps with their respective plang and pidentity columns
+    """
     parent_info = dict()
     for _, row in datadict_df.iterrows():
         if row["dataType"] == "parent_identity":
@@ -390,6 +412,7 @@ if __name__ == "__main__":
 
         parent_info = parent_columns(df_dd)
 
+        # Fill in "NA"s in parent cols for all subjects not present in redcap
         for expected_rc in redcheck_columns.keys():
             if expected_rc in parent_info.keys():
                 for subj in set(subjects).difference(all_rc_subjects[expected_rc]):
