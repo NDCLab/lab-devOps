@@ -283,14 +283,25 @@ if __name__ == "__main__":
                     sys.exit(c.RED + "Error: multiple redcaps found with name specified in datadict, " + redcap_path + " and " + redcap + ", exiting." + c.ENDC)
             if not present:
                 sys.exit(c.RED + "Error: can't find redcap specified in datadict " + expected_rc + ", exiting." + c.ENDC)
+
+            # re-index redcap and save to redcheck_columns
+
             if "id_column" in redcheck_columns[expected_rc].keys():
-                id_col = redcheck_columns[expected_rc]["id_column"]
-                for column in pd.read_csv(redcap_path).columns:
-                    if column.startswith(id_col):
-                        all_rc_dfs[expected_rc] = pd.read_csv(redcap_path, index_col = column)
-            else:
+                # ID column has been specified
+                id_col = str(redcheck_columns[expected_rc]["id_column"])
+            else:  # no ID column specified, use default
                 id_col = "record_id"
-                all_rc_dfs[expected_rc] = pd.read_csv(redcap_path, index_col = id_col)
+
+            rc_df = pd.read_csv(redcap_path)
+            rc_cols = rc_df.columns
+            col_matches = rc_cols[rc_cols.str.startswith(id_col)]
+
+            if col_matches:  # re-index rc_df on the selected column
+                rc_id_col = col_matches[0]
+                all_rc_dfs[expected_rc] = rc_df.set_index(rc_id_col)
+            else:  # column match not found, raise an error
+                raise ValueError(f"Column {id_col} not found for RedCAP {redcap_path}")
+
             # If hallMonitor passes "redcap" arg, data exists and passed checks 
             vals = pd.read_csv(redcap_path, header=None, nrows=1).iloc[0,:].value_counts()
             # Exit if duplicate column names in redcap
