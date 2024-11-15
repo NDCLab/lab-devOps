@@ -576,7 +576,7 @@ def qa_validation(dataset):
 if __name__ == "__main__":
     # initialization stage
     args = get_args()
-    dataset = os.path.realpath(args.dataset)
+    dataset = os.path.realpath(str(args.dataset))
     if not os.path.exists(dataset):
         raise FileNotFoundError(f"Dataset {dataset} not found")
     
