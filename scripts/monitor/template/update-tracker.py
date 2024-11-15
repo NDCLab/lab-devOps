@@ -295,12 +295,11 @@ if __name__ == "__main__":
             rc_df = pd.read_csv(redcap_path)
             rc_cols = rc_df.columns
             col_matches = rc_cols[rc_cols.str.startswith(id_col)]
-
-            if col_matches:  # re-index rc_df on the selected column
-                rc_id_col = col_matches[0]
-                all_rc_dfs[expected_rc] = rc_df.set_index(rc_id_col)
-            else:  # column match not found, raise an error
+            if not col_matches:  # column match not found, raise an error
                 raise ValueError(f"Column {id_col} not found for RedCAP {redcap_path}")
+            # re-index rc_df on the selected column
+            rc_id_col = col_matches[0]
+            all_rc_dfs[expected_rc] = rc_df.set_index(rc_id_col)
 
             # If hallMonitor passes "redcap" arg, data exists and passed checks 
             vals = pd.read_csv(redcap_path, header=None, nrows=1).iloc[0,:].value_counts()
