@@ -522,7 +522,7 @@ def qa_validation(dataset):
         try:
             subprocess.run(["mv", src_path, dest_path], check=True)
             logger.debug("Moved file(s) for ID %s to %s", id, dest_path)
-        except shutil.Error as err:
+        except subprocess.CalledProcessError as err:
             logger.error("Could not move file(s) for %s to %s (%s)", id, dest_path, err)
 
     # remove fully-verified identifiers from QA checklist
