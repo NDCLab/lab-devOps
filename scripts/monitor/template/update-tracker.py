@@ -274,13 +274,33 @@ if __name__ == "__main__":
         all_rc_subjects = dict()
         for expected_rc in redcheck_columns.keys():
             present = False
-            for redcap in redcaps:
+            remote_rcs = [r for r in redcaps if "remoteonly" in basename(r.lower())]
+            normal_rcs = [r for r in redcaps if r not in remote_rcs]
+            for redcap in normal_rcs:
                 if expected_rc in basename(redcap.lower()) and not present:
                     redcap_path = redcap
                     all_redcap_paths[expected_rc] = redcap_path
                     present = True
                 elif expected_rc in basename(redcap.lower()) and present:
                     sys.exit(c.RED + "Error: multiple redcaps found with name specified in datadict, " + redcap_path + " and " + redcap + ", exiting." + c.ENDC)
+
+            remote_rc = ""
+            for redcap in remote_rcs:
+                rc_basename = basename(redcap.lower())
+                if expected_rc not in rc_basename:
+                    continue
+
+                present = True
+                if expected_rc in all_redcap_paths:
+                    # save remote redcap for later
+                    remote_rc = redcap
+                else:
+                    # treat remote redcap as the only redcap
+                    redcap_path = redcap
+                    all_redcap_paths[expected_rc] = redcap
+
+                break
+
             if not present:
                 sys.exit(c.RED + "Error: can't find redcap specified in datadict " + expected_rc + ", exiting." + c.ENDC)
 
@@ -293,6 +313,11 @@ if __name__ == "__main__":
                 id_col = "record_id"
 
             rc_df = pd.read_csv(redcap_path)
+            if remote_rc:  # if there is both a remote and in-person redcap...
+                # ...append remote RC to in-person RC, since variables are the same
+                remote_df = pd.read_csv(remote_rc)
+                rc_df = pd.concat([rc_df, remote_df])
+
             rc_cols = rc_df.columns
             col_matches = rc_cols[rc_cols.str.startswith(id_col)]
             if not col_matches:  # column match not found, raise an error
