@@ -21,7 +21,7 @@ fi
 # Generate sub file
 sub_file="${file_name%.*}.sub"
 
-R_MODULE="r-4.2.0-gcc-8.2.0"
+R_MODULE="r-4.4.1-gcc-13.2.0"
 
 echo -e  "#!/bin/bash\\n
 #SBATCH --nodes=$NODES\\n
