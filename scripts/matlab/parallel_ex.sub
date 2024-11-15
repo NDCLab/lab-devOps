@@ -1,0 +1,15 @@
+#!/bin/bash
+#SBATCH --nodes=1                # node count
+#SBATCH --ntasks=4               # total number of tasks across all nodes
+#SBATCH --cpus-per-task=1        # CPUS to use when using data parallelization
+#SBATCH --time=00:05:00          # total run time limit (HH:MM:SS)
+#SBATCH --output=%x-%j.out
+
+# an example script for doing parallel processing in Matlab
+
+module load matlab-2021b
+
+#ARG1="arg1"; ARG2="arg2"
+#matlab -nodisplay -nosplash -r "addpath('$PWD'); parallelExample $ARG1 $ARG2" # if you need to pass in arguments to the matlab function
+
+matlab -nodisplay -nosplash -r "addpath('$PWD'); parallelExample"
