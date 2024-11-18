@@ -252,6 +252,7 @@ if __name__ == "__main__":
             {
                 "id": id.subject.removeprefix("sub-"),
                 "colname": f"{id.variable}_{id.session}_{id.run}_{id.event}",
+                "variable": id.variable,
                 "datatype": get_variable_datatype(dataset, id.variable),
                 "passed": pass_val,  # 1 for verified IDs, 0 for failing IDs
             }
@@ -520,7 +521,7 @@ if __name__ == "__main__":
     print(
         c.GREEN
         + "Success: {} data tracker updated.".format(
-            ", ".join(id_df["datatype"].unique())
+            ", ".join(id_df["variable"].unique())
         )
         + c.ENDC
     )
