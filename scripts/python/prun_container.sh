@@ -25,8 +25,8 @@ echo -e  "#!/bin/bash\\n
 #SBATCH --nodes=$NODES\\n
 #SBATCH --ntasks=1\\n
 #SBATCH --time=$WALLTIME\\n
-singularity exec /home/data/NDClab/tools/containers/python-3.8/container.simg python3 ${file_name}" >| $sub_file
-# python 3.8.10
+singularity exec /home/data/NDClab/tools/containers/python-3.9/python-3.9.simg python3 ${file_name}" >| $sub_file
+# python 3.9.20
 
 # Submit sub file
 echo "Submitting $sub_file as job"
