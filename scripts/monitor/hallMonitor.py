@@ -623,6 +623,7 @@ if __name__ == "__main__":
         logger.addHandler(console_handler)
 
     logger.info("Logging initialized")
+    logger.debug("%s", get_timestamp())
 
     # rename redcap columns
     raw_dir = os.path.join(dataset, RAW_SUBDIR)
