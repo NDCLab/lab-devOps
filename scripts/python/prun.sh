@@ -21,7 +21,7 @@ fi
 # Generate sub file
 sub_file="${file_name%.*}.sub"
 
-CONDA_MODULE="miniconda3-4.5.11-gcc-8.2.0-oqs2mbg"
+CONDA_MODULE="miniconda3-23.5.2"
 
 echo -e  "#!/bin/bash\\n
 #SBATCH --nodes=$NODES\\n
