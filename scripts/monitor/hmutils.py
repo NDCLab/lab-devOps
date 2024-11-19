@@ -357,6 +357,11 @@ def get_args():
         help="disable color in output, useful for logging or plain-text environments",
     )
     parser.add_argument(
+        "--no-qa",
+        action="store_true",
+        help="skip the QA (quality assurance) step of the pipeline",
+    )
+    parser.add_argument(
         "-o",
         "--output",
         type=str,

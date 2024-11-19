@@ -696,7 +696,10 @@ if __name__ == "__main__":
         checked_data_validation(dataset, legacy_exceptions)
         raw_data_validation(dataset, legacy_exceptions)
 
-    qa_validation(dataset)
+    if args.no_qa:
+        logger.info("Skipping QA stage")
+    else:
+        qa_validation(dataset)
 
     logger.info("All checks complete")
 
