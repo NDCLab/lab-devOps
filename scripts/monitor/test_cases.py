@@ -3,8 +3,6 @@ import os
 from abc import ABC, abstractmethod
 from typing import Type
 
-from gen_bug_tracking import BASE_SUBJECT_ID
-
 
 class TestCase(ABC):
     """
@@ -20,6 +18,8 @@ class TestCase(ABC):
     """
 
     _used_subject_ids = set()
+
+    BASE_SUBJECT_ID = 3000000
 
     BASE_SUBJECT_SUBDIR = os.path.join("base_subject", "")
     TEST_CASES_SUBDIR = os.path.join("test_cases", "")
@@ -68,7 +68,7 @@ class TestCase(ABC):
                 rel_path = os.path.relpath(file_path, self.base_sub_dir)
 
                 rel_path = rel_path.replace(
-                    f"sub-{BASE_SUBJECT_ID}", f"sub-{self.sub_id}"
+                    f"sub-{self.BASE_SUBJECT_ID}", f"sub-{self.sub_id}"
                 )
 
                 with open(file_path, "r") as f:
@@ -143,7 +143,7 @@ class TestCase(ABC):
 
 
 class TestCaseRegistry:
-    next_id = BASE_SUBJECT_ID + 1
+    next_id = TestCase.BASE_SUBJECT_ID + 1
 
     def __init__(self, base_dir: str):
         self.base_dir = base_dir
