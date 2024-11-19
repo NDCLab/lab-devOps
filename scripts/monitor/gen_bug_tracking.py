@@ -107,7 +107,7 @@ def create_base_subject(basedir):
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description="The hallMonitor.py script ensures data integrity by validating files within raw and checked directories against a central tracker and data dictionary. It performs checks for expected files, naming conventions, and handles exceptions such as no-data.txt and deviation.txt files. It logs errors for missing, extra, or misnamed files, runs special checks for data types like EEG and Psychopy, and prepares valid files for QA. The script outputs errors and updates logs to assist the data monitor in verifying and resolving issues."
+        description="This script generates base subject data, as well as test data, given a list of test cases."
     )
     parser.add_argument(
         "basedir",
