@@ -85,7 +85,7 @@ class TestCase(ABC):
         """
         for rel_path, content in files.items():
             full_path = os.path.join(self.case_dir, rel_path)
-            os.makedirs(full_path)
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
             with open(full_path, "w") as f:
                 f.write(content)
