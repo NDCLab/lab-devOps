@@ -363,6 +363,18 @@ def get_args():
         help="file path for logger output (defaults to timestamped file in data-monitoring/logs/).",
     )
 
+    limit_data_validation = parser.add_mutually_exclusive_group()
+    limit_data_validation.add_argument(
+        "--checked-only",
+        action="store_true",
+        help="only run data validation for data in sourcedata/checked/",
+    )
+    limit_data_validation.add_argument(
+        "--raw-only",
+        action="store_true",
+        help="only run data validation for data in sourcedata/raw/",
+    )
+
     verbosity = parser.add_mutually_exclusive_group()
     verbosity.add_argument(
         "-v",

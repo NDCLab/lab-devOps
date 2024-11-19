@@ -685,8 +685,17 @@ if __name__ == "__main__":
         "Using %s exception file naming", "legacy" if legacy_exceptions else "standard"
     )
 
-    checked_data_validation(dataset, legacy_exceptions)
-    raw_data_validation(dataset, legacy_exceptions)
+    # limit scope of data validation to raw or checked, if requested
+    if args.raw_only:
+        logger.info("Only running data validation for sourcedata/raw/")
+        raw_data_validation(dataset, legacy_exceptions)
+    elif args.checked_only:
+        logger.info("Only running data validation for sourcedata/checked/")
+        checked_data_validation(dataset, legacy_exceptions)
+    else:
+        checked_data_validation(dataset, legacy_exceptions)
+        raw_data_validation(dataset, legacy_exceptions)
+
     qa_validation(dataset)
 
     logger.info("All checks complete")
