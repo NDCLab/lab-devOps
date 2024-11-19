@@ -26,27 +26,29 @@ class TestCase(ABC):
     SRE = "@sre@"
     EXT = "@ext@"
 
-    def __init__(self, basedir, case_name, description, conditions, expected_output):
+    def __init__(
+        self, basedir, sub_id, case_name, description, conditions, expected_output
+    ):
         """
         Initialize a TestCase.
 
         Args:
             basedir (str): The base directory containing test case data.
+            sub_id (int): The subject ID assigned to the test case.
             case_name (str): The name of the test case.
             description (str): A description of the test case.
             conditions (list[str]): A list of conditions applied in the test case.
             expected_output (str): A description of the expected output for the test case.
         """
         self.basedir = basedir
+        self.sub_id = sub_id
         self.case_name = case_name
         self.description = description
         self.conditions = conditions
         self.expected_output = expected_output
 
-        self.subject_id = self._generate_unique_subject_id()
-
+        self.base_sub_dir = os.path.join(basedir, self.BASE_SUBJECT_SUBDIR)
         self.case_dir = os.path.join(basedir, self.TEST_CASES_SUBDIR, case_name)
-        os.makedirs(self.case_dir, exist_ok=True)
 
     def read_base_files(self) -> dict[str, str]:
         """
