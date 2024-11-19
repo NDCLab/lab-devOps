@@ -44,6 +44,9 @@ if __name__ == "__main__":
     args = get_args()
     basedir = str(args.basedir)
 
+    if os.listdir(basedir):
+        raise FileExistsError(f"{basedir} is not empty, clear files before running")
+
     create_base_subject(basedir)
 
     tests: list[Type[TestCase]] = []
