@@ -1,9 +1,17 @@
 import argparse
 import os
+from typing import Type
+
+from test_cases import TestCase
 
 
-def create_test_case():
-    pass
+def create_tests(tests: list[Type[TestCase]], basedir: str):
+    for test_type in tests:
+        try:
+            test_case = test_type(basedir)
+            test_case.generate()
+        except Exception as err:
+            raise RuntimeError(f"Error setting up test {test_type.case_name}") from err
 
 
 def create_base_subject():
@@ -34,3 +42,10 @@ def validated_dir(input):
 
 if __name__ == "__main__":
     args = get_args()
+    basedir = str(args.basedir)
+
+    create_base_subject(basedir)
+
+    tests: list[Type[TestCase]] = []
+
+    create_tests(tests, basedir)
