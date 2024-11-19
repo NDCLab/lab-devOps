@@ -58,12 +58,19 @@ class TestCase(ABC):
             dict[str,str]: A dictionary where keys are filenames and values are file contents.
         """
         base_files = {}
-        subject_dir = os.path.join(self.basedir, self.BASE_SUBJECT_SUBDIR)
-        for filename in os.listdir(subject_dir):
-            file_path = os.path.join(subject_dir, filename)
-            if os.path.isfile(file_path):
+
+        for root, _, files in os.walk(self.base_sub_dir):
+            for filename in files:
+                file_path = os.path.join(root, filename)
+                rel_path = os.path.relpath(file_path, self.base_sub_dir)
+
+                rel_path = rel_path.replace(
+                    f"sub-{BASE_SUBJECT_ID}", f"sub-{self.sub_id}"
+                )
+
                 with open(file_path, "r") as f:
-                    base_files[filename] = f.read()
+                    base_files[rel_path] = f.read()
+
         return base_files
 
     def write_files(self, files: dict[str, str]):
@@ -71,12 +78,14 @@ class TestCase(ABC):
         Write the modified files to the test case directory.
 
         Args:
-            files (dict[str,str]): A dictionary where keys are filenames and values are file contents.
+            files (dict[str,str]): A dictionary where keys are relative paths to files and values are file contents.
         """
-        for filename, content in files.items():
-            filename = self._fill_placeholders(filename)
-            with open(os.path.join(self.case_dir, filename), "w") as f:
-                f.write(self._fill_placeholders(content))
+        for rel_path, content in files.items():
+            full_path = os.path.join(self.case_dir, rel_path)
+            os.makedirs(full_path)
+
+            with open(full_path, "w") as f:
+                f.write(content)
 
     def write_metadata(self):
         """
@@ -123,6 +132,7 @@ class TestCase(ABC):
         Generate the test case by reading the base subject, applying modifications,
         and writing the modified files and metadata.
         """
+        os.makedirs(self.case_dir)
         base_files = self.read_base_files()
         modified_files = self.modify(base_files)
         self.write_files(modified_files)
