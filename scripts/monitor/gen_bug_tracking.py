@@ -5,7 +5,8 @@ from typing import Type
 import pandas as pd
 from test_cases import TestCase
 
-BASE_SUBJECT_ID = 3000000
+
+BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
 
 
 def create_tests(tests: list[Type[TestCase]], basedir: str):
