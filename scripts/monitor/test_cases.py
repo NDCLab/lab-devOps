@@ -1,6 +1,9 @@
 import json
 import os
 from abc import ABC, abstractmethod
+from typing import Type
+
+from gen_bug_tracking import BASE_SUBJECT_ID
 
 
 class TestCase(ABC):
@@ -138,11 +141,35 @@ class TestCase(ABC):
         self.write_files(modified_files)
         self.write_metadata()
 
-    def _fill_placeholders(self, input: str):
-        output = input.replace(TestCase.SUB, self.subject_id)
-        output = output.replace(TestCase.VAR, self.variable)
-        output = output.replace(TestCase.SRE, self.sre)
-        output = output.replace(TestCase.EXT, self.ext)
+
+class TestCaseRegistry:
+    next_id = BASE_SUBJECT_ID + 1
+
+    def __init__(self, base_dir: str):
+        self.base_dir = base_dir
+        self._cases: list[TestCase] = []
+
+    @staticmethod
+    def _get_next_subject_id():
+        sub_id = TestCaseRegistry.next_id
+        TestCaseRegistry.next_id += 1
+        return sub_id
+
+    def add_case(self, test_type: Type[TestCase]):
+        case = test_type(self.base_dir, sub_id=self._get_next_subject_id())
+        self._cases.append(case)
+
+    def add_cases(self, test_types: list[Type[TestCase]]):
+        for test_type in test_types:
+            self.add_case(test_type)
+
+    def get_cases(self):
+        return self._cases
+
+    def generate_all(self):
+        for case in self._cases:
+            case.generate()
+
 
         return output
 
