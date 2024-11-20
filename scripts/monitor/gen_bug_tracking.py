@@ -3,19 +3,20 @@ import os
 from typing import Type
 
 import pandas as pd
-from test_cases import TestCase
+from test_cases import (
+    InvalidVariableNameTestCase,
+    TestCase,
+    TestCaseRegistry,
+)
 
 
 BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
 
 
 def create_tests(tests: list[Type[TestCase]], basedir: str):
-    for test_type in tests:
-        try:
-            test_case = test_type(basedir)
-            test_case.generate()
-        except Exception as err:
-            raise RuntimeError(f"Error setting up test {test_type.case_name}") from err
+    registry = TestCaseRegistry(basedir)
+    registry.add_cases(tests)
+    registry.generate_all()
 
 
 def create_base_subject(basedir):
@@ -137,6 +138,8 @@ if __name__ == "__main__":
 
     create_base_subject(basedir)
 
-    tests: list[Type[TestCase]] = []
+    tests: list[Type[TestCase]] = [
+        InvalidVariableNameTestCase,
+    ]
 
     create_tests(tests, basedir)
