@@ -608,12 +608,12 @@ class NoDataAdditionalFilesTestCase(FileNameTestCase):
         return modified_files
 
 
-class FolderSuffixMismatchTestCase(FileNameTestCase):
+class FolderSessionSuffixMismatchTestCase(FileNameTestCase):
     """
     Test case for mismatched session suffix in file name and folder.
     """
 
-    case_name = "FolderSuffixMismatchTestCase"
+    case_name = "FolderSessionSuffixMismatchTestCase"
     description = "Renames a file so its session suffix doesn't match the session folder it's located in."
     conditions = ["File's session suffix does not match session folder"]
     expected_output = "Error is raised for file whose session suffix does not match its session folder."
