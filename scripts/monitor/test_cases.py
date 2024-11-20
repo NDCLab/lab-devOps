@@ -216,3 +216,24 @@ class FileNameTestCase(TestCase):
 
         return False
 
+
+class InvalidVariableNameTestCase(FileNameTestCase):
+    """
+    Test case for incorrect variable names in file names.
+    """
+
+    case_name = "IncorrectVariableNameTestCase"
+    description = "Introduces an incorrect variable name in the file name."
+    conditions = ["Variable name is invalid"]
+    expected_output = "Error is raised for incorrect variable name in file name."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        new_name = f"sub-{self.sub_id}_bad-taskname_s1_r1_e1.csv"
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise ValueError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
