@@ -21,7 +21,7 @@ def create_tests(tests: list[Type[TestCase]], basedir: str):
 
 def create_base_subject(basedir):
     base_subdir = os.path.join(basedir, TestCase.BASE_SUBJECT_SUBDIR)
-    os.makedirs(base_subdir, exist_ok=True)
+    os.makedirs(base_subdir)
 
     # -- set up standard files --
     # (stored in "checked order": sub/ses/dtype)
@@ -31,12 +31,12 @@ def create_base_subject(basedir):
     for ses, run in ses_runs:
         # set up session/run directory
         sr_dir = os.path.join(base_subdir, f"{ses}_{run}")
-        os.makedirs(sr_dir, exist_ok=True)
+        os.makedirs(sr_dir)
 
         # set up psychopy data
 
         psychopy_dir = os.path.join(sr_dir, "psychopy")
-        os.makedirs(psychopy_dir, exist_ok=True)
+        os.makedirs(psychopy_dir)
 
         psychopy_var = "arrow-alert-v1-1_psychopy"
         psychopy_base = f"sub-{BASE_SUBJECT_ID}_{psychopy_var}_{ses}_{run}_e1"
@@ -55,7 +55,7 @@ def create_base_subject(basedir):
         # set up eeg data
 
         eeg_dir = os.path.join(sr_dir, "eeg")
-        os.makedirs(eeg_dir, exist_ok=True)
+        os.makedirs(eeg_dir)
 
         eeg_var = "all_eeg"
         eeg_base = f"sub-{BASE_SUBJECT_ID}_{eeg_var}_{ses}_{run}_e1"
@@ -82,7 +82,7 @@ def create_base_subject(basedir):
         # set up audacity data
 
         audacity_dir = os.path.join(sr_dir, "audacity")
-        os.makedirs(audacity_dir, exist_ok=True)
+        os.makedirs(audacity_dir)
 
         audacity_zip_gpg = f"sub-{BASE_SUBJECT_ID}_all_audacity_{ses}_{run}_e1.zip.gig"
         with open(os.path.join(audacity_dir, audacity_zip_gpg), "w") as f:
@@ -91,7 +91,7 @@ def create_base_subject(basedir):
         # set up zoom data
 
         zoom_dir = os.path.join(sr_dir, "zoom")
-        os.makedirs(zoom_dir, exist_ok=True)
+        os.makedirs(zoom_dir)
 
         zoom_zip_gpg = f"sub-{BASE_SUBJECT_ID}_all_zoom_{ses}_{run}_e1.zip.gig"
         with open(os.path.join(zoom_dir, zoom_zip_gpg), "w") as f:
@@ -100,7 +100,7 @@ def create_base_subject(basedir):
         # set up digi data
 
         digi_dir = os.path.join(sr_dir, "digi")
-        os.makedirs(digi_dir, exist_ok=True)
+        os.makedirs(digi_dir)
 
         digi_zip_gpg = f"sub-{BASE_SUBJECT_ID}_all_digi_{ses}_{run}_e1.zip.gig"
         with open(os.path.join(digi_dir, digi_zip_gpg), "w") as f:
