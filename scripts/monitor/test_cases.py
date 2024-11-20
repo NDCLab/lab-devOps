@@ -631,3 +631,29 @@ class FolderSessionSuffixMismatchTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class FolderRunSuffixMismatchTestCase(FileNameTestCase):
+    """
+    Test case for mismatched run suffix in file name and session folder.
+    """
+
+    case_name = "FolderRunSuffixMismatchTestCase"
+    description = "Renames a file so its run suffix doesn't match the session folder it's located in."
+    conditions = ["File's run suffix does not match session folder"]
+    expected_output = (
+        "Error is raised for file whose run suffix does not match its session folder."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        old_suffix = "s1_r1_e1"
+        new_suffix = "s1_r3_e1"
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
+        new_name = old_name.replace(old_suffix, new_suffix)
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
