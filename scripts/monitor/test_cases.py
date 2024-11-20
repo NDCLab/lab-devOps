@@ -468,3 +468,25 @@ class InvalidExtensionTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class MissingExtensionTestCase(FileNameTestCase):
+    """
+    Test case for missing file extensions in file names.
+    """
+
+    case_name = "MissingExtensionTestCase"
+    description = "Removes the file extension from the file name, leaving it missing."
+    conditions = ["File extension is missing"]
+    expected_output = "Error is raised for missing file extension in file name."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        old_ext = ".csv"
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1{old_ext}"
+        new_name = old_name.replace(old_ext, "")
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise ValueError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
