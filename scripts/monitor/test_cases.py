@@ -560,3 +560,29 @@ class DeviationAndNoDataErrorTestCase(FileNameTestCase):
 
         return modified_files
 
+class DeviationAndNoDataFilesErrorTestCase(FileNameTestCase):
+    """
+    Test case for presence of both deviation.txt and no-data.txt in a folder.
+    """
+
+    case_name = "DeviationAndNoDataFilesErrorTestCase"
+    description = "Adds both 'deviation.txt' and 'no-data.txt' files to the folder, leaving other files intact."
+    conditions = [
+        "Folder contains deviation.txt",
+        "Folder contains no-data.txt",
+    ]
+    expected_output = "Error is raised for the presence of both deviation.txt and no-data.txt in the folder."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
+        no_data_file = f"s1_r1/psychopy/{identifier}-no-data.txt"
+
+        # add deviation.txt and no-data.txt files
+        modified_files[deviation_file] = "Deviation reason: Testing with no-data.txt"
+        modified_files[no_data_file] = "No data available for this test case."
+
+        return modified_files
+
