@@ -512,3 +512,23 @@ class MissingExtensionTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class InsufficientFilesTestCase(FileNameTestCase):
+    """
+    Test case for incorrect number of files in a folder (not enough).
+    """
+
+    case_name = "InsufficientFilesTestCase"
+    description = "Deletes a file from a folder that should contain multiple files."
+    conditions = ["Folder contains fewer files than expected"]
+    expected_output = "Error is raised for insufficient number of files in folder."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        target_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+
+        if not self.remove_file(modified_files, target_file):
+            raise FileNotFoundError(f"File matching basename {target_file} not found")
+
+        return modified_files
+
