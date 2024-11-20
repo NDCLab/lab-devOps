@@ -536,7 +536,10 @@ class DeviationAndNoDataErrorTestCase(FileNameTestCase):
     description = (
         "Adds a 'deviation.txt' file and removes all other files from the folder."
     )
-    conditions = ["Folder contains deviation.txt but no other data"]
+    conditions = [
+        "Folder contains deviation.txt",
+        "Folder contains no other data",
+    ]
     expected_output = (
         "Error is raised for the presence of deviation.txt without any data files."
     )
