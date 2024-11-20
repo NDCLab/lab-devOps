@@ -657,3 +657,27 @@ class FolderRunSuffixMismatchTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class FolderSubjectMismatchTestCase(FileNameTestCase):
+    """
+    Test case for mismatched subject in file name and subject folder.
+    """
+
+    case_name = "FolderSubjectMismatchTestCase"
+    description = "Renames a file so its specified subject does not match the subject folder it's located in."
+    conditions = ["File's subject does not match subject folder"]
+    expected_output = (
+        "Error is raised for file whose subject does not match its subject folder."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        new_name = old_name.replace(str(self.sub_id), str(TestCase.BASE_SUBJECT_ID))
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
