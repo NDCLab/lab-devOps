@@ -560,6 +560,7 @@ class DeviationAndNoDataErrorTestCase(FileNameTestCase):
 
         return modified_files
 
+
 class DeviationAndNoDataFilesErrorTestCase(FileNameTestCase):
     """
     Test case for presence of both deviation.txt and no-data.txt in a folder.
