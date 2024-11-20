@@ -281,3 +281,25 @@ class MissingSubjectNumberTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class InvalidSubjectNumberTestCase(FileNameTestCase):
+    """
+    Test case for invalid subject numbers in file names.
+    """
+
+    case_name = "InvalidSubjectNumberTestCase"
+    description = "Replaces the valid subject number in the file name with an invalid subject number."
+    conditions = ["Subject number is invalid"]
+    expected_output = "Error is raised for invalid subject number in file name."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        sub = f"sub-{self.sub_id}"
+        old_name = f"{sub}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        new_name = old_name.replace(sub, "sub-303")
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise ValueError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
