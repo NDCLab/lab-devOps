@@ -316,10 +316,9 @@ class InvalidSessionSuffixTestCase(FileNameTestCase):
 
     def modify(self, base_files):
         modified_files = base_files.copy()
-        sub = f"sub-{self.sub_id}"
         old_suffix = "s1_r1_e1"
         new_suffix = "s11_r1_e1"
-        old_name = f"{sub}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
         new_name = old_name.replace(old_suffix, new_suffix)
 
         if not self.replace_file_name(modified_files, old_name, new_name):
