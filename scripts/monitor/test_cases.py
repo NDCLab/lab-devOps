@@ -399,3 +399,26 @@ class MissingSessionSuffixTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class MissingRunSuffixTestCase(FileNameTestCase):
+    """
+    Test case for missing run numbers in file names.
+    """
+
+    case_name = "MissingRunSuffixTestCase"
+    description = "Removes the run number from the file name, making it incomplete."
+    conditions = ["Run number in suffix is missing"]
+    expected_output = "Error is raised for missing run number in file name."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        old_suffix = "s1_r1_e1"
+        new_suffix = "s1_r_e1"
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
+        new_name = old_name.replace(old_suffix, new_suffix)
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise ValueError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
