@@ -76,8 +76,10 @@ class TestCase(ABC):
         Args:
             files (dict[str,str]): A dictionary where keys are relative paths to files and values are file contents.
         """
+        sub_dir = os.path.join(self.case_dir, f"sub-{self.sub_id}")
+        os.makedirs(sub_dir)
         for rel_path, content in files.items():
-            full_path = os.path.join(self.case_dir, rel_path)
+            full_path = os.path.join(sub_dir, rel_path)
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
             with open(full_path, "w") as f:
