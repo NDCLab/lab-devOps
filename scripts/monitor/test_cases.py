@@ -376,3 +376,26 @@ class InvalidEventSuffixTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class MissingSessionSuffixTestCase(FileNameTestCase):
+    """
+    Test case for missing session numbers in file names.
+    """
+
+    case_name = "MissingSessionSuffixTestCase"
+    description = "Removes the session number from the file name, making it incomplete."
+    conditions = ["Session number in suffix is missing"]
+    expected_output = "Error is raised for missing session number in file name."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        old_suffix = "s1_r1_e1"
+        new_suffix = "s_r1_e1"
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
+        new_name = old_name.replace(old_suffix, new_suffix)
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise ValueError(f"File matching basename {old_name} not found")
+
+        return modified_files
+

@@ -9,6 +9,7 @@ from test_cases import (
     InvalidSessionSuffixTestCase,
     InvalidSubjectNumberTestCase,
     InvalidVariableNameTestCase,
+    MissingSessionSuffixTestCase,
     MissingSubjectNumberTestCase,
     MissingVariableNameTestCase,
     TestCase,
@@ -149,6 +150,7 @@ if __name__ == "__main__":
         InvalidSessionSuffixTestCase,
         InvalidSubjectNumberTestCase,
         InvalidVariableNameTestCase,
+        MissingSessionSuffixTestCase,
         MissingSubjectNumberTestCase,
         MissingVariableNameTestCase,
     ]
