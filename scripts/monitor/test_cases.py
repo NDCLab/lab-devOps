@@ -94,6 +94,7 @@ class TestCase(ABC):
             "description": self.description,
             "conditions": self.conditions,
             "expected_output": self.expected_output,
+            "subject": f"sub-{self.sub_id}",
         }
         with open(os.path.join(self.case_dir, "metadata.json"), "w") as f:
             json.dump(metadata, f, indent=4)
