@@ -259,3 +259,25 @@ class MissingVariableNameTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class MissingSubjectNumberTestCase(FileNameTestCase):
+    """
+    Test case for missing subject number in file names.
+    """
+
+    case_name = "MissingSubjectNumberTestCase"
+    description = "Removes the subject number from the file name, leaving an incomplete subject identifier."
+    conditions = ["Subject number is missing"]
+    expected_output = "Error is raised for missing subject number in file name."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        sub = f"sub-{self.sub_id}"
+        old_name = f"{sub}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        new_name = old_name.replace(sub, "sub-")
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise ValueError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
