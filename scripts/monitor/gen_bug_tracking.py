@@ -5,6 +5,7 @@ from typing import Type
 import pandas as pd
 from test_cases import (
     InvalidEventSuffixTestCase,
+    InvalidExtensionTestCase,
     InvalidRunSuffixTestCase,
     InvalidSessionSuffixTestCase,
     InvalidSubjectNumberTestCase,
@@ -148,6 +149,7 @@ if __name__ == "__main__":
 
     tests: list[Type[TestCase]] = [
         InvalidEventSuffixTestCase,
+        InvalidExtensionTestCase,
         InvalidRunSuffixTestCase,
         InvalidSessionSuffixTestCase,
         InvalidSubjectNumberTestCase,
