@@ -244,7 +244,7 @@ class InvalidVariableNameTestCase(FileNameTestCase):
     Test case for incorrect variable names in file names.
     """
 
-    case_name = "IncorrectVariableNameTestCase"
+    case_name = "InvalidVariableNameTestCase"
     description = "Introduces an incorrect variable name in the file name."
     conditions = ["Variable name is invalid"]
     expected_output = "Error is raised for incorrect variable name in file name."
