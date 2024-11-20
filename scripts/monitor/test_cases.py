@@ -486,7 +486,7 @@ class MissingExtensionTestCase(FileNameTestCase):
         new_name = old_name.replace(old_ext, "")
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
