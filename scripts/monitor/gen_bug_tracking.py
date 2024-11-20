@@ -19,6 +19,7 @@ from test_cases import (
     MissingSessionSuffixTestCase,
     MissingSubjectNumberTestCase,
     MissingVariableNameTestCase,
+    NoDataAdditionalFilesTestCase,
     TestCase,
     TestCaseRegistry,
 )
@@ -167,6 +168,7 @@ if __name__ == "__main__":
         MissingSessionSuffixTestCase,
         MissingSubjectNumberTestCase,
         MissingVariableNameTestCase,
+        NoDataAdditionalFilesTestCase,
     ]
 
     create_tests(tests, basedir)

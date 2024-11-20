@@ -587,3 +587,23 @@ class DeviationAndNoDataFilesErrorTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class NoDataAdditionalFilesTestCase(FileNameTestCase):
+    """
+    Test case for presence of no-data.txt when additional files are present for the same identifier.
+    """
+
+    case_name = "NoDataAdditionalFilesTestCase"
+    description = "Adds a 'no-data.txt' file to the folder while leaving other files for the same identifier intact."
+    conditions = ["Folder contains no-data.txt"]
+    expected_output = "Error is raised for the presence of no-data.txt when additional files are present for the same identifier."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        no_data_file = f"s1_r1/psychopy/{identifier}-no-data.txt"
+        modified_files[no_data_file] = "No data available for this test case."
+
+        return modified_files
+
