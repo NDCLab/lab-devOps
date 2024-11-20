@@ -607,3 +607,27 @@ class NoDataAdditionalFilesTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class FolderSuffixMismatchTestCase(FileNameTestCase):
+    """
+    Test case for mismatched session suffix in file name and folder.
+    """
+
+    case_name = "FolderSuffixMismatchTestCase"
+    description = "Renames a file so its session suffix doesn't match the session folder it's located in."
+    conditions = ["File's session suffix does not match session folder"]
+    expected_output = "Error is raised for file whose session suffix does not match its session folder."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        old_suffix = "s1_r1_e1"
+        new_suffix = "s3_r1_e1"
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
+        new_name = old_name.replace(old_suffix, new_suffix)
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
