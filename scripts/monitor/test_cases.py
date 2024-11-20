@@ -233,7 +233,7 @@ class InvalidVariableNameTestCase(FileNameTestCase):
         new_name = f"sub-{self.sub_id}_bad-taskname_s1_r1_e1.csv"
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
@@ -255,7 +255,7 @@ class MissingVariableNameTestCase(FileNameTestCase):
         new_name = old_name.replace(variable, "")
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
@@ -277,7 +277,7 @@ class MissingSubjectNumberTestCase(FileNameTestCase):
         new_name = old_name.replace(sub, "sub-")
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
@@ -299,7 +299,7 @@ class InvalidSubjectNumberTestCase(FileNameTestCase):
         new_name = old_name.replace(sub, "sub-303")
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
@@ -322,7 +322,7 @@ class InvalidSessionSuffixTestCase(FileNameTestCase):
         new_name = old_name.replace(old_suffix, new_suffix)
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
@@ -347,7 +347,7 @@ class InvalidRunSuffixTestCase(FileNameTestCase):
         new_name = old_name.replace(old_suffix, new_suffix)
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
@@ -372,7 +372,7 @@ class InvalidEventSuffixTestCase(FileNameTestCase):
         new_name = old_name.replace(old_suffix, new_suffix)
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
@@ -395,7 +395,7 @@ class MissingSessionSuffixTestCase(FileNameTestCase):
         new_name = old_name.replace(old_suffix, new_suffix)
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
@@ -418,7 +418,7 @@ class MissingRunSuffixTestCase(FileNameTestCase):
         new_name = old_name.replace(old_suffix, new_suffix)
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
@@ -441,7 +441,7 @@ class MissingEventSuffixTestCase(FileNameTestCase):
         new_name = old_name.replace(old_suffix, new_suffix)
 
         if not self.replace_file_name(modified_files, old_name, new_name):
-            raise ValueError(f"File matching basename {old_name} not found")
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
