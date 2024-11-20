@@ -769,3 +769,35 @@ class DeviationFileWithBadNamesTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class DeviationFileWithValidNamesTestCase(FileNameTestCase):
+    """
+    Test case for deviation.txt presence with valid file names containing additional strings.
+    """
+
+    case_name = "DeviationFileWithValidNamesTestCase"
+    description = "Adds a 'deviation.txt' file to the folder and renames a file so it matches the naming convention up to an additional string."
+    conditions = [
+        "Folder contains deviation.txt",
+        "File names match naming convention up to an additional string",
+    ]
+    expected_output = (
+        "No error is raised for valid file names with deviation.txt present."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
+        modified_files[deviation_file] = "Deviation reason: Testing valid file names."
+
+        # rename existing file to include additional string
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        new_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1_addstring.csv"
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
