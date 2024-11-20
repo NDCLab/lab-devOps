@@ -5,10 +5,10 @@ from typing import Type
 import pandas as pd
 from test_cases import (
     InvalidVariableNameTestCase,
+    MissingVariableNameTestCase,
     TestCase,
     TestCaseRegistry,
 )
-
 
 BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
 
@@ -140,6 +140,7 @@ if __name__ == "__main__":
 
     tests: list[Type[TestCase]] = [
         InvalidVariableNameTestCase,
+        MissingVariableNameTestCase,
     ]
 
     create_tests(tests, basedir)

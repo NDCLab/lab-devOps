@@ -237,3 +237,25 @@ class InvalidVariableNameTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class MissingVariableNameTestCase(FileNameTestCase):
+    """
+    Test case for missing variable names in file names.
+    """
+
+    case_name = "MissingVariableNameTestCase"
+    description = "Removes the variable name from the file name, making it missing."
+    conditions = ["Variable name is missing"]
+    expected_output = "Error is raised for missing variable name in file name."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        variable = "arrow-alert-v1-1_psychopy"
+        old_name = f"sub-{self.sub_id}_{variable}_s1_r1_e1.csv"
+        new_name = old_name.replace(variable, "")
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise ValueError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
