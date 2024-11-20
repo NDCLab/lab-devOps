@@ -525,3 +525,34 @@ class InsufficientFilesTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class DeviationAndNoDataErrorTestCase(FileNameTestCase):
+    """
+    Test case for presence of deviation.txt when no other data is present.
+    """
+
+    case_name = "DeviationAndNoDataErrorTestCase"
+    description = (
+        "Adds a 'deviation.txt' file and removes all other files from the folder."
+    )
+    conditions = ["Folder contains deviation.txt but no other data"]
+    expected_output = (
+        "Error is raised for the presence of deviation.txt without any data files."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
+        modified_files[deviation_file] = "Deviation reason: Testing no data condition."
+
+        # remove all s1_r1 psychopy files except deviation.txt
+        prefix = "s1_r1/psychopy/"
+        psychopy_files = [f for f in modified_files if f.startswith(prefix)]
+        for file in psychopy_files:
+            if file != deviation_file:
+                del modified_files[file]
+
+        return modified_files
+
