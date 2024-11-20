@@ -707,3 +707,33 @@ class FolderVariableMismatchTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class EmptyFileTestCase(FileNameTestCase):
+    """
+    Test case for correctly named files that are empty.
+    """
+
+    case_name = "EmptyFileTestCase"
+    description = "Creates an empty (0 bytes) file, retaining its correct name."
+    conditions = [
+        "File is named correctly",
+        "File is empty (0 bytes)",
+    ]
+    expected_output = (
+        "Error is raised for file that is correctly named but contains no data."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        target = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        target = "s1_r1/psychopy/" + target
+
+        if target not in modified_files:
+            raise FileNotFoundError(f"File matching relative path {target} not found")
+
+        # simulate empty file (0 bytes)
+        modified_files[target] = ""
+
+        return modified_files
+
