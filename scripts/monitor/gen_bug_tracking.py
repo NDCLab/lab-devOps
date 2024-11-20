@@ -4,6 +4,7 @@ from typing import Type
 
 import pandas as pd
 from test_cases import (
+    InvalidSessionSuffixTestCase,
     InvalidSubjectNumberTestCase,
     InvalidVariableNameTestCase,
     MissingSubjectNumberTestCase,
@@ -141,6 +142,7 @@ if __name__ == "__main__":
     create_base_subject(basedir)
 
     tests: list[Type[TestCase]] = [
+        InvalidSessionSuffixTestCase,
         InvalidSubjectNumberTestCase,
         InvalidVariableNameTestCase,
         MissingSubjectNumberTestCase,

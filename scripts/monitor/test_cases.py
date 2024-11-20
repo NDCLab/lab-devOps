@@ -303,3 +303,27 @@ class InvalidSubjectNumberTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class InvalidSessionSuffixTestCase(FileNameTestCase):
+    """
+    Test case for invalid session numbers in file names.
+    """
+
+    case_name = "InvalidSessionSuffixTestCase"
+    description = "Replaces the valid session number in the file name with an invalid session suffix."
+    conditions = ["Session number in suffix is invalid"]
+    expected_output = "Error is raised for invalid session suffix in file name."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        sub = f"sub-{self.sub_id}"
+        old_suffix = "s1_r1_e1"
+        new_suffix = "s11_r1_e1"
+        old_name = f"{sub}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
+        new_name = old_name.replace(old_suffix, new_suffix)
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise ValueError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
