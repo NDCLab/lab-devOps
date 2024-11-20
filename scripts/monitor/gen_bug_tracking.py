@@ -6,6 +6,7 @@ import pandas as pd
 from test_cases import (
     DeviationAndNoDataErrorTestCase,
     DeviationAndNoDataFilesErrorTestCase,
+    DeviationFileWithBadNamesTestCase,
     EmptyFileTestCase,
     FolderRunSuffixMismatchTestCase,
     FolderSessionSuffixMismatchTestCase,
@@ -160,6 +161,7 @@ if __name__ == "__main__":
     tests: list[Type[TestCase]] = [
         DeviationAndNoDataErrorTestCase,
         DeviationAndNoDataFilesErrorTestCase,
+        DeviationFileWithBadNamesTestCase,
         EmptyFileTestCase,
         FolderRunSuffixMismatchTestCase,
         FolderSessionSuffixMismatchTestCase,
