@@ -216,6 +216,28 @@ class FileNameTestCase(TestCase):
 
         return False
 
+    def remove_file(self, base_files, file):
+        """
+        Removes a file from the given dictionary of files if it exists.
+
+        Args:
+            base_files (dict[str, str]): A dictionary where keys are relative file paths and values are file contents.
+            file (str): The basename of the file to remove.
+
+        Returns:
+            bool: True if the file was found and removed, False otherwise.
+        """
+        path = ""
+        for relpath in base_files:
+            if os.path.basename(relpath) == file:
+                path = relpath
+                break
+        if path:
+            del base_files[path]
+            return True
+        else:
+            return False
+
 
 class InvalidVariableNameTestCase(FileNameTestCase):
     """
