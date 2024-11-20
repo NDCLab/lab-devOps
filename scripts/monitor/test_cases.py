@@ -171,15 +171,48 @@ class TestCaseRegistry:
             case.generate()
 
 
-        return output
+class FileNameTestCase(TestCase):
+    """
+    Base class for file name test cases.
+    """
 
-    def _generate_unique_subject_id(self):
-        base_id = 3000001
-        while True:
-            new_id = f"sub-{base_id}"
-            if new_id not in TestCase._used_subject_ids:
-                TestCase._used_subject_ids.add(new_id)
-                return new_id
-            base_id += 1
+    case_name = "FileNameTestCase"
+    description = "Handles errors related to file names."
+    conditions = ["File name mismatch", "Incorrect variable name"]
+    expected_output = "Correct error generated for file name issues."
 
+    def __init__(self, basedir: str, sub_id: int):
+        super().__init__(
+            basedir,
+            sub_id,
+            self.case_name,
+            self.description,
+            self.conditions,
+            self.expected_output,
+        )
+
+    @property
+    def behavior_to_test(self) -> str:
+        return "Tests for errors related to file names."
+
+    def replace_file_name(self, base_files, old_name, new_name):
+        """
+        Searches for a file by its basename in the given dictionary of files and replaces its name if found.
+
+        Args:
+            base_files (dict[str, str]): A dictionary where keys are relative file paths and values are file contents.
+            old_name (str): The basename of the file to search for.
+            new_name (str): The new basename to replace the old one with.
+
+        Returns:
+            bool: True if the file was found and replaced; False otherwise.
+        """
+        for relpath in base_files:
+            if os.path.basename(relpath) == old_name:
+                old_dir = os.path.dirname(relpath)
+                new_relpath = os.path.join(old_dir, new_name)
+                base_files[new_relpath] = base_files.pop(relpath)
+                return True
+
+        return False
 
