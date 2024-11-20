@@ -681,3 +681,29 @@ class FolderSubjectMismatchTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class FolderVariableMismatchTestCase(FileNameTestCase):
+    """
+    Test case for variable name not matching the enclosing data type folder.
+    """
+
+    case_name = "FolderVariableMismatchTestCase"
+    description = "Copies a file to a folder with an incorrect data type, causing a mismatch between the variable name and the folder."
+    conditions = ["File's variable name does not match enclosing data type folder"]
+    expected_output = "Error is raised for file whose variable name does not match the enclosing data type folder."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        old_folder = "psychopy"
+        new_folder = "digi"
+        old_path = f"s1_r1/{old_folder}/sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        new_path = old_path.replace(old_folder, new_folder, count=1)
+
+        if old_path not in modified_files:
+            raise FileNotFoundError(f"File matching relative path {old_path} not found")
+
+        modified_files[new_path] = modified_files[old_path]  # make copy of file
+
+        return modified_files
+
