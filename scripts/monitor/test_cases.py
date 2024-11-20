@@ -445,3 +445,26 @@ class MissingEventSuffixTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class InvalidExtensionTestCase(FileNameTestCase):
+    """
+    Test case for invalid file extensions in file names.
+    """
+
+    case_name = "InvalidExtensionTestCase"
+    description = "Replaces the valid file extension with an invalid extension."
+    conditions = ["File extension is invalid"]
+    expected_output = "Error is raised for invalid file extension in file name."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        old_ext = ".csv"
+        new_ext = ".badext"
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1{old_ext}"
+        new_name = old_name.replace(old_ext, new_ext)
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
