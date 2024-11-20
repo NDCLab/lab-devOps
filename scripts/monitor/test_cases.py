@@ -17,17 +17,10 @@ class TestCase(ABC):
         case_dir (str): The directory where the test case files will be written.
     """
 
-    _used_subject_ids = set()
-
     BASE_SUBJECT_ID = 3000000
 
     BASE_SUBJECT_SUBDIR = os.path.join("base_subject", "")
     TEST_CASES_SUBDIR = os.path.join("test_cases", "")
-
-    SUB = "@subject_id@"
-    VAR = "@variable@"
-    SRE = "@sre@"
-    EXT = "@ext@"
 
     def __init__(
         self, basedir, sub_id, case_name, description, conditions, expected_output
