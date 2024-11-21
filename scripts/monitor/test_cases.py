@@ -65,7 +65,11 @@ class TestCase(ABC):
                 )
 
                 with open(file_path, "r") as f:
-                    base_files[rel_path] = f.read()
+                    content = f.read()
+
+                base_files[rel_path] = content.replace(
+                    str(TestCase.BASE_SUBJECT_ID), str(self.sub_id)
+                )
 
         return base_files
 
