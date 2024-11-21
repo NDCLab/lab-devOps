@@ -643,6 +643,41 @@ class DeviationFileWithFolderMismatchTestCase(FileNameTestCase):
         return modified_files
 
 
+class DeviationFilePreventsErrorWithExtraFilesTestCase(FileNameTestCase):
+    """
+    Test case for deviation.txt preventing errors when the number of files in a folder differs from the data dictionary.
+    """
+
+    case_name = "DeviationFilePreventsErrorWithExtraFilesTestCase"
+    description = "Adds a 'deviation.txt' file to the folder and includes an additional valid file with an extra string in its name."
+    conditions = [
+        "Folder contains deviation.txt",
+        "Folder contains more files than expected",
+    ]
+    expected_output = (
+        "No error is raised for extra files when deviation.txt is present."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
+        modified_files[deviation_file] = "Deviation reason: Testing extra files."
+
+        base_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        base_file = "s1_r1/psychopy/" + base_file
+        # additional valid file with extra string
+        additional_file = base_file.replace(".csv", "_extra.csv")
+
+        if base_file not in modified_files:
+            raise FileNotFoundError(f"File matching basename {base_file} not found")
+
+        modified_files[additional_file] = modified_files[base_file]
+
+        return modified_files
+
+
 class NoDataAdditionalFilesTestCase(FileNameTestCase):
     """
     Test case for presence of no-data.txt when additional files are present for the same identifier.
