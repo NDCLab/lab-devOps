@@ -36,6 +36,7 @@ from test_cases import (
     MissingVariableNameTestCase,
     MultipleTasksFromCombinationRowTestCase,
     NoDataAdditionalFilesTestCase,
+    PsychopyFileIDMismatchTestCase,
     TestCase,
     TestCaseRegistry,
 )
@@ -201,6 +202,7 @@ if __name__ == "__main__":
         MissingVariableNameTestCase,
         MultipleTasksFromCombinationRowTestCase,
         NoDataAdditionalFilesTestCase,
+        PsychopyFileIDMismatchTestCase,
     ]
 
     create_tests(tests, basedir)
