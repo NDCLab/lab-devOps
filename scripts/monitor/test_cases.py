@@ -1008,3 +1008,34 @@ class EEGMarkerFileVHDRMismatchTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class EEGDataFileVMRKMismatchTestCase(FileNameTestCase):
+    """
+    Test case for mismatched DataFile line in an EEG .vmrk file.
+    """
+
+    case_name = "EEGDataFileVMRKMismatchTestCase"
+    description = "Edits the DataFile line in a .vmrk file so it does not match the name of the .vmrk file itself."
+    conditions = [
+        "DataFile line in .vmrk file does not match the .vmrk file name",
+    ]
+    expected_output = "Error is raised for mismatched DataFile line in the .vmrk file."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        # define the .vmrk file and the incorrect DataFile line
+        vmrk_file = f"s1_r1/eeg/sub-{self.sub_id}_all_eeg_s1_r1_e1.vmrk"
+        if vmrk_file not in modified_files:
+            raise FileNotFoundError(f"File matching basename {vmrk_file} not found")
+
+        # modify the DataFile line in the .vmrk file to introduce the mismatch
+        original_content = modified_files[vmrk_file]
+        updated_content = original_content.replace(
+            f"DataFile=sub-{self.sub_id}_all_eeg_s1_r1_e1.eeg",
+            f"DataFile=sub-{self.sub_id}_wrongname_s1_r1_e1.eeg",
+        )
+        modified_files[vmrk_file] = updated_content
+
+        return modified_files
+
