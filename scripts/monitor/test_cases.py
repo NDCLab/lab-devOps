@@ -944,3 +944,34 @@ class MultipleTasksFromCombinationRowTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class EEGDataFileVHDRMismatchTestCase(FileNameTestCase):
+    """
+    Test case for mismatched DataFile line in an EEG .vhdr file.
+    """
+
+    case_name = "EEGDataFileVHDRMismatchTestCase"
+    description = "Edits the DataFile line in a .vhdr file so it does not match the name of the .vhdr file itself."
+    conditions = [
+        "DataFile line in .vhdr file does not match the .vhdr file name",
+    ]
+    expected_output = "Error is raised for mismatched DataFile line in the .vhdr file."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        # define the .vhdr file and the incorrect DataFile line
+        vhdr_file = f"s1_r1/eeg/sub-{self.sub_id}_all_eeg_s1_r1_e1.vhdr"
+        if vhdr_file not in modified_files:
+            raise FileNotFoundError(f"File matching basename {vhdr_file} not found")
+
+        # modify the DataFile line in the .vhdr file to introduce the mismatch
+        original_content = modified_files[vhdr_file]
+        updated_content = original_content.replace(
+            f"DataFile=sub-{self.sub_id}_all_eeg_s1_r1_e1.eeg",
+            f"DataFile=sub-{self.sub_id}_wrongname_s1_r1_e1.eeg",
+        )
+        modified_files[vhdr_file] = updated_content
+
+        return modified_files
+
