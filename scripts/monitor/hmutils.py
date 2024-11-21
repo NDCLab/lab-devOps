@@ -1216,7 +1216,8 @@ def get_misplaced_redcaps(redcaps):
         ses = ses.group(1)
         split_rc = split_path(rc)
         for part in split_rc:
-            if re.fullmatch(r"s\d+_r\d+", part) and part != ses:
+            m = re.fullmatch(r"(s\d+)_r\d+", part)
+            if m is not None and m.group(1) != ses:
                 misplaced.append(rc)
 
     return misplaced
