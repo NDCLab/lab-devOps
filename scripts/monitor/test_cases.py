@@ -913,3 +913,30 @@ class ExpectedFileMissingTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class MultipleTasksFromCombinationRowTestCase(FileNameTestCase):
+    """
+    Test case for the presence of multiple tasks from the same combination row.
+    """
+
+    case_name = "MultipleTasksFromCombinationRowTestCase"
+    description = "Duplicates a file from a task in a combination row and renames it to appear as another task from the same row."
+    conditions = ["Folder contains multiple tasks from the same combination row"]
+    expected_output = (
+        "Error is raised for multiple tasks present in the same combination row."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        template = f"s1_r1/psychopy/sub-{self.sub_id}_VARNAME_s1_r1_e1.csv"
+        existing_file = template.replace("VARNAME", "arrow-alert-v1-1_psychopy")
+        duplicate_file = template.replace("VARNAME", "arrow-alert-v1-2_psychopy")
+
+        if existing_file not in modified_files:
+            raise FileNotFoundError(f"File matching basename {existing_file} not found")
+
+        modified_files[duplicate_file] = modified_files[existing_file]
+
+        return modified_files
+

@@ -30,6 +30,7 @@ from test_cases import (
     MissingSessionSuffixTestCase,
     MissingSubjectNumberTestCase,
     MissingVariableNameTestCase,
+    MultipleTasksFromCombinationRowTestCase,
     NoDataAdditionalFilesTestCase,
     TestCase,
     TestCaseRegistry,
@@ -190,6 +191,7 @@ if __name__ == "__main__":
         MissingSessionSuffixTestCase,
         MissingSubjectNumberTestCase,
         MissingVariableNameTestCase,
+        MultipleTasksFromCombinationRowTestCase,
         NoDataAdditionalFilesTestCase,
     ]
 
