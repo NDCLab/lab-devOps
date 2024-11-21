@@ -889,3 +889,27 @@ class DeviationFileWithValidNamesTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class ExpectedFileMissingTestCase(FileNameTestCase):
+    """
+    Test case for missing expected files based on the data dictionary.
+    """
+
+    case_name = "ExpectedFileMissingTestCase"
+    description = (
+        "Deletes a file that is expected to be present based on the data dictionary."
+    )
+    conditions = [
+        "File expected based on data dictionary is missing",
+    ]
+    expected_output = "Error is raised for missing expected file."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        target_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+
+        if not self.remove_file(modified_files, target_file):
+            raise FileNotFoundError(f"File matching basename {target_file} not found")
+
+        return modified_files
+
