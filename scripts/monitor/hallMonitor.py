@@ -28,6 +28,7 @@ from hmutils import (
     get_expected_identifiers,
     get_file_record,
     get_identifier_files,
+    get_misplaced_redcaps,
     get_naming_errors,
     get_new_redcaps,
     get_pending_errors,
@@ -625,9 +626,16 @@ if __name__ == "__main__":
     logger.debug("%s", get_timestamp())
 
     # rename redcap columns
+
     raw_dir = os.path.join(dataset, RAW_SUBDIR)
     checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
     redcaps = get_new_redcaps(raw_dir)
+
+    # redcaps in the wrong session folder are considered a critical error
+    misplaced = get_misplaced_redcaps(redcaps)
+    if misplaced:
+        logger.critical(f"Found misplaced redcaps: {', '.join(misplaced)}")
+        exit(1)
 
     if args.map:
         for rc_file in redcaps:

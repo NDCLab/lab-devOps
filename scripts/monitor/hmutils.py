@@ -1167,6 +1167,61 @@ def write_qa_tracker(dataset, df):
     df.to_csv(checklist_path, index=False)
 
 
+def split_path(path):
+    """
+    Splits a given path into its constituent elements.
+
+    Args:
+        path (str): The path to split.
+
+    Returns:
+        list[str]: The path's constituent elements.
+    """
+    parts = []
+    while True:
+        path, tail = os.path.split(path)
+        if tail:
+            parts.insert(0, tail)
+        else:
+            if path:
+                parts.insert(0, path)
+            break
+    return parts
+
+
+def get_misplaced_redcaps(redcaps):
+    """
+    Identifies misplaced REDCap files that are not in their correct session folder.
+
+    This function iterates through a list of REDCap file paths, checks the session
+    information encoded in their filenames, and compares it to the session folder
+    in which they are located. If a file's session identifier does not match its
+    folder, the file is added to a list of misplaced files.
+
+    Args:
+        redcaps (list[str]): A list of file paths to REDCap files.
+
+    Returns:
+        list[str]: A list of file paths for REDCap files that are misplaced.
+
+    Raises:
+        ValueError: If a REDCap filename does not follow the expected naming convention.
+    """
+    misplaced = []
+    for rc in redcaps:
+        rc_base = os.path.basename(rc)
+        ses = re.search(r"(s\d+)(?:r\d+)?_DATA_", rc_base)
+        if ses is None:
+            raise ValueError(f"{rc_base} is not a valid REDCap name")
+        ses = ses.group(1)
+        split_rc = split_path(rc)
+        for part in split_rc:
+            if re.fullmatch(r"s\d+_r\d+", part) and part != ses:
+                misplaced.append(rc)
+
+    return misplaced
+
+
 def clean_empty_dirs(basedir):
     """
     Removes empty directories within the specified base directory.
