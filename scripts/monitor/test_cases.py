@@ -614,6 +614,35 @@ class DeviationAndNoDataFilesErrorTestCase(FileNameTestCase):
         return modified_files
 
 
+class DeviationFileWithFolderMismatchTestCase(FileNameTestCase):
+    """
+    Test case for deviation.txt presence with file names that do not match their folder.
+    """
+
+    case_name = "DeviationFileWithFolderMismatchTestCase"
+    description = "Adds a 'deviation.txt' file to the folder and renames a file so its name does not match the folder it is located in."
+    conditions = [
+        "Folder contains deviation.txt",
+        "File name does not match the folder it is located in",
+    ]
+    expected_output = "Error is raised for the presence of deviation.txt when file names do not match their folder."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
+        modified_files[deviation_file] = "Deviation reason: Testing file mismatch."
+
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        new_name = old_name.replace(str(self.sub_id), str(TestCase.BASE_SUBJECT_ID))
+
+        if not self.replace_file_name(modified_files, old_name, new_name):
+            raise FileNotFoundError(f"File matching basename {old_name} not found")
+
+        return modified_files
+
+
 class NoDataAdditionalFilesTestCase(FileNameTestCase):
     """
     Test case for presence of no-data.txt when additional files are present for the same identifier.
