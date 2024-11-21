@@ -529,6 +529,30 @@ class InsufficientFilesTestCase(FileNameTestCase):
         return modified_files
 
 
+class ExtraFilesInFolderTestCase(FileNameTestCase):
+    """
+    Test case for incorrect number of files in a folder (extra files present).
+    """
+
+    case_name = "ExtraFilesInFolderTestCase"
+    description = (
+        "Adds an additional file to the folder so it has more files than expected."
+    )
+    conditions = [
+        "Folder contains more files than expected",
+    ]
+    expected_output = "Error is raised for folder containing extra files."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        additional_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e2.csv"
+        additional_file = "s1_r1/psychopy/" + additional_file
+        modified_files[additional_file] = "Extra file content for testing purposes."
+
+        return modified_files
+
+
 class DeviationAndNoDataErrorTestCase(FileNameTestCase):
     """
     Test case for presence of deviation.txt when no other data is present.
