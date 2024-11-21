@@ -894,6 +894,35 @@ class DeviationFileWithValidNamesTestCase(FileNameTestCase):
         return modified_files
 
 
+class IssueFileTestCase(FileNameTestCase):
+    """
+    Test case for presence of an issue.txt file in a folder.
+    """
+
+    case_name = "IssueFileTestCase"
+    description = (
+        "Adds an 'issue.txt' file to the folder, which should produce an error. "
+        "'deviation.txt' and 'no-data.txt' files should not produce errors."
+    )
+    conditions = [
+        "Folder contains issue.txt file",
+    ]
+    expected_output = (
+        "Error is raised for the presence of issue.txt file in the folder."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        issue_file = "s1_r1/psychopy/issue.txt"
+
+        if issue_file in modified_files:
+            raise FileExistsError(f"File matching relpath {issue_file} already exists")
+
+        modified_files[issue_file] = "Generic issue message"
+
+        return modified_files
+
+
 class ExpectedFileMissingTestCase(FileNameTestCase):
     """
     Test case for missing expected files based on the data dictionary.
