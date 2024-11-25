@@ -1,0 +1,5 @@
+passRaw,identifier,identifierDetails,errorType,errorDetails
+False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s11_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s11_r1_e1 (psychopy) (combination),Naming error,"Suffix s11_r1_e1 not in allowed suffixes ['s1_r1_e1', 's2_r1_e1', 's3_r1_e1']"
+False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Misplaced file,Found file in wrong directory: sub-3XXXXXX_arrow-alert-v1-1_psychopy_s11_r1_e1.csv found in test_output/test_cases/InvalidSessionSuffixTestCase/sourcedata/checked/sub-3XXXXXX/s1_r1/psychopy/
+False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Missing file,Expected file sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1.csv not found
+False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Unexpected file,Unexpected file sub-3XXXXXX_arrow-alert-v1-1_psychopy_s11_r1_e1.csv found

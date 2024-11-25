@@ -3,7 +3,7 @@ import re
 from unittest import mock
 
 import pytest
-from hmutils import get_psychopy_errors
+from hallmonitor.hmutils import get_psychopy_errors
 
 
 @pytest.fixture
@@ -11,7 +11,7 @@ def mock_file_re(monkeypatch):
     # mock valid filename regex
     mock_re = r"(?P<subject>sub-(?P<id>\d+))_s\d+_r\d+"
 
-    monkeypatch.setattr("hmutils.FILE_RE", mock_re)
+    monkeypatch.setattr("hallmonitor.hmutils.FILE_RE", mock_re)
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def mock_new_error_record(monkeypatch):
             "message": error_details,
         }
 
-    monkeypatch.setattr("hmutils.new_error_record", mock_error_record)
+    monkeypatch.setattr("hallmonitor.hmutils.new_error_record", mock_error_record)
 
 
 @pytest.fixture
@@ -281,7 +281,7 @@ def test_mismatched_id_in_csv_file(
 ):
     id_num = "001"
     mismatched_id = "999"
-    base_filename = f"sub-{id_num}_s1_r1"
+    base_filename = f"sub-{id_num}_s1_r1_e1"
     csv_file = tmp_path / f"{base_filename}.csv"
     log_file = tmp_path / f"{base_filename}.log"
     psydat_file = tmp_path / f"{base_filename}.psydat"

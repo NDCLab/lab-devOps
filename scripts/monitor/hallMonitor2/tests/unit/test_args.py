@@ -2,7 +2,7 @@ import argparse
 from unittest import mock
 
 import pytest
-from hmutils import (
+from hallmonitor.hmutils import (
     get_args,
     validated_dataset,
     validated_redcap_map,
@@ -17,7 +17,7 @@ VALID_DATASET = f"{DATASET_DIR}/some_dataset"
 @pytest.fixture
 def mock_dataset_dir(monkeypatch):
     # Set a mock dataset directory
-    monkeypatch.setattr("hmutils.DATASET_DIR", DATASET_DIR)
+    monkeypatch.setattr("hallmonitor.hmutils.DATASET_DIR", DATASET_DIR)
 
 
 # --- test dataset validation ---

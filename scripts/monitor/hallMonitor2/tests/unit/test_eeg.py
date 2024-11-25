@@ -2,14 +2,14 @@ import os
 from unittest import mock
 
 import pytest
-from hmutils import get_eeg_errors
+from hallmonitor.hmutils import get_eeg_errors
 
 
 @pytest.fixture
 def mock_file_re(monkeypatch):
     # mock valid filename regex
     mock_re = r"(?P<id>\D+)"  # anything but digits
-    monkeypatch.setattr("hmutils.FILE_RE", mock_re)
+    monkeypatch.setattr("hallmonitor.hmutils.FILE_RE", mock_re)
     return mock_re
 
 
@@ -36,7 +36,7 @@ def dataset(tmp_path):
 @pytest.fixture
 def mock_new_error(monkeypatch):
     # Patch the new_error_record function
-    monkeypatch.setattr("hmutils.new_error_record", mock_new_error_record)
+    monkeypatch.setattr("hallmonitor.hmutils.new_error_record", mock_new_error_record)
 
 
 # Test: Valid EEG files with consistent .vhdr, .vmrk, and .eeg content
@@ -300,7 +300,7 @@ def test_get_eeg_errors_wrong_extension(logger, dataset, mock_new_error, mock_fi
 def test_get_eeg_errors_bad_naming_convention(
     logger, dataset, mock_new_error, mock_file_re
 ):
-    with mock.patch("hmutils.FILE_RE", mock_file_re):
+    with mock.patch("hallmonitor.hmutils.FILE_RE", mock_file_re):
         files = [
             os.path.join(dataset, "correct.vmrk"),
             os.path.join(dataset, "123subject.vhdr"),  # Does not match the regex

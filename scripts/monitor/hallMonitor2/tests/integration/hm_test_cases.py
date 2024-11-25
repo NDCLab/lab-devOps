@@ -21,6 +21,7 @@ class TestCase(ABC):
     """
 
     BASE_SUBJECT_ID = 3000000
+    SUB_PLACEHOLDER = "3XXXXXX"
 
     BASE_SUBJECT_SUBDIR = os.path.join("base_subject", "")
     TEST_CASES_SUBDIR = os.path.join("test_cases", "")
@@ -165,7 +166,7 @@ class TestCase(ABC):
         Returns:
             pd.DataFrame: A DataFrame containing the errors reported by validate_data.
         """
-        from hallMonitor import validate_data
+        from hallmonitor.hallMonitor import validate_data
 
         # set up a logger to save hallMonitor output
         logger = logging.getLogger(f"{self.case_name}_logger")
@@ -198,7 +199,10 @@ class TestCase(ABC):
             AssertionError: If there are differences between the generated errors and the gold standard errors.
         """
         # load gold standard error file
-        gold_standard_path = os.path.join("gold-errors", f"{self.case_name}.csv")
+        my_dir = os.path.dirname(__file__)
+        gold_standard_path = os.path.join(
+            my_dir, "gold-errors", f"{self.case_name}.csv"
+        )
         if not os.path.exists(gold_standard_path):
             raise FileNotFoundError(f"Could not find {gold_standard_path}")
         try:
@@ -216,7 +220,7 @@ class TestCase(ABC):
             gold_standard_df.sort_index(axis=1)
             .sort_values(by=list(gold_standard_df.columns), axis=0)
             .reset_index(drop=True)
-            .replace({f"sub-{self.BASE_SUBJECT_ID}": f"sub-{self.sub_id}"}, regex=True)
+            .replace({{self.SUB_PLACEHOLDER}: f"sub-{self.sub_id}"}, regex=True)
         )
         gold_standard_df.columns = generated_errors_df.columns
 
@@ -226,6 +230,8 @@ class TestCase(ABC):
             diff = generated_errors_df.compare(
                 gold_standard_df, keep_shape=True, keep_equal=False
             )
+            print(generated_errors_df)
+            print(gold_standard_df)
             raise AssertionError(
                 f"Mismatch between generated errors and gold standard:\n{diff}"
             )
@@ -235,6 +241,8 @@ class TestCase(ABC):
         Run the full validation, including running validate_data and comparing errors.
         """
         errors_df = self.run_validate_data()
+        # gold_path = os.path.join("gold-errors", f"{self.case_name}.csv")
+        # errors_df.to_csv(gold_path, index=False)
         self.compare_errors(errors_df)
 
 
@@ -1219,3 +1227,154 @@ class EEGDataFileVMRKMismatchTestCase(FileNameTestCase):
 
         return modified_files
 
+
+class DeviationFileValidatesFolderTestCase(FileNameTestCase):
+    pass
+
+
+class DeviationFileInvalidatesFolderTestCase(FileNameTestCase):
+    pass
+
+
+class DeviationFileMissingDataTestCase(FileNameTestCase):
+    pass
+
+
+class VariableNameFolderMismatchTestCase(FileNameTestCase):
+    pass
+
+
+class MultipleTasksSameRowTestCase(FileNameTestCase):
+    pass
+
+
+class IssueFileErrorTestCase(FileNameTestCase):
+    pass
+
+
+class EmptyDirectoriesTestCase(FileNameTestCase):
+    pass
+
+
+class ContentTestCase(TestCase):
+    pass
+
+
+class TrackerCreationWithDeviationTestCase(ContentTestCase):
+    pass
+
+
+class TrackerCreationWithoutDeviationTestCase(ContentTestCase):
+    pass
+
+
+class TaskMissingInStatusRowTestCase(ContentTestCase):
+    pass
+
+
+class SubjectIDMismatchInFileTestCase(ContentTestCase):
+    pass
+
+
+class DataDictionaryModifiedTestCase(ContentTestCase):
+    pass
+
+
+class TrackerBehaviorTestCase(TestCase):
+    pass
+
+
+class BBSDataEmptyFolderTestCase(TrackerBehaviorTestCase):
+    pass
+
+
+class BBSDataNoDataFileTestCase(TrackerBehaviorTestCase):
+    pass
+
+
+class BBSDataIncorrectDataTestCase(TrackerBehaviorTestCase):
+    pass
+
+
+class BBSDataValidTestCase(TrackerBehaviorTestCase):
+    pass
+
+
+class BBSStatusErrorNoDataTestCase(TrackerBehaviorTestCase):
+    pass
+
+
+class BBSStatusValidTestCase(TrackerBehaviorTestCase):
+    pass
+
+
+class CentralTrackerNoDataTestCase(TrackerBehaviorTestCase):
+    pass
+
+
+class CentralTrackerDeviationTestCase(TrackerBehaviorTestCase):
+    pass
+
+
+class EEGTestCase(TestCase):
+    pass
+
+
+class VhdrDataFileMismatchTestCase(EEGTestCase):
+    pass
+
+
+class VhdrMarkerFileMismatchTestCase(EEGTestCase):
+    pass
+
+
+class VmrkDataFileMismatchTestCase(EEGTestCase):
+    pass
+
+
+class QATestCase(TestCase):
+    pass
+
+
+class MoveValidRawToPendingQATestCase(QATestCase):
+    pass
+
+
+class PendingQAToCheckedDirectoryTestCase(QATestCase):
+    pass
+
+
+class CheckedDirectoryCleanupTestCase(QATestCase):
+    pass
+
+
+class QAValidatedRecordTestCase(QATestCase):
+    pass
+
+
+class REDCapTestCase(TestCase):
+    pass
+
+
+class DuplicateColumnsTestCase(REDCapTestCase):
+    pass
+
+
+class MissingColumnTestCase(REDCapTestCase):
+    pass
+
+
+class RedcapNameMismatchTestCase(REDCapTestCase):
+    pass
+
+
+class RedcapFileInWrongFolderTestCase(REDCapTestCase):
+    pass
+
+
+class RemoteRedcapValidTestCase(REDCapTestCase):
+    pass
+
+
+class RemoteRedcapErrorTestCase(REDCapTestCase):
+    pass

@@ -3,7 +3,7 @@ from unittest import mock
 
 import pandas as pd
 import pytest
-from hmutils import (
+from hallmonitor.hmutils import (
     FILE_RECORD_COLS,
     get_file_record,
     new_file_record_df,
@@ -40,7 +40,7 @@ def test_get_file_record_exists(mock_dataset_dir):
     with (
         mock.patch("os.path.exists", return_value=True),
         mock.patch("pandas.read_csv", return_value=mock_df) as mock_read_csv,
-        mock.patch("hmutils.FILE_RECORD_SUBPATH", FILE_RECORD_SUBPATH),
+        mock.patch("hallmonitor.hmutils.FILE_RECORD_SUBPATH", FILE_RECORD_SUBPATH),
     ):
         result = get_file_record(mock_dataset_dir)
         mock_read_csv.assert_called_once_with(file_path)
@@ -53,7 +53,7 @@ def test_get_file_record_not_exists(mock_dataset_dir):
         # Mock os.path.exists to simulate that the file doesn't exist
         mock.patch("os.path.exists", return_value=False),
         mock.patch(
-            "hmutils.new_file_record_df",
+            "hallmonitor.hmutils.new_file_record_df",
             side_effect=mock_new_file_record_df,
         ),
     ):
@@ -85,7 +85,7 @@ def test_write_file_record_valid(mock_dataset_dir):
 
     with (
         # Mock the FILE_RECORD_SUBPATH variable
-        mock.patch("hmutils.FILE_RECORD_SUBPATH", FILE_RECORD_SUBPATH),
+        mock.patch("hallmonitor.hmutils.FILE_RECORD_SUBPATH", FILE_RECORD_SUBPATH),
         # Mock to_csv method to avoid file I/O
         mock.patch("pandas.DataFrame.to_csv") as mock_to_csv,
     ):
@@ -115,7 +115,7 @@ def test_write_file_record_sorting(mock_dataset_dir):
         }
     )
 
-    with mock.patch("hmutils.FILE_RECORD_SUBPATH", FILE_RECORD_SUBPATH):
+    with mock.patch("hallmonitor.hmutils.FILE_RECORD_SUBPATH", FILE_RECORD_SUBPATH):
         write_file_record(mock_dataset_dir, df)
 
         # Ensure the DataFrame is sorted by 'datetime' and 'identifier'

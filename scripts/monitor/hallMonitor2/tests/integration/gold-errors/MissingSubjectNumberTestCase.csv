@@ -1,0 +1,4 @@
+passRaw,identifier,identifierDetails,errorType,errorDetails
+False,Unknown Identifier,Unknown Identifier,Naming error,File sub-_arrow-alert-v1-1_psychopy_s1_r1_e1.csv does not match expected identifier format
+False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Missing file,Expected file sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1.csv not found
+False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Unexpected file,Unexpected file sub-_arrow-alert-v1-1_psychopy_s1_r1_e1.csv found

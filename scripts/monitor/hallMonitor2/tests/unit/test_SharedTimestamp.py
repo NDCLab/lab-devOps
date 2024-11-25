@@ -2,7 +2,7 @@ import datetime
 from unittest import mock
 
 import pytest
-from hmutils import DT_FORMAT, SharedTimestamp, get_timestamp
+from hallmonitor.hmutils import DT_FORMAT, SharedTimestamp, get_timestamp
 
 
 def setup_function():
@@ -10,7 +10,7 @@ def setup_function():
 
 
 def test_get_timestamp_format():
-    with mock.patch("hmutils.datetime") as mock_datetime:
+    with mock.patch("hallmonitor.hmutils.datetime") as mock_datetime:
         mock_dt = datetime.datetime(2024, 1, 1, 12, 0, 0)
         mock_datetime.datetime.now.return_value = mock_dt
 
@@ -36,7 +36,7 @@ def test_shared_timestamp_singleton_identity():
 
 
 def test_shared_timestamp_generated_once():
-    with mock.patch("hmutils.get_timestamp") as mock_get_timestamp:
+    with mock.patch("hallmonitor.hmutils.get_timestamp") as mock_get_timestamp:
         mock_get_timestamp.return_value = "2024-01-01T12:00:00"
 
         # First call should generate the timestamp
@@ -50,7 +50,7 @@ def test_shared_timestamp_generated_once():
 
 
 def test_shared_timestamp_reset():
-    with mock.patch("hmutils.get_timestamp") as mock_get_timestamp:
+    with mock.patch("hallmonitor.hmutils.get_timestamp") as mock_get_timestamp:
         mock_get_timestamp.side_effect = ["2024-01-01T12:00:00", "2024-01-01T12:01:00"]
 
         # First instance should get the first timestamp
