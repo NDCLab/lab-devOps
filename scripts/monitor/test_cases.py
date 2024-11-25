@@ -218,6 +218,7 @@ class TestCase(ABC):
             .reset_index(drop=True)
             .replace({f"sub-{self.BASE_SUBJECT_ID}": f"sub-{self.sub_id}"}, regex=True)
         )
+        gold_standard_df.columns = generated_errors_df.columns
 
         # compare dataframes
         if not generated_errors_df.equals(gold_standard_df):
