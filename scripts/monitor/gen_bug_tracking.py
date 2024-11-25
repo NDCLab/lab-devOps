@@ -114,7 +114,7 @@ def create_base_subject(basedir):
         audacity_dir = os.path.join(sr_dir, "audacity")
         os.makedirs(audacity_dir)
 
-        audacity_zip_gpg = f"sub-{BASE_SUBJECT_ID}_all_audacity_{ses}_{run}_e1.zip.gig"
+        audacity_zip_gpg = f"sub-{BASE_SUBJECT_ID}_all_audacity_{ses}_{run}_e1.zip.gpg"
         with open(os.path.join(audacity_dir, audacity_zip_gpg), "w") as f:
             f.write("audacity data")
 
@@ -123,7 +123,7 @@ def create_base_subject(basedir):
         zoom_dir = os.path.join(sr_dir, "zoom")
         os.makedirs(zoom_dir)
 
-        zoom_zip_gpg = f"sub-{BASE_SUBJECT_ID}_all_zoom_{ses}_{run}_e1.zip.gig"
+        zoom_zip_gpg = f"sub-{BASE_SUBJECT_ID}_all_zoom_{ses}_{run}_e1.zip.gpg"
         with open(os.path.join(zoom_dir, zoom_zip_gpg), "w") as f:
             f.write("zoom data")
 
@@ -132,7 +132,7 @@ def create_base_subject(basedir):
         digi_dir = os.path.join(sr_dir, "digi")
         os.makedirs(digi_dir)
 
-        digi_zip_gpg = f"sub-{BASE_SUBJECT_ID}_all_digi_{ses}_{run}_e1.zip.gig"
+        digi_zip_gpg = f"sub-{BASE_SUBJECT_ID}_all_digi_{ses}_{run}_e1.zip.gpg"
         with open(os.path.join(digi_dir, digi_zip_gpg), "w") as f:
             f.write("digi data")
 
