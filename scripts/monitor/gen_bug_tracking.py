@@ -131,6 +131,138 @@ def create_base_subject(basedir):
         with open(os.path.join(digi_dir, digi_zip_gpg), "w") as f:
             f.write("digi data")
 
+    # -- set up data-monitoring/ directory --
+
+    data_monitoring_dir = os.path.join(base_subdir, "data-monitoring")
+    os.makedirs(data_monitoring_dir)
+
+    # set up data dictionary
+
+    dd_path = os.path.join(data_monitoring_dir, "central-tracker_datadict.csv")
+    mock_dd = [
+        {
+            "variable": "id",
+            "dataType": "id",
+            "description": "Participant ID",
+            "detail": "The participant ID is specific to this study, and is auto-assigned by REDCap.",
+            "allowedSuffix": "NA",
+            "measureUnit": "Integer",
+            "allowedValues": "[3000000,3009999],[3080000,3089999],[3090000,3099999]",
+            "valueInfo": "One ID per participant (eligible and ineligible)",
+            "provenance": 'file: "thriveconsent"; variable: "record_id"',
+            "expectedFileExt": "NA",
+        },
+        {
+            "variable": "consent",
+            "dataType": "consent",
+            "description": "Participant consent status",
+            "detail": 'When data is transferred from raw to checked, value of 1 is assigned based on the value of "consent_complete" or "consentes_complete" == "2"(indicating participant consented), otherwise 0.',
+            "allowedSuffix": "NA",
+            "measureUnit": "Logical",
+            "allowedValues": "NA, 0, 1",
+            "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+            "provenance": 'file: "thriveconsent"; variable: ""',
+            "expectedFileExt": "NA",
+        },
+        {
+            "variable": "assent",
+            "dataType": "assent",
+            "description": "Participant assent status",
+            "detail": 'When data is transferred from raw to checked, value of 1 is assigned based on the value of "assent_complete"=="2" (indicating participant assented), otherwise 0.',
+            "allowedSuffix": "NA",
+            "measureUnit": "Logical",
+            "allowedValues": "NA, 0, 1",
+            "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+            "provenance": 'file: "thriveconsent"; variable: ""',
+            "expectedFileExt": "NA",
+        },
+        {
+            "variable": "arrow-alert-v1-1_psychopy",
+            "dataType": "psychopy",
+            "description": "arrow-alert-v1-1_psychopy task status",
+            "detail": 'When data is transferred from raw to checked, value of 1 is assigned if "arrow-alert-v1-1" file exists, otherwise 0.',
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
+            "measureUnit": "Logical",
+            "allowedValues": "NA, 0, 1",
+            "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+            "provenance": "direct-psychopy",
+            "expectedFileExt": ".psydat, .csv, .log",
+        },
+        {
+            "variable": "arrow-alert-v1-2_psychopy",
+            "dataType": "psychopy",
+            "description": "arrow-alert-v1-2_psychopy task status",
+            "detail": 'When data is transferred from raw to checked, value of 1 is assigned if "arrow-alert-v1-2" file exists, otherwise 0.',
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
+            "measureUnit": "Logical",
+            "allowedValues": "NA, 0, 1",
+            "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+            "provenance": "direct-psychopy",
+            "expectedFileExt": ".psydat, .csv, .log",
+        },
+        {
+            "variable": "arrow-alert_psychopy",
+            "dataType": "combination",
+            "description": "arrow-alert_psychopy task status",
+            "detail": "When updatetracker is run, value of 1 is assigned if either of the variables specificed for a given allowedSuffix = 1, otherwise a value of 0 is assigned.",
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
+            "measureUnit": "Logical",
+            "allowedValues": "NA, 0, 1",
+            "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+            "provenance": 'variables: "arrow-alert-v1-1_psychopy","arrow-alert-v1-2_psychopy"',
+            "expectedFileExt": "NA",
+        },
+        {
+            "variable": "all_audacity",
+            "dataType": "audacity",
+            "description": "Audacity data status",
+            "detail": "When hallMonitor is run, value of 1 is assigned if data already exists in checked, otherwise 0.",
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
+            "measureUnit": "Logical",
+            "allowedValues": "NA, 0, 1",
+            "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+            "provenance": "direct-audacity",
+            "expectedFileExt": ".zip.gpg",
+        },
+        {
+            "variable": "all_zoom",
+            "dataType": "zoom",
+            "description": "Zoom data status",
+            "detail": "When hallMonitor is run, value of 1 is assigned if data already exists in checked, otherwise 0.",
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
+            "measureUnit": "Logical",
+            "allowedValues": "NA, 0, 1",
+            "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+            "provenance": "direct-zoom",
+            "expectedFileExt": ".zip.gpg",
+        },
+        {
+            "variable": "all_eeg",
+            "dataType": "eeg",
+            "description": "Brain Vision EEG data status",
+            "detail": "When data is transferred from raw to checked, value of 1 is assigned if data exists, otherwise 0.",
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
+            "measureUnit": "Logical",
+            "allowedValues": "NA, 0, 1",
+            "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+            "provenance": "direct-eeg",
+            "expectedFileExt": ".eeg, .vmrk, .vhdr",
+        },
+        {
+            "variable": "all_digi",
+            "dataType": "digi",
+            "description": "Digi data status",
+            "detail": "When hallMonitor is run, value of 1 is assigned if data already exists in checked, otherwise 0.",
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
+            "measureUnit": "Logical",
+            "allowedValues": "NA, 0, 1",
+            "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+            "provenance": "direct-digi",
+            "expectedFileExt": ".zip.gpg",
+        },
+    ]
+    mock_dd = pd.DataFrame(mock_dd)
+    mock_dd.to_csv(dd_path, index=False)
 
 def create_tests():
     basedir = "test_output"
