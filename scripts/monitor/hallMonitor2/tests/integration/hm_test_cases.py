@@ -220,7 +220,7 @@ class TestCase(ABC):
             gold_standard_df.sort_index(axis=1)
             .sort_values(by=list(gold_standard_df.columns), axis=0)
             .reset_index(drop=True)
-            .replace({{self.SUB_PLACEHOLDER}: f"sub-{self.sub_id}"}, regex=True)
+            .replace({self.SUB_PLACEHOLDER: f"sub-{self.sub_id}"}, regex=True)
         )
         gold_standard_df.columns = generated_errors_df.columns
 
