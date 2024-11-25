@@ -258,7 +258,7 @@ class Identifier:
         """
         match = Identifier.PATTERN.fullmatch(input)
         if not match:
-            raise ValueError("Passed string is not a valid data identifier")
+            raise ValueError(f"'{input}' is not a valid data identifier")
         sub_id = match.group("subject")
         var = match.group("var")
         sre = match.group("sre")
