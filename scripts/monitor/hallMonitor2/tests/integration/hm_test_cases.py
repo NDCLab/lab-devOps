@@ -241,8 +241,6 @@ class TestCase(ABC):
         Run the full validation, including running validate_data and comparing errors.
         """
         errors_df = self.run_validate_data()
-        # gold_path = os.path.join("gold-errors", f"{self.case_name}.csv")
-        # errors_df.to_csv(gold_path, index=False)
         self.compare_errors(errors_df)
 
 
