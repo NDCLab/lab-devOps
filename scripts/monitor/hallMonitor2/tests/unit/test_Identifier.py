@@ -5,12 +5,14 @@ from unittest import mock
 import pytest
 from hallmonitor.hmutils import Identifier
 
-IDENTIFIER_RE = r"(?P<subject>[a-zA-Z0-9]+)_(?P<var>[a-zA-Z0-9]+)_(?P<sre>[a-zA-Z0-9]+)"
+IDENTIFIER_RE = (
+    r"(?P<subject>[a-zA-Z0-9]+)_(?P<var>[a-zA-Z0-9]+)_(?P<sre>(?:[a-zA-Z0-9]+_?){3})"
+)
 
 
 @pytest.fixture
 def valid_identifier_str():
-    return "sub001_eeg_s1r1e1"
+    return "sub001_eeg_s1_r1_e1"
 
 
 @pytest.fixture
@@ -35,7 +37,9 @@ def test_identifier_from_str_valid(valid_identifier_str):
         identifier = Identifier.from_str(valid_identifier_str)
         assert identifier.subject == "sub001"
         assert identifier.variable == "eeg"
-        assert identifier.session == "s1r1e1"
+        assert identifier.session == "s1"
+        assert identifier.run == "r1"
+        assert identifier.event == "e1"
 
 
 def test_identifier_from_str_invalid(invalid_identifier_str):
@@ -51,12 +55,12 @@ def test_identifier_str(identifier):
 
 
 def test_identifier_eq(identifier):
-    other = Identifier("sub-001", "all_eeg", "s1_r1_e1")
+    other = Identifier("sub-001", "all_eeg", "s1", "r1", "e1")
     assert identifier == other
 
 
 def test_identifier_neq(identifier):
-    other = Identifier("sub-002", "all_eeg", "s1_r1_e1")
+    other = Identifier("sub-002", "all_eeg", "s1", "r1", "e1")
     assert identifier != other
 
 
@@ -67,7 +71,9 @@ def test_identifier_to_dir_raw(identifier, mock_dataset):
         datatype = "mockdtype"
         mock_get_variable_datatype.return_value = datatype
         path = identifier.to_dir(mock_dataset, is_raw=True)
-        assert path == os.path.join("s1_r1", datatype, "sub-001", "")
+        assert path == os.path.join(
+            mock_dataset, "sourcedata", "raw", "s1_r1", datatype, "sub-001", ""
+        )
 
 
 def test_identifier_to_dir_checked(identifier, mock_dataset):
@@ -77,7 +83,9 @@ def test_identifier_to_dir_checked(identifier, mock_dataset):
         datatype = "mockdtype"
         mock_get_variable_datatype.return_value = datatype
         path = identifier.to_dir(mock_dataset, is_raw=False)
-        assert path == os.path.join("sub-001", "s1_r1", datatype, "")
+        assert path == os.path.join(
+            mock_dataset, "sourcedata", "checked", "sub-001", "s1_r1", datatype, ""
+        )
 
 
 def test_identifier_to_detailed_str(identifier, mock_dataset):
