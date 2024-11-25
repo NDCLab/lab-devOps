@@ -235,7 +235,7 @@ class TestCase(ABC):
         self.compare_errors(errors_df)
 
 
-class TestCaseRegistry:
+class _TestCaseRegistry:
     next_id = TestCase.BASE_SUBJECT_ID + 1
 
     def __init__(self, base_dir: str):
@@ -244,8 +244,8 @@ class TestCaseRegistry:
 
     @staticmethod
     def _get_next_subject_id():
-        sub_id = TestCaseRegistry.next_id
-        TestCaseRegistry.next_id += 1
+        sub_id = _TestCaseRegistry.next_id
+        _TestCaseRegistry.next_id += 1
         return sub_id
 
     def add_case(self, test_type: Type[TestCase]):
