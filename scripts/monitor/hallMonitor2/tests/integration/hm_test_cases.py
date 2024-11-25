@@ -188,6 +188,14 @@ class TestCase(ABC):
 
         return pending_df
 
+    def fill_placeholder(self, df: pd.DataFrame, placeholder, new_val):
+        for col in df.columns:
+            if df[col].dtype != pd.StringDtype:
+                continue
+            df[col] = df[col].str.replace(str(placeholder), str(new_val))
+
+        return df
+
     def compare_errors(self, generated_errors_df: pd.DataFrame):
         """
         Compare the generated errors DataFrame with the gold standard errors.
@@ -220,7 +228,9 @@ class TestCase(ABC):
             gold_standard_df.sort_index(axis=1)
             .sort_values(by=list(gold_standard_df.columns), axis=0)
             .reset_index(drop=True)
-            .replace({self.SUB_PLACEHOLDER: f"sub-{self.sub_id}"}, regex=True)
+        )
+        gold_standard_df = self.fill_placeholder(
+            gold_standard_df, self.SUB_PLACEHOLDER, self.sub_id
         )
         gold_standard_df.columns = generated_errors_df.columns
 
