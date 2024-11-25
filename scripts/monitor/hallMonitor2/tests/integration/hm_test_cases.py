@@ -189,6 +189,17 @@ class TestCase(ABC):
         return pending_df
 
     def fill_placeholder(self, df: pd.DataFrame, placeholder, new_val):
+        """
+        Replace a placeholder value with a new value in string columns of a DataFrame.
+
+        Args:
+            df (pd.DataFrame): The DataFrame to modify.
+            placeholder (str): The value to replace.
+            new_val (str): The value to insert in place of the placeholder.
+
+        Returns:
+            pd.DataFrame: The modified DataFrame with replacements applied.
+        """
         for col in df.columns:
             if df[col].dtype != pd.StringDtype:
                 continue
