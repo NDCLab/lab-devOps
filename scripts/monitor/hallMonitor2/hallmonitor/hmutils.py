@@ -263,6 +263,8 @@ class Identifier:
         var = match.group("var")
         sre = match.group("sre")
         sre_match = re.fullmatch(r"(s\d+)_(r\d+)_(e\d+)", sre)
+        if sre_match is None:
+            raise ValueError(f"Valid ses/run/event not found for {sre}")
         ses = sre_match.group(1)
         run = sre_match.group(2)
         event = sre_match.group(3)
