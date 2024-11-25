@@ -12,7 +12,7 @@ from hallmonitor.hmutils import (
 
 @pytest.fixture
 def mock_Identifier_re(monkeypatch):
-    id_pattern = r"(?P<subject>\w+)_(?P<var>\w+)_(?P<sre>\w+)"
+    id_pattern = r"(?P<subject>[a-zA-Z0-9]+)_(?P<var>[a-zA-Z0-9]+)_(?P<sre>(?:[a-zA-Z0-9]+_?){3})"
     monkeypatch.setattr("hallmonitor.hmutils.Identifier.PATTERN", re.compile(id_pattern))
 
 
@@ -20,10 +20,10 @@ def mock_Identifier_re(monkeypatch):
 def mock_datadict(monkeypatch):
     dd_df = pd.DataFrame(
         {
-            "variable": ["var1", "var2", "var3"],
-            "expectedFileExt": ['"eeg,vmrk,vhdr"', '"txt,csv"', '""'],
+            "variable": ["eeg", "psychopy", "var3"],
+            "expectedFileExt": ['".eeg,.vmrk,.vhdr"', '".txt,.csv"', '""'],
             "dataType": ["visit_data", "other", "visit_data"],
-            "provenance": ["variables: var1, var2", "variables: var3", ""],
+            "provenance": ["variables: eeg, psychopy", "variables: var3", ""],
         }
     )
     monkeypatch.setattr("hallmonitor.hmutils.get_datadict", lambda _: dd_df)
@@ -40,14 +40,14 @@ def mock_dataset(tmp_path, mock_datadict, mock_Identifier_re):
 
 
 def test_get_expected_files_valid_string(mock_dataset):
-    identifier = "subject1_var1_ses1"
+    identifier = "subject1_eeg_s1_r1_e1"
 
-    # The mocked data dictionary specifies that var1
-    # has expected extensions "eeg, vmrk, vhdr"
+    # The mocked data dictionary specifies that eeg
+    # has expected extensions ".eeg, .vmrk, .vhdr"
     expected_files = [
-        "subject1_var1_ses1.eeg",
-        "subject1_var1_ses1.vmrk",
-        "subject1_var1_ses1.vhdr",
+        "subject1_eeg_s1_r1_e1.eeg",
+        "subject1_eeg_s1_r1_e1.vmrk",
+        "subject1_eeg_s1_r1_e1.vhdr",
     ]
 
     assert get_expected_files(mock_dataset, identifier) == expected_files
@@ -61,12 +61,12 @@ def test_get_expected_files_invalid_string(mock_dataset):
 
 
 def test_get_expected_files_valid_Identifier(mock_dataset):
-    identifier = Identifier("subject1", "var1", "ses1")
+    identifier = Identifier("subject1", "eeg", "s1", "r1", "e1")
 
     expected_files = [
-        "subject1_var1_ses1.eeg",
-        "subject1_var1_ses1.vmrk",
-        "subject1_var1_ses1.vhdr",
+        "subject1_eeg_s1_r1_e1.eeg",
+        "subject1_eeg_s1_r1_e1.vmrk",
+        "subject1_eeg_s1_r1_e1.vhdr",
     ]
 
     assert get_expected_files(mock_dataset, identifier) == expected_files
@@ -74,7 +74,7 @@ def test_get_expected_files_valid_Identifier(mock_dataset):
 
 def test_get_expected_files_no_extensions(mock_dataset):
     # var3 has no extensions in the mock data dictionary
-    identifier = "subject1_var3_ses1"
+    identifier = "subject1_var3_s1_r1_e1"
     assert get_expected_files(mock_dataset, identifier) == []
 
 
@@ -82,15 +82,15 @@ def test_get_expected_files_no_extensions(mock_dataset):
 
 
 def test_get_expected_identifiers_valid(mock_dataset):
-    present_ids = ["subject1_var1_ses1", "subject2_var1_ses2"]
+    present_ids = ["subject1_eeg_s1_r1_e1", "subject2_eeg_s2_r1_e1"]
 
-    # Based on the mock data dictionary, var1 and var2 are associated with visit data
-    # So, we expect combinations of subject1, subject2 with var1 and var2 for the same sessions
+    # Based on the mock data dictionary, eeg and psychopy are associated with visit data
+    # So, we expect combinations of subject1, subject2 with eeg and psychopy for the same sessions
     expected_ids = [
-        Identifier("subject1", "var1", "ses1"),
-        Identifier("subject1", "var2", "ses1"),
-        Identifier("subject2", "var1", "ses2"),
-        Identifier("subject2", "var2", "ses2"),
+        Identifier("subject1", "eeg", "s1", "r1", "e1"),
+        Identifier("subject1", "psychopy", "s1", "r1", "e1"),
+        Identifier("subject2", "eeg", "s2", "r1", "e1"),
+        Identifier("subject2", "psychopy", "s2", "r1", "e1"),
     ]
 
     result = get_expected_identifiers(mock_dataset, present_ids)
@@ -112,7 +112,7 @@ def test_get_expected_identifiers_no_visit_vars(mock_dataset, monkeypatch):
         return pd.DataFrame(
             {
                 "variable": ["var1", "var2"],  # No "visit_data"
-                "expectedFileExt": ['"eeg,vmrk,vhdr"', '"txt,csv"'],
+                "expectedFileExt": ['".eeg,.vmrk,.vhdr"', '".txt,.csv"'],
                 "dataType": ["other", "other"],  # Not associated with visit_data
                 "provenance": ["", ""],
             }
@@ -122,7 +122,7 @@ def test_get_expected_identifiers_no_visit_vars(mock_dataset, monkeypatch):
 
     # Present identifiers, but since no variables are associated with visit_data,
     # we expect an empty list of expected identifiers
-    present_ids = ["subject1_var1_ses1", "subject2_var2_ses2"]
+    present_ids = ["subject1_var1_s1_r1_e1", "subject2_var2_s2_r1_e1"]
 
     result = get_expected_identifiers(mock_dataset, present_ids)
     assert result == []
