@@ -51,11 +51,16 @@ def create_base_subject(basedir):
     # -- set up standard files --
     # (stored in "checked order": sub/ses/dtype)
 
+    data_dir = os.path.join(
+        base_subdir, "sourcedata", "checked", f"sub-{BASE_SUBJECT_ID}"
+    )
+    os.makedirs(data_dir)
+
     ses_runs = [("s1", "r1"), ("s2", "r1"), ("s3", "r1")]
 
     for ses, run in ses_runs:
         # set up session/run directory
-        sr_dir = os.path.join(base_subdir, f"{ses}_{run}")
+        sr_dir = os.path.join(data_dir, f"{ses}_{run}")
         os.makedirs(sr_dir)
 
         # set up psychopy data
