@@ -643,9 +643,15 @@ class ExtraFilesInFolderTestCase(FileNameTestCase):
     def modify(self, base_files):
         modified_files = base_files.copy()
 
-        additional_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e2.csv"
-        additional_file = "s1_r1/psychopy/" + additional_file
-        modified_files[additional_file] = "Extra file content for testing purposes."
+        original_suffix = "s1_r1_e1"
+        new_suffix = "s1_r1_e2"
+
+        base_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{original_suffix}.csv"
+        base_file = self.build_path("s1_r1", "psychopy", base_file)
+        additional_file = base_file.replace(original_suffix, new_suffix)
+
+        # copy original file contents
+        modified_files[additional_file] = modified_files[base_file]
 
         return modified_files
 
@@ -671,12 +677,14 @@ class DeviationAndNoDataErrorTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
+        deviation_file = self.build_path(
+            "s1_r1", "psychopy", f"{identifier}-deviation.txt"
+        )
         modified_files[deviation_file] = "Deviation reason: Testing no data condition."
 
         # remove all s1_r1 psychopy files except deviation.txt
-        prefix = "s1_r1/psychopy/"
-        psychopy_files = [f for f in modified_files if f.startswith(prefix)]
+        info = os.path.join("s1_r1", "psychopy", "")
+        psychopy_files = [f for f in modified_files if info in f]
         for file in psychopy_files:
             if file != deviation_file:
                 del modified_files[file]
@@ -701,8 +709,10 @@ class DeviationAndNoDataFilesErrorTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
-        no_data_file = f"s1_r1/psychopy/{identifier}-no-data.txt"
+        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
+        no_data_file = f"{identifier}-no-data.txt"
+        no_data_file = self.build_path("s1_r1", "psychopy", no_data_file)
 
         # add deviation.txt and no-data.txt files
         modified_files[deviation_file] = "Deviation reason: Testing with no-data.txt"
@@ -728,7 +738,8 @@ class DeviationFileWithFolderMismatchTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
+        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
         modified_files[deviation_file] = "Deviation reason: Testing file mismatch."
 
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
@@ -759,11 +770,12 @@ class DeviationFilePreventsErrorWithExtraFilesTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
+        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
         modified_files[deviation_file] = "Deviation reason: Testing extra files."
 
         base_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        base_file = "s1_r1/psychopy/" + base_file
+        base_file = self.build_path("s1_r1", "psychopy/", base_file)
         # additional valid file with extra string
         additional_file = base_file.replace(".csv", "_extra.csv")
 
@@ -789,7 +801,8 @@ class NoDataAdditionalFilesTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        no_data_file = f"s1_r1/psychopy/{identifier}-no-data.txt"
+        no_data_file = f"{identifier}-no-data.txt"
+        no_data_file = self.build_path("s1_r1", "psychopy", no_data_file)
         modified_files[no_data_file] = "No data available for this test case."
 
         return modified_files
@@ -884,7 +897,11 @@ class FolderVariableMismatchTestCase(FileNameTestCase):
 
         old_folder = "psychopy"
         new_folder = "digi"
-        old_path = f"s1_r1/{old_folder}/sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        old_path = self.build_path(
+            "s1_r1",
+            old_folder,
+            f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv",
+        )
         new_path = old_path.replace(old_folder, new_folder, count=1)
 
         if old_path not in modified_files:
@@ -914,7 +931,7 @@ class EmptyFileTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         target = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        target = "s1_r1/psychopy/" + target
+        target = self.build_path("s1_r1", "psychopy", target)
 
         if target not in modified_files:
             raise FileNotFoundError(f"File matching relative path {target} not found")
@@ -942,7 +959,8 @@ class DeviationFileWithBadNamesTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
+        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
         modified_files[deviation_file] = "Deviation reason: Testing bad file names."
 
         # rename existing file to invalid name
@@ -974,7 +992,8 @@ class DeviationFileWithValidNamesTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"s1_r1/psychopy/{identifier}-deviation.txt"
+        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
         modified_files[deviation_file] = "Deviation reason: Testing valid file names."
 
         # rename existing file to include additional string
@@ -1006,7 +1025,7 @@ class IssueFileTestCase(FileNameTestCase):
 
     def modify(self, base_files):
         modified_files = base_files.copy()
-        issue_file = "s1_r1/psychopy/issue.txt"
+        issue_file = self.build_path("s1_r1", "psychopy", "issue.txt")
 
         if issue_file in modified_files:
             raise FileExistsError(f"File matching relpath {issue_file} already exists")
@@ -1055,7 +1074,8 @@ class MultipleTasksFromCombinationRowTestCase(FileNameTestCase):
     def modify(self, base_files):
         modified_files = base_files.copy()
 
-        template = f"s1_r1/psychopy/sub-{self.sub_id}_VARNAME_s1_r1_e1.csv"
+        template = f"sub-{self.sub_id}_VARNAME_s1_r1_e1.csv"
+        template = self.build_path("s1_r1", "psychopy", template)
         existing_file = template.replace("VARNAME", "arrow-alert-v1-1_psychopy")
         duplicate_file = template.replace("VARNAME", "arrow-alert-v1-2_psychopy")
 
@@ -1085,7 +1105,7 @@ class PsychopyFileIDMismatchTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         psychopy_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        psychopy_file = "s1_r1/psychopy/" + psychopy_file
+        psychopy_file = self.build_path("s1_r1", "psychopy", psychopy_file)
         if psychopy_file not in modified_files:
             raise FileNotFoundError(f"File matching basename {psychopy_file} not found")
 
@@ -1115,7 +1135,8 @@ class EEGDataFileVHDRMismatchTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         # define the .vhdr file and the incorrect DataFile line
-        vhdr_file = f"s1_r1/eeg/sub-{self.sub_id}_all_eeg_s1_r1_e1.vhdr"
+        vhdr_file = f"sub-{self.sub_id}_all_eeg_s1_r1_e1.vhdr"
+        vhdr_file = self.build_path("s1_r1", "eeg", vhdr_file)
         if vhdr_file not in modified_files:
             raise FileNotFoundError(f"File matching basename {vhdr_file} not found")
 
@@ -1148,7 +1169,8 @@ class EEGMarkerFileVHDRMismatchTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         # define the .vhdr file and the incorrect MarkerFile line
-        vhdr_file = f"s1_r1/eeg/sub-{self.sub_id}_all_eeg_s1_r1_e1.vhdr"
+        vhdr_file = f"sub-{self.sub_id}_all_eeg_s1_r1_e1.vhdr"
+        vhdr_file = self.build_path("s1_r1", "eeg", vhdr_file)
         if vhdr_file not in modified_files:
             raise FileNotFoundError(f"File matching basename {vhdr_file} not found")
 
@@ -1179,7 +1201,8 @@ class EEGDataFileVMRKMismatchTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         # define the .vmrk file and the incorrect DataFile line
-        vmrk_file = f"s1_r1/eeg/sub-{self.sub_id}_all_eeg_s1_r1_e1.vmrk"
+        vmrk_file = f"sub-{self.sub_id}_all_eeg_s1_r1_e1.vmrk"
+        vmrk_file = self.build_path("s1_r1", "eeg", vmrk_file)
         if vmrk_file not in modified_files:
             raise FileNotFoundError(f"File matching basename {vmrk_file} not found")
 
