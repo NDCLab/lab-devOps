@@ -215,6 +215,7 @@ class TestCase(ABC):
             gold_standard_df.sort_index(axis=1)
             .sort_values(by=list(gold_standard_df.columns), axis=0)
             .reset_index(drop=True)
+            .replace({f"sub-{self.BASE_SUBJECT_ID}": f"sub-{self.sub_id}"}, regex=True)
         )
 
         # compare dataframes
