@@ -272,6 +272,7 @@ def create_base_subject(basedir):
     mock_dd = pd.DataFrame(mock_dd)
     mock_dd.to_csv(dd_path, index=False)
 
+
 def create_tests():
     basedir = "test_output"
     if os.path.exists(basedir):
@@ -333,6 +334,6 @@ tests = registry.get_cases()
 
 
 # run each test separately using a pytest harness
-@pytest.mark.parametrize("test_case", tests)
+@pytest.mark.parametrize("test_case", tests, ids=lambda t: t.case_name)
 def test_validate_test_cases(test_case):
     test_case.validate()
