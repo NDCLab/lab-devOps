@@ -38,7 +38,7 @@ from test_cases import (
     NoDataAdditionalFilesTestCase,
     PsychopyFileIDMismatchTestCase,
     TestCase,
-    TestCaseRegistry,
+    _TestCaseRegistry,
 )
 
 BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
@@ -288,7 +288,7 @@ def create_tests():
     create_base_subject(basedir)
 
     # set up test cases
-    registry = TestCaseRegistry(basedir)
+    registry = _TestCaseRegistry(basedir)
     tests: list[Type[TestCase]] = [
         DeviationAndNoDataErrorTestCase,
         DeviationAndNoDataFilesErrorTestCase,
