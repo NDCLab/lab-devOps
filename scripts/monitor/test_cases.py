@@ -170,6 +170,7 @@ class TestCase(ABC):
         # set up a logger to save hallMonitor output
         logger = logging.getLogger(f"{self.case_name}_logger")
         logger.setLevel(logging.ERROR)
+        logger.propagate = False
 
         pending = validate_data(
             logger,
