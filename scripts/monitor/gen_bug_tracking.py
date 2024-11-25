@@ -143,7 +143,10 @@ def create_base_subject(basedir):
 
     # set up data dictionary
 
-    dd_path = os.path.join(data_monitoring_dir, "central-tracker_datadict.csv")
+    dd_dir = os.path.join(data_monitoring_dir, "data-dictionary")
+    os.makedirs(dd_dir)
+
+    dd_path = os.path.join(dd_dir, "central-tracker_datadict.csv")
     mock_dd = [
         {
             "variable": "id",
