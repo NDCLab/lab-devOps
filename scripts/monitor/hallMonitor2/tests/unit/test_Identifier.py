@@ -3,7 +3,7 @@ import re
 from unittest import mock
 
 import pytest
-from hmutils import Identifier
+from hallmonitor.hmutils import Identifier
 
 IDENTIFIER_RE = r"(?P<subject>[a-zA-Z0-9]+)_(?P<var>[a-zA-Z0-9]+)_(?P<sre>[a-zA-Z0-9]+)"
 
@@ -15,7 +15,7 @@ def valid_identifier_str():
 
 @pytest.fixture
 def identifier():
-    return Identifier("sub-001", "all_eeg", "s1_r1_e1")
+    return Identifier("sub-001", "all_eeg", "s1", "r1", "e1")
 
 
 @pytest.fixture
@@ -29,7 +29,9 @@ def mock_dataset():
 
 
 def test_identifier_from_str_valid(valid_identifier_str):
-    with mock.patch("hmutils.Identifier.PATTERN", re.compile(IDENTIFIER_RE)):
+    with mock.patch(
+        "hallmonitor.hmutils.Identifier.PATTERN", re.compile(IDENTIFIER_RE)
+    ):
         identifier = Identifier.from_str(valid_identifier_str)
         assert identifier.subject == "sub001"
         assert identifier.variable == "eeg"
@@ -37,7 +39,9 @@ def test_identifier_from_str_valid(valid_identifier_str):
 
 
 def test_identifier_from_str_invalid(invalid_identifier_str):
-    with mock.patch("hmutils.Identifier.PATTERN", re.compile(IDENTIFIER_RE)):
+    with mock.patch(
+        "hallmonitor.hmutils.Identifier.PATTERN", re.compile(IDENTIFIER_RE)
+    ):
         with pytest.raises(ValueError):
             Identifier.from_str(invalid_identifier_str)
 
@@ -57,7 +61,9 @@ def test_identifier_neq(identifier):
 
 
 def test_identifier_to_dir_raw(identifier, mock_dataset):
-    with mock.patch("hmutils.get_variable_datatype") as mock_get_variable_datatype:
+    with mock.patch(
+        "hallmonitor.hmutils.get_variable_datatype"
+    ) as mock_get_variable_datatype:
         datatype = "mockdtype"
         mock_get_variable_datatype.return_value = datatype
         path = identifier.to_dir(mock_dataset, is_raw=True)
@@ -65,7 +71,9 @@ def test_identifier_to_dir_raw(identifier, mock_dataset):
 
 
 def test_identifier_to_dir_checked(identifier, mock_dataset):
-    with mock.patch("hmutils.get_variable_datatype") as mock_get_variable_datatype:
+    with mock.patch(
+        "hallmonitor.hmutils.get_variable_datatype"
+    ) as mock_get_variable_datatype:
         datatype = "mockdtype"
         mock_get_variable_datatype.return_value = datatype
         path = identifier.to_dir(mock_dataset, is_raw=False)
@@ -74,9 +82,9 @@ def test_identifier_to_dir_checked(identifier, mock_dataset):
 
 def test_identifier_to_detailed_str(identifier, mock_dataset):
     with mock.patch(
-        "hmutils.get_variable_datatype"
+        "hallmonitor.hmutils.get_variable_datatype"
     ) as mock_get_variable_datatype, mock.patch(
-        "hmutils.is_combination_var"
+        "hallmonitor.hmutils.is_combination_var"
     ) as mock_is_combination_var:
         datatype = "mockdtype"
         mock_get_variable_datatype.return_value = datatype

@@ -3,13 +3,17 @@ import re
 
 import pandas as pd
 import pytest
-from hmutils import Identifier, get_expected_files, get_expected_identifiers
+from hallmonitor.hmutils import (
+    Identifier,
+    get_expected_files,
+    get_expected_identifiers,
+)
 
 
 @pytest.fixture
 def mock_Identifier_re(monkeypatch):
     id_pattern = r"(?P<subject>\w+)_(?P<var>\w+)_(?P<sre>\w+)"
-    monkeypatch.setattr("hmutils.Identifier.PATTERN", re.compile(id_pattern))
+    monkeypatch.setattr("hallmonitor.hmutils.Identifier.PATTERN", re.compile(id_pattern))
 
 
 @pytest.fixture
@@ -22,7 +26,7 @@ def mock_datadict(monkeypatch):
             "provenance": ["variables: var1, var2", "variables: var3", ""],
         }
     )
-    monkeypatch.setattr("hmutils.get_datadict", lambda _: dd_df)
+    monkeypatch.setattr("hallmonitor.hmutils.get_datadict", lambda _: dd_df)
 
 
 @pytest.fixture
@@ -114,7 +118,7 @@ def test_get_expected_identifiers_no_visit_vars(mock_dataset, monkeypatch):
             }
         )
 
-    monkeypatch.setattr("hmutils.get_datadict", mock_get_datadict_no_visit_vars)
+    monkeypatch.setattr("hallmonitor.hmutils.get_datadict", mock_get_datadict_no_visit_vars)
 
     # Present identifiers, but since no variables are associated with visit_data,
     # we expect an empty list of expected identifiers

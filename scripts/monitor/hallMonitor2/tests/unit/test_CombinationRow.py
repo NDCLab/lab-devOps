@@ -1,4 +1,4 @@
-from hmutils import CombinationRow
+from hallmonitor.hmutils import CombinationRow
 
 
 def test_combination_row_initialization():

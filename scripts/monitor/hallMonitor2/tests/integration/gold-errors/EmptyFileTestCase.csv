@@ -1,0 +1,3 @@
+passRaw,identifier,identifierDetails,errorType,errorDetails
+False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Empty file,Found empty file test_output/test_cases/EmptyFileTestCase/sourcedata/checked/sub-3XXXXXX/s1_r1/psychopy/sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1.csv
+False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Psychopy error,No data found in test_output/test_cases/EmptyFileTestCase/sourcedata/checked/sub-3XXXXXX/s1_r1/psychopy/sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1.csv

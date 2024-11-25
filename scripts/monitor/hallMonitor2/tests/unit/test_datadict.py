@@ -3,7 +3,7 @@ from unittest import mock
 
 import pandas as pd
 import pytest
-from hmutils import datadict_has_changes, get_datadict
+from hallmonitor.hmutils import datadict_has_changes, get_datadict
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def mock_read_csv(monkeypatch, datadict):
 def mock_local_datadict(monkeypatch, dataset, datadict):
     datadict_path = "datadict.csv"
     datadict.to_csv(os.path.join(dataset, datadict_path))
-    monkeypatch.setattr("hmutils.DATADICT_SUBPATH", datadict_path)
+    monkeypatch.setattr("hallmonitor.hmutils.DATADICT_SUBPATH", datadict_path)
 
 
 def test_get_datadict_valid(dataset, mock_read_csv):
@@ -53,7 +53,7 @@ def test_get_datadict_DATADICT_SUBPATH(dataset):
     mock_subpaths = ["mock_subpath", "another_subpath", "ndclab"]
     for subpath in mock_subpaths:
         with (
-            mock.patch("hmutils.DATADICT_SUBPATH", subpath),
+            mock.patch("hallmonitor.hmutils.DATADICT_SUBPATH", subpath),
             mock.patch("pandas.read_csv") as read_csv,
         ):
             get_datadict(dataset, use_cache=False)
@@ -131,8 +131,8 @@ def mock_local_data_dictionaries(
     matching_datadict.to_csv(os.path.join(dataset, dd_path))
     latest_datadict.to_csv(os.path.join(dataset, latest_dd_path))
 
-    monkeypatch.setattr("hmutils.DATADICT_SUBPATH", dd_path)
-    monkeypatch.setattr("hmutils.DATADICT_LATEST_SUBPATH", latest_dd_path)
+    monkeypatch.setattr("hallmonitor.hmutils.DATADICT_SUBPATH", dd_path)
+    monkeypatch.setattr("hallmonitor.hmutils.DATADICT_LATEST_SUBPATH", latest_dd_path)
 
 
 def test_datadict_has_changes_no_change(mock_local_data_dictionaries, dataset):
@@ -236,4 +236,3 @@ def test_datadict_has_changes_dd_has_new_column(mock_local_data_dictionaries, da
     datadict.to_csv(dd_path)
 
     assert datadict_has_changes(dataset)
-

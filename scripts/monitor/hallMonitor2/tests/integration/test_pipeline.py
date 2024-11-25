@@ -3,7 +3,7 @@ from typing import Type
 
 import pandas as pd
 import pytest
-from test_cases import (
+from .hm_test_cases import (
     DeviationAndNoDataErrorTestCase,
     DeviationAndNoDataFilesErrorTestCase,
     DeviationFilePreventsErrorWithExtraFilesTestCase,
@@ -274,7 +274,8 @@ def create_base_subject(basedir):
 
 
 def create_tests():
-    basedir = "test_output"
+    basedir = os.path.dirname(__file__)
+    basedir = os.path.join(basedir, ".test_output")
     if os.path.exists(basedir):
         # clear directory before running tests
         for root, dirs, files in os.walk(basedir, topdown=False):

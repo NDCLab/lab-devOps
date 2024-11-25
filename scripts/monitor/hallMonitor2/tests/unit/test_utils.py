@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 import pytz
-from hmutils import get_timestamp
+from hallmonitor.hmutils import get_timestamp
 
 # test get_timestamp(), DT_FORMAT, and TZ_INFO
 
@@ -22,13 +22,13 @@ def mock_datetime_now(monkeypatch):
 @pytest.fixture
 def mock_dt_format(monkeypatch):
     dt_format = "%Y-%m-%d %H:%M"
-    monkeypatch.setattr("hmutils.DT_FORMAT", dt_format)
+    monkeypatch.setattr("hallmonitor.hmutils.DT_FORMAT", dt_format)
 
 
 @pytest.fixture
 def mock_tz_info(monkeypatch):
     tz_info = pytz.timezone("US/Eastern")
-    monkeypatch.setattr("hmutils.TZ_INFO", tz_info)
+    monkeypatch.setattr("hallmonitor.hmutils.TZ_INFO", tz_info)
 
 
 def test_get_timestamp(mock_datetime_now, mock_dt_format, mock_tz_info):
@@ -37,7 +37,7 @@ def test_get_timestamp(mock_datetime_now, mock_dt_format, mock_tz_info):
 
 def test_get_timestamp_different_format(mock_datetime_now, monkeypatch, mock_tz_info):
     # Change the date format
-    monkeypatch.setattr("hmutils.DT_FORMAT", "%Y/%m/%d")
+    monkeypatch.setattr("hallmonitor.hmutils.DT_FORMAT", "%Y/%m/%d")
     assert get_timestamp() == "2024/03/14"
 
 
@@ -46,7 +46,7 @@ def test_get_timestamp_different_timezone(
 ):
     # Change the timezone
     est = pytz.timezone("US/Eastern")
-    monkeypatch.setattr("hmutils.TZ_INFO", est)
+    monkeypatch.setattr("hallmonitor.hmutils.TZ_INFO", est)
 
     # Assert that the timestamp is adjusted to the new timezone
     assert (

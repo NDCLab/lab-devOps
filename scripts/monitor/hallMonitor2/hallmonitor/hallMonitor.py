@@ -7,7 +7,7 @@ import subprocess
 from datetime import datetime
 
 import pandas as pd
-from hmutils import (
+from .hmutils import (
     CHECKED_SUBDIR,
     FILE_RE,
     LOGGING_SUBPATH,
@@ -138,8 +138,8 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
             ]
             num_combo_vars = len(present_combo_ids)
 
-            if num_combo_vars == 1: # expected case
-                continue  
+            if num_combo_vars == 1:  # expected case
+                continue
 
             elif num_combo_vars == 0:  # raise an error for each possible identifier
                 for var in combo.variables:
@@ -290,7 +290,9 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
             naming_errors = get_naming_errors(logger, dataset, file, has_deviation)
             if len(naming_errors) > 0:
                 pending.extend(naming_errors)
-                logger.debug("Found %d naming error(s) in file %s", len(naming_errors), file)
+                logger.debug(
+                    "Found %d naming error(s) in file %s", len(naming_errors), file
+                )
                 misnamed_files.append(file)
 
         logger.debug("Found %d misnamed file(s)", len(misnamed_files))
@@ -579,7 +581,7 @@ if __name__ == "__main__":
     dataset = os.path.realpath(str(args.dataset))
     if not os.path.exists(dataset):
         raise FileNotFoundError(f"Dataset {dataset} not found")
-    
+
     pending_dir = os.path.join(dataset, PENDING_SUBDIR)
     os.makedirs(pending_dir, exist_ok=True)
 
@@ -599,12 +601,10 @@ if __name__ == "__main__":
         os.makedirs(log_path, exist_ok=True)
         file_name = f"hallMonitor-{get_timestamp()}.log"
         log_file = os.path.join(log_path, file_name)
-    
+
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
-    file_formatter = logging.Formatter(
-        "[%(asctime)s]\t(%(levelname)s)\t%(message)s"
-    )
+    file_formatter = logging.Formatter("[%(asctime)s]\t(%(levelname)s)\t%(message)s")
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
 
