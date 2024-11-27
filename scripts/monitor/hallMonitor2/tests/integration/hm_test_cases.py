@@ -244,7 +244,7 @@ class TestCase(ABC):
             if len(matching_errors.index) < error.multiplicity:
                 n_missing = error.multiplicity - len(matching_errors.index)
                 missing.append(
-                    f"{error.error_type}: {error.info_regex} (missing {n_missing})"
+                    f"{error.error_type}: {error.info_regex.replace('\\', '')} (missing {n_missing})"
                 )
 
         # check for extraneous errors
