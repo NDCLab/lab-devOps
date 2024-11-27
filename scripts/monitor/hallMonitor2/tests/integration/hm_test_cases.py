@@ -803,6 +803,24 @@ class MissingExtensionTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        old_basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv "
+        new_basename = old_basename.replace(".csv", "")
+
+        naming_info = re.escape(
+            f"File {new_basename} does not match expected identifier format"
+        )
+        missing_info = re.escape(f"Expected file {old_basename} not found")
+        extra_info = re.escape(f"Unexpected file {new_basename} found")
+
+        errors = [
+            ExpectedError("Naming error", naming_info),
+            ExpectedError("Missing file", missing_info),
+            ExpectedError("Unexpected file", extra_info),
+        ]
+
+        return errors
+
 
 class InsufficientFilesTestCase(FileNameTestCase):
     """
