@@ -666,6 +666,13 @@ class InsufficientFilesTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        missing_info = f"Expected file {basename} not found"
+        errors = [ExpectedError("Missing file", re.escape(missing_info))]
+
+        return errors
+
 
 class ExtraFilesInFolderTestCase(FileNameTestCase):
     """
