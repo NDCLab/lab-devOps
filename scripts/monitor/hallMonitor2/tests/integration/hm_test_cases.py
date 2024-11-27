@@ -908,6 +908,26 @@ class FolderSessionSuffixMismatchTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        old_basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        new_basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s3_r1_e1.csv"
+        misplaced_info = re.escape(
+            f"Found file in wrong directory: {new_basename} found in "
+        )
+        misplaced_info += r"(?:.*/)+"
+
+        errors = [
+            ExpectedError("Misplaced file", misplaced_info),
+            ExpectedError(
+                "Missing file", re.escape(f"Expected file {old_basename} not found")
+            ),
+            ExpectedError(
+                "Unexpected file", re.escape(f"Unexpected file {new_basename} found")
+            ),
+        ]
+
+        return errors
+
 
 class FolderRunSuffixMismatchTestCase(FileNameTestCase):
     """
