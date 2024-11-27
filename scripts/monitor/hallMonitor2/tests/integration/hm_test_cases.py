@@ -1,10 +1,28 @@
 import json
 import logging
 import os
+import re
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Type
 
 import pandas as pd
+
+
+@dataclass
+class ExpectedError:
+    """
+    Represents an expected error with its type, details, and expected occurrence.
+
+    Attributes:
+        error_type (str): The type of the error (e.g., "Empty file").
+        info_regex (str): A regex pattern to match the error details.
+        multiplicity (int): The number of times this error is expected to occur. Default is 1.
+    """
+
+    error_type: str
+    info_regex: str
+    multiplicity: int = 1
 
 
 class TestCase(ABC):
@@ -148,6 +166,22 @@ class TestCase(ABC):
         """
         pass
 
+    @abstractmethod
+    def get_expected_errors(self) -> list[ExpectedError]:
+        """
+        Generate a list of ExpectedError instances for this object.
+
+        This method defines the expected errors that may occur,
+        using dynamically generated file paths and error messages
+        specific to the current object's state. Each error is
+        represented as an ExpectedError instance.
+
+        Returns:
+            list[ExpectedError]: A list of ExpectedError objects
+            encapsulating the error type and associated message.
+        """
+        pass
+
     def generate(self):
         """
         Generate the test case by reading the base subject, applying modifications,
@@ -188,25 +222,6 @@ class TestCase(ABC):
 
         return pending_df
 
-    def fill_placeholder(self, df: pd.DataFrame, placeholder, new_val):
-        """
-        Replace a placeholder value with a new value in string columns of a DataFrame.
-
-        Args:
-            df (pd.DataFrame): The DataFrame to modify.
-            placeholder (str): The value to replace.
-            new_val (str): The value to insert in place of the placeholder.
-
-        Returns:
-            pd.DataFrame: The modified DataFrame with replacements applied.
-        """
-        for col in df.columns:
-            if df[col].dtype != pd.StringDtype:
-                continue
-            df[col] = df[col].str.replace(str(placeholder), str(new_val))
-
-        return df
-
     def compare_errors(self, generated_errors_df: pd.DataFrame):
         """
         Compare the generated errors DataFrame with the gold standard errors.
@@ -217,45 +232,41 @@ class TestCase(ABC):
         Raises:
             AssertionError: If there are differences between the generated errors and the gold standard errors.
         """
-        # load gold standard error file
-        my_dir = os.path.dirname(__file__)
-        gold_standard_path = os.path.join(
-            my_dir, "gold-errors", f"{self.case_name}.csv"
-        )
-        if not os.path.exists(gold_standard_path):
-            raise FileNotFoundError(f"Could not find {gold_standard_path}")
-        try:
-            gold_standard_df = pd.read_csv(gold_standard_path)
-        except ValueError:  # if pandas cannot read the file, init as empty
-            gold_standard_df = pd.DataFrame()
+        expected_errors = self.get_expected_errors()
 
-        # sort dataframes to make sure comparisons are not affected by row order
-        generated_errors_df = (
-            generated_errors_df.sort_index(axis=1)
-            .sort_values(by=list(generated_errors_df.columns), axis=0)
-            .reset_index(drop=True)
-        )
-        gold_standard_df = (
-            gold_standard_df.sort_index(axis=1)
-            .sort_values(by=list(gold_standard_df.columns), axis=0)
-            .reset_index(drop=True)
-        )
-        gold_standard_df = self.fill_placeholder(
-            gold_standard_df, self.SUB_PLACEHOLDER, self.sub_id
-        )
-        gold_standard_df.columns = generated_errors_df.columns
+        # check for missing errors
+        missing = []
+        for error in expected_errors:
+            matching_errors = generated_errors_df[
+                (generated_errors_df["errorType"] == error.error_type)
+                & (generated_errors_df["errorDetails"].str.fullmatch(error.info_regex))
+            ]
+            if len(matching_errors.index) < error.multiplicity:
+                n_missing = error.multiplicity - len(matching_errors.index)
+                missing.append(
+                    f"{error.error_type}: {error.info_regex} (missing {n_missing})"
+                )
 
-        # compare dataframes
-        if not generated_errors_df.equals(gold_standard_df):
-            # output differences
-            diff = generated_errors_df.compare(
-                gold_standard_df, keep_shape=True, keep_equal=False
+        # check for extraneous errors
+        extra = []
+        for _, row in generated_errors_df.iterrows():
+            is_expected = any(
+                row["errorType"] == error.error_type
+                and re.fullmatch(error.info_regex, row["errorDetails"])
+                for error in expected_errors
             )
-            print(generated_errors_df)
-            print(gold_standard_df)
-            raise AssertionError(
-                f"Mismatch between generated errors and gold standard:\n{diff}"
-            )
+            if not is_expected:
+                extra.append(f'{row["errorType"]}: {row["errorDetails"]}')
+
+        # construct failure message
+        fail_reason = ""
+        if missing:
+            fail_reason += "Missing errors:\n" + "\n".join(missing) + "\n"
+        if extra:
+            fail_reason += "Extra errors:\n" + "\n".join(extra) + "\n"
+
+        if fail_reason:
+            raise AssertionError(fail_reason)
 
     def validate(self):
         """
