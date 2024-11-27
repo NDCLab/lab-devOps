@@ -1239,6 +1239,26 @@ class MultipleTasksFromCombinationRowTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        basename_v1_1 = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        basename_v1_2 = f"sub-{self.sub_id}_arrow-alert-v1-2_psychopy_s1_r1_e1"
+        ext_re = r"\..+"
+        combination_info = "Multiple variables present for combination row arrow-alert_psychopy, expected one."
+        missing_info = f"Expected file {basename_v1_2 + ext_re} not found"
+
+        errors = [
+            ExpectedError("Combination variable error", re.escape(combination_info), 2),
+            ExpectedError("Missing file", missing_info, 2),
+            ExpectedError(  # unexpected from the v1-2 identifier's "perspective"
+                "Unexpected file", f"Unexpected file {basename_v1_1 + ext_re} found", 3
+            ),
+            ExpectedError(  # unexpected for the v1-1 identifier
+                "Unexpected file", f"Unexpected file {basename_v1_2 + ext_re} found", 1
+            ),
+        ]
+
+        return errors
+
 
 class PsychopyFileIDMismatchTestCase(FileNameTestCase):
     """
