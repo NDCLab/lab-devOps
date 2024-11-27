@@ -645,6 +645,30 @@ class InvalidExtensionTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.PATTERN"
+        old_ext = "csv"
+        new_ext = "badext"
+
+        naming_info = (
+            re.escape(f"File extension .{new_ext} doesn't match expected extensions")
+            + r".*"
+        )
+        missing_info = re.escape(
+            f"Expected file {basename.replace("PATTERN", old_ext)} not found"
+        )
+        extra_info = re.escape(
+            f"Unexpected file {basename.replace("PATTERN", new_ext)} found"
+        )
+
+        errors = [
+            ExpectedError("Naming error", naming_info),
+            ExpectedError("Missing file", missing_info),
+            ExpectedError("Unexpected file", extra_info),
+        ]
+
+        return errors
+
 
 class MissingExtensionTestCase(FileNameTestCase):
     """
