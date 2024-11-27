@@ -1285,6 +1285,16 @@ class EEGMarkerFileVHDRMismatchTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        basename = f"sub-{self.sub_id}_PATTERN_s1_r1_e1.vmrk"
+        correct = basename.replace("PATTERN", "all_eeg")
+        incorrect = basename.replace("PATTERN", "wrongname")
+
+        eeg_info = f"Incorrect MarkerFile {incorrect} in .vhdr file, expected {correct}"
+        errors = [ExpectedError("EEG error"), re.escape(eeg_info)]
+
+        return errors
+
 
 class EEGDataFileVMRKMismatchTestCase(FileNameTestCase):
     """
