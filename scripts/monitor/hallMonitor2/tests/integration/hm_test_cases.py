@@ -696,6 +696,16 @@ class ExtraFilesInFolderTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        naming_info = r"Suffix s1_r1_e2 not in allowed suffixes.*"
+        unexpected_info = f"Unexpected file sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e2.csv found"
+        errors = [
+            ExpectedError("Naming error", naming_info),
+            ExpectedError("Unexpected file", re.escape(unexpected_info)),
+        ]
+
+        return errors
+
 
 class DeviationAndNoDataErrorTestCase(FileNameTestCase):
     """
