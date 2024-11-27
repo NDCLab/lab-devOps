@@ -479,7 +479,7 @@ class MissingSubjectNumberTestCase(FileNameTestCase):
 
     def get_expected_errors(self):
         basename = "sub-PATTERN_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        old_sub = self.sub_id
+        old_sub = str(self.sub_id)
         new_sub = ""
         old_basename = basename.replace("PATTERN", old_sub)
         new_basename = basename.replace("PATTERN", new_sub)
@@ -522,8 +522,8 @@ class InvalidSubjectNumberTestCase(FileNameTestCase):
 
     def get_expected_errors(self):
         basename = "sub-PATTERN_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        old_sub = self.sub_id
-        new_sub = 303
+        old_sub = str(self.sub_id)
+        new_sub = "303"
         old_basename = basename.replace("PATTERN", old_sub)
         new_basename = basename.replace("PATTERN", new_sub)
 
