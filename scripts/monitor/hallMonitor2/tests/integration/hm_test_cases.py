@@ -988,6 +988,21 @@ class FolderVariableMismatchTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        file_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        misplaced_info = re.escape(
+            f"Found file in wrong directory: {file_name} found in "
+        )
+        misplaced_info += r"(?:.*/)+digi/"
+        errors = [
+            ExpectedError("Misplaced file", misplaced_info),
+            ExpectedError(
+                "Unexpected file", re.escape(f"Unexpected file {file_name} found")
+            ),
+        ]
+
+        return errors
+
 
 class EmptyFileTestCase(FileNameTestCase):
     """
