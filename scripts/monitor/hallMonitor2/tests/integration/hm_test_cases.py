@@ -667,6 +667,27 @@ class MissingSessionSuffixTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_PATTERN.csv"
+        old_suffix = "s1_r1_e1"
+        new_suffix = "s_r1_e1"
+        old_basename = basename.replace("PATTERN", old_suffix)
+        new_basename = basename.replace("PATTERN", new_suffix)
+
+        naming_info = re.escape(
+            f"File {new_basename} does not match expected identifier format"
+        )
+        missing_info = re.escape(f"Expected file {old_basename} not found")
+        extra_info = re.escape(f"Unexpected file {new_basename} found")
+
+        errors = [
+            ExpectedError("Naming error", naming_info),
+            ExpectedError("Missing file", missing_info),
+            ExpectedError("Unexpected file", extra_info),
+        ]
+
+        return errors
+
 
 class MissingRunSuffixTestCase(FileNameTestCase):
     """
