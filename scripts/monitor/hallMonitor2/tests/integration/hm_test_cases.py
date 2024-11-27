@@ -714,7 +714,7 @@ class MissingEventSuffixTestCase(FileNameTestCase):
         return modified_files
 
     def get_expected_errors(self):
-        basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_PATTERN.csv "
+        basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_PATTERN.csv"
         old_suffix = "s1_r1_e1"
         new_suffix = "s1_r1_e"
         old_basename = basename.replace("PATTERN", old_suffix)
@@ -804,7 +804,7 @@ class MissingExtensionTestCase(FileNameTestCase):
         return modified_files
 
     def get_expected_errors(self):
-        old_basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv "
+        old_basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
         new_basename = old_basename.replace(".csv", "")
 
         naming_info = re.escape(
