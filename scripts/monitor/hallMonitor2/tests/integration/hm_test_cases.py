@@ -955,7 +955,7 @@ class FolderRunSuffixMismatchTestCase(FileNameTestCase):
         return modified_files
 
     def get_expected_errors(self) -> list[ExpectedError]:
-        old_basename = f"sub-{self.sub_id }_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        old_basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
         new_basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s3_r1_e1.csv"
 
         misplaced_info = re.escape(
