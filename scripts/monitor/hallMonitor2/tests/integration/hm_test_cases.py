@@ -791,6 +791,15 @@ class DeviationFileWithFolderMismatchTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        misplaced_info = re.escape(
+            f"Found file in wrong directory: sub-{self.sub_id + 1}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv found in "
+        )
+        misplaced_info += r"(?:.*/)+"
+        errors = [ExpectedError("Misplaced file", misplaced_info)]
+
+        return errors
+
 
 class DeviationFilePreventsErrorWithExtraFilesTestCase(FileNameTestCase):
     """
