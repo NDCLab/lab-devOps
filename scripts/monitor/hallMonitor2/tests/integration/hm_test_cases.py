@@ -945,7 +945,7 @@ class FolderRunSuffixMismatchTestCase(FileNameTestCase):
         modified_files = base_files.copy()
 
         old_suffix = "s1_r1_e1"
-        new_suffix = "s1_r3_e1"
+        new_suffix = "s3_r1_e1"
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
         new_name = old_name.replace(old_suffix, new_suffix)
 
