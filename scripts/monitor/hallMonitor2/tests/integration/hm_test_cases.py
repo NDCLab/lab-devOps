@@ -1027,6 +1027,12 @@ class DeviationFileWithBadNamesTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        error_info = "File badfilename.csv does not match expected identifier format"
+        errors = [ExpectedError("Naming error", re.escape(error_info))]
+
+        return errors
+
 
 class DeviationFileWithValidNamesTestCase(FileNameTestCase):
     """
