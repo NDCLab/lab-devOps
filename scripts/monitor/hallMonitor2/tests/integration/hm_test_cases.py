@@ -761,6 +761,20 @@ class DeviationAndNoDataFilesErrorTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        errors = [
+            ExpectedError(
+                "Improper exception files",
+                "Both deviation and no-data files present for identifier",
+            ),
+            ExpectedError(
+                "Unexpected file", f"Unexpected file {basename + r"\..+"} found", 4
+            ),
+        ]
+
+        return errors
+
 
 class DeviationFileWithFolderMismatchTestCase(FileNameTestCase):
     """
