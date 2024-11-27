@@ -1098,6 +1098,16 @@ class IssueFileTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        issue_info = "Found issue.txt in identifier's directory"
+        unexpected_info = "Unexpected file issue.txt found"
+        errors = [
+            ExpectedError("Issue file", re.escape(issue_info)),
+            ExpectedError("Unexpected file", re.escape(unexpected_info)),
+        ]
+
+        return errors
+
 
 class ExpectedFileMissingTestCase(FileNameTestCase):
     """
