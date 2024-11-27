@@ -985,6 +985,17 @@ class EmptyFileTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        info_regex = r"(?:.*/)+" + re.escape(basename)
+
+        errors = [
+            ExpectedError("Empty file", f"Found empty file {info_regex}"),
+            ExpectedError("Psychopy error", f"No data found in {info_regex}"),
+        ]
+
+        return errors
+
 
 class DeviationFileWithBadNamesTestCase(FileNameTestCase):
     """
