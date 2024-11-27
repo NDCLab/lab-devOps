@@ -1060,6 +1060,9 @@ class DeviationFileWithValidNamesTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        return []
+
 
 class IssueFileTestCase(FileNameTestCase):
     """
