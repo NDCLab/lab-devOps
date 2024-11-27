@@ -1605,7 +1605,7 @@ class PsychopyFileIDMismatchTestCase(FileNameTestCase):
 
     def get_expected_errors(self):
         id_info = f"ID value(s) [{TestCase.BASE_SUBJECT_ID}] in csvfile different from ID in filename ({self.sub_id})"
-        errors = [ExpectedError("Psychopy error"), re.escape(id_info)]
+        errors = [ExpectedError("Psychopy error", re.escape(id_info))]
 
         return errors
 
