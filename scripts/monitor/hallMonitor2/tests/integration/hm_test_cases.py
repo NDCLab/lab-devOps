@@ -507,6 +507,30 @@ class InvalidRunSuffixTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_PATTERN.csv"
+        old_suffix = "s1_r1_e1"
+        new_suffix = "s1_r3_e1"
+        old_basename = basename.replace("PATTERN", old_suffix)
+        new_basename = basename.replace("PATTERN", new_suffix)
+
+        naming_info = f"Suffix {new_suffix} not in allowed suffixes" + r".*"
+        misplaced_info = re.escape(
+            f"Found file in wrong directory: {new_basename} found in "
+        )
+        misplaced_info += r"(?:.*/)+"
+        missing_info = re.escape(f"Expected file {old_basename} not found")
+        extra_info = re.escape(f"Unexpected file {new_basename} found")
+
+        errors = [
+            ExpectedError("Naming error", naming_info),
+            ExpectedError("Misplaced file", misplaced_info),
+            ExpectedError("Missing file", missing_info),
+            ExpectedError("Unexpected file", extra_info),
+        ]
+
+        return errors
+
 
 class InvalidEventSuffixTestCase(FileNameTestCase):
     """
