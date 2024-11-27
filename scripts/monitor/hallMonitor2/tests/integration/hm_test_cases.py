@@ -1132,6 +1132,17 @@ class ExpectedFileMissingTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        missing_info = re.escape(f"Expected file {basename} not found")
+
+        errors = [
+            ExpectedError("Missing file", missing_info),
+        ]
+        errors = []
+
+        return errors
+
 
 class MultipleTasksFromCombinationRowTestCase(FileNameTestCase):
     """
