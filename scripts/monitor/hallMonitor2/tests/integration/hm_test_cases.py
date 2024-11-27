@@ -1529,7 +1529,6 @@ class ExpectedFileMissingTestCase(FileNameTestCase):
         errors = [
             ExpectedError("Missing file", missing_info),
         ]
-        errors = []
 
         return errors
 
