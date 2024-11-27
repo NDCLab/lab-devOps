@@ -393,6 +393,25 @@ class InvalidVariableNameTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        basename = f"sub-{self.sub_id}_PATTERN_s1_r1_e1.csv"
+        old_var = "arrow-alert-v1-1_psychopy"
+        new_var = "bad-taskname"
+        old_basename = basename.replace("PATTERN", old_var)
+        new_basename = basename.replace("PATTERN", new_var)
+
+        naming_info = re.escape(f"Invalid variable name {new_var}")
+        missing_info = re.escape(f"Expected file {old_basename} not found")
+        extra_info = re.escape(f"Unexpected file {new_basename} found")
+
+        errors = [
+            ExpectedError("Naming error", naming_info),
+            ExpectedError("Missing file", missing_info),
+            ExpectedError("Unexpected file", extra_info),
+        ]
+
+        return errors
+
 
 class MissingVariableNameTestCase(FileNameTestCase):
     """
