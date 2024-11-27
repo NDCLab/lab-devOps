@@ -779,7 +779,7 @@ class DeviationAndNoDataFilesErrorTestCase(FileNameTestCase):
                 "Both deviation and no-data files present for identifier",
             ),
             ExpectedError(
-                "Unexpected file", f"Unexpected file {basename + r"\..+"} found", 4
+                "Unexpected file", f"Unexpected file {basename + r'\..+'} found", 4
             ),
         ]
 
