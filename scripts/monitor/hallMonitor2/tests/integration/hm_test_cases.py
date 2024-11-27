@@ -1150,6 +1150,14 @@ class NoDataAdditionalFilesTestCase(FileNameTestCase):
 
         return modified_files
 
+    def get_expected_errors(self):
+        file_re = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1" + r"\..+"
+        extra_info = f"Unexpected file {file_re} found"
+
+        errors = [ExpectedError("Unexpected file", extra_info, 3)]
+
+        return errors
+
 
 class FolderSessionSuffixMismatchTestCase(FileNameTestCase):
     """
