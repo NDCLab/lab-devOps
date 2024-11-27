@@ -1733,7 +1733,7 @@ class EEGDataFileVMRKMismatchTestCase(FileNameTestCase):
         incorrect = basename.replace("PATTERN", "wrongname")
 
         eeg_info = f"Incorrect MarkerFile {incorrect} in .vmrk file, expected {correct}"
-        errors = [ExpectedError("EEG error"), re.escape(eeg_info)]
+        errors = [ExpectedError("EEG error", re.escape(eeg_info))]
 
         return errors
 
