@@ -784,7 +784,7 @@ class DeviationFileWithFolderMismatchTestCase(FileNameTestCase):
         modified_files[deviation_file] = "Deviation reason: Testing file mismatch."
 
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        new_name = old_name.replace(str(self.sub_id), str(TestCase.BASE_SUBJECT_ID))
+        new_name = old_name.replace(str(self.sub_id), str(self.sub_id + 1))
 
         if not self.replace_file_name(modified_files, old_name, new_name):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
