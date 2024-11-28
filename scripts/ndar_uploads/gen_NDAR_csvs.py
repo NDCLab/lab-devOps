@@ -360,7 +360,7 @@ if __name__ == "__main__":
                 race_column = ndar_json[ndar_csv]["req_columns"][col]["rc_variable"]
                 sessionless = True if "sessionless" in ndar_json[ndar_csv]["req_columns"][col].keys() else False
                 parent = True if "parent" in ndar_json[ndar_csv]["req_columns"][col].keys() else False
-                map_race(df, ndar_json, race_redcap, race_column, sre, sessionless=sessionless, parent=parent)
+                map_race(df, ndar_json, race_redcap, race_column, sre, col, sessionless=sessionless, parent=parent)
                 continue
             if col == "timepoint_label":
                 sess = sre[0:2]
