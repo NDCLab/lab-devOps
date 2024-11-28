@@ -3,7 +3,9 @@ from typing import Type
 
 import pandas as pd
 import pytest
+
 from .hm_test_cases import (
+    BaseTestCase,
     DeviationAndNoDataErrorTestCase,
     DeviationAndNoDataFilesErrorTestCase,
     DeviationFilePreventsErrorWithExtraFilesTestCase,
@@ -291,6 +293,7 @@ def create_tests():
     # set up test cases
     registry = _TestCaseRegistry(basedir)
     tests: list[Type[TestCase]] = [
+        BaseTestCase,
         DeviationAndNoDataErrorTestCase,
         DeviationAndNoDataFilesErrorTestCase,
         DeviationFilePreventsErrorWithExtraFilesTestCase,
