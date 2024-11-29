@@ -11,7 +11,9 @@ if isnan(N_CPUS) || N_CPUS <= 0
     N_CPUS = maxNumCompThreads; % fallback value
 end
 
-parpool(cluster, N_CPUS)
+if isempty(gcp('nocreate'))
+    pool = parpool('local', N_CPUS)
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This script was initially edited by George Buzzell for the NDC Lab EEG
@@ -188,9 +190,7 @@ if ~isnan(n_tasks)
 end
 
 %for file_locater_counter = 1:length(subjects_to_process) % This for loop lists the folders containing the main data files
-threadsPerWorker = max(1, floor(N_CPUS / length(subjects_to_process)));
-maxNumCompThreads(threadsPerWorker); % set max CPUs for each worker
-parfor file_locater_counter = 1:length(subjects_to_process) %1:4
+for file_locater_counter = 1:length(subjects_to_process)
         try
         subjStart = tic;
         rawdata_location = fullfile(rawdata_location_parent, subjects_to_process(file_locater_counter));
@@ -455,7 +455,14 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
 
             % Performing high pass filtering
             EEG = eeg_checkset( EEG );
-            EEG = pop_firws(EEG, 'fcutoff', high_cutoff, 'ftype', 'highpass', 'wtype', 'hamming', 'forder', hp_fl_order, 'minphase', 0);
+
+            filteredData = zeros(size(EEG.data));
+            % Process each channel as a separate task
+            parfor chanIdx = 1:EEG_copy.nbchan
+                filteredData(chanIdx, :) = pop_firws(EEG, 'fcutoff', high_cutoff, 'ftype', 'highpass', 'wtype', 'hamming', 'forder', hp_fl_order, 'minphase', 0, 'data', EEG.data(chanIdx, :));
+            end
+
+            EEG.data = filteredData;
             EEG = eeg_checkset( EEG );
 
             % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -465,7 +472,14 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
 
             % Performing low pass filtering
             EEG = eeg_checkset( EEG );
-            EEG = pop_firws(EEG, 'fcutoff', low_cutoff, 'ftype', 'lowpass', 'wtype', 'hamming', 'forder', lp_fl_order, 'minphase', 0);
+
+            filteredData = zeros(size(EEG.data));
+            % Process each channel as a separate task
+            parfor chanIdx = 1:EEG_copy.nbchan
+                filteredData(chanIdx, :) = pop_firws(EEG, 'fcutoff', low_cutoff, 'ftype', 'lowpass', 'wtype', 'hamming', 'forder', lp_fl_order, 'minphase', 0, 'data', EEG.data(chanIdx, :));
+            end
+
+            EEG.data = filteredData;
             EEG = eeg_checkset( EEG );
 
             % pop_firws() - transition band width: 10 Hz
@@ -481,7 +495,20 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                 error(['There are more than 1 zeroed channel (i.e. zero value throughout recording) in data.'...
                     ' Only reference channel should be zeroed channel. Delete the zeroed channel/s which is not reference channel.']);
             elseif numel(ref_chan)==1
-                list_properties = channel_properties(EEG, 1:EEG.nbchan, ref_chan); % run faster
+                numChannels = EEG.nbchan
+                list_properties = cell(numChannels, 1);
+                
+                sharedEEG = parallel.pool.Constant(EEG);
+
+                parfor chanIdx = 1:numChannels
+                    try
+                        list_properties{chanIdx} = channel_properties(sharedEEG.value, chanIdx, ref_chan);
+                    catch ME
+                        fprintf('Error processing channel %d: %s\n', chanIdx, ME.message);
+                    end
+                end
+
+                list_properties = vertcat(list_properties{:});
                 FASTbadIdx=min_z(list_properties);
                 FASTbadChans=find(FASTbadIdx==1);
                 FASTbadChans=FASTbadChans(FASTbadChans~=ref_chan);
@@ -581,11 +608,44 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
                 fl_order=floor(fl_order)+1;
             end
 
-            EEG_copy = pop_firws(EEG_copy, 'fcutoff', fl_cutoff, 'ftype', 'highpass', 'wtype', 'hamming', 'forder', fl_order, 'minphase', 0);
+            filteredData = zeros(size(EEG_copy.data));
+            % Process each channel as a separate task
+            parfor chanIdx = 1:EEG_copy.nbchan
+                filteredData(chanIdx, :) = pop_firws(EEG_copy, 'fcutoff', fl_cutoff, 'ftype', 'highpass', 'wtype', 'hamming', 'forder', fl_order, 'minphase', 0, 'data', EEG.data(chanIdx, :));
+            end
+
+            EEG_copy.data = filteredData;            
             EEG_copy = eeg_checkset(EEG_copy);
 
             % Create 1 second epoch
-            EEG_copy=eeg_regepochs(EEG_copy,'recurrence', 1, 'limits',[0 1], 'rmbase', [NaN], 'eventtype', '999'); % insert temporary marker 1 second apart and create epochs
+            epochedChannels = cell(1, EEG_copy.nbchan);
+
+            parfor chanIdx = 1: EEG_copy.nbchan
+                try
+                    % Create a copy of EEG with only the current channel
+                    EEG_channel = EEG_copy;
+                    EEG_channel.data = EEG_copy.data(ch, :); % Keep only the current channel's data
+                    EEG_channel.nbchan = 1; % Update number of channels
+                    EEG_channel.chanlocs = EEG_copy.chanlocs(ch); % Keep only the current channel's location info
+
+                    % Create epochs for the current channel
+                    EEG_channel = eeg_regepochs(EEG_channel, 'recurrence', recurrence, ...
+                        'limits', limits, 'rmbase', [NaN], 'eventtype', eventtype);
+
+                    % Store the epoched data for the channel
+                    epochedChannels{ch} = EEG_channel.data;
+                catch ME
+                    fprintf('Error processing channel %d: %s\n', ch, ME.message);
+                end
+            end
+
+            EEG_copy.data = cat(1, epochedChannels{:});
+
+            % Update EEG_copy metadata after combining
+            EEG_copy.nbchan = numChannels;
+            EEG_copy.pnts = size(EEG_copy.data, 2);
+            EEG_copy.trials = size(EEG_copy.data, 3);
+            EEG_copy.chanlocs = EEG.chanlocs;
             EEG_copy = eeg_checkset(EEG_copy);
 
             % Find bad epochs and delete them from dataset
@@ -1051,6 +1111,7 @@ parfor file_locater_counter = 1:length(subjects_to_process) %1:4
             writetable(report_table, [output_report_path '.csv'], "WriteMode", "append");
             % final_report_table = vertcat(final_report_table, report_table);
 
+            delete(pool); % Clean up parallel pool
 
         end % end of subject loop
 
@@ -1082,6 +1143,27 @@ end
 
 function [] = parsave(file, x)
     save(file, 'x')
+end
+
+function filteredData = parallel_pop_firws(data, filterParams, srate)
+    % Wrapper function to call pop_firws on a specific data segment
+    % data: the data segment to filter (e.g., a single channel of EEG data)
+    % filterParams: cell array containing filter parameters for pop_firws
+    % srate: sampling rate of the EEG data, required by pop_firws
+
+    % Create a temporary EEG structure with necessary fields
+    EEGtemp = eeg_emptyset;          % Initialize an empty EEG structure
+    EEGtemp.data = data;              % Insert the data segment
+    EEGtemp.srate = srate;            % Set the sampling rate
+    EEGtemp.nbchan = size(data, 1);   % Set number of channels (usually 1 for single-channel processing)
+    EEGtemp.pnts = size(data, 2);     % Set number of points (time samples)
+    EEGtemp.trials = 1;               % Set number of trials (1 if continuous data)
+
+    % Call pop_firws on the temporary EEG structure
+    EEGtemp = pop_firws(EEGtemp, filterParams{:});
+
+    % Extract the filtered data
+    filteredData = EEGtemp.data;
 end
 
 
