@@ -1,2 +1,0 @@
-passRaw,identifier,identifierDetails,errorType,errorDetails
-False,sub-3XXXXXX_all_eeg_s1_r1_e1,sub-3XXXXXX/all_eeg/s1_r1_e1 (eeg),EEG error,"Incorrect MarkerFile sub-3XXXXXX_wrongname_s1_r1_e1.vmrk in .vhdr file, expected sub-3XXXXXX_all_eeg_s1_r1_e1.vmrk"

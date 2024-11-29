@@ -1,5 +1,0 @@
-passRaw,identifier,identifierDetails,errorType,errorDetails
-False,sub-303_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-303/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Naming error,"Subject number 303 not an allowed subject value [3000022,3009999],[3080000,3089999],[3090000,3099999] in file sub-303_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Misplaced file,Found file in wrong directory: sub-303_arrow-alert-v1-1_psychopy_s1_r1_e1.csv found in test_output/test_cases/InvalidSubjectNumberTestCase/sourcedata/checked/sub-3XXXXXX/s1_r1/psychopy/
-False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Missing file,Expected file sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1.csv not found
-False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Unexpected file,Unexpected file sub-303_arrow-alert-v1-1_psychopy_s1_r1_e1.csv found
