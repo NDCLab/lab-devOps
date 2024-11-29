@@ -575,7 +575,7 @@ def qa_validation(dataset):
     logger.info("QA check done!")
 
 
-if __name__ == "__main__":
+def main():
     # initialization stage
     args = get_args()
     dataset = os.path.realpath(str(args.dataset))
@@ -778,3 +778,7 @@ if __name__ == "__main__":
     # everything completed successfully, exit with success
     logger.info("hallMonitor pipeline complete, exiting")
     exit(0)
+
+
+if __name__ == "__main__":
+    main()
