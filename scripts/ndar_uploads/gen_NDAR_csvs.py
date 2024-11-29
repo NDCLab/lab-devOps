@@ -369,7 +369,7 @@ if __name__ == "__main__":
     redcaps = ",".join(redcaps)
 
     if not isdir(out_path):
-        os.mkdir(out_path)
+        os.makedirs(out_path)
     redcaps = redcaps.split(',')
     df_dd = pd.read_csv(df_dd)
     with open(ndar_json, 'r') as json_file:
