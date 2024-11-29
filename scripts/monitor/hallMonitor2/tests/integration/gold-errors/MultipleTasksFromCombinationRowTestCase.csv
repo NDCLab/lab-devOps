@@ -1,9 +1,0 @@
-passRaw,identifier,identifierDetails,errorType,errorDetails
-False,sub-3XXXXXX_arrow-alert-v1-2_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-2_psychopy/s1_r1_e1 (psychopy) (combination),Combination variable error,"Multiple variables present for combination row arrow-alert_psychopy, expected one."
-False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Combination variable error,"Multiple variables present for combination row arrow-alert_psychopy, expected one."
-False,sub-3XXXXXX_arrow-alert-v1-2_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-2_psychopy/s1_r1_e1 (psychopy) (combination),Missing file,Expected file sub-3XXXXXX_arrow-alert-v1-2_psychopy_s1_r1_e1.psydat not found
-False,sub-3XXXXXX_arrow-alert-v1-2_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-2_psychopy/s1_r1_e1 (psychopy) (combination),Missing file,Expected file sub-3XXXXXX_arrow-alert-v1-2_psychopy_s1_r1_e1.log not found
-False,sub-3XXXXXX_arrow-alert-v1-2_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-2_psychopy/s1_r1_e1 (psychopy) (combination),Unexpected file,Unexpected file sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1.log found
-False,sub-3XXXXXX_arrow-alert-v1-2_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-2_psychopy/s1_r1_e1 (psychopy) (combination),Unexpected file,Unexpected file sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1.psydat found
-False,sub-3XXXXXX_arrow-alert-v1-2_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-2_psychopy/s1_r1_e1 (psychopy) (combination),Unexpected file,Unexpected file sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1.csv found
-False,sub-3XXXXXX_arrow-alert-v1-1_psychopy_s1_r1_e1,sub-3XXXXXX/arrow-alert-v1-1_psychopy/s1_r1_e1 (psychopy) (combination),Unexpected file,Unexpected file sub-3XXXXXX_arrow-alert-v1-2_psychopy_s1_r1_e1.csv found
