@@ -1385,9 +1385,9 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
             new_error_record(
                 logger,
                 dataset,
-                "Unknown", #? I forget how we said we'd deal with this
+                "",
                 "Naming error",
-                f"File {filename} does not match expected identifier format"
+                f"File {filename} does not match expected identifier format",
             )
         )
         return errors
