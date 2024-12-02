@@ -1380,6 +1380,12 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
         errors: List of errors associated with the file name.
     """
     errors = []
+
+    no_data_re = IDENTIFIER_RE + r"-no-data\.txt"
+    no_data_match = re.fullmatch(no_data_re, filename)
+    if no_data_match:
+        return errors
+
     file_match = re.fullmatch(FILE_RE, filename)
     if not file_match:
         errors.append(
