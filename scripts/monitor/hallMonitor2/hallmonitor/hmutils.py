@@ -16,7 +16,7 @@ import pytz
 
 DT_FORMAT = r"%Y-%m-%d_%H-%M"
 TZ_INFO = pytz.timezone("US/Eastern")
-IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>[\w\-]+)_(?P<sre>(s\d+_r\d+)_e\d+))"
+IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>[\w\-]+)_(?P<sre>s\d+_r\d+_e\d+))"
 FILE_RE = IDENTIFIER_RE + r"(?P<info>_[\w\-]+)?(?P<ext>(?:\.[a-zA-Z0-9]+)+)"
 
 FILE_RECORD_SUBPATH = os.path.join("data-monitoring", "validated-file-record.csv")
@@ -611,7 +611,8 @@ def get_present_identifiers(dataset, is_raw=True):
                 dtype = ""
             except ValueError:  # variable does not exist
                 continue
-            ses = match.group(5)
+            sre = match.group("sre")
+            ses = "_".join(sre.split("_")[:2])
             # Check that each identifier matches the subject, session, and datatype corresponding to its
             # directory path. If this does not match up, the identifier is not appended to present_ids.
             if is_raw:
