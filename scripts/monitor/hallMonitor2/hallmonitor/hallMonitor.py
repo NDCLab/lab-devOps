@@ -50,7 +50,7 @@ from .hmutils import (
 )
 
 
-def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
+def validate_data(logger, dataset, use_legacy_exceptions=False, is_raw=True):
     """
     Validates the data in the specified dataset.
 
@@ -103,7 +103,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
         id.is_missing = True  # included in detailed stringification
         id_as_dir = id.to_dir(dataset, is_raw=is_raw)
 
-        if legacy_exceptions:
+        if use_legacy_exceptions:
             no_data_file = "no-data.txt"
         else:
             no_data_file = f"{id}-no-data.txt"
@@ -240,7 +240,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
             continue
 
         # --- check for exception files, set flags ---
-        if legacy_exceptions:
+        if use_legacy_exceptions:
             has_deviation = "deviation.txt" in dir_filenames
             has_no_data = "no-data.txt" in dir_filenames
         else:
@@ -267,7 +267,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
 
         # handle misnamed files
 
-        if legacy_exceptions:
+        if use_legacy_exceptions:
             deviation_file = "deviation.txt"
         else:
             deviation_file = f"{id}-deviation.txt"
@@ -363,7 +363,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
         # handle exception file flags
         if has_no_data:
             # only expect the "no data" exception file
-            if legacy_exceptions:
+            if use_legacy_exceptions:
                 expected_files = ["no-data.txt"]
             else:
                 expected_files = [f"{id}-no-data.txt"]
@@ -452,12 +452,12 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
     return pending
 
 
-def checked_data_validation(dataset, legacy_exceptions=False):
+def checked_data_validation(dataset, use_legacy_exceptions=False):
     logger = logging.getLogger(__name__)
     logger.info("Starting checked data validation...")
 
     # perform data validation for checked directory
-    pending = validate_data(logger, dataset, legacy_exceptions, is_raw=False)
+    pending = validate_data(logger, dataset, use_legacy_exceptions, is_raw=False)
 
     logger.info("Checked data validation complete, found %d errors", len(pending))
 
@@ -476,12 +476,12 @@ def checked_data_validation(dataset, legacy_exceptions=False):
     return  # go to raw data validation
 
 
-def raw_data_validation(dataset, legacy_exceptions=False):
+def raw_data_validation(dataset, use_legacy_exceptions=False):
     logger = logging.getLogger(__name__)
     logger.info("Starting raw data validation...")
 
     # perform data validation for raw directory
-    pending = validate_data(logger, dataset, legacy_exceptions, is_raw=True)
+    pending = validate_data(logger, dataset, use_legacy_exceptions, is_raw=True)
 
     errors = [r for r in pending if not r["passRaw"]]
     logger.info("Raw data validation complete, found %d errors", len(errors))
@@ -688,21 +688,22 @@ def main():
         exit(1)
     logger.debug("No changes to data dictionary")
 
-    legacy_exceptions = bool(args.legacy_exceptions)
+    use_legacy_exceptions = bool(args.legacy_exceptions)
     logger.debug(
-        "Using %s exception file naming", "legacy" if legacy_exceptions else "standard"
+        "Using %s exception file naming",
+        "legacy" if use_legacy_exceptions else "standard",
     )
 
     # limit scope of data validation to raw or checked, if requested
     if args.raw_only:
         logger.info("Only running data validation for sourcedata/raw/")
-        raw_data_validation(dataset, legacy_exceptions)
+        raw_data_validation(dataset, use_legacy_exceptions)
     elif args.checked_only:
         logger.info("Only running data validation for sourcedata/checked/")
-        checked_data_validation(dataset, legacy_exceptions)
+        checked_data_validation(dataset, use_legacy_exceptions)
     else:
-        checked_data_validation(dataset, legacy_exceptions)
-        raw_data_validation(dataset, legacy_exceptions)
+        checked_data_validation(dataset, use_legacy_exceptions)
+        raw_data_validation(dataset, use_legacy_exceptions)
 
     if args.no_qa:
         logger.info("Skipping QA stage")
