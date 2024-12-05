@@ -7,6 +7,27 @@ class MiscellaneousTestCase(ValidationTestCase):
     pass
 
 
+class BaseTestCase(MiscellaneousTestCase):
+    """
+    Test case for no modifications to the base subject data.
+    """
+
+    case_name = "BaseTestCase"
+    description = "Copies the base subject data exactly."
+    conditions = ["No variations to base subject data"]
+    expected_output = "No errors are raised."
+
+    @property
+    def behavior_to_test(self) -> str:
+        return "Tests to make sure no errors are raised for unaltered data."
+
+    def modify(self, base_files):
+        return base_files.copy()
+
+    def get_expected_errors(self):
+        return []
+
+
 class InsufficientFilesTestCase(MiscellaneousTestCase):
     """
     Test case for incorrect number of files in a folder (not enough).

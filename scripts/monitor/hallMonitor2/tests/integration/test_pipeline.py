@@ -5,7 +5,6 @@ import pandas as pd
 import pytest
 
 from .base_cases import (
-    BaseTestCase,
     TestCase,
     _TestCaseRegistry,
 )
@@ -25,6 +24,7 @@ from .exception_cases import (
     NoDataAdditionalFilesTestCase,
 )
 from .misc_cases import (
+    BaseTestCase,
     EmptyFileTestCase,
     ExpectedFileMissingTestCase,
     ExtraFilesInFolderTestCase,
