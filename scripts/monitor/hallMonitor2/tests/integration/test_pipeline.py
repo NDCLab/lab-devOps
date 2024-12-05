@@ -285,7 +285,7 @@ def create_base_subject(basedir):
     mock_dd.to_csv(dd_path, index=False)
 
 
-def create_tests():
+def create_registry():
     basedir = os.path.dirname(__file__)
     basedir = os.path.join(basedir, ".test_output")
     if os.path.exists(basedir):
@@ -339,11 +339,11 @@ def create_tests():
         PsychopyFileIDMismatchTestCase,
     ]
     registry.add_cases(tests)
-    registry.generate_all()
     return registry
 
 
-registry = create_tests()
+registry = create_registry()
+registry.generate_all()
 tests = registry.get_cases()
 
 
