@@ -342,17 +342,30 @@ class ValidationTestCase(TestCase):
         expected_errors = self.get_expected_errors()
 
         # check for missing errors
-        missing = []
-        for error in expected_errors:
-            matching_errors = generated_errors_df[
-                (generated_errors_df["errorType"] == error.error_type)
-                & (generated_errors_df["errorDetails"].str.fullmatch(error.info_regex))
+
+        if generated_errors_df.empty:
+            # we may have no errors; in this case, all expected errors are missing
+            missing = [
+                f"{error.error_type}: {error.info_regex.replace('\\', '')} (missing {error.multiplicity})"
+                for error in expected_errors
             ]
-            if len(matching_errors.index) < error.multiplicity:
-                n_missing = error.multiplicity - len(matching_errors.index)
-                missing.append(
-                    f"{error.error_type}: {error.info_regex.replace('\\', '')} (missing {n_missing})"
-                )
+
+        else:
+            missing = []
+            for error in expected_errors:
+                matching_errors = generated_errors_df[
+                    (generated_errors_df["errorType"] == error.error_type)
+                    & (
+                        generated_errors_df["errorDetails"].str.fullmatch(
+                            error.info_regex
+                        )
+                    )
+                ]
+                if len(matching_errors.index) < error.multiplicity:
+                    n_missing = error.multiplicity - len(matching_errors.index)
+                    missing.append(
+                        f"{error.error_type}: {error.info_regex.replace('\\', '')} (missing {n_missing})"
+                    )
 
         # check for extraneous errors
         extra = []
