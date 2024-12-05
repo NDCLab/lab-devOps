@@ -4,44 +4,54 @@ from typing import Type
 import pandas as pd
 import pytest
 
-from .hm_test_cases import (
+from .base_cases import (
     BaseTestCase,
+    TestCase,
+    _TestCaseRegistry,
+)
+from .eeg_cases import (
+    EEGDataFileVHDRMismatchTestCase,
+    EEGDataFileVMRKMismatchTestCase,
+    EEGMarkerFileVHDRMismatchTestCase,
+)
+from .exception_cases import (
     DeviationAndNoDataErrorTestCase,
     DeviationAndNoDataFilesErrorTestCase,
     DeviationFilePreventsErrorWithExtraFilesTestCase,
     DeviationFileWithBadNamesTestCase,
     DeviationFileWithFolderMismatchTestCase,
     DeviationFileWithValidNamesTestCase,
-    EEGDataFileVHDRMismatchTestCase,
-    EEGDataFileVMRKMismatchTestCase,
-    EEGMarkerFileVHDRMismatchTestCase,
+    IssueFileTestCase,
+    NoDataAdditionalFilesTestCase,
+)
+from .misc_cases import (
     EmptyFileTestCase,
     ExpectedFileMissingTestCase,
     ExtraFilesInFolderTestCase,
+    InsufficientFilesTestCase,
+    MultipleTasksFromCombinationRowTestCase,
+)
+from .misplaced_cases import (
     FolderRunSuffixMismatchTestCase,
     FolderSessionSuffixMismatchTestCase,
     FolderSubjectMismatchTestCase,
     FolderVariableMismatchTestCase,
-    InsufficientFilesTestCase,
+)
+from .naming_cases import (
     InvalidEventSuffixTestCase,
     InvalidExtensionTestCase,
     InvalidRunSuffixTestCase,
     InvalidSessionSuffixTestCase,
     InvalidSubjectNumberTestCase,
     InvalidVariableNameTestCase,
-    IssueFileTestCase,
     MissingEventSuffixTestCase,
     MissingExtensionTestCase,
     MissingRunSuffixTestCase,
     MissingSessionSuffixTestCase,
     MissingSubjectNumberTestCase,
     MissingVariableNameTestCase,
-    MultipleTasksFromCombinationRowTestCase,
-    NoDataAdditionalFilesTestCase,
-    PsychopyFileIDMismatchTestCase,
-    TestCase,
-    _TestCaseRegistry,
 )
+from .psychopy_cases import PsychopyFileIDMismatchTestCase
 
 BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
 
