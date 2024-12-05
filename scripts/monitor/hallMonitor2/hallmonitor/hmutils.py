@@ -17,7 +17,12 @@ import pytz
 DT_FORMAT = r"%Y-%m-%d_%H-%M"
 TZ_INFO = pytz.timezone("US/Eastern")
 IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>[\w\-]+)_(?P<sre>s\d+_r\d+_e\d+))"
-FILE_RE = IDENTIFIER_RE + r"(?P<info>_[\w\-]+)?(?P<ext>(?:\.[a-zA-Z0-9]+)+)"
+FILE_RE = (
+    IDENTIFIER_RE
+    + r"(?P<dev>-deviation)?"
+    + r"(?P<info>_[\w\-]+)?"
+    + r"(?P<ext>(?:\.[a-zA-Z0-9]+)+)"
+)
 
 FILE_RECORD_SUBPATH = os.path.join("data-monitoring", "validated-file-record.csv")
 DATADICT_SUBPATH = os.path.join(
@@ -178,6 +183,7 @@ class Identifier:
     run: str
     event: str = None
     is_missing: bool = False
+    is_from_deviation = False
 
     def __str__(self):
         s = f"{self.subject}_{self.variable}_{self.session}_{self.run}_{self.event}"
@@ -624,6 +630,9 @@ def get_present_identifiers(dataset, is_raw=True):
 
             try:
                 new_id = Identifier.from_str(identifier)
+                # when we check whether a combination row has any variables present,
+                #    files labeled as "deviation.txt" should not count.
+                new_id.is_from_deviation = match.group("dev") is not None
                 present_ids.add(new_id)
             except ValueError:
                 continue

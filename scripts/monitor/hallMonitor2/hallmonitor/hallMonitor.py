@@ -132,6 +132,7 @@ def validate_data(logger, dataset, legacy_exceptions=False, is_raw=True):
                 id
                 for id in present_ids
                 if id.variable in combo.variables
+                and not id.is_from_deviation
                 and id.subject == sub
                 and id.session == ses
                 and id.run == run
