@@ -4,9 +4,11 @@ import logging
 import os
 import re
 import subprocess
+from argparse import Namespace
 from datetime import datetime
 
 import pandas as pd
+
 from .hmutils import (
     CHECKED_SUBDIR,
     FILE_RE,
@@ -576,9 +578,8 @@ def qa_validation(dataset):
     logger.info("QA check done!")
 
 
-def main():
+def main(args: Namespace):
     # initialization stage
-    args = get_args()
     dataset = os.path.realpath(str(args.dataset))
     if not os.path.exists(dataset):
         raise FileNotFoundError(f"Dataset {dataset} not found")
@@ -783,4 +784,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    script_args = get_args()
+    main(script_args)
