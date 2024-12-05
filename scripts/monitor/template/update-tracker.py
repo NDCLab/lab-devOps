@@ -364,7 +364,7 @@ if __name__ == "__main__":
 
             duplicate_cols = []
             # drop any duplicate columns ending in ".NUMBER"
-            for col, _ in tracker_df.iteritems():
+            for col in tracker_df.columns:
                 if re.match('^.*\.[0-9]+$', col):
                     duplicate_cols.append(col)
             tracker_df.drop(columns=duplicate_cols, inplace=True)
