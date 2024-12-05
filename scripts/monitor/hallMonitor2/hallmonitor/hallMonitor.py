@@ -636,8 +636,9 @@ def main(args: Namespace):
     # redcaps in the wrong session folder are considered a critical error
     misplaced = get_misplaced_redcaps(redcaps)
     if misplaced:
-        logger.critical(f"Found misplaced redcaps: {', '.join(misplaced)}")
-        exit(1)
+        msg = f"Found misplaced redcaps: {', '.join(misplaced)}"
+        logger.critical(msg)
+        raise RuntimeError(msg)
 
     if args.map:
         for rc_file in redcaps:
@@ -662,13 +663,11 @@ def main(args: Namespace):
         for rc_file in redcaps:
             df = pd.read_csv(rc_file)
             if len(df.columns) != len(args.replace):
-                logger.critical(
-                    "Column count mismatch in %s: %d vs %d",
-                    rc_file,
-                    len(df.columns),
-                    len(args.replace),
+                msg = (
+                    f"Column count mismatch in {rc_file}: {len(df.columns)} vs {len(args.replace)}",
                 )
-                exit(1)
+                logger.critical(msg)
+                raise ValueError(msg)
             df.columns = args.replace
 
             # see above
@@ -682,11 +681,12 @@ def main(args: Namespace):
     # check data dictionary
     try:
         if datadict_has_changes(dataset):
-            logger.error("Data dictionary has changed. Please rerun setup.sh.")
-            exit(1)
+            msg = "Data dictionary has changed. Please rerun setup.sh."
+            logger.error(msg)
+            raise ValueError(msg)
     except FileNotFoundError as err:
-        logger.error(err)
-        exit(1)
+        logger.error(err)  # ensure this is caught in file logs
+        raise err
     logger.debug("No changes to data dictionary")
 
     use_legacy_exceptions = bool(args.legacy_exceptions)
@@ -717,8 +717,9 @@ def main(args: Namespace):
 
     script_location = os.path.join(dataset, UPDATE_TRACKER_SUBPATH)
     if not os.path.exists(script_location):
-        logger.critical("update-tracker.py does not exist at expected location.")
-        exit(1)
+        msg = "update-tracker.py does not exist at expected location."
+        logger.critical(msg)
+        raise FileNotFoundError(msg)
 
     # get passed/failed IDs as specified by pending-files.csv
     pending = get_pending_files(dataset)
@@ -733,7 +734,7 @@ def main(args: Namespace):
         redcaps = get_new_redcaps(checked_dir)
     except ValueError as err:
         logger.critical("Could not get new redcaps: %s", err)
-        exit(1)
+        raise ValueError("Could not get new redcaps") from err
 
     universal_redcaps = [
         rc for rc in redcaps if not re.fullmatch(r".*s\d+.*", os.path.basename(rc))
@@ -772,15 +773,16 @@ def main(args: Namespace):
 
     if failed_sr:
         failed_sr = ", ".join(failed_sr)
-        logger.critical("Could not update tracker for %s, exiting", failed_sr)
-        exit(1)
+        msg = f"Could not update tracker for {failed_sr}"
+        logger.critical(msg)
+        raise RuntimeError(msg)
 
     success_sr = ", ".join(f"{s}_{r}" for s, r in unique_sr)
     logger.info("Successfully updated tracker for %s ", success_sr)
 
-    # everything completed successfully, exit with success
-    logger.info("hallMonitor pipeline complete, exiting")
-    exit(0)
+    # everything completed successfully, return success
+    logger.info("hallMonitor pipeline complete")
+    return True
 
 
 if __name__ == "__main__":
