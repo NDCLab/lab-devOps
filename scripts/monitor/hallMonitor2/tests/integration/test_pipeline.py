@@ -21,6 +21,7 @@ from .exception_cases import (
     DeviationFileWithFolderMismatchTestCase,
     DeviationFileWithValidNamesTestCase,
     IssueFileTestCase,
+    MissingIdentifierWithoutNoDataTestCase,
     NoDataAdditionalFilesTestCase,
 )
 from .misc_cases import (
@@ -378,6 +379,7 @@ def create_registry():
         IssueFileTestCase,
         MissingEventSuffixTestCase,
         MissingExtensionTestCase,
+        MissingIdentifierWithoutNoDataTestCase,
         MissingRunSuffixTestCase,
         MissingSessionSuffixTestCase,
         MissingSubjectNumberTestCase,
