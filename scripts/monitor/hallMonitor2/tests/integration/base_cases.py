@@ -107,8 +107,11 @@ class TestCase(ABC):
             full_path = os.path.join(self.case_dir, rel_path)
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
-            with open(full_path, "w") as f:
-                f.write(content)
+            try:
+                with open(full_path, "w") as f:
+                    f.write(content)
+            except IsADirectoryError:  # some test cases require empty directories
+                continue
 
     def build_path(self, ses: str, datatype: str, filename: str):
         """
