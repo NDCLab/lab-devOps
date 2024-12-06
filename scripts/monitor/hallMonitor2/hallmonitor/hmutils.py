@@ -686,7 +686,7 @@ def get_expected_identifiers(dataset, present_ids):
                 continue
 
     expected_ids = [
-        Identifier(sub, var, ses, run)
+        Identifier(sub, var, ses, run, "e1")
         for sub, ses, run in present_sub_ses_run
         for var in expected_vars
     ]
