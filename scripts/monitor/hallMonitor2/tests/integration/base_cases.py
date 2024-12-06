@@ -194,22 +194,6 @@ class TestCase(ABC):
         """
         pass
 
-    @abstractmethod
-    def get_expected_errors(self) -> list[ExpectedError]:
-        """
-        Generate a list of ExpectedError instances for this object.
-
-        This method defines the expected errors that may occur,
-        using dynamically generated file paths and error messages
-        specific to the current object's state. Each error is
-        represented as an ExpectedError instance.
-
-        Returns:
-            list[ExpectedError]: A list of ExpectedError objects
-            encapsulating the error type and associated message.
-        """
-        pass
-
     def generate(self):
         """
         Generate the test case by reading the base subject, applying modifications,
@@ -373,6 +357,22 @@ class ValidationTestCase(TestCase):
             return True
         else:
             return False
+
+    @abstractmethod
+    def get_expected_errors(self) -> list[ExpectedError]:
+        """
+        Generate a list of ExpectedError instances for this object.
+
+        This method defines the expected errors that may occur,
+        using dynamically generated file paths and error messages
+        specific to the current object's state. Each error is
+        represented as an ExpectedError instance.
+
+        Returns:
+            list[ExpectedError]: A list of ExpectedError objects
+            encapsulating the error type and associated message.
+        """
+        pass
 
     def compare_errors(self, generated_errors_df: pd.DataFrame):
         """
