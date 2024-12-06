@@ -69,30 +69,55 @@ class TestCase(ABC):
         self.case_dir = os.path.join(basedir, self.TEST_CASES_SUBDIR, case_name)
         self.rel_data_dir = os.path.join("sourcedata", "checked", f"sub-{self.sub_id}")
 
-    def read_base_files(self) -> dict[str, str]:
-        """
-        Read all files in the base subject directory.
+    def read_files(self, base_dir: str):
+        """Read all files in a base directory and return their contents in a dictionary.
+
+        Args:
+            base_dir (str): The path to the base directory to read files from.
+
+        Raises:
+            FileNotFoundError: If the provided `base_dir` does not exist or is not a directory.
 
         Returns:
-            dict[str,str]: A dictionary where keys are filenames and values are file contents.
+            dict[str,str]: A dictionary where keys are relative file paths and values are file contents
         """
-        base_files = {}
+        new_files = {}
 
-        for root, _, files in os.walk(self.base_sub_dir):
+        if not os.path.exists(base_dir) or not os.path.isdir(base_dir):
+            raise FileNotFoundError(f"{base_dir} does not exist, or is not a directory")
+
+        for root, _, files in os.walk(base_dir):
             for filename in files:
                 file_path = os.path.join(root, filename)
                 rel_path = os.path.relpath(file_path, self.base_sub_dir)
 
-                rel_path = rel_path.replace(
-                    f"sub-{self.BASE_SUBJECT_ID}", f"sub-{self.sub_id}"
-                )
-
                 with open(file_path, "r") as f:
                     content = f.read()
 
-                base_files[rel_path] = content.replace(
-                    str(TestCase.BASE_SUBJECT_ID), str(self.sub_id)
-                )
+                new_files[rel_path] = content
+
+        return new_files
+
+    def read_base_files(self) -> dict[str, str]:
+        """
+        Read all files in the base subject directory. Replace all references to the base subject ID with
+        the test case's own subject ID.
+
+        Returns:
+            dict[str,str]: A dictionary where keys are filenames and values are file contents.
+        """
+        try:
+            base_files = self.read_files(self.base_sub_dir)
+        except FileNotFoundError as err:
+            raise FileNotFoundError("Invalid base subject directory") from err
+
+        def swap_in_subject_id(text: str):
+            return text.replace(str(self.BASE_SUBJECT_ID), str(self.sub_id))
+
+        base_files = {
+            swap_in_subject_id(path): swap_in_subject_id(content)
+            for path, content in base_files.items()
+        }
 
         return base_files
 
