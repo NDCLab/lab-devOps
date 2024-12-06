@@ -5,7 +5,7 @@ These scripts should generate a series of output CSV files that can be uploaded 
 Required arguments are the dataset's redcaps and a JSON file containing information on mapping the Redcap columns to the output CSVs.
 
 ```
-python3 gen_NDAR_csvs.py <redcap1,redcap2,redcap3> <data dictionary> <JSON file> <sre string> <output path> [any redcaps from a prior session needed or "None"]
+python3 gen_NDAR_csvs.py <dataset path> <data dictionary> <JSON file> <sre string> <output path> [any redcaps from a prior session needed or "None"]
 ```
 
 Example command:
