@@ -150,6 +150,26 @@ def create_base_subject(basedir):
         with open(os.path.join(digi_dir, digi_zip_gpg), "w") as f:
             f.write("digi data")
 
+    # -- set up sourcedata/pending-qa/ directory --
+
+    pending_qa_dir = os.path.join(base_subdir, "sourcedata", "pending-qa")
+    os.makedirs(pending_qa_dir)
+
+    # set up empty QA checklist
+
+    checklist_path = os.path.join(pending_qa_dir, "qa-checklist.csv")
+    mock_checklist = pd.DataFrame(
+        columns=[
+            "datetime",
+            "user",
+            "identifier",
+            "identifierDetails",
+            "qa",
+            "localMove",
+        ]
+    )
+    mock_checklist.to_csv(checklist_path, index=False)
+
     # -- set up data-monitoring/ directory --
 
     data_monitoring_dir = os.path.join(base_subdir, "data-monitoring")
