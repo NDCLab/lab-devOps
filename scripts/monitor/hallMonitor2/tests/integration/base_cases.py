@@ -250,6 +250,26 @@ class TestCase(ABC):
 
         return pending_df
 
+    def run_qa_validation(self) -> str:
+        """Run qa_validation() on the generated data directory.
+
+        Returns:
+            str: A string containing error text, if any error was raised during execution.
+        """
+        from hallmonitor.hallMonitor import qa_validation
+
+        logger = logging.getLogger(f"{self.case_name}_logger")
+        logger.setLevel(logging.ERROR)
+        logger.propagate = False
+
+        error_text = ""
+        try:
+            qa_validation(logger, dataset=self.case_dir)
+        except Exception as err:
+            error_text = str(err)
+
+        return error_text
+
     @abstractmethod
     def validate(self):
         """
