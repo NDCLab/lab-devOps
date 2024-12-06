@@ -444,8 +444,9 @@ def validate_data(logger, dataset, use_legacy_exceptions=False, is_raw=True):
     return pending
 
 
-def checked_data_validation(dataset, use_legacy_exceptions=False):
-    logger = logging.getLogger(__name__)
+def checked_data_validation(
+    logger: logging.Logger, dataset: str, use_legacy_exceptions=False
+):
     logger.info("Starting checked data validation...")
 
     # perform data validation for checked directory
@@ -468,8 +469,9 @@ def checked_data_validation(dataset, use_legacy_exceptions=False):
     return  # go to raw data validation
 
 
-def raw_data_validation(dataset, use_legacy_exceptions=False):
-    logger = logging.getLogger(__name__)
+def raw_data_validation(
+    logger: logging.Logger, dataset: str, use_legacy_exceptions=False
+):
     logger.info("Starting raw data validation...")
 
     # perform data validation for raw directory
@@ -491,8 +493,7 @@ def raw_data_validation(dataset, use_legacy_exceptions=False):
     return  # go to QA checks
 
 
-def qa_validation(dataset):
-    logger = logging.getLogger(__name__)
+def qa_validation(logger: logging.Logger, dataset: str):
     logger.info("Starting QA check...")
 
     # set up paths and dataframes
@@ -688,18 +689,18 @@ def main(args: Namespace):
     # limit scope of data validation to raw or checked, if requested
     if args.raw_only:
         logger.info("Only running data validation for sourcedata/raw/")
-        raw_data_validation(dataset, use_legacy_exceptions)
+        raw_data_validation(logger, dataset, use_legacy_exceptions)
     elif args.checked_only:
         logger.info("Only running data validation for sourcedata/checked/")
-        checked_data_validation(dataset, use_legacy_exceptions)
+        checked_data_validation(logger, dataset, use_legacy_exceptions)
     else:
-        checked_data_validation(dataset, use_legacy_exceptions)
-        raw_data_validation(dataset, use_legacy_exceptions)
+        checked_data_validation(logger, dataset, use_legacy_exceptions)
+        raw_data_validation(logger, dataset, use_legacy_exceptions)
 
     if args.no_qa:
         logger.info("Skipping QA stage")
     else:
-        qa_validation(dataset)
+        qa_validation(logger, dataset)
 
     logger.info("All checks complete")
 
