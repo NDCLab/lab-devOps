@@ -343,3 +343,31 @@ class MissingIdentifierWithoutNoDataTestCase(ExceptionTestCase):
         errors = [ExpectedError("Missing identifier", missing_info)]
 
         return errors
+
+
+class MissingIdentifierNoDataTestCase(ExceptionTestCase):
+    """
+    Test case for no data in a folder with an accompanying no-data.txt file.
+    """
+
+    case_name = "MissingIdentifierNoDataTestCase"
+    description = (
+        "Removes all data from a datatype folder, replacing it with a no-data file."
+    )
+    conditions = ["Folder is empty.", "Folder contains a no-data.txt file."]
+    expected_output = "No error is raised for the missing identifier."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_all_digi_s1_r1_e1"
+        old_basename = f"{identifier}.zip.gpg"
+        new_basename = f"{identifier}-no-data.txt"
+
+        if not self.replace_file_name(modified_files, old_basename, new_basename):
+            raise FileNotFoundError(f"File matching basename {old_basename} not found")
+
+        return modified_files
+
+    def get_expected_errors(self):
+        return []
