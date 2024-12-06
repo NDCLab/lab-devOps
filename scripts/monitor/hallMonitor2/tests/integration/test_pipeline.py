@@ -175,6 +175,40 @@ def create_base_subject(basedir):
     data_monitoring_dir = os.path.join(base_subdir, "data-monitoring")
     os.makedirs(data_monitoring_dir)
 
+    # set up pending/ directory and files
+
+    pending_dir = os.path.join(data_monitoring_dir, "pending")
+    os.makedirs(pending_dir)
+
+    timestamp = "2024-01-01-12_30"
+
+    pending_files_path = os.path.join(pending_dir, f"pending-files-{timestamp}.csv")
+    pending_files = pd.DataFrame(
+        columns=[
+            "datetime",
+            "user",
+            "passRaw",
+            "identifier",
+            "identifierDetails",
+            "errorType",
+            "errorDetails",
+        ]
+    )
+    pending_files.to_csv(pending_files_path, index=False)
+
+    pending_errors_path = os.path.join(pending_dir, f"pending-errors-{timestamp}.csv")
+    pending_errors = pd.DataFrame(
+        columns=[
+            "datetime",
+            "user",
+            "identifier",
+            "identifierDetails",
+            "errorType",
+            "errorDetails",
+        ]
+    )
+    pending_errors.to_csv(pending_errors_path, index=False)
+
     # set up data dictionary
 
     dd_dir = os.path.join(data_monitoring_dir, "data-dictionary")
