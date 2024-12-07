@@ -436,3 +436,106 @@ class ValidationTestCase(TestCase):
     def validate(self):
         errors_df = self.run_validate_data()
         self.compare_errors(errors_df)
+
+
+class QATestCase(TestCase):
+    """
+    Base class for errors associated with the quality assurance (QA) stage.
+    """
+
+    case_name = "QATestCase"
+    description = "Handles errors related to quality assurance."
+    conditions = []
+    expected_output = "Correct error generated for quality assurance issues."
+
+    def __init__(self, basedir: str, sub_id: int):
+        super().__init__(
+            basedir,
+            sub_id,
+            self.case_name,
+            self.description,
+            self.conditions,
+            self.expected_output,
+        )
+
+    @property
+    def behavior_to_test(self) -> str:
+        return "Tests for errors related to quality assurance."
+
+    @abstractmethod
+    def get_expected_files(self) -> list[str]:
+        """
+        Define the list of files expected to be present in the test case directory.
+
+        This method should be implemented by child classes to return a list of file paths
+        that are expected to exist after QA validation.
+
+        Returns:
+            list[str]: A list of file paths relative to the test case directory that
+                    are expected to be present.
+        """
+        pass
+
+    @abstractmethod
+    def get_expected_error(self) -> str:
+        """
+        Define the expected error message for the QA validation.
+
+        This method should be implemented by child classes to return the error message
+        expected to occur during QA validation. If no error is expected, this method
+        should return an empty string or None.
+
+        Returns:
+            str: The expected error message, or an empty string/None if no error is expected.
+        """
+        pass
+
+    def validate_expected_files(self):
+        """
+        Validate that the expected files exist in the test case directory.
+
+        Raises:
+            AssertionError: If any expected files are missing or extraneous files are found.
+        """
+        actual_files = set()
+        for root, _, files in os.walk(self.case_dir):
+            for filename in files:
+                actual_files.add(
+                    os.path.relpath(os.path.join(root, filename), self.case_dir)
+                )
+
+        expected_files_set = set(self.get_expected_files())
+        missing_files = expected_files_set - actual_files
+        extra_files = actual_files - expected_files_set
+
+        if missing_files or extra_files:
+            fail_reason = ""
+            if missing_files:
+                fail_reason += "Missing files:\n" + "\n".join(missing_files) + "\n"
+            if extra_files:
+                fail_reason += "Extra files:\n" + "\n".join(extra_files) + "\n"
+            raise AssertionError(f"File layout validation failed:\n{fail_reason}")
+
+    def validate(self):
+        """
+        Validate the QA outcome by checking for expected errors or file layouts.
+
+        Raises:
+            AssertionError: If the QA validation does not match the expected outcome.
+        """
+        expected_error = self.get_expected_error()
+
+        if expected_error:
+            error_text = self.run_qa_validation()
+            if error_text.strip() != expected_error.strip():
+                raise AssertionError(
+                    f"QA validation error mismatch:\nExpected: {expected_error}\nGot: {error_text}"
+                )
+        else:
+            # no error expected, check file layout instead
+            error_text = self.run_qa_validation()
+            if error_text:
+                raise AssertionError(
+                    f"Unexpected error during QA validation: {error_text}"
+                )
+            self.validate_expected_files()
