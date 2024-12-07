@@ -209,12 +209,13 @@ def create_base_subject(basedir):
     )
     pending_errors.to_csv(pending_errors_path, index=False)
 
-    # set up data dictionary
+    # set up data dictionary and "latest" data dictionary
 
     dd_dir = os.path.join(data_monitoring_dir, "data-dictionary")
     os.makedirs(dd_dir)
 
     dd_path = os.path.join(dd_dir, "central-tracker_datadict.csv")
+    latest_dd_path = os.path.join(dd_dir, "central-tracker_datadict_latest.csv")
     mock_dd = [
         {
             "variable": "id",
@@ -387,6 +388,7 @@ def create_base_subject(basedir):
     ]
     mock_dd = pd.DataFrame(mock_dd)
     mock_dd.to_csv(dd_path, index=False)
+    mock_dd.to_csv(latest_dd_path, index=False)
 
 
 def create_registry():
