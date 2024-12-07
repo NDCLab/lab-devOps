@@ -83,7 +83,6 @@ def validate_data(logger, dataset, use_legacy_exceptions=False, is_raw=True):
     """
     # initialize variables
     pending = []
-    dd_df = get_datadict(dataset)
     if is_raw:
         base_dir = os.path.join(dataset, RAW_SUBDIR)
     else:
