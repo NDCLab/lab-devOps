@@ -1,6 +1,9 @@
+import os
 import re
 
-from .base_cases import ExpectedError, ValidationTestCase
+import pytest
+
+from .base_cases import ExpectedError, TestCase, ValidationTestCase
 
 
 class MiscellaneousTestCase(ValidationTestCase):
@@ -216,3 +219,50 @@ class MultipleTasksFromCombinationRowTestCase(MiscellaneousTestCase):
         ]
 
         return errors
+
+
+class DataDictionaryHasChangesTestCase(TestCase):
+    case_name = "DataDictionaryHasChangesTestCase"
+    description = "Modifies the data dictionary to simulate unexpected changes."
+    behavior_to_test = (
+        "Validation should raise an error if the data dictionary has been modified."
+    )
+    conditions = [
+        "Data dictionary contents differ from the expected format or version."
+    ]
+    expected_output = "Error is raised indicating that the data dictionary has changed."
+
+    def __init__(self, basedir: str, sub_id: int):
+        super().__init__(
+            basedir,
+            sub_id,
+            self.case_name,
+            self.description,
+            self.conditions,
+            self.expected_output,
+        )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        datadict_path = os.path.join(
+            "data-monitoring",
+            "data-dictionary",
+            "central-tracker_datadict.csv",
+        )
+
+        if datadict_path not in modified_files:
+            raise FileNotFoundError(f"Could not find datadict at {datadict_path}")
+
+        curr_content = modified_files[datadict_path]
+        new_content = curr_content.replace("Participant ID", "participant ID")
+        modified_files[datadict_path] = new_content
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor.hallMonitor import main
+
+        with pytest.raises(ValueError, match="Data dictionary has changed"):
+            args = self.get_standard_args()
+            main(args)
