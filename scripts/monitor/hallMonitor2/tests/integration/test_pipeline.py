@@ -27,6 +27,7 @@ from .exception_cases import (
 )
 from .misc_cases import (
     BaseTestCase,
+    DataDictionaryHasChangesTestCase,
     EmptyFileTestCase,
     ExpectedFileMissingTestCase,
     ExtraFilesInFolderTestCase,
@@ -410,6 +411,7 @@ def create_registry():
     registry = _TestCaseRegistry(basedir)
     tests: list[Type[TestCase]] = [
         BaseTestCase,
+        DataDictionaryHasChangesTestCase,
         DeviationAndNoDataErrorTestCase,
         DeviationAndNoDataFilesErrorTestCase,
         DeviationFilePreventsErrorWithExtraFilesTestCase,
