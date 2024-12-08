@@ -526,16 +526,18 @@ class QATestCase(TestCase):
         return "Tests for errors related to quality assurance."
 
     @abstractmethod
-    def get_expected_files(self) -> list[str]:
+    def get_expected_file_changes(self) -> tuple[list[str], list[str]]:
         """
-        Define the list of files expected to be present in the test case directory.
+        Define the file changes expected in the test case directory.
 
-        This method should be implemented by child classes to return a list of file paths
-        that are expected to exist after QA validation.
+        This method should be implemented by child classes to return two lists:
+        - The first list contains file paths that are expected to be added.
+        - The second list contains file paths that are expected to be missing.
 
         Returns:
-            list[str]: A list of file paths relative to the test case directory that
-                    are expected to be present.
+            tuple[list[str],list[str]]: A tuple containing:
+                - added_files (list[str]): A list of file paths expected to be added to the test case directory.
+                - missing_files (list[str]): A list of file paths expected to be missing from the test case directory.
         """
         pass
 
