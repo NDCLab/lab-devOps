@@ -1,4 +1,5 @@
 import os
+import subprocess
 from typing import Type
 
 import pandas as pd
@@ -66,20 +67,23 @@ def create_base_subject(basedir):
     # -- set up standard files --
     # (stored in "checked order": sub/ses/dtype)
 
-    data_dir = os.path.join(
+    checked_data_dir = os.path.join(
         base_subdir, "sourcedata", "checked", f"sub-{BASE_SUBJECT_ID}"
     )
-    os.makedirs(data_dir)
+    os.makedirs(checked_data_dir)
 
     ses_runs = [("s1", "r1"), ("s2", "r1"), ("s3", "r1")]
 
+    datatypes = set()
+    # set up files in checked directory
     for ses, run in ses_runs:
         # set up session/run directory
-        sr_dir = os.path.join(data_dir, f"{ses}_{run}")
+        sr_dir = os.path.join(checked_data_dir, f"{ses}_{run}")
         os.makedirs(sr_dir)
 
         # set up psychopy data
 
+        datatypes.add("psychopy")
         psychopy_dir = os.path.join(sr_dir, "psychopy")
         os.makedirs(psychopy_dir)
 
@@ -99,6 +103,7 @@ def create_base_subject(basedir):
 
         # set up eeg data
 
+        datatypes.add("eeg")
         eeg_dir = os.path.join(sr_dir, "eeg")
         os.makedirs(eeg_dir)
 
@@ -126,6 +131,7 @@ def create_base_subject(basedir):
 
         # set up audacity data
 
+        datatypes.add("audacity")
         audacity_dir = os.path.join(sr_dir, "audacity")
         os.makedirs(audacity_dir)
 
@@ -135,6 +141,7 @@ def create_base_subject(basedir):
 
         # set up zoom data
 
+        datatypes.add("zoom")
         zoom_dir = os.path.join(sr_dir, "zoom")
         os.makedirs(zoom_dir)
 
@@ -144,12 +151,25 @@ def create_base_subject(basedir):
 
         # set up digi data
 
+        datatypes.add("digi")
         digi_dir = os.path.join(sr_dir, "digi")
         os.makedirs(digi_dir)
 
         digi_zip_gpg = f"sub-{BASE_SUBJECT_ID}_all_digi_{ses}_{run}_e1.zip.gpg"
         with open(os.path.join(digi_dir, digi_zip_gpg), "w") as f:
             f.write("digi data")
+
+    # copy checked directory files to raw directory
+    raw_data_dir = os.path.join(base_subdir, "sourcedata", "raw")
+    os.makedirs(raw_data_dir)
+    for ses, run in ses_runs:
+        ses_run = f"{ses}_{run}"
+        for dtype in datatypes:
+            dtype_dir = os.path.join(raw_data_dir, ses_run, dtype)
+            os.makedirs(dtype_dir)
+            src_path = os.path.join(checked_data_dir, ses_run, dtype)
+            dest_path = os.path.join(dtype_dir, f"sub-{BASE_SUBJECT_ID}")
+            subprocess.check_call(["cp", "-r", src_path, dest_path])
 
     # -- set up sourcedata/pending-qa/ directory --
 
