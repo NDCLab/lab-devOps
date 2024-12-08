@@ -201,7 +201,7 @@ def create_base_subject(basedir):
     pending_dir = os.path.join(data_monitoring_dir, "pending")
     os.makedirs(pending_dir)
 
-    timestamp = "2024-01-01-12_30"
+    timestamp = "2024-01-01_12-30"
 
     pending_files_path = os.path.join(pending_dir, f"pending-files-{timestamp}.csv")
     pending_files = pd.DataFrame(
