@@ -510,10 +510,21 @@ def qa_validation(logger: logging.Logger, dataset: str):
     # move fully-verified files from pending-qa/ to checked/
     for id in passed_ids:
         id = Identifier.from_str(id)
-        identifier_dir = id.to_dir(dataset, is_raw=True)
-        identifier_subdir = os.path.relpath(identifier_dir, raw_dir)
-        src_path = os.path.join(pending_qa_dir, identifier_subdir)
-        dest_path = os.path.join(checked_dir, identifier_subdir)
+
+        # sourcedata/pending-qa/ stores data in "raw order"
+        id_raw_subdir = os.path.relpath(
+            id.to_dir(dataset, is_raw=True),
+            raw_dir,
+        )
+        src_path = os.path.join(pending_qa_dir, id_raw_subdir)
+
+        # sourcedata/checked/ stores data in "checked order"
+        id_checked_subdir = os.path.relpath(
+            id.to_dir(dataset, is_raw=False),
+            checked_dir,
+        )
+        dest_path = os.path.join(checked_dir, id_checked_subdir)
+
         try:
             subprocess.run(["mv", src_path, dest_path], check=True)
             logger.debug("Moved file(s) for ID %s to %s", id, dest_path)
