@@ -85,11 +85,9 @@ class TestCase(ABC):
             raise FileNotFoundError(f"{base_dir} does not exist, or is not a directory")
 
         paths = []
-        for root, _, files in os.walk(self.base_sub_dir):
+        for root, _, files in os.walk(base_dir):
             for filename in files:
-                paths.append(
-                    os.path.relpath(os.path.join(root, filename), self.base_sub_dir)
-                )
+                paths.append(os.path.relpath(os.path.join(root, filename), base_dir))
 
         return paths
 
