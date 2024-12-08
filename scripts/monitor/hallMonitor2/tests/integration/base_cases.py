@@ -205,6 +205,31 @@ class TestCase(ABC):
         self.write_files(modified_files)
         self.write_metadata()
 
+    def get_standard_args(self):
+        """
+        Create and return a mock namespace object representing the standard command-line arguments.
+
+        Returns:
+            MockNamespace: An object containing the standard arguments to hallMonitor 2.0.
+        """
+
+        class MockNamespace:
+            dataset = self.case_dir
+            child_data = None
+            legacy_exceptions = False
+            no_color = False
+            no_qa = False
+            # we typically do not want to gather logging output
+            output = os.devnull
+            checked_only = False
+            raw_only = False
+            verbose = False
+            quiet = False
+            replace = None
+            map = None
+
+        return MockNamespace()
+
     def run_validate_data(self):
         """
         Run validate_data() on the generated data directory and collect errors.
