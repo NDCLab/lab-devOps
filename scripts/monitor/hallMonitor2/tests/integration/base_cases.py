@@ -69,6 +69,44 @@ class TestCase(ABC):
         self.case_dir = os.path.join(basedir, self.TEST_CASES_SUBDIR, case_name)
         self.rel_data_dir = os.path.join("sourcedata", "checked", f"sub-{self.sub_id}")
 
+    def get_paths(self, base_dir: str):
+        """Retrieve a list of relative file paths from a base directory.
+
+        Args:
+            base_dir (str): The path to the base directory to scan for files.
+
+        Raises:
+            FileNotFoundError: If the provided `base_dir` does not exist or is not a directory.
+
+        Returns:
+            list[str]: A list of relative file paths found in the base directory.
+        """
+        if not os.path.exists(base_dir) or not os.path.isdir(base_dir):
+            raise FileNotFoundError(f"{base_dir} does not exist, or is not a directory")
+
+        paths = []
+        for root, _, files in os.walk(self.base_sub_dir):
+            for filename in files:
+                paths.append(
+                    os.path.relpath(os.path.join(root, filename), self.base_sub_dir)
+                )
+
+        return paths
+
+    def get_base_paths(self):
+        """
+        Retrieve all relative file paths in the base subject directory.
+
+        Returns:
+            list[str]: A list of relative file paths found in the base subject directory.
+        """
+        try:
+            base_paths = self.get_paths(self.base_sub_dir)
+        except FileNotFoundError as err:
+            raise FileNotFoundError("Invalid base subject directory") from err
+
+        return base_paths
+
     def read_files(self, base_dir: str):
         """Read all files in a base directory and return their contents in a dictionary.
 
@@ -522,17 +560,23 @@ class QATestCase(TestCase):
         Raises:
             AssertionError: If any expected files are missing or extraneous files are found.
         """
-        actual_files = set()
-        for root, _, files in os.walk(self.case_dir):
-            for filename in files:
-                actual_files.add(
-                    os.path.relpath(os.path.join(root, filename), self.case_dir)
-                )
+        # get relpaths for base subject and this test case
+        actual_files = set(self.get_paths(self.case_dir))
+        expected_files = set(self.get_base_paths())
 
-        expected_files_set = set(self.get_expected_files())
-        missing_files = expected_files_set - actual_files
-        extra_files = actual_files - expected_files_set
+        # fetch lists of new and removed files from the test case
+        new, remove = self.get_expected_file_changes()
+        new = set(new)
+        remove = set(remove)
 
+        # add new files and remove specified files from the expected set
+        expected_files.update(set(new))
+        expected_files.difference_update(set(remove))
+
+        missing_files = expected_files - actual_files
+        extra_files = actual_files - expected_files
+
+        # raise error on mismatch
         if missing_files or extra_files:
             fail_reason = ""
             if missing_files:
