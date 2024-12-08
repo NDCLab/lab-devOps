@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 from typing import Type
@@ -63,6 +64,14 @@ BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
 def create_base_subject(basedir):
     base_subdir = os.path.join(basedir, TestCase.BASE_SUBJECT_SUBDIR)
     os.makedirs(base_subdir)
+
+    # add metadata file
+    metadata = {
+        "description": "Unmodified test data.",
+        "subject": f"sub-{BASE_SUBJECT_ID}",
+    }
+    with open(os.path.join(base_subdir, "metadata.json"), "w") as f:
+        json.dump(metadata, f)
 
     # -- set up standard files --
     # (stored in "checked order": sub/ses/dtype)
@@ -195,6 +204,20 @@ def create_base_subject(basedir):
 
     data_monitoring_dir = os.path.join(base_subdir, "data-monitoring")
     os.makedirs(data_monitoring_dir)
+
+    # set up validated file record
+    validated_files_path = os.path.join(
+        data_monitoring_dir, "validated-file-record.csv"
+    )
+    validated_files = pd.DataFrame(
+        columns=[
+            "datetime",
+            "user",
+            "identifier",
+            "identifierDetails",
+        ]
+    )
+    validated_files.to_csv(validated_files_path, index=False)
 
     # set up pending/ directory and files
 
