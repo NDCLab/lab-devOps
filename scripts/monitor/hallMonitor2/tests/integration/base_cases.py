@@ -93,13 +93,18 @@ class TestCase(ABC):
 
     def get_base_paths(self):
         """
-        Retrieve all relative file paths in the base subject directory.
+        Retrieve all relative file paths in the base subject directory. Paths will have the base
+        subject ID replaced with this test case's assigned subject ID.
 
         Returns:
             list[str]: A list of relative file paths found in the base subject directory.
         """
         try:
             base_paths = self.get_paths(self.base_sub_dir)
+            base_paths = [
+                str(path).replace(str(TestCase.BASE_SUBJECT_ID), str(self.sub_id))
+                for path in base_paths
+            ]
         except FileNotFoundError as err:
             raise FileNotFoundError("Invalid base subject directory") from err
 
