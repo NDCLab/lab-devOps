@@ -57,7 +57,7 @@ from .naming_cases import (
     MissingVariableNameTestCase,
 )
 from .psychopy_cases import PsychopyFileIDMismatchTestCase
-from .qa_cases import PendingQAFileTestCase
+from .qa_cases import PendingQAFileTestCase, QAChecklistEntryTestCase
 
 BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
 
@@ -492,6 +492,7 @@ def create_registry():
         NoDataAdditionalFilesTestCase,
         PendingQAFileTestCase,
         PsychopyFileIDMismatchTestCase,
+        QAChecklistEntryTestCase,
     ]
     registry.add_cases(tests)
     return registry
