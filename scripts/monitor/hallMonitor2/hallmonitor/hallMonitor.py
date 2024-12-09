@@ -23,7 +23,6 @@ from .hmutils import (
     clean_empty_dirs,
     datadict_has_changes,
     get_args,
-    get_datadict,
     get_eeg_errors,
     get_expected_combination_rows,
     get_expected_files,
