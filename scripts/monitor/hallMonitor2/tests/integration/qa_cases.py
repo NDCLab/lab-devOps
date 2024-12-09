@@ -23,11 +23,11 @@ class PendingQAFileTestCase(QATestCase):
 
         pending_dir = os.path.join("data-monitoring", "pending")
 
-        # remove old pending CSVs
+        # remove old pending-files CSV, keep pending-errors
         modified_files = {
             path: contents
             for path, contents in modified_files.items()
-            if not path.startswith(pending_dir)
+            if "pending-errors" in path or not path.startswith(pending_dir)
         }
 
         # add in our own pending-files CSV
