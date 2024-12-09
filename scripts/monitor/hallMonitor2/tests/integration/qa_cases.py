@@ -21,7 +21,7 @@ class PendingQAFileTestCase(QATestCase):
     def modify(self, base_files):
         modified_files = base_files.copy()
 
-        pending_dir = os.path.join(self.case_dir, "data-monitoring", "pending")
+        pending_dir = os.path.join("data-monitoring", "pending")
 
         # remove old pending CSVs
         modified_files = {
