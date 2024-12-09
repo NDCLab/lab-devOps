@@ -54,7 +54,12 @@ class PendingQAFileTestCase(QATestCase):
 
         return modified_files
 
-    def get_expected_file_changes(self):
+    def validate(self):
+        error = self.run_qa_validation()
+        if error:
+            raise AssertionError(f"Unexpected error occurred: {error}")
+
+        # mock out copied files in sourcedata/pending-qa/
         data_folder = os.path.join(
             "sourcedata",
             "pending-qa",
@@ -64,9 +69,21 @@ class PendingQAFileTestCase(QATestCase):
         )
         identifier = f"sub-{self.sub_id}_all_eeg_s1_r1_e1"
         exts = {".eeg", ".vmrk", ".vhdr"}
-        additional_files = [os.path.join(data_folder, identifier + ext) for ext in exts]
+        additional_files = {os.path.join(data_folder, identifier + ext) for ext in exts}
 
-        return additional_files, []
+        expected_files = set(self.get_base_paths())
+        expected_files.update(additional_files)
 
-    def get_expected_error(self):
-        return ""
+        actual_files = set(self.get_paths(self.case_dir))
+
+        missing_files = expected_files - actual_files
+        extra_files = actual_files - expected_files
+
+        # raise error on mismatch
+        if missing_files or extra_files:
+            fail_reason = ""
+            if missing_files:
+                fail_reason += "Missing files:\n" + "\n".join(missing_files) + "\n"
+            if extra_files:
+                fail_reason += "Extra files:\n" + "\n".join(extra_files) + "\n"
+            raise AssertionError(f"File layout validation failed:\n{fail_reason}")
