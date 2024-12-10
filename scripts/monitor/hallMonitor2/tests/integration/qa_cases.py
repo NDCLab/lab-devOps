@@ -123,3 +123,92 @@ class QAChecklistEntryTestCase(PendingQAFileTestCase):
 
         assert info["user"]
         assert re.match(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}", info["datetime"]) is not None
+
+
+class QAPassMovedToCheckedTestCase(QATestCase):
+    """
+    Test case for verifying that only identifiers marked as both passing QA checks and
+    being moved locally are sent to the checked directory.
+    """
+
+    case_name = "QAPassMovedToCheckedTestCase"
+    description = (
+        "Sets up three identifiers in pending-qa: one that passes QA and is moved locally, "
+        "one that fails QA, and one that is not moved. Verifies proper directory placement."
+    )
+    conditions = [
+        "Identifier 'A' is in sourcedata/pending-qa/ and passes QA checks and is moved locally.",
+        "Identifier 'B' is in sourcedata/pending-qa/ and fails QA checks.",
+        "Identifier 'C' is in sourcedata/pending-qa/ and is not moved locally.",
+    ]
+    expected_output = "sourcedata/checked/ contains 'A', while the 'pending-qa' directory retains 'B' and 'C'."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        pending_qa_dir = os.path.join("sourcedata", "pending-qa")
+
+        # mock out presence of data for three identifiers in source/pending-qa
+        data_dir = os.path.join(pending_qa_dir, "s1_r1", "eeg")
+        ids = {1, 2, 3}
+        for sub_id in ids:
+            data_path = os.path.join(data_dir, f"sub-{sub_id}", "dummy.txt")
+            modified_files[data_path] = f"Dummy data for mock subject {sub_id}"
+
+        # mock out qa-checklist.csv
+        qa_checklist_path = os.path.join(pending_qa_dir, "qa-checklist.csv")
+        new_qa_checklist = {
+            "identifier": [
+                "sub-1_all_eeg_s1_r1_e1",
+                "sub-2_all_eeg_s1_r1_e1",
+                "sub-3_all_eeg_s1_r1_e1",
+            ],
+            "qa": [1, 0, 1],  # pass, fail, pass
+            "localMove": [1, 1, 0],  # pass, pass, fail
+            "datetime": ["2024-01-01_12-30"] * 3,
+            "user": ["dummyuser"] * 3,
+            "identifierDetails": ["Dummy details"] * 3,
+        }
+        new_qa_df = pd.DataFrame(new_qa_checklist)
+        modified_files[qa_checklist_path] = new_qa_df.to_csv(index=False)
+
+        # make empty directory in sourcedata/checked/
+        checked_dest = os.path.join("sourcedata", "checked", "sub-1", "s1_r1", "")
+        modified_files[checked_dest] = ""
+
+        return modified_files
+
+    def validate(self):
+        error = self.run_qa_validation()
+        if error:
+            raise AssertionError(f"Unexpected error occurred: {error}")
+
+        actual_files = self.read_files(self.case_dir)
+
+        checked_dir = os.path.join("sourcedata", "checked")
+
+        sub1_checked_path = os.path.join(
+            checked_dir, "sub-1", "s1_r1", "eeg", "dummy.txt"
+        )
+        assert sub1_checked_path in actual_files
+        assert "subject 1" in str(actual_files[sub1_checked_path]).lower()
+
+        checked_subs = {
+            os.path.relpath(path, checked_dir).split("/")[0]
+            for path in actual_files
+            if str(path).startswith(checked_dir)
+        }
+        assert checked_subs == {"sub-1", f"sub-{self.sub_id}"}
+
+        data_dir = os.path.join("sourcedata", "pending-qa", "s1_r1", "eeg")
+
+        sub1_pending_path = os.path.join(data_dir, "sub-1", "dummy.txt")
+        assert sub1_pending_path not in actual_files
+
+        sub2_pending_path = os.path.join(data_dir, "sub-2", "dummy.txt")
+        assert sub2_pending_path in actual_files
+        assert "subject 2" in str(actual_files[sub2_pending_path]).lower()
+
+        sub3_pending_path = os.path.join(data_dir, "sub-3", "dummy.txt")
+        assert sub3_pending_path in actual_files
+        assert "subject 3" in str(actual_files[sub3_pending_path]).lower()
