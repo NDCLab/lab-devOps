@@ -68,13 +68,13 @@ def test_get_unique_sub_ses_run_invalid_format(monkeypatch, mock_identifier):
     monkeypatch.setattr("hallmonitor.hmutils.Identifier", mock_identifier)
 
     # Identifiers with invalid formats (too many or too few parts)
-    with pytest.raises(ValueError, match="Invalid identifier format"):
+    with pytest.raises(ValueError, match="Could not build Identifier"):
         get_unique_sub_ses_run(["sub1ses1run1"])  # Missing delimiter
 
-    with pytest.raises(ValueError, match="Invalid identifier format"):
+    with pytest.raises(ValueError, match="Could not build Identifier"):
         get_unique_sub_ses_run(["sub1_ses1_run1_extra"])  # Too many parts
 
-    with pytest.raises(ValueError, match="Invalid identifier format"):
+    with pytest.raises(ValueError, match="Could not build Identifier"):
         get_unique_sub_ses_run(["sub1_ses1"])  # Not enough parts
 
 

@@ -661,7 +661,7 @@ def get_expected_identifiers(dataset, present_ids):
     try:
         present_sub_ses_run = get_unique_sub_ses_run(present_ids)
     except ValueError as err:
-        raise err
+        raise ValueError("Could not get unique sub/ses/run for present IDs") from err
 
     dd_df = get_datadict(dataset)
 
@@ -745,7 +745,7 @@ def get_unique_sub_ses_run(identifiers):
         try:
             identifiers = [Identifier.from_str(str(id)) for id in identifiers]
         except ValueError as err:
-            raise err
+            raise ValueError("Could not build Identifier from string") from err
 
     sub_ses = [(id.subject, id.session, id.run) for id in identifiers]
     sub_ses = list(set(sub_ses))  # remove duplicates
@@ -780,7 +780,7 @@ def get_identifier_files(basedir, identifier, datatype, is_raw=True):
         try:
             identifier = Identifier.from_str(identifier)
         except ValueError as err:
-            raise err
+            raise ValueError("Could not build Identifeir from string") from err
 
     ses_run = f"{identifier.session}_{identifier.run}"
 
@@ -1032,7 +1032,7 @@ def new_validation_record(dataset, identifier):
         id_str = str(identifier)
         detailed_str = identifier.to_detailed_str(dataset)
     except ValueError as err:
-        raise err
+        raise ValueError("Could not build Identifier from string") from err
 
     return {
         "datetime": get_timestamp(),
@@ -1265,7 +1265,7 @@ def clean_empty_dirs(basedir):
         dirs = [line for line in proc.stdout.decode().splitlines() if line]
         return len(dirs)
     except subprocess.CalledProcessError as err:
-        raise err
+        raise RuntimeError("find command returned error") from err
 
 
 def get_visit_pairs(datadict: pd.DataFrame):
@@ -1323,8 +1323,8 @@ def get_expected_files(dataset, identifier):
     if isinstance(identifier, str):
         try:
             identifier = Identifier.from_str(identifier)
-        except ValueError:
-            raise ValueError("Invalid identifier string")
+        except ValueError as err:
+            raise ValueError("Could not build Identifier from string") from err
 
     dd_df = get_datadict(dataset)
 

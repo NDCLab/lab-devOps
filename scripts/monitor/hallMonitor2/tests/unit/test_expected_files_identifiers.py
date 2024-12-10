@@ -56,7 +56,7 @@ def test_get_expected_files_valid_string(mock_dataset):
 def test_get_expected_files_invalid_string(mock_dataset):
     invalid_identifier = "invalid_identifier"
 
-    with pytest.raises(ValueError, match="Invalid identifier string"):
+    with pytest.raises(ValueError, match="Could not build Identifier"):
         get_expected_files(mock_dataset, invalid_identifier)
 
 
