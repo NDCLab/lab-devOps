@@ -1,5 +1,6 @@
 #!/bin/python3
 
+import glob
 import logging
 import os
 import re
@@ -497,7 +498,6 @@ def qa_validation(logger: logging.Logger, dataset: str):
     # set up paths and dataframes
     pending_qa_dir = os.path.join(dataset, PENDING_QA_SUBDIR)
     raw_dir = os.path.join(dataset, RAW_SUBDIR)
-    checked_dir = os.path.join(dataset, CHECKED_SUBDIR)
 
     record_df = get_file_record(dataset)
     qa_df = get_qa_checklist(dataset)
@@ -515,17 +515,16 @@ def qa_validation(logger: logging.Logger, dataset: str):
             id.to_dir(dataset, is_raw=True),
             raw_dir,
         )
-        src_path = os.path.join(pending_qa_dir, id_raw_subdir)
+        src_path = os.path.join(pending_qa_dir, id_raw_subdir, "*")
+        files_to_move = glob.glob(src_path)
 
         # sourcedata/checked/ stores data in "checked order"
-        id_checked_subdir = os.path.relpath(
-            id.to_dir(dataset, is_raw=False),
-            checked_dir,
-        )
-        dest_path = os.path.join(checked_dir, id_checked_subdir)
+        dest_path = id.to_dir(dataset, is_raw=False)
+        os.makedirs(dest_path, exist_ok=True)
 
         try:
-            subprocess.run(["mv", src_path, dest_path], check=True)
+            # unpack list of files before passing to `mv` script
+            subprocess.run(["mv", *files_to_move, dest_path], check=True)
             logger.debug("Moved file(s) for ID %s to %s", id, dest_path)
         except subprocess.CalledProcessError as err:
             logger.error("Could not move file(s) for %s to %s (%s)", id, dest_path, err)
