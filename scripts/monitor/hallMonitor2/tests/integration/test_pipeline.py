@@ -59,6 +59,7 @@ from .naming_cases import (
 from .psychopy_cases import PsychopyFileIDMismatchTestCase
 from .qa_cases import (
     PendingQAFileTestCase,
+    QAChecklistCreatedTestCase,
     QAChecklistEntryTestCase,
     QAEmptyDirectoriesAreDeletedTestCase,
     QAPassAddedToValidatedFileRecordTestCase,
@@ -499,6 +500,7 @@ def create_registry():
         NoDataAdditionalFilesTestCase,
         PendingQAFileTestCase,
         PsychopyFileIDMismatchTestCase,
+        QAChecklistCreatedTestCase,
         QAChecklistEntryTestCase,
         QAEmptyDirectoriesAreDeletedTestCase,
         QAPassAddedToValidatedFileRecordTestCase,

@@ -340,3 +340,60 @@ class QAEmptyDirectoriesAreDeletedTestCase(QATestCase):
 
         assert len(pending_qa_files.keys()) == 2
         assert pending_qa_files.keys() == {"not_empty/dummy.txt", "qa-checklist.csv"}
+
+
+class QAChecklistCreatedTestCase(QATestCase):
+    """
+    Test case for verifying that a QA checklist is automatically created if one does not
+    already exist in the `pending-qa` folder.
+    """
+
+    case_name = "QAChecklistCreatedTestCase"
+    description = (
+        "Simulates a scenario where no QA checklist is present in sourcedata/pending-qa/. "
+        "Verifies that hallMonitor creates a new QA checklist during the QA process."
+    )
+    conditions = [
+        "The sourcedata/pending-qa/ directory does not contain a file named 'qa-checklist.csv'.",
+        "Identifiers and their data are present in sourcedata/pending-qa/, but no checklist exists.",
+    ]
+    expected_output = "A new 'qa-checklist.csv' file is created in sourcedata/pending-qa/ with entries for all identifiers."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        pending_qa_subdir = os.path.join("sourcedata", "pending-qa", "")
+        qa_checklist_path = os.path.join(pending_qa_subdir, "qa-checklist.csv")
+
+        if qa_checklist_path not in modified_files:
+            raise FileNotFoundError("Could not find QA checklist at expected location")
+
+        # get rid of qa-checklist.csv
+        del modified_files[qa_checklist_path]
+        # ensure we still have an empty dir at sourcedata/pending-qa/
+        modified_files[pending_qa_subdir] = ""
+
+        return modified_files
+
+    def validate(self):
+        error = self.run_qa_validation()
+        if error:
+            raise AssertionError(f"Unexpected error occurred: {error}")
+
+        pending_qa_dir = os.path.join(self.case_dir, "sourcedata", "pending-qa")
+        pending_qa_files = self.read_files(pending_qa_dir)
+
+        assert "qa-checklist.csv" in pending_qa_files
+
+        qa_df = pd.read_csv(os.path.join(pending_qa_dir, "qa-checklist.csv"))
+
+        assert len(qa_df.index) == 0  # no entries by default
+
+        assert set(qa_df.columns) == {
+            "datetime",
+            "user",
+            "identifier",
+            "identifierDetails",
+            "qa",
+            "localMove",
+        }
