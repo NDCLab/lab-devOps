@@ -208,3 +208,42 @@ class QAPassMovedToCheckedTestCase(QATestCase):
         sub3_pending_path = os.path.join(data_dir, "sub-3", "dummy.txt")
         assert sub3_pending_path in actual_files
         assert "subject 3" in str(actual_files[sub3_pending_path]).lower()
+
+
+class QAPassRemovedFromChecklistTestCase(QAPassMovedToCheckedTestCase):
+    """
+    Test case for verifying that only identifiers marked as both passing QA checks and
+    being moved locally are removed from the QA checklist.
+    """
+
+    case_name = "QAPassRemovedFromChecklistTestCase"
+    description = (
+        "Sets up three identifiers in pending-qa: one that passes QA and is moved locally, "
+        "one that fails QA, and one that is not moved. Verifies proper QA checklist state."
+    )
+    conditions = [
+        "Identifier 'A' is in sourcedata/pending-qa/ and passes QA checks and is moved locally.",
+        "Identifier 'B' is in sourcedata/pending-qa/ and fails QA checks.",
+        "Identifier 'C' is in sourcedata/pending-qa/ and is not moved locally.",
+    ]
+    expected_output = "qa-checklist.csv is missing 'A' and contains entries for identifiers 'B' and 'C'."
+
+    def validate(self):
+        error = self.run_qa_validation()
+        if error:
+            raise AssertionError(f"Unexpected error occurred: {error}")
+
+        qa_df = pd.read_csv(
+            os.path.join(self.case_dir, "sourcedata", "pending-qa", "qa-checklist.csv")
+        )
+
+        assert len(qa_df.index) == 2
+
+        sub1_qa_entries = qa_df[qa_df["identifier"] == "sub-1_all_eeg_s1_r1_e1"]
+        assert len(sub1_qa_entries.index) == 0
+
+        sub2_qa_entries = qa_df[qa_df["identifier"] == "sub-2_all_eeg_s1_r1_e1"]
+        assert len(sub2_qa_entries.index) == 1
+
+        sub3_qa_entries = qa_df[qa_df["identifier"] == "sub-3_all_eeg_s1_r1_e1"]
+        assert len(sub3_qa_entries.index) == 1
