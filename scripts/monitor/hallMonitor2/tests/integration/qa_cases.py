@@ -172,10 +172,6 @@ class QAPassMovedToCheckedTestCase(QATestCase):
         new_qa_df = pd.DataFrame(new_qa_checklist)
         modified_files[qa_checklist_path] = new_qa_df.to_csv(index=False)
 
-        # make empty directory in sourcedata/checked/
-        checked_dest = os.path.join("sourcedata", "checked", "sub-1", "s1_r1", "")
-        modified_files[checked_dest] = ""
-
         return modified_files
 
     def validate(self):
