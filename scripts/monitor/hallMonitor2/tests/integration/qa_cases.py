@@ -289,3 +289,54 @@ class QAPassAddedToValidatedFileRecordTestCase(QAPassMovedToCheckedTestCase):
 
         sub3_qa_entries = record_df[record_df["identifier"] == "sub-3_all_eeg_s1_r1_e1"]
         assert len(sub3_qa_entries.index) == 0
+
+
+class QAEmptyDirectoriesAreDeletedTestCase(QATestCase):
+    """
+    Test case for verifying that empty directories in the `pending-qa` folder are deleted
+    as part of the QA cleanup process.
+    """
+
+    case_name = "QAEmptyDirectoriesAreDeletedTestCase"
+    description = (
+        "Sets up multiple empty directories in sourcedata/pending-qa/ to verify that all "
+        "empty directories are removed during QA cleanup."
+    )
+    conditions = [
+        "Directory 'empty1/' is in sourcedata/pending-qa/ and contains no files or subdirectories.",
+        "Directory 'empty2/' is in sourcedata/pending-qa/ and contains no files or subdirectories.",
+        "Directory 'not_empty/' is in sourcedata/pending-qa/ and contains one or more files.",
+    ]
+    expected_output = "The directories 'empty1/' and 'empty2/' are deleted, while 'not_empty/' remains intact."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        pending_qa_dir = os.path.join("sourcedata", "pending-qa")
+
+        empty_dir_1 = os.path.join(pending_qa_dir, "empty1", "")
+        modified_files[empty_dir_1] = ""
+
+        empty_dir_2 = os.path.join(pending_qa_dir, "empty2", "")
+        modified_files[empty_dir_2] = ""
+
+        sub_empty_dir = os.path.join(empty_dir_2, "sub_empty", "")
+        modified_files[sub_empty_dir] = ""
+
+        non_empty_dir = os.path.join(pending_qa_dir, "not_empty", "")
+        dummy_filepath = os.path.join(non_empty_dir, "dummy.txt")
+        modified_files[dummy_filepath] = "Dummy content that should not be deleted"
+
+        return modified_files
+
+    def validate(self):
+        error = self.run_qa_validation()
+        if error:
+            raise AssertionError(f"Unexpected error occurred: {error}")
+
+        pending_qa_files = self.read_files(
+            os.path.join(self.case_dir, "sourcedata", "pending-qa")
+        )
+
+        assert len(pending_qa_files.keys()) == 2
+        assert pending_qa_files.keys() == {"not_empty/dummy.txt", "qa-checklist.csv"}
