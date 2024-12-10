@@ -130,7 +130,7 @@ class TestCase(ABC):
         for root, _, files in os.walk(base_dir):
             for filename in files:
                 file_path = os.path.join(root, filename)
-                rel_path = os.path.relpath(file_path, self.base_sub_dir)
+                rel_path = os.path.relpath(file_path, base_dir)
 
                 with open(file_path, "r") as f:
                     content = f.read()
