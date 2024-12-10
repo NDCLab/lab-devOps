@@ -247,3 +247,45 @@ class QAPassRemovedFromChecklistTestCase(QAPassMovedToCheckedTestCase):
 
         sub3_qa_entries = qa_df[qa_df["identifier"] == "sub-3_all_eeg_s1_r1_e1"]
         assert len(sub3_qa_entries.index) == 1
+
+
+class QAPassAddedToValidatedFileRecordTestCase(QAPassMovedToCheckedTestCase):
+    """
+    Test case for verifying that only identifiers marked as both passing QA checks and
+    being moved locally are added to the validated file record.
+    """
+
+    case_name = "QAPassAddedToValidatedFileRecordTestCase"
+    description = (
+        "Sets up three identifiers in pending-qa: one that passes QA and is moved locally, "
+        "one that fails QA, and one that is not moved. Verifies proper validated file record state."
+    )
+    conditions = [
+        "Identifier 'A' is in sourcedata/pending-qa/ and passes QA checks and is moved locally.",
+        "Identifier 'B' is in sourcedata/pending-qa/ and fails QA checks.",
+        "Identifier 'C' is in sourcedata/pending-qa/ and is not moved locally.",
+    ]
+    expected_output = "validated-file-record.csv contains an entry for 'A' and does not have 'B' or 'C'."
+
+    def validate(self):
+        error = self.run_qa_validation()
+        if error:
+            raise AssertionError(f"Unexpected error occurred: {error}")
+
+        record_df = pd.read_csv(
+            os.path.join(self.case_dir, "data-monitoring", "validated-file-record.csv")
+        )
+
+        assert len(record_df.index) == 1
+
+        sub1_qa_entries = record_df[record_df["identifier"] == "sub-1_all_eeg_s1_r1_e1"]
+        assert len(sub1_qa_entries.index) == 1
+
+        datetime = sub1_qa_entries["datetime"].iloc[0]
+        assert re.match(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}", str(datetime)) is not None
+
+        sub2_qa_entries = record_df[record_df["identifier"] == "sub-2_all_eeg_s1_r1_e1"]
+        assert len(sub2_qa_entries.index) == 0
+
+        sub3_qa_entries = record_df[record_df["identifier"] == "sub-3_all_eeg_s1_r1_e1"]
+        assert len(sub3_qa_entries.index) == 0

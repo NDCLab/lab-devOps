@@ -60,6 +60,7 @@ from .psychopy_cases import PsychopyFileIDMismatchTestCase
 from .qa_cases import (
     PendingQAFileTestCase,
     QAChecklistEntryTestCase,
+    QAPassAddedToValidatedFileRecordTestCase,
     QAPassMovedToCheckedTestCase,
     QAPassRemovedFromChecklistTestCase,
 )
@@ -498,6 +499,7 @@ def create_registry():
         PendingQAFileTestCase,
         PsychopyFileIDMismatchTestCase,
         QAChecklistEntryTestCase,
+        QAPassAddedToValidatedFileRecordTestCase,
         QAPassMovedToCheckedTestCase,
         QAPassRemovedFromChecklistTestCase,
     ]
