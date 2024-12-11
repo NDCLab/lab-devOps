@@ -43,6 +43,7 @@ from .hmutils import (
     get_variable_datatype,
     new_error_record,
     new_pass_record,
+    new_pending_df,
     new_qa_record,
     new_validation_record,
     write_file_record,
@@ -455,7 +456,10 @@ def checked_data_validation(
 
     # write errors to pending-errors-[datetime].csv
     # (checked data validation does not have "pending" files)
-    pending_df = pd.DataFrame(pending)
+    if pending:
+        pending_df = pd.DataFrame(pending)
+    else:  # handle empty pending list
+        pending_df = get_pending_errors(new_pending_df())
     timestamp = SharedTimestamp()
     write_pending_errors(dataset, pending_df, timestamp)
 
@@ -481,7 +485,10 @@ def raw_data_validation(
     logger.info("Found %d identifiers with no errors", len(pending) - len(errors))
 
     # write pending rows to pending-files-[datetime].csv
-    pending_df = pd.DataFrame(pending)
+    if pending:
+        pending_df = pd.DataFrame(pending)
+    else:  # handle empty pending list
+        pending_df = new_pending_df()
     timestamp = SharedTimestamp()
     write_pending_files(dataset, pending_df, timestamp)
 
