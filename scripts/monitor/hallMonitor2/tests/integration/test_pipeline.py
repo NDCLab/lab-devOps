@@ -35,6 +35,7 @@ from .misc_cases import (
     ExtraFilesInFolderTestCase,
     InsufficientFilesTestCase,
     MultipleTasksFromCombinationRowTestCase,
+    PendingFilesCsvCreatedTestCase,
 )
 from .misplaced_cases import (
     FolderRunSuffixMismatchTestCase,
@@ -498,6 +499,7 @@ def create_registry():
         MissingVariableNameTestCase,
         MultipleTasksFromCombinationRowTestCase,
         NoDataAdditionalFilesTestCase,
+        PendingFilesCsvCreatedTestCase,
         PendingQAFileTestCase,
         PsychopyFileIDMismatchTestCase,
         QAChecklistCreatedTestCase,
