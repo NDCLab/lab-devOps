@@ -1,9 +1,15 @@
+import datetime
 import os
 import re
 
+import pandas as pd
 import pytest
+import pytz
+from mock import Mock
 
 from .base_cases import ExpectedError, TestCase, ValidationTestCase
+
+TZ_INFO = pytz.timezone("US/Eastern")
 
 
 class MiscellaneousTestCase(ValidationTestCase):
@@ -266,3 +272,129 @@ class DataDictionaryHasChangesTestCase(TestCase):
         with pytest.raises(ValueError, match="Data dictionary has changed"):
             args = self.get_standard_args()
             main(args)
+
+
+class PendingFilesCsvCreatedTestCase(TestCase):
+    """
+    Test case to ensure that new pending-files and pending-errors CSVs are created
+    by raw data validation if not already present.
+    """
+
+    case_name = "PendingFilesCsvCreatedTestCase"
+    description = "Deletes pending CSVs to ensure new ones are created by the program."
+    behavior_to_test = "Two new CSVs (pending-files and pending-errors) are created."
+    conditions = [
+        "pending-files and pending-errors CSVs are removed, simulating a first run."
+    ]
+    expected_output = (
+        "CSVs with the names pending-files and pending-errors are created. These files' names should "
+        "contain an appropriate matching timestamp and the files should have all expected columns."
+    )
+
+    def __init__(self, basedir: str, sub_id: int):
+        super().__init__(
+            basedir,
+            sub_id,
+            self.case_name,
+            self.description,
+            self.conditions,
+            self.expected_output,
+        )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        # remove our pending CSVs
+        modified_files = {
+            relpath: contents
+            for relpath, contents in modified_files.items()
+            if not relpath.startswith("data-monitoring/pending/pending-")
+        }
+
+        # add back an empty directory
+        pending_dir = os.path.join("data-monitoring", "pending", "")
+        modified_files[pending_dir] = ""
+
+        return modified_files
+
+    def validate(self):
+        # Raw data validation deals with pending-files and pending-errors,
+        # while checked data validation only uses pending-errors. In this
+        # test case, we want to examine the program's behavior for both.
+        from hallmonitor.hallMonitor import raw_data_validation
+
+        # save start time for later
+        start_dt = datetime.datetime.now(tz=TZ_INFO)
+        # remove sub-minute precision (seconds and microseconds)
+        start_dt = start_dt.replace(second=0, microsecond=0)
+
+        logger = Mock()  # no need to examine output
+        raw_data_validation(
+            logger,
+            dataset=self.case_dir,
+            use_legacy_exceptions=False,
+        )
+
+        pending_dir = os.path.join(self.case_dir, "data-monitoring", "pending")
+
+        assert os.path.exists(pending_dir)
+        assert os.path.isdir(pending_dir)
+
+        pending_contents = os.listdir(pending_dir)
+        assert len(pending_contents) == 2
+
+        pending_file_name = [
+            file
+            for file in pending_contents
+            if re.fullmatch(r"pending-files-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}\.csv", file)
+        ][0]
+        file_df = pd.read_csv(os.path.join(pending_dir, pending_file_name))
+        assert set(file_df.columns) == {
+            "datetime",
+            "user",
+            "passRaw",
+            "identifier",
+            "identifierDetails",
+            "errorType",
+            "errorDetails",
+        }
+
+        pending_error_name = [
+            file
+            for file in pending_contents
+            if re.fullmatch(r"pending-errors-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}\.csv", file)
+        ][0]
+        error_df = pd.read_csv(os.path.join(pending_dir, pending_error_name))
+        assert set(error_df.columns) == {
+            "datetime",
+            "user",
+            "identifier",
+            "identifierDetails",
+            "errorType",
+            "errorDetails",
+        }
+
+        # ensure timestamps match between the two files
+        pending_files_ts = re.search(
+            r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}", pending_file_name
+        )
+        pending_errors_ts = re.search(
+            r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}", pending_error_name
+        )
+        assert pending_files_ts is not None
+        pending_files_ts = pending_files_ts.group(0)
+
+        assert pending_errors_ts is not None
+        pending_errors_ts = pending_errors_ts.group(0)
+
+        assert pending_files_ts == pending_errors_ts
+
+        # ensure timestamp is reasonable (we'll say any time between the time we ran
+        # raw data validation and now is reasonable, since we don't need high precision)
+        filename_dt = datetime.datetime.strptime(
+            pending_files_ts, r"%Y-%m-%d_%H-%M"
+        ).astimezone(TZ_INFO)
+        now_dt = datetime.datetime.now(TZ_INFO).replace(second=0, microsecond=0)
+
+        assert start_dt <= filename_dt
+        assert filename_dt <= now_dt
