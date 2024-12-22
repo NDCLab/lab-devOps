@@ -67,6 +67,7 @@ from .qa_cases import (
     QAPassMovedToCheckedTestCase,
     QAPassRemovedFromChecklistTestCase,
 )
+from .tracker_cases import BaseUpdateTrackerTestCase
 
 BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
 
@@ -280,7 +281,7 @@ def create_base_subject(basedir):
             "measureUnit": "Integer",
             "allowedValues": "[3000000,3009999],[3080000,3089999],[3090000,3099999]",
             "valueInfo": "One ID per participant (eligible and ineligible)",
-            "provenance": 'file: "thriveconsent"; variable: "record_id"',
+            "provenance": f'file: "{TestCase.BASE_SUBJECT_SUBDIR}consent"; variable: "record_id"',
             "expectedFileExt": "NA",
         },
         {
@@ -292,7 +293,7 @@ def create_base_subject(basedir):
             "measureUnit": "Logical",
             "allowedValues": "NA, 0, 1",
             "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
-            "provenance": 'file: "thriveconsent"; variable: ""',
+            "provenance": f'file: "{TestCase.BASE_SUBJECT_SUBDIR}consent"; variable: ""',
             "expectedFileExt": "NA",
         },
         {
@@ -304,7 +305,7 @@ def create_base_subject(basedir):
             "measureUnit": "Logical",
             "allowedValues": "NA, 0, 1",
             "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
-            "provenance": 'file: "thriveconsent"; variable: ""',
+            "provenance": f'file: "{TestCase.BASE_SUBJECT_SUBDIR}consent"; variable: ""',
             "expectedFileExt": "NA",
         },
         {
@@ -396,7 +397,7 @@ def create_base_subject(basedir):
             "dataType": "visit_status",
             "description": "Status of participant's IQS visit (attended vs not attended)",
             "detail": "Value of 1 is assigned if the participant attended the IQS visit, otherwise 0.",
-            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e2",
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
             "measureUnit": "Logical",
             "allowedValues": "NA, 0, 1",
             "valueInfo": "NA, status unknown | 0, participant has not attended IQS | 1, participant has attended IQS",
@@ -408,7 +409,7 @@ def create_base_subject(basedir):
             "dataType": "visit_status",
             "description": "Status of participant's BBS visit (attended vs not attended)",
             "detail": "Value of 1 is assigned if the participant attended the BBS visit, otherwise 0.",
-            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e3",
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
             "measureUnit": "Logical",
             "allowedValues": "NA, 0, 1",
             "valueInfo": "NA, status unknown | 0, participant has not attended BBS | 1, participant has attended BBS",
@@ -420,11 +421,11 @@ def create_base_subject(basedir):
             "dataType": "visit_data",
             "description": "Status of participant's IQS data (present on HPC or not)",
             "detail": "Value of 1 is assigned if IQS data exists, otherwise 0.",
-            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e4",
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
             "measureUnit": "Logical",
             "allowedValues": "NA, 0, 1",
             "valueInfo": "NA, status unknown | 0, IQS data does not exist | 1, IQS data exists",
-            "provenance": 'file: "iqsclinician", "iqschild", "iqsparent"',
+            "provenance": 'file: "iqsclinician"',
             "expectedFileExt": "NA",
         },
         {
@@ -432,7 +433,7 @@ def create_base_subject(basedir):
             "dataType": "visit_data",
             "description": "Status of participant's BBS data (present on HPC or not)",
             "detail": "Value of 1 is assigned if all BBS data exists, otherwise 0.",
-            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e5",
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
             "measureUnit": "Logical",
             "allowedValues": "NA, 0, 1",
             "valueInfo": "NA, status unknown | 0, At least some BBS data does not exist | 1, All BBS data exists",
@@ -443,6 +444,68 @@ def create_base_subject(basedir):
     mock_dd = pd.DataFrame(mock_dd)
     mock_dd.to_csv(dd_path, index=False)
     mock_dd.to_csv(latest_dd_path, index=False)
+
+    # set up minimum necessary REDCaps
+
+    redcap_dir = os.path.join(base_subdir, "sourcedata", "checked", "redcap")
+    os.makedirs(redcap_dir)
+
+    # basic "consent" REDCap (not associated with a ses/run)
+    rc_consent_path = os.path.join(redcap_dir, build_base_rc_name("consent"))
+    consent_row = {
+        "record_id": TestCase.BASE_SUBJECT_ID,
+        "consent_complete": 2,
+        "assent_complete": 2,
+    }
+    consent_df = pd.DataFrame([consent_row])
+    consent_df.to_csv(rc_consent_path, index=False)
+
+    # set up identical REDCap files for all session/run combinations,
+    # with appropriate substitutions to file content and names
+    for ses, run in ses_runs:
+        # basic "iqsclinician" REDCap
+        rc_iqsclinician_path = os.path.join(
+            redcap_dir, build_base_rc_name("iqsclinician", ses, run)
+        )
+        iqsclinician_row = {
+            "record_id": TestCase.BASE_SUBJECT_ID,
+            f"iqsclchecklist_{ses}_{run}_e1_complete": 2,
+        }
+        iqsclinician_df = pd.DataFrame([iqsclinician_row])
+        iqsclinician_df.to_csv(rc_iqsclinician_path, index=False)
+
+        # basic "bbsRA" REDCap
+        rc_bbsra_path = os.path.join(redcap_dir, build_base_rc_name("bbsRA", ses, run))
+        bbsra_row = {
+            "record_id": 1,
+            f"bbsradebrief_{ses}_{run}_e1_complete": 2,
+            f"bbsratrk_acid_{ses}_{run}_e1": TestCase.BASE_SUBJECT_ID,
+        }
+        bbsra_df = pd.DataFrame([bbsra_row])
+        bbsra_df.to_csv(rc_bbsra_path, index=False)
+
+    # set up empty central tracker
+
+    # handle record_id, consent, and assent variables separately
+    tracker_cols = {"id", "consent", "assent"}
+
+    var_df = mock_dd[~mock_dd["variable"].isin(tracker_cols)]
+    for _, row in var_df.iterrows():
+        variable = str(row["variable"])
+        suffixes = str(row["allowedSuffix"]).split(",")
+        for suffix in suffixes:
+            tracker_cols.add(f"{variable}_{suffix.strip()}")
+
+    case_name = os.path.basename(TestCase.BASE_SUBJECT_SUBDIR)
+    tracker_path = os.path.join(data_monitoring_dir, f"central-tracker_{case_name}.csv")
+
+    tracker_df = pd.DataFrame(columns=list(tracker_cols))
+    tracker_df.to_csv(tracker_path, index=False)
+
+
+def build_base_rc_name(rc_stem: str, ses: str = "", run: str = ""):
+    RC_TIMESTAMP = "2024-01-01_1230"
+    return f"{TestCase.BASE_SUBJECT_SUBDIR}{rc_stem}{ses}{run}_DATA_{RC_TIMESTAMP}.csv"
 
 
 def create_registry():
@@ -464,6 +527,7 @@ def create_registry():
     registry = _TestCaseRegistry(basedir)
     tests: list[Type[TestCase]] = [
         BaseTestCase,
+        BaseUpdateTrackerTestCase,
         DataDictionaryHasChangesTestCase,
         DeviationAndNoDataErrorTestCase,
         DeviationAndNoDataFilesErrorTestCase,
@@ -520,5 +584,5 @@ tests = registry.get_cases()
 
 # run each test separately using a pytest harness
 @pytest.mark.parametrize("test_case", tests, ids=lambda t: t.case_name)
-def test_validate_test_cases(test_case):
+def test_validate_test_cases(test_case) -> None:
     test_case.validate()
