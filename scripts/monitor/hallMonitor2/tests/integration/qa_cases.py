@@ -192,7 +192,7 @@ class QAPassMovedToCheckedTestCase(QATestCase):
         checked_subs = {
             os.path.relpath(path, checked_dir).split("/")[0]
             for path in actual_files
-            if str(path).startswith(checked_dir)
+            if str(path).startswith(checked_dir) and "redcap" not in path
         }
         assert checked_subs == {"sub-1", f"sub-{self.sub_id}"}
 
