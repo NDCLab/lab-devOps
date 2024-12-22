@@ -41,8 +41,8 @@ class TestCase(ABC):
     BASE_SUBJECT_ID = 3000000
     SUB_PLACEHOLDER = "3XXXXXX"
 
-    BASE_SUBJECT_SUBDIR = os.path.join("base_subject", "")
-    TEST_CASES_SUBDIR = os.path.join("test_cases", "")
+    BASE_SUBJECT_SUBDIR = "base_subject"
+    TEST_CASES_SUBDIR = "test_cases"
 
     def __init__(
         self, basedir, sub_id, case_name, description, conditions, expected_output
@@ -94,7 +94,8 @@ class TestCase(ABC):
     def get_base_paths(self):
         """
         Retrieve all relative file paths in the base subject directory. Paths will have the base
-        subject ID replaced with this test case's assigned subject ID.
+        subject ID replaced with this test case's assigned subject ID, and the base subject
+        case name will be replaced with this test case's assigned name.
 
         Returns:
             list[str]: A list of relative file paths found in the base subject directory.
@@ -102,7 +103,9 @@ class TestCase(ABC):
         try:
             base_paths = self.get_paths(self.base_sub_dir)
             base_paths = [
-                str(path).replace(str(TestCase.BASE_SUBJECT_ID), str(self.sub_id))
+                str(path)
+                .replace(str(TestCase.BASE_SUBJECT_ID), str(self.sub_id))
+                .replace(os.path.basename(TestCase.BASE_SUBJECT_SUBDIR), self.case_name)
                 for path in base_paths
             ]
         except FileNotFoundError as err:
@@ -142,18 +145,29 @@ class TestCase(ABC):
     def read_base_files(self) -> dict[str, str]:
         """
         Read all files in the base subject directory. Replace all references to the base subject ID with
-        the test case's own subject ID.
+        the test case's own subject ID, and all references to the base subject case name with the test
+        case's assigned test case name.
 
         Returns:
             dict[str,str]: A dictionary where keys are filenames and values are file contents.
         """
+        base_case_name = os.path.basename(TestCase.BASE_SUBJECT_SUBDIR)
+
+        def swap_in_case_name(text: str):
+            return text.replace(base_case_name, self.case_name)
+
+        def swap_in_subject_id(text: str):
+            return text.replace(str(TestCase.BASE_SUBJECT_ID), str(self.sub_id))
+
         try:
             base_files = self.read_files(self.base_sub_dir)
         except FileNotFoundError as err:
             raise FileNotFoundError("Invalid base subject directory") from err
 
-        def swap_in_subject_id(text: str):
-            return text.replace(str(self.BASE_SUBJECT_ID), str(self.sub_id))
+        base_files = {
+            swap_in_case_name(path): swap_in_case_name(content)
+            for path, content in base_files.items()
+        }
 
         base_files = {
             swap_in_subject_id(path): swap_in_subject_id(content)
@@ -319,6 +333,59 @@ class TestCase(ABC):
             error_text = str(err)
 
         return error_text
+
+    def run_update_tracker(
+        self,
+        child: bool,
+        session: str,
+        dataset: str = None,
+        redcaps: list[str] = [],
+        passed_id_list: list[str] = [],
+        failed_id_list: list[str] = [],
+    ) -> str:
+        """Run the update_tracker script on the generated data directory.
+
+        Returns:
+            str: A string containing error text, if any error was raised during execution.
+        """
+        from updatetracker import update_tracker
+
+        if dataset is None:
+            dataset = self.case_dir
+
+        redcap_dir = os.path.join(self.case_dir, "sourcedata", "checked", "redcap")
+        default_redcaps = [
+            os.path.join(redcap_dir, rc_file) for rc_file in os.listdir(redcap_dir)
+        ]
+
+        if passed_id_list == failed_id_list == []:
+            expected_vars = [
+                "arrow-alert-v1-1_psychopy",
+                "arrow-alert-v1-2_psychopy",
+                "all_audacity",
+                "all_zoom",
+                "all_eeg",
+                "all_digi",
+            ]
+            expected_sre = ["s1_r1_e1", "s2_r1_e1", "s3_r1_e1"]
+
+            passed_id_list = [
+                f"sub-{self.sub_id}_{var}_{sre}"
+                for var in expected_vars
+                for sre in expected_sre
+            ]
+
+        try:
+            update_tracker.main(
+                dataset,
+                redcaps or default_redcaps,
+                session,
+                child,
+                passed_id_list,
+                failed_id_list,
+            )
+        except Exception as err:
+            raise RuntimeError("update_tracker exited with error") from err
 
     @abstractmethod
     def validate(self):
@@ -513,6 +580,31 @@ class QATestCase(TestCase):
     description = "Handles errors related to quality assurance."
     conditions = []
     expected_output = "Correct error generated for quality assurance issues."
+
+    def __init__(self, basedir: str, sub_id: int):
+        super().__init__(
+            basedir,
+            sub_id,
+            self.case_name,
+            self.description,
+            self.conditions,
+            self.expected_output,
+        )
+
+    @property
+    def behavior_to_test(self) -> str:
+        return "Tests for errors related to quality assurance."
+
+
+class TrackerTestCase(TestCase):
+    """
+    Base class for errors associated with the update-tracker script.
+    """
+
+    case_name = "TrackerTestCase"
+    description = "Handles errors related to central tracker updates."
+    conditions = []
+    expected_output = "Correct error generated for central tracker issues."
 
     def __init__(self, basedir: str, sub_id: int):
         super().__init__(
