@@ -67,7 +67,6 @@ class TestCase(ABC):
 
         self.base_sub_dir = os.path.join(basedir, self.BASE_SUBJECT_SUBDIR)
         self.case_dir = os.path.join(basedir, self.TEST_CASES_SUBDIR, case_name)
-        self.rel_data_dir = os.path.join("sourcedata", "checked", f"sub-{self.sub_id}")
 
     def get_paths(self, base_dir: str):
         """Retrieve a list of relative file paths from a base directory.
@@ -193,7 +192,7 @@ class TestCase(ABC):
             except IsADirectoryError:  # some test cases require empty directories
                 continue
 
-    def build_path(self, ses: str, datatype: str, filename: str):
+    def build_path(self, ses: str, datatype: str, filename: str, is_raw=False):
         """
         Constructs a file path by joining the base directory with session, datatype, and filename.
 
@@ -201,12 +200,72 @@ class TestCase(ABC):
             ses (str): The session identifier.
             datatype (str): The datatype.
             filename (str): The name of the file.
+            is_raw (bool): Whether a raw filepath should be generated. Defaults to False.
 
         Returns:
-            str: The constructed file path.
+            str: The constructed file path, rooted at "sourcedata".
         """
-        p = os.path.join(self.rel_data_dir, ses, datatype, filename)
-        return p
+        if is_raw:
+            return os.path.join(
+                "sourcedata",
+                "raw",
+                ses,
+                datatype,
+                f"sub-{self.sub_id}",
+                filename,
+            )
+        else:
+            return os.path.join(
+                "sourcedata",
+                "checked",
+                f"sub-{self.sub_id}",
+                ses,
+                datatype,
+                filename,
+            )
+
+    def replace_file_name(self, base_files, old_name, new_name):
+        """
+        Searches for a file by its basename in the given dictionary of files and replaces its name if found.
+
+        Args:
+            base_files (dict[str, str]): A dictionary where keys are relative file paths and values are file contents.
+            old_name (str): The basename of the file to search for.
+            new_name (str): The new basename to replace the old one with.
+
+        Returns:
+            bool: True if the file was found and replaced; False otherwise.
+        """
+        for relpath in base_files:
+            if os.path.basename(relpath) == old_name:
+                old_dir = os.path.dirname(relpath)
+                new_relpath = os.path.join(old_dir, new_name)
+                base_files[new_relpath] = base_files.pop(relpath)
+                return True
+
+        return False
+
+    def remove_file(self, base_files, file):
+        """
+        Removes a file from the given dictionary of files if it exists.
+
+        Args:
+            base_files (dict[str, str]): A dictionary where keys are relative file paths and values are file contents.
+            file (str): The basename of the file to remove.
+
+        Returns:
+            bool: True if the file was found and removed, False otherwise.
+        """
+        path = ""
+        for relpath in base_files:
+            if os.path.basename(relpath) == file:
+                path = relpath
+                break
+        if path:
+            del base_files[path]
+            return True
+        else:
+            return False
 
     def write_metadata(self):
         """
@@ -447,49 +506,6 @@ class ValidationTestCase(TestCase):
     @property
     def behavior_to_test(self) -> str:
         return "Tests for errors related to pending errors."
-
-    def replace_file_name(self, base_files, old_name, new_name):
-        """
-        Searches for a file by its basename in the given dictionary of files and replaces its name if found.
-
-        Args:
-            base_files (dict[str, str]): A dictionary where keys are relative file paths and values are file contents.
-            old_name (str): The basename of the file to search for.
-            new_name (str): The new basename to replace the old one with.
-
-        Returns:
-            bool: True if the file was found and replaced; False otherwise.
-        """
-        for relpath in base_files:
-            if os.path.basename(relpath) == old_name:
-                old_dir = os.path.dirname(relpath)
-                new_relpath = os.path.join(old_dir, new_name)
-                base_files[new_relpath] = base_files.pop(relpath)
-                return True
-
-        return False
-
-    def remove_file(self, base_files, file):
-        """
-        Removes a file from the given dictionary of files if it exists.
-
-        Args:
-            base_files (dict[str, str]): A dictionary where keys are relative file paths and values are file contents.
-            file (str): The basename of the file to remove.
-
-        Returns:
-            bool: True if the file was found and removed, False otherwise.
-        """
-        path = ""
-        for relpath in base_files:
-            if os.path.basename(relpath) == file:
-                path = relpath
-                break
-        if path:
-            del base_files[path]
-            return True
-        else:
-            return False
 
     @abstractmethod
     def get_expected_errors(self) -> list[ExpectedError]:
