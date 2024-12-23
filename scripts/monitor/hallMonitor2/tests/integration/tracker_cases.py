@@ -144,3 +144,39 @@ class DeviationCheckedUpdateTrackerTestCase(TrackerTestCase):
         sub_row = tracker_df[tracker_df["id"].astype(int) == self.sub_id].iloc[0]
         assert sub_row["consent"] == 1
         assert sub_row["assent"] == 1
+
+
+class DeviationNoCheckedUpdateTrackerTestCase(DeviationCheckedUpdateTrackerTestCase):
+    """
+    Validates that addition of a deviation.txt file for a file that has not been
+    moved to sourcedata/checked/ does not affect tracker generation.
+    """
+
+    case_name = "DeviationNoCheckedUpdateTrackerTestCase"
+    description = (
+        "Ensures that presence of deviation.txt file doesn't disturb tracker creation."
+    )
+    conditions = [
+        "File name modified to be incorrect",
+        "Deviation.txt file added",
+        "File not moved to sourcedata/checked",
+    ]
+    expected_output = "update_tracker runs without issues."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        # rename file only in sourcedata/raw/
+        filename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        old_name = os.path.join(
+            "sourcedata", "raw", "s1_r1", "psychopy", f"sub-{self.sub_id}", filename
+        )
+        new_name = old_name.replace(".csv", "_deviation.csv")
+        modified_files[new_name] = modified_files.pop(old_name)
+
+        # add deviation.txt to raw/
+        deviation_file = f"{filename}-deviation.txt"
+        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file, True)
+        modified_files[deviation_file] = "Deviation reason: Testing update_tracker."
+
+        return modified_files
