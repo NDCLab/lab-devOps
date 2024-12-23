@@ -12,6 +12,9 @@ class BaseUpdateTrackerTestCase(TrackerTestCase):
     """
 
     case_name = "BaseUpdateTrackerTestCase"
+    description = "Ensures that update_tracker runs correctly with no modifications."
+    conditions = ["No modifications made to base subject files"]
+    expected_output = "update_tracker runs without issues."
 
     def modify(self, base_files):
         return base_files.copy()
