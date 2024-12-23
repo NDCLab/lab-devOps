@@ -398,3 +398,29 @@ class PendingFilesCsvCreatedTestCase(TestCase):
 
         assert start_dt <= filename_dt
         assert filename_dt <= now_dt
+
+
+class MissingTaskFromDataDictionaryTestCase(MiscellaneousTestCase):
+    case_name = "MissingTaskFromDataDictionaryTestCase"
+    description = (
+        "Ensures that a missing task specified in a '_status' variable raises an error."
+    )
+    conditions = ["Removed file specified in the bbs_status variable."]
+    expected_output = "An error is raised for the missing file."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        filename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+
+        for _ in range(2):  # once for raw, once for checked
+            if not self.remove_file(modified_files, filename):
+                raise FileNotFoundError(f"File with basename {filename} not found")
+
+        return modified_files
+
+    def get_expected_errors(self):
+        error_info = r"Expected file .+\.csv not found"
+        errors = [ExpectedError("Missing file", info_regex=error_info)]
+
+        return errors

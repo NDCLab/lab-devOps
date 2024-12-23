@@ -34,6 +34,7 @@ from .misc_cases import (
     ExpectedFileMissingTestCase,
     ExtraFilesInFolderTestCase,
     InsufficientFilesTestCase,
+    MissingTaskFromDataDictionaryTestCase,
     MultipleTasksFromCombinationRowTestCase,
     PendingFilesCsvCreatedTestCase,
 )
@@ -566,6 +567,7 @@ def create_registry():
         MissingRunSuffixTestCase,
         MissingSessionSuffixTestCase,
         MissingSubjectNumberTestCase,
+        MissingTaskFromDataDictionaryTestCase,
         MissingVariableNameTestCase,
         MultipleTasksFromCombinationRowTestCase,
         NoDataAdditionalFilesTestCase,
