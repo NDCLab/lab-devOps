@@ -67,7 +67,10 @@ from .qa_cases import (
     QAPassMovedToCheckedTestCase,
     QAPassRemovedFromChecklistTestCase,
 )
-from .tracker_cases import BaseUpdateTrackerTestCase
+from .tracker_cases import (
+    BaseUpdateTrackerTestCase,
+    DeviationCheckedUpdateTrackerTestCase,
+)
 
 BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
 
@@ -531,6 +534,7 @@ def create_registry():
         DataDictionaryHasChangesTestCase,
         DeviationAndNoDataErrorTestCase,
         DeviationAndNoDataFilesErrorTestCase,
+        DeviationCheckedUpdateTrackerTestCase,
         DeviationFilePreventsErrorWithExtraFilesTestCase,
         DeviationFileWithBadNamesTestCase,
         DeviationFileWithFolderMismatchTestCase,
