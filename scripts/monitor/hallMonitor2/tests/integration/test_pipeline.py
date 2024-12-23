@@ -70,6 +70,7 @@ from .qa_cases import (
 from .tracker_cases import (
     BaseUpdateTrackerTestCase,
     DeviationCheckedUpdateTrackerTestCase,
+    DeviationNoCheckedUpdateTrackerTestCase,
 )
 
 BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
@@ -539,6 +540,7 @@ def create_registry():
         DeviationFileWithBadNamesTestCase,
         DeviationFileWithFolderMismatchTestCase,
         DeviationFileWithValidNamesTestCase,
+        DeviationNoCheckedUpdateTrackerTestCase,
         EEGDataFileVHDRMismatchTestCase,
         EEGDataFileVMRKMismatchTestCase,
         EEGMarkerFileVHDRMismatchTestCase,
