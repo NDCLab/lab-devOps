@@ -80,3 +80,60 @@ class BaseUpdateTrackerTestCase(TrackerTestCase):
 
         failed_cols = {col for col in cols if sub_row[col] != 1}
         assert len(failed_cols) == 0, f"Failed column(s): {', '.join(failed_cols)}"
+
+
+class DeviationCheckedUpdateTrackerTestCase(TrackerTestCase):
+    """
+    Validates that addition of a deviation.txt file for a file that has been
+    moved to sourcedata/checked/ does not affect tracker generation.
+    """
+
+    case_name = "DeviationCheckedUpdateTrackerTestCase"
+    description = (
+        "Ensures that presence of deviation.txt file doesn't disturb tracker creation."
+    )
+    conditions = ["File name modified to be incorrect", "Deviation.txt file added"]
+    expected_output = "update_tracker runs without issues."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+
+        # rename file incorrectly
+        old_name = f"{identifier}.csv"
+        new_name = old_name.replace(".csv", "_deviation.csv")
+        for _ in range(2):  # do once for raw and once for checked
+            if not self.replace_file_name(modified_files, old_name, new_name):
+                raise FileNotFoundError(f"Could not find basename {new_name}")
+
+        # add deviation.txt to raw/ and checked/
+        deviation_file = f"{identifier}-deviation.txt"
+        deviation_content = "Deviation reason: Testing update_tracker."
+        deviation_raw = self.build_path("s1_r1", "psychopy", deviation_file, True)
+        deviation_checked = self.build_path("s1_r1", "psychopy", deviation_file, False)
+        modified_files[deviation_raw] = deviation_content
+        modified_files[deviation_checked] = deviation_content
+
+        return modified_files
+
+    def validate(self):
+        try:
+            self.run_update_tracker(child=True, session="s1")
+        except Exception as err:
+            raise AssertionError from err
+
+        tracker_path = os.path.join(
+            self.case_dir,
+            "data-monitoring",
+            f"central-tracker_{self.case_name}.csv",
+        )
+        assert os.path.exists(tracker_path)
+
+        tracker_df = pd.read_csv(tracker_path)
+        assert not tracker_df.empty
+        assert len(tracker_df.index) == 1
+
+        sub_row = tracker_df[tracker_df["id"].astype(int) == self.sub_id].iloc[0]
+        assert sub_row["consent"] == 1
+        assert sub_row["assent"] == 1
