@@ -85,7 +85,7 @@ class BaseUpdateTrackerTestCase(TrackerTestCase):
         assert len(failed_cols) == 0, f"Failed column(s): {', '.join(failed_cols)}"
 
 
-class DeviationCheckedUpdateTrackerTestCase(TrackerTestCase):
+class DeviationCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
     """
     Validates that addition of a deviation.txt file for a file that has been
     moved to sourcedata/checked/ does not affect tracker generation.
@@ -124,29 +124,8 @@ class DeviationCheckedUpdateTrackerTestCase(TrackerTestCase):
 
         return modified_files
 
-    def validate(self):
-        try:
-            self.run_update_tracker(child=True, session="s1")
-        except Exception as err:
-            raise AssertionError from err
 
-        tracker_path = os.path.join(
-            self.case_dir,
-            "data-monitoring",
-            f"central-tracker_{self.case_name}.csv",
-        )
-        assert os.path.exists(tracker_path)
-
-        tracker_df = pd.read_csv(tracker_path)
-        assert not tracker_df.empty
-        assert len(tracker_df.index) == 1
-
-        sub_row = tracker_df[tracker_df["id"].astype(int) == self.sub_id].iloc[0]
-        assert sub_row["consent"] == 1
-        assert sub_row["assent"] == 1
-
-
-class DeviationNoCheckedUpdateTrackerTestCase(DeviationCheckedUpdateTrackerTestCase):
+class DeviationNoCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
     """
     Validates that addition of a deviation.txt file for a file that has not been
     moved to sourcedata/checked/ does not affect tracker generation.
