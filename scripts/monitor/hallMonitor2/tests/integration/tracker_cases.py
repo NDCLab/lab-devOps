@@ -95,7 +95,11 @@ class DeviationCheckedUpdateTrackerTestCase(TrackerTestCase):
     description = (
         "Ensures that presence of deviation.txt file doesn't disturb tracker creation."
     )
-    conditions = ["File name modified to be incorrect", "Deviation.txt file added"]
+    conditions = [
+        "File name modified to be incorrect",
+        "Deviation.txt file added",
+        "File moved to sourcedata/checked",
+    ]
     expected_output = "update_tracker runs without issues."
 
     def modify(self, base_files):
