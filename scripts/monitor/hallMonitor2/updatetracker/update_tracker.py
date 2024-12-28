@@ -412,6 +412,9 @@ def main(
     if not session:
         raise ValueError(f"No session passed for dataset {dataset}")
 
+    if not passed_id_list and not failed_id_list:
+        raise ValueError("No passed or failed identifiers passed")
+
     passed_ids = [(Identifier.from_str(s), 1) for s in passed_id_list]
     failed_ids = [(Identifier.from_str(s), 0) for s in failed_id_list]
     all_ids = passed_ids + failed_ids
