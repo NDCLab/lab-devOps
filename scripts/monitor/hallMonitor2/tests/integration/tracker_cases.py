@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+import pytest
 
 from .base_cases import TrackerTestCase
 
@@ -377,5 +378,63 @@ class BBSDataZeroIncorrectDataTestCase(TrackerTestCase):
         assert sub_row["bbs_data_s1_r1_e1"] == 0
 
         # these sessions should have no problems
+        assert sub_row["bbs_data_s2_r1_e1"] == 1
+        assert sub_row["bbs_data_s3_r1_e1"] == 1
+
+
+class BBSDataOneDeviationFileTestCase(TrackerTestCase):
+    """"""
+
+    case_name = "BBSDataOneDeviationFileTestCase"
+    description = (
+        "Ensures that bbs_data_s1_r1_e1 is 1 when a deviation.txt file is present."
+    )
+    conditions = [
+        "Deviation.txt file present in psychopy folder for s1_r1_e1",
+        "Data is in an incorrect state",
+    ]
+    expected_output = "update_tracker runs without issues, and bbs_data_s1_r1_e1 is 1."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        # change the filename to be incorrect
+        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        old_path = self.build_path("s1_r1", "psychopy", old_name, True)
+
+        new_name = "badfilename.csv"
+        new_path = old_path.replace(old_name, new_name)
+        modified_files[new_path] = modified_files.pop(old_path)
+
+        # add our deviation.txt file
+        deviation_file = self.build_path("s1_r1", "psychopy", "deviation.txt", True)
+        modified_files[deviation_file] = "Deviation reason: Testing update_tracker."
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import hallMonitor
+
+        args = self.get_standard_args()
+        args.raw_only = True
+        args.no_qa = True
+        args.legacy_exceptions = True  # deviation.txt without identifier
+
+        try:
+            hallMonitor.main(args)
+        except Exception as err:
+            raise AssertionError from err
+
+        tracker_path = os.path.join(
+            self.case_dir,
+            "data-monitoring",
+            f"central-tracker_{self.case_name}.csv",
+        )
+        tracker_df = pd.read_csv(tracker_path)
+
+        sub_row = tracker_df[tracker_df["id"].astype(int) == self.sub_id].iloc[0]
+
+        # we should have no problems with any session due to the deviation.txt file
+        assert sub_row["bbs_data_s1_r1_e1"] == 1
         assert sub_row["bbs_data_s2_r1_e1"] == 1
         assert sub_row["bbs_data_s3_r1_e1"] == 1
