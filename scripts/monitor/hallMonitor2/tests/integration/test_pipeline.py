@@ -72,6 +72,7 @@ from .tracker_cases import (
     BaseUpdateTrackerTestCase,
     BBSDataZeroMissingDataTestCase,
     BBSDataZeroMissingDatatypeFolderTestCase,
+    BBSDataZeroNoDataFileTestCase,
     DeviationCheckedUpdateTrackerTestCase,
     DeviationNoCheckedUpdateTrackerTestCase,
 )
@@ -537,6 +538,7 @@ def create_registry():
         BaseUpdateTrackerTestCase,
         BBSDataZeroMissingDataTestCase,
         BBSDataZeroMissingDatatypeFolderTestCase,
+        BBSDataZeroNoDataFileTestCase,
         DataDictionaryHasChangesTestCase,
         DeviationAndNoDataErrorTestCase,
         DeviationAndNoDataFilesErrorTestCase,
