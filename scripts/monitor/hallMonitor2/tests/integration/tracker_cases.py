@@ -159,3 +159,56 @@ class DeviationNoCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
         modified_files[deviation_file] = "Deviation reason: Testing update_tracker."
 
         return modified_files
+
+
+class BBSDataZeroMissingDatatypeFolderTestCase(TrackerTestCase):
+    """
+    Validates that a missing datatype folder results in a 0 in the central tracker.
+    """
+
+    case_name = "BBSDataZeroMissingDatatypeFolderTestCase"
+    description = (
+        "Ensures that a missing datatype folder results in a 0 in the central tracker."
+    )
+    conditions = ["Missing bbs_data folder for s1_r1_e1"]
+    expected_output = "update_tracker runs without issues, and bbs_data_s1_r1_e1 is 0."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        psychopy_dir = os.path.dirname(self.build_path("s1_r1", "psychopy", "", True))
+        modified_files = {
+            path: contents
+            for path, contents in modified_files.items()
+            if not path.startswith(psychopy_dir)
+        }
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import hallMonitor
+
+        args = self.get_standard_args()
+        args.raw_only = True
+        args.no_qa = True
+
+        try:
+            hallMonitor.main(args)
+        except Exception as err:
+            raise AssertionError from err
+
+        tracker_path = os.path.join(
+            self.case_dir,
+            "data-monitoring",
+            f"central-tracker_{self.case_name}.csv",
+        )
+        tracker_df = pd.read_csv(tracker_path)
+
+        sub_row = tracker_df[tracker_df["id"].astype(int) == self.sub_id].iloc[0]
+
+        # we deleted the files for this session
+        assert sub_row["bbs_data_s1_r1_e1"] == 0
+
+        # these sessions should have no problems
+        assert sub_row["bbs_data_s2_r1_e1"] == 1
+        assert sub_row["bbs_data_s3_r1_e1"] == 1
