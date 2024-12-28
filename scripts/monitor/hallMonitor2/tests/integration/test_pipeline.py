@@ -70,6 +70,7 @@ from .qa_cases import (
 )
 from .tracker_cases import (
     BaseUpdateTrackerTestCase,
+    BBSDataZeroMissingDataTestCase,
     BBSDataZeroMissingDatatypeFolderTestCase,
     DeviationCheckedUpdateTrackerTestCase,
     DeviationNoCheckedUpdateTrackerTestCase,
@@ -534,6 +535,7 @@ def create_registry():
     tests: list[Type[TestCase]] = [
         BaseTestCase,
         BaseUpdateTrackerTestCase,
+        BBSDataZeroMissingDataTestCase,
         BBSDataZeroMissingDatatypeFolderTestCase,
         DataDictionaryHasChangesTestCase,
         DeviationAndNoDataErrorTestCase,

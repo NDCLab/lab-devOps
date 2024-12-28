@@ -212,3 +212,57 @@ class BBSDataZeroMissingDatatypeFolderTestCase(TrackerTestCase):
         # these sessions should have no problems
         assert sub_row["bbs_data_s2_r1_e1"] == 1
         assert sub_row["bbs_data_s3_r1_e1"] == 1
+
+
+class BBSDataZeroMissingDataTestCase(TrackerTestCase):
+    """
+    Validates that a present datatype folder with no data results in a 0 in the central tracker.
+    """
+
+    case_name = "BBSDataZeroMissingDataTestCase"
+    description = "Ensures that a present datatype folder with no data results in a 0 in the central tracker."
+    conditions = ["Empty psychopy folder for s1_r1_e1"]
+    expected_output = "update_tracker runs without issues, and bbs_data_s1_r1_e1 is 0."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        psychopy_dir = os.path.dirname(self.build_path("s1_r1", "psychopy", "", True))
+        modified_files = {
+            path: contents
+            for path, contents in modified_files.items()
+            if not path.startswith(psychopy_dir)
+        }
+
+        # add back the empty psychopy folder
+        modified_files[self.build_path("s1_r1", "psychopy", "", True)] = ""
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import hallMonitor
+
+        args = self.get_standard_args()
+        args.raw_only = True
+        args.no_qa = True
+
+        try:
+            hallMonitor.main(args)
+        except Exception as err:
+            raise AssertionError from err
+
+        tracker_path = os.path.join(
+            self.case_dir,
+            "data-monitoring",
+            f"central-tracker_{self.case_name}.csv",
+        )
+        tracker_df = pd.read_csv(tracker_path)
+
+        sub_row = tracker_df[tracker_df["id"].astype(int) == self.sub_id].iloc[0]
+
+        # we deleted the files, but not the folder, for this session
+        assert sub_row["bbs_data_s1_r1_e1"] == 0
+
+        # these sessions should have no problems
+        assert sub_row["bbs_data_s2_r1_e1"] == 1
+        assert sub_row["bbs_data_s3_r1_e1"] == 1
