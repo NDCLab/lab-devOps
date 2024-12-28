@@ -323,3 +323,59 @@ class BBSDataZeroNoDataFileTestCase(TrackerTestCase):
         # these sessions should have no problems
         assert sub_row["bbs_data_s2_r1_e1"] == 1
         assert sub_row["bbs_data_s3_r1_e1"] == 1
+
+
+class BBSDataZeroIncorrectDataTestCase(TrackerTestCase):
+    """
+    Validates that the bbs_data column updates with a "0"
+    if an expected BBS datatype folder exists but contains incorrect data.
+    """
+
+    case_name = "BBSDataZeroIncorrectDataTestCase"
+    description = "Ensures that bbs_data_s1_r1_e1 is 0 when incorrect data is present."
+    conditions = ["Incorrect data present in psychopy folder for s1_r1_e1"]
+    expected_output = "update_tracker runs without issues, and bbs_data_s1_r1_e1 is 0."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        old_var = "arrow-alert-v1-1_psychopy"
+        old_filename = f"sub-{self.sub_id}_{old_var}_s1_r1_e1.csv"
+
+        new_var = "incorrect_psychopy"
+        new_filename = old_filename.replace(old_var, new_var)
+
+        # rename file to be incorrect
+        old_path = self.build_path("s1_r1", "psychopy", old_filename, True)
+        new_path = self.build_path("s1_r1", "psychopy", new_filename, True)
+        modified_files[new_path] = modified_files.pop(old_path)
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import hallMonitor
+
+        args = self.get_standard_args()
+        args.raw_only = True
+        args.no_qa = True
+
+        try:
+            hallMonitor.main(args)
+        except Exception as err:
+            raise AssertionError from err
+
+        tracker_path = os.path.join(
+            self.case_dir,
+            "data-monitoring",
+            f"central-tracker_{self.case_name}.csv",
+        )
+        tracker_df = pd.read_csv(tracker_path)
+
+        sub_row = tracker_df[tracker_df["id"].astype(int) == self.sub_id].iloc[0]
+
+        # failing identifier present for this session
+        assert sub_row["bbs_data_s1_r1_e1"] == 0
+
+        # these sessions should have no problems
+        assert sub_row["bbs_data_s2_r1_e1"] == 1
+        assert sub_row["bbs_data_s3_r1_e1"] == 1
