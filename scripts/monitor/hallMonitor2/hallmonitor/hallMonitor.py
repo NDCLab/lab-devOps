@@ -146,7 +146,8 @@ def validate_data(logger, dataset, use_legacy_exceptions=False, is_raw=True):
 
             elif num_combo_vars == 0:  # raise an error for each possible identifier
                 for var in combo.variables:
-                    identifier = Identifier(sub, var, ses, run)
+                    event = "e1"  # default to e1 if no variables present for combination row
+                    identifier = Identifier(sub, var, ses, run, event)
                     pending.append(
                         new_error_record(
                             logger,
