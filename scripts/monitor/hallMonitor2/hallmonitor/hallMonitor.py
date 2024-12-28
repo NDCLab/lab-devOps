@@ -9,6 +9,7 @@ from argparse import Namespace
 from datetime import datetime
 
 import pandas as pd
+from updatetracker import update_tracker
 
 from .hmutils import (
     CHECKED_SUBDIR,
@@ -17,7 +18,6 @@ from .hmutils import (
     PENDING_QA_SUBDIR,
     PENDING_SUBDIR,
     RAW_SUBDIR,
-    UPDATE_TRACKER_SUBPATH,
     ColorfulFormatter,
     Identifier,
     SharedTimestamp,
@@ -722,12 +722,6 @@ def main(args: Namespace):
 
     # update central tracker
 
-    script_location = os.path.join(dataset, UPDATE_TRACKER_SUBPATH)
-    if not os.path.exists(script_location):
-        msg = "update-tracker.py does not exist at expected location."
-        logger.critical(msg)
-        raise FileNotFoundError(msg)
-
     # get passed/failed IDs as specified by pending-files.csv
     pending = get_pending_files(dataset)
     failed_ids = pending[
@@ -760,22 +754,11 @@ def main(args: Namespace):
         ]
         sr_redcaps += universal_redcaps
         try:
-            logger.info("Running update-tracker.py for session/run %s...", sr)
-            subprocess.check_call(
-                [
-                    "python",
-                    script_location,
-                    checked_dir,
-                    dataset,
-                    ",".join(sr_redcaps),
-                    sr,
-                    "true" if args.child_data else "false",
-                    ",".join(passed_ids),
-                    ",".join(failed_ids),
-                ]
+            update_tracker.main(
+                dataset, sr_redcaps, sr, bool(args.child_data), passed_ids, failed_ids
             )
-        except subprocess.CalledProcessError as err:
-            logger.error("update-tracker.py failed for ses/run %s (%s)", sr, err)
+        except Exception as err:
+            logger.error("update_tracker.py failed for ses/run %s (%s)", sr, err)
             failed_sr.append(sr)
 
     if failed_sr:
