@@ -293,7 +293,7 @@ class ColorfulFormatter(logging.Formatter):
     }
 
     def __init__(self, pattern):
-        logging.Formatter.__init__(self, pattern)
+        super().__init__(pattern)
 
     def format(self, record):
         color_record = copy(record)
