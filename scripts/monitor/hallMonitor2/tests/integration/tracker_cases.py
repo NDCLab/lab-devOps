@@ -1,4 +1,6 @@
 import os
+import re
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -438,3 +440,61 @@ class BBSDataOneDeviationFileTestCase(TrackerTestCase):
         assert sub_row["bbs_data_s1_r1_e1"] == 1
         assert sub_row["bbs_data_s2_r1_e1"] == 1
         assert sub_row["bbs_data_s3_r1_e1"] == 1
+
+
+class DuplicateREDCapColumnsTestCase(TrackerTestCase):
+    """
+    Validates that duplicate columns in REDCap files are caught.
+    """
+
+    case_name = "DuplicateREDCapColumnsTestCase"
+    description = "Ensures that duplicate columns in REDCap files are caught."
+    conditions = ["Duplicate columns in REDCap files"]
+    expected_output = "update_tracker raises a RuntimeError due to duplicate columns."
+
+    duped_col = "consent_complete"
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        rc_cols = [
+            "record_id",
+            "bbsratrk_acid_s1_r1_e1",
+            self.duped_col,
+            self.duped_col,
+        ]
+        rc_data = [[1, self.sub_id, 2, 2]]
+        redcap_df = pd.DataFrame(columns=rc_cols, data=rc_data)
+
+        redcap_subpath = os.path.join(
+            "sourcedata",
+            "checked",
+            "redcap",
+            f"{self.case_name}consent_DATA_2024-01-01_1230.csv",
+        )
+        modified_files[redcap_subpath] = redcap_df.to_csv(index=False)
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import hallMonitor
+
+        args = self.get_standard_args()
+        args.raw_only = True
+        args.no_qa = True
+
+        mock_logger = mock.Mock()
+        with (
+            mock.patch("logging.getLogger", return_value=mock_logger),
+            pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
+        ):
+            hallMonitor.main(args)
+
+        error_re = r".*[Dd]uplicate column.*"
+        error_re += re.escape(self.duped_col)
+
+        assert mock_logger.error.call_count == 3
+        for call in mock_logger.error.call_args_list:
+            assert any(
+                re.match(error_re, str(arg)) for arg in call.args
+            ), f"Unexpected error: {call.args}"
