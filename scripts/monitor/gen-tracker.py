@@ -1,8 +1,10 @@
-import sys
-import pandas as pd
-from os.path import basename, splitext, isfile
 import collections
 import shutil
+import sys
+from os.path import basename, splitext
+
+import pandas as pd
+
 
 def check_data_dict_variables(df_dd):
     all_tracker_cols = []
