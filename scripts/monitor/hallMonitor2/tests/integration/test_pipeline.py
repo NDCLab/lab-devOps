@@ -77,6 +77,7 @@ from .tracker_cases import (
     BBSDataZeroNoDataFileTestCase,
     DeviationCheckedUpdateTrackerTestCase,
     DeviationNoCheckedUpdateTrackerTestCase,
+    DuplicateREDCapColumnsTestCase,
 )
 
 BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
@@ -552,6 +553,7 @@ def create_registry():
         DeviationFileWithFolderMismatchTestCase,
         DeviationFileWithValidNamesTestCase,
         DeviationNoCheckedUpdateTrackerTestCase,
+        DuplicateREDCapColumnsTestCase,
         EEGDataFileVHDRMismatchTestCase,
         EEGDataFileVMRKMismatchTestCase,
         EEGMarkerFileVHDRMismatchTestCase,
