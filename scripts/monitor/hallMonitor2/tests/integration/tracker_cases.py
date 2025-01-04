@@ -25,6 +25,8 @@ class BaseUpdateTrackerTestCase(TrackerTestCase):
     def validate(self):
         try:
             self.run_update_tracker(child=True, session="s1")
+            self.run_update_tracker(child=True, session="s2")
+            self.run_update_tracker(child=True, session="s3")
         except Exception as err:
             raise AssertionError from err
 
