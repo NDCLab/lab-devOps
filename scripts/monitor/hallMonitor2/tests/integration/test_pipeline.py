@@ -451,6 +451,18 @@ def create_base_subject(basedir):
             "provenance": 'variables: "arrow-alert_psychopy","all_audacity","all_zoom","all_eeg","all_digi"',
             "expectedFileExt": "NA",
         },
+        {
+            "variable": "abq",
+            "dataType": "redcap_data",
+            "description": "ABQ questionnaire status",
+            "detail": 'When data is transferred from raw to checked, value of 1 is assigned based on the value of "{questionnaire name}_complete"!=NULL (indicating participant began questionnaire), otherwise 0.',
+            "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
+            "measureUnit": "Logical",
+            "allowedValues": "NA, 0, 1",
+            "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+            "provenance": 'file: "bbschild"; variable: ""',
+            "expectedFileExt": "NA",
+        },
     ]
     mock_dd = pd.DataFrame(mock_dd)
     mock_dd.to_csv(dd_path, index=False)
@@ -498,6 +510,17 @@ def create_base_subject(basedir):
         }
         bbsra_df = pd.DataFrame([bbsra_row])
         bbsra_df.to_csv(rc_bbsra_path, index=False)
+
+        # basic "bbschild" REDCap
+        rc_bbschild_path = os.path.join(
+            redcap_dir, build_base_rc_name("bbschild", ses, run)
+        )
+        bbschild_row = {
+            "record_id": TestCase.BASE_SUBJECT_ID,
+            f"abq_{ses}_{run}_e1_complete": 2,
+        }
+        bbschild_df = pd.DataFrame([bbschild_row])
+        bbschild_df.to_csv(rc_bbschild_path, index=False)
 
     # set up empty central tracker
 
