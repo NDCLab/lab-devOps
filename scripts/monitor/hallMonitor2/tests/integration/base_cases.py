@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Type
 
 import pandas as pd
+from hallmonitor.hmutils import get_new_redcaps
 
 
 @dataclass
@@ -412,11 +413,6 @@ class TestCase(ABC):
         if dataset is None:
             dataset = self.case_dir
 
-        redcap_dir = os.path.join(self.case_dir, "sourcedata", "checked", "redcap")
-        default_redcaps = [
-            os.path.join(redcap_dir, rc_file) for rc_file in os.listdir(redcap_dir)
-        ]
-
         if passed_id_list == failed_id_list == []:
             expected_vars = [
                 "arrow-alert-v1-1_psychopy",
@@ -434,10 +430,19 @@ class TestCase(ABC):
                 for sre in expected_sre
             ]
 
+        if not redcaps:
+            redcap_dir = os.path.join(self.case_dir, "sourcedata", "checked", "redcap")
+            redcaps = [
+                rc
+                for rc in get_new_redcaps(redcap_dir)
+                if re.fullmatch(rf".*{session}(r\d+)?_DATA.*", os.path.basename(rc))
+                or not re.fullmatch(r".*s\d+.*", os.path.basename(rc))
+            ]
+
         try:
             update_tracker.main(
                 dataset,
-                redcaps or default_redcaps,
+                redcaps,
                 session,
                 child,
                 passed_id_list,
