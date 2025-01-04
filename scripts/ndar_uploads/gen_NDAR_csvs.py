@@ -320,14 +320,12 @@ def map_adis(ndar_df, ndar_col, ndar_csv, ndar_json, sre, all_columns=False, par
 
 def save_csv(ndar_csv, ndar_df):
     ndar_df.to_csv('tmpfile.csv', index=False)
-    f = open('tmpfile.csv', 'r')
-    csvstring = f.read()
-    f.close()
+    with open("tmpfile.csv", "r") as f:
+        csvstring = f.read()
     #with open(join(out_path, ndar_csv + '_incomplete.csv'), 'w') as f:
     with open(join(out_path, ndar_csv + '_' + sre + '_incomplete.csv'), 'w') as f:
         f.write(ndar_csv[0:-2] + ",01" + ","*(len(df.columns)-2) + "\n")
         f.write(csvstring)
-    f.close()
     os.remove('tmpfile.csv')
 
 class Column:
@@ -374,7 +372,6 @@ if __name__ == "__main__":
     df_dd = pd.read_csv(df_dd)
     with open(ndar_json, 'r') as json_file:
         ndar_json = json.load(json_file)
-    json_file.close()
 
     redcaps_dict = get_redcaps(df_dd, redcaps, ndar_json) # dataframes of each redcap
     if 'redcaps_other_sessions' in locals() and redcaps_other_sessions.lower() != "none":
