@@ -552,8 +552,8 @@ def qa_validation(logger: logging.Logger, dataset: str):
     record_df = pd.concat([record_df, val_df])
     try:
         write_file_record(dataset, record_df)
-    except Exception as err:
-        logger.error("Error writing to file record: %s", err)
+    except KeyError as err:
+        logger.error("Could not write out file record: %s", err)
 
     # get new raw-validated identifiers
     pending_df = get_pending_files(dataset)
