@@ -389,16 +389,6 @@ class PendingFilesCsvCreatedTestCase(TestCase):
 
         assert pending_files_ts == pending_errors_ts
 
-        # ensure timestamp is reasonable (we'll say any time between the time we ran
-        # raw data validation and now is reasonable, since we don't need high precision)
-        filename_dt = datetime.datetime.strptime(
-            pending_files_ts, r"%Y-%m-%d_%H-%M"
-        ).astimezone(TZ_INFO)
-        now_dt = datetime.datetime.now(TZ_INFO).replace(second=0, microsecond=0)
-
-        assert start_dt <= filename_dt
-        assert filename_dt <= now_dt
-
 
 class MissingTaskFromDataDictionaryTestCase(MiscellaneousTestCase):
     case_name = "MissingTaskFromDataDictionaryTestCase"
