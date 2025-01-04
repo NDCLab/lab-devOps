@@ -1,5 +1,6 @@
 import os
 import re
+from io import StringIO
 from unittest import mock
 
 import pandas as pd
@@ -502,3 +503,57 @@ class DuplicateREDCapColumnsTestCase(TrackerTestCase):
             assert any(
                 re.match(error_re, str(arg)) for arg in call.args
             ), f"Unexpected error: {call.args}"
+
+
+class MissingREDCapColumnTestCase(TrackerTestCase):
+    """
+    Validates that missing columns in REDCap files are caught.
+    """
+
+    case_name = "MissingREDCapColumnTestCase"
+    description = "Ensures that missing columns in REDCap files are caught."
+    conditions = ["Missing columns in REDCap files"]
+    expected_output = "update_tracker raises a RuntimeError due to missing columns."
+
+    removed_col = "abq_s1_r1_e1_complete"
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        redcap_subpath = os.path.join(
+            "sourcedata",
+            "checked",
+            "redcap",
+            f"{self.case_name}bbschilds1r1_DATA_2024-01-01_1230.csv",
+        )
+        # pandas.read_csv() expects a file-like object, so we create a StringIO object
+        #   because modify() is called before the test case's files are written to disk
+        redcap_df = pd.read_csv(StringIO(modified_files[redcap_subpath]))
+        redcap_df.drop(columns=[self.removed_col], inplace=True)
+        modified_files[redcap_subpath] = redcap_df.to_csv(index=False)
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import hallMonitor
+
+        args = self.get_standard_args()
+        args.raw_only = True
+        args.no_qa = True
+
+        mock_logger = mock.Mock()
+        with (
+            mock.patch("logging.getLogger", return_value=mock_logger),
+            pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
+        ):
+            hallMonitor.main(args)
+
+        error_re = r".*" + re.escape(self.removed_col)
+        error_re += r".*bbschild.*"
+
+        assert mock_logger.error.call_count == 1
+
+        err_call = mock_logger.error.call_args_list[0]
+        assert any(
+            re.match(error_re, str(arg)) for arg in err_call.args
+        ), f"Unexpected error: {err_call.args}"

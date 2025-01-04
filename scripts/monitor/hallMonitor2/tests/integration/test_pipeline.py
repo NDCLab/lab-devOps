@@ -78,6 +78,7 @@ from .tracker_cases import (
     DeviationCheckedUpdateTrackerTestCase,
     DeviationNoCheckedUpdateTrackerTestCase,
     DuplicateREDCapColumnsTestCase,
+    MissingREDCapColumnTestCase,
 )
 
 BASE_SUBJECT_ID = TestCase.BASE_SUBJECT_ID
@@ -603,6 +604,7 @@ def create_registry():
         MissingExtensionTestCase,
         MissingIdentifierNoDataTestCase,
         MissingIdentifierWithoutNoDataTestCase,
+        MissingREDCapColumnTestCase,
         MissingRunSuffixTestCase,
         MissingSessionSuffixTestCase,
         MissingSubjectNumberTestCase,
