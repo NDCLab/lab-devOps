@@ -229,9 +229,11 @@ def fill_status_data_columns(dataset: str, tracker_df: pd.DataFrame):
     for _, row in status_var_rows.iterrows():
         prov = str(row["provenance"])
         suffixes = get_allowed_suffixes(dd_df, row["variable"])
-        if "file:" in prov and "variable:" in prov:
-            prov_file = re.search(r'file:\s*"([^"\s]+)"', prov).group(1)
-            prov_var = re.search(r'variable:\s*"([^"\s]+)"', prov).group(1)
+        prov_file = re.search(r'file:\s*"([^"\s]+)"', prov)
+        prov_var = re.search(r'variable:\s*"([^"\s]+)"', prov)
+        if None not in {prov_file, prov_var}:  # ensure both matches exist
+            prov_file = str(prov_file.group(1))
+            prov_var = str(prov_var.group(1))
 
             for suffix in suffixes:
                 prov_id_match = re.search(r'id:\s*"([^"\s]+)"', prov)
