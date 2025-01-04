@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Type
 
 import pandas as pd
+
 from hallmonitor.hmutils import get_new_redcaps
 
 
@@ -408,7 +409,7 @@ class TestCase(ABC):
         Returns:
             str: A string containing error text, if any error was raised during execution.
         """
-        from updatetracker import update_tracker
+        from hallmonitor.updatetracker import update_tracker
 
         if dataset is None:
             dataset = self.case_dir

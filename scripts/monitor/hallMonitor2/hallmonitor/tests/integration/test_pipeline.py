@@ -6,7 +6,7 @@ from typing import Type
 import pandas as pd
 import pytest
 
-from .base_cases import (
+from hallmonitor.tests.integration.base_cases import (
     TestCase,
     _TestCaseRegistry,
 )

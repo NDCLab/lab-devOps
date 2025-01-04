@@ -1,8 +1,8 @@
-import os
 import re
 from unittest import mock
 
 import pytest
+
 from hallmonitor.hmutils import get_psychopy_errors
 
 

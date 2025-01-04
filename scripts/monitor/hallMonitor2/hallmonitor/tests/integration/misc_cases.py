@@ -7,7 +7,11 @@ import pytest
 import pytz
 from mock import Mock
 
-from .base_cases import ExpectedError, TestCase, ValidationTestCase
+from hallmonitor.tests.integration.base_cases import (
+    ExpectedError,
+    TestCase,
+    ValidationTestCase,
+)
 
 TZ_INFO = pytz.timezone("US/Eastern")
 

@@ -1,7 +1,7 @@
 import os
 import re
 
-from .base_cases import ExpectedError, ValidationTestCase
+from hallmonitor.tests.integration.base_cases import ExpectedError, ValidationTestCase
 
 
 class ExceptionTestCase(ValidationTestCase):

@@ -6,7 +6,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-from .base_cases import TrackerTestCase
+from hallmonitor.tests.integration.base_cases import TrackerTestCase
 
 
 class BaseUpdateTrackerTestCase(TrackerTestCase):

@@ -13,7 +13,9 @@ from hallmonitor.hmutils import (
 @pytest.fixture
 def mock_Identifier_re(monkeypatch):
     id_pattern = r"(?P<subject>[a-zA-Z0-9]+)_(?P<var>[a-zA-Z0-9]+)_(?P<sre>(?:[a-zA-Z0-9]+_?){3})"
-    monkeypatch.setattr("hallmonitor.hmutils.Identifier.PATTERN", re.compile(id_pattern))
+    monkeypatch.setattr(
+        "hallmonitor.hmutils.Identifier.PATTERN", re.compile(id_pattern)
+    )
 
 
 @pytest.fixture
@@ -118,7 +120,9 @@ def test_get_expected_identifiers_no_visit_vars(mock_dataset, monkeypatch):
             }
         )
 
-    monkeypatch.setattr("hallmonitor.hmutils.get_datadict", mock_get_datadict_no_visit_vars)
+    monkeypatch.setattr(
+        "hallmonitor.hmutils.get_datadict", mock_get_datadict_no_visit_vars
+    )
 
     # Present identifiers, but since no variables are associated with visit_data,
     # we expect an empty list of expected identifiers

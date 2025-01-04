@@ -1,6 +1,10 @@
 import re
 
-from .base_cases import ExpectedError, TestCase, ValidationTestCase
+from hallmonitor.tests.integration.base_cases import (
+    ExpectedError,
+    TestCase,
+    ValidationTestCase,
+)
 
 
 class PsychopyTestCase(ValidationTestCase):
