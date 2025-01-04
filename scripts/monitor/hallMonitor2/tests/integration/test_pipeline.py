@@ -465,8 +465,12 @@ def create_base_subject(basedir):
     rc_consent_path = os.path.join(redcap_dir, build_base_rc_name("consent"))
     consent_row = {
         "record_id": TestCase.BASE_SUBJECT_ID,
+        # English variables
         "consent_complete": 2,
         "assent_complete": 2,
+        # Spanish variables
+        "consentes_complete": 2,
+        "assentes_complete": 2,
     }
     consent_df = pd.DataFrame([consent_row])
     consent_df.to_csv(rc_consent_path, index=False)
