@@ -58,10 +58,13 @@ if __name__ == "__main__":
                 if not isdir(join(dataset,'data-monitoring','ndar',current_submission,'eeg',sub_folder+'_all_eeg_'+sess_folder+'_e1')):
                     _ = os.system('cp -R ' + join(dataset,'sourcedata','checked',sub_folder,sess_folder,'eeg') + ' ' + \
                                 join(dataset,'data-monitoring','ndar',current_submission,'eeg',sub_folder+'_all_eeg_'+sess_folder+'_e1'))
+    # TODO: Read this as command line arg? (Don't do now, George to update later)
     #experiment_id = "2232" # thrive = 2232
     experiment_id = "" # read leave blank
     with open(join(dataset,'data-monitoring','ndar',current_submission,'eeg_sub_files01.csv'), 'w') as o:
         _ = o.write('eeg_sub_files,01,,,,,,,\n')
+        # TODO: Sex can be drawn from REDCap
+        # TODO: Interview date can be drawn from REDCap
         _ = o.write('subjectkey,src_subject_id,interview_date,interview_age,sex,experiment_id,data_file1,data_file1_type,timepoint_label\n')
         for new_sub_file in new_sub_files:
             file_re = re.match('sub-([0-9]+)_[a-zA-Z0-9_-]+_(s[0-9]+)_r[0-9]+_e[0-9]+\.zip', new_sub_file)
