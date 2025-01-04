@@ -53,7 +53,12 @@ from .hmutils import (
 )
 
 
-def validate_data(logger, dataset, use_legacy_exceptions=False, is_raw=True):
+def validate_data(
+    logger: logging.Logger,
+    dataset: str,
+    use_legacy_exceptions: bool = False,
+    is_raw: bool = True,
+):
     """
     Validates the data in the specified dataset.
 
