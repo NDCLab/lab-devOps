@@ -1283,8 +1283,7 @@ def get_visit_pairs(datadict: pd.DataFrame):
     data_vars = vars[vars["dataType"] == "visit_data"]
     data_vars.rename(columns={"variable": "datavar"}, inplace=True)
 
-    # TODO Does this drop all rows without root match? It should, so figure out how to make that happen if not.
-    var_pairs = status_vars.merge(data_vars, on="root")
+    var_pairs = status_vars.merge(data_vars, on="root", how="inner")
 
     visit_pairs = []
     for _, pair in var_pairs.iterrows():
