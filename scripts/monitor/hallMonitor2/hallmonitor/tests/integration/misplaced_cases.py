@@ -1,6 +1,6 @@
 import re
 
-from .base_cases import ExpectedError, ValidationTestCase
+from hallmonitor.tests.integration.base_cases import ExpectedError, ValidationTestCase
 
 
 class MisplacedFileTestCase(ValidationTestCase):

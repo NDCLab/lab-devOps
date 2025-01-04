@@ -3,7 +3,7 @@ import re
 
 import pandas as pd
 
-from .base_cases import QATestCase
+from hallmonitor.tests.integration.base_cases import QATestCase
 
 
 class PendingQAFileTestCase(QATestCase):

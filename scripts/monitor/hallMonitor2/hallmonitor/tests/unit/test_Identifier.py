@@ -89,11 +89,12 @@ def test_identifier_to_dir_checked(identifier, mock_dataset):
 
 
 def test_identifier_to_detailed_str(identifier, mock_dataset):
-    with mock.patch(
-        "hallmonitor.hmutils.get_variable_datatype"
-    ) as mock_get_variable_datatype, mock.patch(
-        "hallmonitor.hmutils.is_combination_var"
-    ) as mock_is_combination_var:
+    with (
+        mock.patch(
+            "hallmonitor.hmutils.get_variable_datatype"
+        ) as mock_get_variable_datatype,
+        mock.patch("hallmonitor.hmutils.is_combination_var") as mock_is_combination_var,
+    ):
         datatype = "mockdtype"
         mock_get_variable_datatype.return_value = datatype
 

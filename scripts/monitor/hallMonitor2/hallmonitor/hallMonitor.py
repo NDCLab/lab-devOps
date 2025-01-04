@@ -9,9 +9,8 @@ from argparse import Namespace
 from datetime import datetime
 
 import pandas as pd
-from updatetracker import update_tracker
 
-from .hmutils import (
+from hallmonitor.hmutils import (
     CHECKED_SUBDIR,
     FILE_RE,
     LOGGING_SUBPATH,
@@ -51,6 +50,7 @@ from .hmutils import (
     write_pending_files,
     write_qa_tracker,
 )
+from hallmonitor.updatetracker import update_tracker
 
 
 def validate_data(
