@@ -41,6 +41,10 @@ class BaseTestCase(MiscellaneousTestCase):
         return []
 
 
+def test_base(request):
+    BaseTestCase.run_test_case(request)
+
+
 class InsufficientFilesTestCase(MiscellaneousTestCase):
     """
     Test case for incorrect number of files in a folder (not enough).
@@ -66,6 +70,10 @@ class InsufficientFilesTestCase(MiscellaneousTestCase):
         errors = [ExpectedError("Missing file", re.escape(missing_info))]
 
         return errors
+
+
+def test_insufficient_files(request):
+    InsufficientFilesTestCase.run_test_case(request)
 
 
 class ExtraFilesInFolderTestCase(MiscellaneousTestCase):
@@ -106,6 +114,10 @@ class ExtraFilesInFolderTestCase(MiscellaneousTestCase):
         ]
 
         return errors
+
+
+def test_extra_files_in_folder(request):
+    ExtraFilesInFolderTestCase.run_test_case(request)
 
 
 class EmptyFileTestCase(MiscellaneousTestCase):
@@ -149,6 +161,10 @@ class EmptyFileTestCase(MiscellaneousTestCase):
         return errors
 
 
+def test_empty_file(request):
+    EmptyFileTestCase.run_test_case(request)
+
+
 class ExpectedFileMissingTestCase(MiscellaneousTestCase):
     """
     Test case for missing expected files based on the data dictionary.
@@ -181,6 +197,10 @@ class ExpectedFileMissingTestCase(MiscellaneousTestCase):
         ]
 
         return errors
+
+
+def test_expected_file_missing(request):
+    ExpectedFileMissingTestCase.run_test_case(request)
 
 
 class MultipleTasksFromCombinationRowTestCase(MiscellaneousTestCase):
@@ -231,6 +251,10 @@ class MultipleTasksFromCombinationRowTestCase(MiscellaneousTestCase):
         return errors
 
 
+def test_multiple_tasks_from_combination_row(request):
+    MultipleTasksFromCombinationRowTestCase.run_test_case(request)
+
+
 class DataDictionaryHasChangesTestCase(TestCase):
     case_name = "DataDictionaryHasChangesTestCase"
     description = "Modifies the data dictionary to simulate unexpected changes."
@@ -241,16 +265,6 @@ class DataDictionaryHasChangesTestCase(TestCase):
         "Data dictionary contents differ from the expected format or version."
     ]
     expected_output = "Error is raised indicating that the data dictionary has changed."
-
-    def __init__(self, basedir: str, sub_id: int):
-        super().__init__(
-            basedir,
-            sub_id,
-            self.case_name,
-            self.description,
-            self.conditions,
-            self.expected_output,
-        )
 
     def modify(self, base_files):
         modified_files = base_files.copy()
@@ -278,6 +292,10 @@ class DataDictionaryHasChangesTestCase(TestCase):
             main(args)
 
 
+def test_data_dictionary_has_changes(request):
+    DataDictionaryHasChangesTestCase.run_test_case(request)
+
+
 class PendingFilesCsvCreatedTestCase(TestCase):
     """
     Test case to ensure that new pending-files and pending-errors CSVs are created
@@ -294,16 +312,6 @@ class PendingFilesCsvCreatedTestCase(TestCase):
         "CSVs with the names pending-files and pending-errors are created. These files' names should "
         "contain an appropriate matching timestamp and the files should have all expected columns."
     )
-
-    def __init__(self, basedir: str, sub_id: int):
-        super().__init__(
-            basedir,
-            sub_id,
-            self.case_name,
-            self.description,
-            self.conditions,
-            self.expected_output,
-        )
 
     def modify(self, base_files):
         modified_files = base_files.copy()
@@ -394,6 +402,10 @@ class PendingFilesCsvCreatedTestCase(TestCase):
         assert pending_files_ts == pending_errors_ts
 
 
+def test_pending_files_csv_created(request):
+    PendingFilesCsvCreatedTestCase.run_test_case(request)
+
+
 class MissingTaskFromDataDictionaryTestCase(MiscellaneousTestCase):
     case_name = "MissingTaskFromDataDictionaryTestCase"
     description = (
@@ -418,3 +430,7 @@ class MissingTaskFromDataDictionaryTestCase(MiscellaneousTestCase):
         errors = [ExpectedError("Missing file", info_regex=error_info)]
 
         return errors
+
+
+def test_missing_task_from_data_dictionary(request):
+    MissingTaskFromDataDictionaryTestCase.run_test_case(request)

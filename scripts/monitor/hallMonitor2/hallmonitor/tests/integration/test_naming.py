@@ -47,6 +47,10 @@ class InvalidVariableNameTestCase(NamingTestCase):
         return errors
 
 
+def test_invalid_variable_name(request):
+    InvalidVariableNameTestCase.run_test_case(request)
+
+
 class MissingVariableNameTestCase(NamingTestCase):
     """
     Test case for missing variable names in file names.
@@ -90,6 +94,10 @@ class MissingVariableNameTestCase(NamingTestCase):
         return errors
 
 
+def test_missing_variable_name(request):
+    MissingVariableNameTestCase.run_test_case(request)
+
+
 class MissingSubjectNumberTestCase(NamingTestCase):
     """
     Test case for missing subject number in file names.
@@ -131,6 +139,10 @@ class MissingSubjectNumberTestCase(NamingTestCase):
         ]
 
         return errors
+
+
+def test_missing_subject_number(request):
+    MissingSubjectNumberTestCase.run_test_case(request)
 
 
 class InvalidSubjectNumberTestCase(NamingTestCase):
@@ -179,6 +191,10 @@ class InvalidSubjectNumberTestCase(NamingTestCase):
         return errors
 
 
+def test_invalid_subject_number(request):
+    InvalidSubjectNumberTestCase.run_test_case(request)
+
+
 class InvalidSessionSuffixTestCase(NamingTestCase):
     """
     Test case for invalid session numbers in file names.
@@ -224,6 +240,10 @@ class InvalidSessionSuffixTestCase(NamingTestCase):
         ]
 
         return errors
+
+
+def test_invalid_session_suffix(request):
+    InvalidSessionSuffixTestCase.run_test_case(request)
 
 
 class InvalidRunSuffixTestCase(NamingTestCase):
@@ -275,6 +295,10 @@ class InvalidRunSuffixTestCase(NamingTestCase):
         return errors
 
 
+def test_invalid_run_suffix(request):
+    InvalidRunSuffixTestCase.run_test_case(request)
+
+
 class InvalidEventSuffixTestCase(NamingTestCase):
     """
     Test case for invalid event numbers in file names.
@@ -321,6 +345,10 @@ class InvalidEventSuffixTestCase(NamingTestCase):
         return errors
 
 
+def test_invalid_event_suffix(request):
+    InvalidEventSuffixTestCase.run_test_case(request)
+
+
 class MissingSessionSuffixTestCase(NamingTestCase):
     """
     Test case for missing session numbers in file names.
@@ -363,6 +391,10 @@ class MissingSessionSuffixTestCase(NamingTestCase):
         ]
 
         return errors
+
+
+def test_missing_session_suffix(request):
+    MissingSessionSuffixTestCase.run_test_case(request)
 
 
 class MissingRunSuffixTestCase(NamingTestCase):
@@ -409,6 +441,10 @@ class MissingRunSuffixTestCase(NamingTestCase):
         return errors
 
 
+def test_missing_run_suffix(request):
+    MissingRunSuffixTestCase.run_test_case(request)
+
+
 class MissingEventSuffixTestCase(NamingTestCase):
     """
     Test case for missing event numbers in file names.
@@ -451,6 +487,10 @@ class MissingEventSuffixTestCase(NamingTestCase):
         ]
 
         return errors
+
+
+def test_missing_event_suffix(request):
+    MissingEventSuffixTestCase.run_test_case(request)
 
 
 class InvalidExtensionTestCase(NamingTestCase):
@@ -500,6 +540,10 @@ class InvalidExtensionTestCase(NamingTestCase):
         return errors
 
 
+def test_invalid_extension(request):
+    InvalidExtensionTestCase.run_test_case(request)
+
+
 class MissingExtensionTestCase(NamingTestCase):
     """
     Test case for missing file extensions in file names.
@@ -538,3 +582,7 @@ class MissingExtensionTestCase(NamingTestCase):
         ]
 
         return errors
+
+
+def test_missing_extension(request):
+    MissingExtensionTestCase.run_test_case(request)

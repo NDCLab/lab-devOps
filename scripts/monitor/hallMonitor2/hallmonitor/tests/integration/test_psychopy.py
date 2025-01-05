@@ -36,14 +36,18 @@ class PsychopyFileIDMismatchTestCase(PsychopyTestCase):
         # modify the first ID in the file to be incorrect
         original_content = modified_files[psychopy_file]
         modified_content = original_content.replace(
-            str(self.sub_id), str(TestCase.BASE_SUBJECT_ID), count=1
+            str(self.sub_id), str(TestCase.SUBJECT_ID), count=1
         )
         modified_files[psychopy_file] = modified_content
 
         return modified_files
 
     def get_expected_errors(self):
-        id_info = f"ID value(s) [{TestCase.BASE_SUBJECT_ID}] in csvfile different from ID in filename ({self.sub_id})"
+        id_info = f"ID value(s) [{TestCase.SUBJECT_ID}] in csvfile different from ID in filename ({self.sub_id})"
         errors = [ExpectedError("Psychopy error", re.escape(id_info))]
 
         return errors
+
+
+def test_psychopy_file_id_mismatch(request):
+    PsychopyFileIDMismatchTestCase.run_test_case(request)

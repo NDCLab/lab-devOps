@@ -51,6 +51,10 @@ class FolderSessionSuffixMismatchTestCase(MisplacedFileTestCase):
         return errors
 
 
+def test_folder_session_suffix_mismatch(request):
+    FolderSessionSuffixMismatchTestCase.run_test_case(request)
+
+
 class FolderRunSuffixMismatchTestCase(MisplacedFileTestCase):
     """
     Test case for mismatched run suffix in file name and session folder.
@@ -96,6 +100,10 @@ class FolderRunSuffixMismatchTestCase(MisplacedFileTestCase):
         return errors
 
 
+def test_folder_run_suffix_mismatch(request):
+    FolderRunSuffixMismatchTestCase.run_test_case(request)
+
+
 class FolderSubjectMismatchTestCase(MisplacedFileTestCase):
     """
     Test case for mismatched subject in file name and subject folder.
@@ -137,6 +145,10 @@ class FolderSubjectMismatchTestCase(MisplacedFileTestCase):
         ]
 
         return errors
+
+
+def test_folder_subject_mismatch(request):
+    FolderSubjectMismatchTestCase.run_test_case(request)
 
 
 class FolderVariableMismatchTestCase(MisplacedFileTestCase):
@@ -182,3 +194,7 @@ class FolderVariableMismatchTestCase(MisplacedFileTestCase):
         ]
 
         return errors
+
+
+def test_folder_variable_mismatch(request):
+    FolderVariableMismatchTestCase.run_test_case(request)

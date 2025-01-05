@@ -93,6 +93,10 @@ class BaseUpdateTrackerTestCase(TrackerTestCase):
         assert len(failed_cols) == 0, f"Failed column(s): {', '.join(failed_cols)}"
 
 
+def test_base_update_tracker(request):
+    BaseUpdateTrackerTestCase.run_test_case(request)
+
+
 class DeviationCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
     """
     Validates that addition of a deviation.txt file for a file that has been
@@ -133,6 +137,10 @@ class DeviationCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
         return modified_files
 
 
+def test_deviation_checked_update_tracker(request):
+    DeviationCheckedUpdateTrackerTestCase.run_test_case(request)
+
+
 class DeviationNoCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
     """
     Validates that addition of a deviation.txt file for a file that has not been
@@ -167,6 +175,10 @@ class DeviationNoCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
         modified_files[deviation_file] = "Deviation reason: Testing update_tracker."
 
         return modified_files
+
+
+def test_deviation_no_checked_update_tracker(request):
+    DeviationNoCheckedUpdateTrackerTestCase.run_test_case(request)
 
 
 class BBSDataZeroMissingDatatypeFolderTestCase(TrackerTestCase):
@@ -222,6 +234,10 @@ class BBSDataZeroMissingDatatypeFolderTestCase(TrackerTestCase):
         assert sub_row["bbs_data_s3_r1_e1"] == 1
 
 
+def test_bbs_data_zero_missing_datatype_folder(request):
+    BBSDataZeroMissingDatatypeFolderTestCase.run_test_case(request)
+
+
 class BBSDataZeroMissingDataTestCase(TrackerTestCase):
     """
     Validates that a present datatype folder with no data results in a 0 in the central tracker.
@@ -274,6 +290,10 @@ class BBSDataZeroMissingDataTestCase(TrackerTestCase):
         # these sessions should have no problems
         assert sub_row["bbs_data_s2_r1_e1"] == 1
         assert sub_row["bbs_data_s3_r1_e1"] == 1
+
+
+def test_bbs_data_zero_missing_data(request):
+    BBSDataZeroMissingDataTestCase.run_test_case(request)
 
 
 class BBSDataZeroNoDataFileTestCase(TrackerTestCase):
@@ -333,6 +353,10 @@ class BBSDataZeroNoDataFileTestCase(TrackerTestCase):
         assert sub_row["bbs_data_s3_r1_e1"] == 1
 
 
+def test_bbs_data_zero_no_data_file(request):
+    BBSDataZeroNoDataFileTestCase.run_test_case(request)
+
+
 class BBSDataZeroIncorrectDataTestCase(TrackerTestCase):
     """
     Validates that the bbs_data column updates with a "0"
@@ -387,6 +411,10 @@ class BBSDataZeroIncorrectDataTestCase(TrackerTestCase):
         # these sessions should have no problems
         assert sub_row["bbs_data_s2_r1_e1"] == 1
         assert sub_row["bbs_data_s3_r1_e1"] == 1
+
+
+def test_bbs_data_Zero_incorrect_data(request):
+    BBSDataZeroIncorrectDataTestCase.run_test_case(request)
 
 
 class BBSDataOneDeviationFileTestCase(TrackerTestCase):
@@ -447,6 +475,10 @@ class BBSDataOneDeviationFileTestCase(TrackerTestCase):
         assert sub_row["bbs_data_s3_r1_e1"] == 1
 
 
+def test_bbs_data_one_deviation_file(request):
+    BBSDataOneDeviationFileTestCase.run_test_case(request)
+
+
 class DuplicateREDCapColumnsTestCase(TrackerTestCase):
     """
     Validates that duplicate columns in REDCap files are caught.
@@ -505,6 +537,10 @@ class DuplicateREDCapColumnsTestCase(TrackerTestCase):
             ), f"Unexpected error: {call.args}"
 
 
+def test_duplicate_redcap_columns(request):
+    DuplicateREDCapColumnsTestCase.run_test_case(request)
+
+
 class MissingREDCapColumnTestCase(TrackerTestCase):
     """
     Validates that missing columns in REDCap files are caught.
@@ -557,3 +593,7 @@ class MissingREDCapColumnTestCase(TrackerTestCase):
         assert any(
             re.match(error_re, str(arg)) for arg in err_call.args
         ), f"Unexpected error: {err_call.args}"
+
+
+def test_missing_redcap_column(request):
+    MissingREDCapColumnTestCase.run_test_case(request)
