@@ -593,6 +593,18 @@ class TestCase(ABC):
         return base_files
 
     def build_rc_name(self, rc_stem: str, ses: str = "", run: str = ""):
+        """
+        Constructs a REDCap name string for the given test case.
+
+        Args:
+            rc_stem (str): The stem of the REDCap name.
+            ses (str, optional): The session identifier. Defaults to an empty string.
+            run (str, optional): The run identifier. Defaults to an empty string.
+
+        Returns:
+            str: The constructed REDCap name string in the format
+                 "{case_name}{rc_stem}{ses}{run}_DATA_{RC_TIMESTAMP}.csv".
+        """
         RC_TIMESTAMP = "2024-01-01_1230"
         return f"{self.case_name}{rc_stem}{ses}{run}_DATA_{RC_TIMESTAMP}.csv"
 
