@@ -505,10 +505,7 @@ class DuplicateREDCapColumnsTestCase(TrackerTestCase):
         redcap_df = pd.DataFrame(columns=rc_cols, data=rc_data)
 
         redcap_subpath = os.path.join(
-            "sourcedata",
-            "checked",
-            "redcap",
-            f"{self.case_name}consent_DATA_2024-01-01_1230.csv",
+            "sourcedata", "checked", "redcap", self.build_rc_name("consent")
         )
         modified_files[redcap_subpath] = redcap_df.to_csv(index=False)
 
@@ -561,7 +558,7 @@ class MissingREDCapColumnTestCase(TrackerTestCase):
             "sourcedata",
             "checked",
             "redcap",
-            f"{self.case_name}bbschilds1r1_DATA_2024-01-01_1230.csv",
+            self.build_rc_name("bbschild", "s1", "r1"),
         )
         # pandas.read_csv() expects a file-like object, so we create a StringIO object
         #   because modify() is called before the test case's files are written to disk
@@ -628,19 +625,14 @@ class RelocatedREDCapColumnTestCase(TrackerTestCase):
         rc_dir = os.path.join("sourcedata", "checked", "redcap")
 
         # delete the column from its original REDCap
-        original_rc = os.path.join(
-            rc_dir,
-            f"{self.case_name}bbschilds1r1_DATA_2024-01-01_1230.csv",
-        )
+        original_rc = os.path.join(rc_dir, self.build_rc_name("bbschild", "s1", "r1"))
         # need to read in data via file-like object
         og_df = pd.read_csv(StringIO(modified_files[original_rc]))
         og_df.drop(columns=[self.moved_col], inplace=True)
         modified_files[original_rc] = og_df.to_csv(index=False)
 
         # add the column back in a different REDCap
-        new_rc = os.path.join(
-            rc_dir, f"{self.case_name}iqschilds1r1_DATA_2024-01-01_1230.csv"
-        )
+        new_rc = os.path.join(rc_dir, self.build_rc_name("iqschild", "s1", "r1"))
         new_df = pd.read_csv(StringIO(modified_files[new_rc]))
         new_df[self.moved_col] = 2
         modified_files[new_rc] = new_df.to_csv(index=False)
