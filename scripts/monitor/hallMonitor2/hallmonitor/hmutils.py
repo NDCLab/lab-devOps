@@ -37,7 +37,6 @@ CHECKED_SUBDIR = os.path.join("sourcedata", "checked", "")
 PENDING_QA_SUBDIR = os.path.join("sourcedata", "pending-qa", "")
 QA_CHECKLIST_SUBPATH = os.path.join(PENDING_QA_SUBDIR, "qa-checklist.csv")
 DATASET_DIR = os.path.join("/home", "data", "NDClab", "datasets")
-DATASET_DIR = "/home/nwelch/ndc-lab/lab-devOps/scripts/monitor/hallMonitor2/hallmonitor/tests/integration/.test_output"
 LOGGING_SUBPATH = os.path.join("data-monitoring", "logs", "")
 
 FILE_RECORD_COLS = [
