@@ -535,7 +535,6 @@ def main(
             rc_df = pd.concat([rc_df, remote_df])
 
         # re-index rc_df on the selected column
-        rc_id_col = col_matches[0]
         all_rc_dfs[expected_rc] = rc_df.set_index(rc_id_col)
 
         # If hallMonitor passes "redcap" arg, data exists and passed checks
