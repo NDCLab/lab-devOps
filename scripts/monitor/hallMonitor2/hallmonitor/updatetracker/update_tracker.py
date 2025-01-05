@@ -273,8 +273,8 @@ def fill_status_data_columns(dataset: str, tracker_df: pd.DataFrame):
     for _, row in data_var_rows.iterrows():
         prov = str(row["provenance"])
         suffixes = get_allowed_suffixes(dd_df, row["variable"])
-        if "variables:" in prov:
-            prov_vars = re.findall(r'variables:\s*"([^"]+)"', prov)
+        if "variables:" in prov and "file:" not in prov:
+            prov_vars = re.findall(r'"([^"]+)"', prov)
             for suffix in suffixes:
                 # create column names by combining each variable with the current suffix
                 colnames = [f"{var}_{suffix}" for var in prov_vars]
@@ -289,7 +289,7 @@ def fill_status_data_columns(dataset: str, tracker_df: pd.DataFrame):
                 tracker_df[status_colname] = all_true.astype(int)
 
         elif "file:" in prov:
-            prov_files = re.findall(r'file:\s*"([^\s"]+)"', prov)
+            prov_files = re.findall(r'"([^\s"]+)"', prov)
             for suffix in suffixes:
                 ses = suffix.split("_")[0]
                 colname = f"{row['variable']}_{suffix}"
