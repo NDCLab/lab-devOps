@@ -598,3 +598,79 @@ class MissingREDCapColumnTestCase(TrackerTestCase):
 
 def test_missing_redcap_column(request):
     MissingREDCapColumnTestCase.run_test_case(request)
+
+
+class RelocatedREDCapColumnTestCase(TrackerTestCase):
+    """
+    Validates that relocated columns in REDCap files are detected.
+    """
+
+    case_name = "RelocatedREDCapColumnTestCase"
+    description = (
+        "Ensures that when a column is removed from one REDCap file "
+        "and added to another, the error is detected and logged, "
+        "preventing the tracker from being updated."
+    )
+    conditions = [
+        "A column is removed from its original REDCap file.",
+        "The same column is added to a different REDCap file.",
+    ]
+    expected_output = (
+        "An error is logged indicating the relocation of the column, "
+        "and the tracker update fails with a RuntimeError."
+    )
+
+    moved_col = "abq_s1_r1_e1_complete"
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        rc_dir = os.path.join("sourcedata", "checked", "redcap")
+
+        # delete the column from its original REDCap
+        original_rc = os.path.join(
+            rc_dir,
+            f"{self.case_name}bbschilds1r1_DATA_2024-01-01_1230.csv",
+        )
+        # need to read in data via file-like object
+        og_df = pd.read_csv(StringIO(modified_files[original_rc]))
+        og_df.drop(columns=[self.moved_col], inplace=True)
+        modified_files[original_rc] = og_df.to_csv(index=False)
+
+        # add the column back in a different REDCap
+        new_rc = os.path.join(
+            rc_dir, f"{self.case_name}iqschilds1r1_DATA_2024-01-01_1230.csv"
+        )
+        new_df = pd.read_csv(StringIO(modified_files[new_rc]))
+        new_df[self.moved_col] = 2
+        modified_files[new_rc] = new_df.to_csv(index=False)
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import hallMonitor
+
+        args = self.get_standard_args()
+        args.raw_only = True
+        args.no_qa = True
+
+        mock_logger = mock.Mock()
+        with (
+            mock.patch("logging.getLogger", return_value=mock_logger),
+            pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
+        ):
+            hallMonitor.main(args)
+
+        assert mock_logger.error.call_count == 1
+        # examine the arguments passed to the first call of logger.error()
+        err_call_args = mock_logger.error.call_args_list[0].args
+        target_keywords = [self.moved_col, "bbschild", "iqschild"]
+        for arg in err_call_args:
+            arg_str = str(arg)
+            if all(kw in arg_str for kw in target_keywords):
+                return  # expected error found
+        raise AssertionError(f"Unexpected error: {err_call_args}")
+
+
+def test_relocated_redcap_column(request):
+    RelocatedREDCapColumnTestCase.run_test_case(request)
