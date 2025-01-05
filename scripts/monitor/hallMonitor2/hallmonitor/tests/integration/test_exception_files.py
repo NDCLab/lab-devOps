@@ -54,6 +54,10 @@ class DeviationAndNoDataErrorTestCase(ExceptionTestCase):
         return errors
 
 
+def test_deviation_and_no_data_error(request):
+    DeviationAndNoDataErrorTestCase.run_test_case(request)
+
+
 class DeviationAndNoDataFilesErrorTestCase(ExceptionTestCase):
     """
     Test case for presence of both deviation.txt and no-data.txt in a folder.
@@ -97,6 +101,10 @@ class DeviationAndNoDataFilesErrorTestCase(ExceptionTestCase):
         return errors
 
 
+def test_deviation_and_no_data_files_error(request):
+    DeviationAndNoDataFilesErrorTestCase.run_test_case(request)
+
+
 class DeviationFileWithFolderMismatchTestCase(ExceptionTestCase):
     """
     Test case for deviation.txt presence with file names that do not match their folder.
@@ -134,6 +142,10 @@ class DeviationFileWithFolderMismatchTestCase(ExceptionTestCase):
         errors = [ExpectedError("Misplaced file", misplaced_info)]
 
         return errors
+
+
+def test_deviation_file_with_folder_mismatch(request):
+    DeviationFileWithFolderMismatchTestCase.run_test_case(request)
 
 
 class DeviationFilePreventsErrorWithExtraFilesTestCase(ExceptionTestCase):
@@ -175,6 +187,10 @@ class DeviationFilePreventsErrorWithExtraFilesTestCase(ExceptionTestCase):
         return []
 
 
+def test_deviation_file_prevents_error_with_extra_files(request):
+    DeviationFilePreventsErrorWithExtraFilesTestCase.run_test_case(request)
+
+
 class NoDataAdditionalFilesTestCase(ExceptionTestCase):
     """
     Test case for presence of no-data.txt when additional files are present for the same identifier.
@@ -202,6 +218,10 @@ class NoDataAdditionalFilesTestCase(ExceptionTestCase):
         errors = [ExpectedError("Unexpected file", extra_info, 3)]
 
         return errors
+
+
+def test_no_data_additional_files(request):
+    NoDataAdditionalFilesTestCase.run_test_case(request)
 
 
 class DeviationFileWithBadNamesTestCase(ExceptionTestCase):
@@ -241,6 +261,10 @@ class DeviationFileWithBadNamesTestCase(ExceptionTestCase):
         return errors
 
 
+def test_deviation_file_with_bad_names(request):
+    DeviationFileWithBadNamesTestCase.run_test_case(request)
+
+
 class DeviationFileWithValidNamesTestCase(ExceptionTestCase):
     """
     Test case for deviation.txt presence with valid file names containing additional strings.
@@ -275,6 +299,10 @@ class DeviationFileWithValidNamesTestCase(ExceptionTestCase):
 
     def get_expected_errors(self):
         return []
+
+
+def test_deviation_file_with_valid_names(request):
+    DeviationFileWithValidNamesTestCase.run_test_case(request)
 
 
 class IssueFileTestCase(ExceptionTestCase):
@@ -316,6 +344,10 @@ class IssueFileTestCase(ExceptionTestCase):
         return errors
 
 
+def test_issue_file(request):
+    IssueFileTestCase.run_test_case(request)
+
+
 class MissingIdentifierWithoutNoDataTestCase(ExceptionTestCase):
     """
     Test case for no data in a folder without an accompanying no-data.txt file.
@@ -345,6 +377,10 @@ class MissingIdentifierWithoutNoDataTestCase(ExceptionTestCase):
         return errors
 
 
+def test_missing_identifier_without_no_data(request):
+    MissingIdentifierWithoutNoDataTestCase.run_test_case(request)
+
+
 class MissingIdentifierNoDataTestCase(ExceptionTestCase):
     """
     Test case for no data in a folder with an accompanying no-data.txt file.
@@ -371,3 +407,7 @@ class MissingIdentifierNoDataTestCase(ExceptionTestCase):
 
     def get_expected_errors(self):
         return []
+
+
+def test_missing_identifier_no_data(request):
+    MissingIdentifierNoDataTestCase.run_test_case(request)

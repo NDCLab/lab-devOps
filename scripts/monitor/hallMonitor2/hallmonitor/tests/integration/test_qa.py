@@ -19,8 +19,11 @@ class PendingQAFileTestCase(QATestCase):
         "Files are copied correctly, and no extraneous files are present in pending-qa."
     )
 
+    original_paths = set()
+
     def modify(self, base_files):
         modified_files = base_files.copy()
+        self.original_paths = set(modified_files.keys())
 
         pending_dir = os.path.join("data-monitoring", "pending")
 
@@ -72,7 +75,7 @@ class PendingQAFileTestCase(QATestCase):
         exts = {".eeg", ".vmrk", ".vhdr"}
         additional_files = {os.path.join(data_folder, identifier + ext) for ext in exts}
 
-        expected_files = set(self.get_base_paths())
+        expected_files = self.original_paths
         expected_files.update(additional_files)
 
         actual_files = set(self.get_paths(self.case_dir))
@@ -88,6 +91,10 @@ class PendingQAFileTestCase(QATestCase):
             if extra_files:
                 fail_reason += "Extra files:\n" + "\n".join(extra_files) + "\n"
             raise AssertionError(f"File layout validation failed:\n{fail_reason}")
+
+
+def test_pending_qa_file(request):
+    PendingQAFileTestCase.run_test_case(request)
 
 
 class QAChecklistEntryTestCase(PendingQAFileTestCase):
@@ -123,6 +130,10 @@ class QAChecklistEntryTestCase(PendingQAFileTestCase):
 
         assert info["user"]
         assert re.match(r"\d{4}-\d{2}-\d{2}_\d{2}-\d{2}", info["datetime"]) is not None
+
+
+def test_qa_checklist_entry(request):
+    QAChecklistEntryTestCase.run_test_case(request)
 
 
 class QAPassMovedToCheckedTestCase(QATestCase):
@@ -210,6 +221,10 @@ class QAPassMovedToCheckedTestCase(QATestCase):
         assert "subject 3" in str(actual_files[sub3_pending_path]).lower()
 
 
+def test_qa_pass_moved_to_checked(request):
+    QAPassMovedToCheckedTestCase.run_test_case(request)
+
+
 class QAPassRemovedFromChecklistTestCase(QAPassMovedToCheckedTestCase):
     """
     Test case for verifying that only identifiers marked as both passing QA checks and
@@ -247,6 +262,10 @@ class QAPassRemovedFromChecklistTestCase(QAPassMovedToCheckedTestCase):
 
         sub3_qa_entries = qa_df[qa_df["identifier"] == "sub-3_all_eeg_s1_r1_e1"]
         assert len(sub3_qa_entries.index) == 1
+
+
+def test_qa_pass_removed_from_checklist(request):
+    QAPassRemovedFromChecklistTestCase.run_test_case(request)
 
 
 class QAPassAddedToValidatedFileRecordTestCase(QAPassMovedToCheckedTestCase):
@@ -289,6 +308,10 @@ class QAPassAddedToValidatedFileRecordTestCase(QAPassMovedToCheckedTestCase):
 
         sub3_qa_entries = record_df[record_df["identifier"] == "sub-3_all_eeg_s1_r1_e1"]
         assert len(sub3_qa_entries.index) == 0
+
+
+def test_qa_pass_added_to_validated_file_record(request):
+    QAPassAddedToValidatedFileRecordTestCase.run_test_case(request)
 
 
 class QAEmptyDirectoriesAreDeletedTestCase(QATestCase):
@@ -340,6 +363,10 @@ class QAEmptyDirectoriesAreDeletedTestCase(QATestCase):
 
         assert len(pending_qa_files.keys()) == 2
         assert pending_qa_files.keys() == {"not_empty/dummy.txt", "qa-checklist.csv"}
+
+
+def test_qa_empty_directories_are_deleted(request):
+    QAEmptyDirectoriesAreDeletedTestCase.run_test_case(request)
 
 
 class QAChecklistCreatedTestCase(QATestCase):
@@ -397,3 +424,7 @@ class QAChecklistCreatedTestCase(QATestCase):
             "qa",
             "localMove",
         }
+
+
+def test_qa_checklist_created(request):
+    QAChecklistCreatedTestCase.run_test_case(request)

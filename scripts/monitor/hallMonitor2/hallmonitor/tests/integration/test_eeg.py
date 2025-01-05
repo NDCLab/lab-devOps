@@ -49,6 +49,10 @@ class EEGDataFileVHDRMismatchTestCase(EEGTestCase):
         return errors
 
 
+def test_eeg_data_file_vhdr_mismatch(request):
+    EEGDataFileVHDRMismatchTestCase.run_test_case(request)
+
+
 class EEGMarkerFileVHDRMismatchTestCase(EEGTestCase):
     """
     Test case for mismatched MarkerFile line in an EEG .vhdr file.
@@ -93,6 +97,10 @@ class EEGMarkerFileVHDRMismatchTestCase(EEGTestCase):
         return errors
 
 
+def test_eeg_marker_file_vhdr_mismatch(request):
+    EEGMarkerFileVHDRMismatchTestCase.run_test_case(request)
+
+
 class EEGDataFileVMRKMismatchTestCase(EEGTestCase):
     """
     Test case for mismatched DataFile line in an EEG .vmrk file.
@@ -133,3 +141,7 @@ class EEGDataFileVMRKMismatchTestCase(EEGTestCase):
         errors = [ExpectedError("EEG error", re.escape(eeg_info))]
 
         return errors
+
+
+def test_eeg_data_file_vmrk_mismatch(request):
+    EEGDataFileVMRKMismatchTestCase.run_test_case(request)
