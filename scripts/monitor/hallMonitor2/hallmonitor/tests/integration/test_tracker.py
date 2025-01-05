@@ -669,6 +669,26 @@ def test_relocated_redcap_column(request):
 
 
 class RemoteAndInPersonREDCapTestCase(TrackerTestCase):
+    """
+    Validates that REDCap files with conflicting in-person and remote-only data
+    are detected, ensuring errors are logged and the tracker cannot be updated.
+    """
+
+    case_name = "RemoteAndInPersonREDCapTestCase"
+    description = (
+        "Ensures that when duplicate REDCap data exists for the same subject, "
+        "with one labeled as remote-only and the other as in-person, the error "
+        "is detected and logged, preventing the tracker from being updated."
+    )
+    conditions = [
+        "A duplicate REDCap file is created with remote-only data for the same subject.",
+        "The original REDCap file contains in-person data for the same subject.",
+    ]
+    expected_output = (
+        "An error is logged indicating the presence of conflicting remote-only and "
+        "in-person data for the same subject, and the tracker update fails with a RuntimeError."
+    )
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
