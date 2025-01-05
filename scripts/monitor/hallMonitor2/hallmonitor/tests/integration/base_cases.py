@@ -481,6 +481,18 @@ class TestCase(ABC):
                 "provenance": 'file: "bbschild"; variable: ""',
                 "expectedFileExt": "NA",
             },
+            {
+                "variable": "psb",
+                "dataType": "redcap_data",
+                "description": "PSB questionnaire status",
+                "detail": 'When data is transferred from raw to checked, value of 1 is assigned based on the value of "{questionnaire name}_complete"!=NULL (indicating participant began questionnaire), otherwise 0.',
+                "allowedSuffix": "s1_r1_e1, s2_r1_e1, s3_r1_e1",
+                "measureUnit": "Logical",
+                "allowedValues": "NA, 0, 1",
+                "valueInfo": "NA, status unknown | 0, no data exists | 1, data exists",
+                "provenance": 'file: "iqschild"; variable: ""',
+                "expectedFileExt": "NA",
+            },
         ]
         mock_dd = pd.DataFrame(mock_dd)
         mock_dd.to_csv(dd_path, index=False)
@@ -541,6 +553,17 @@ class TestCase(ABC):
             }
             bbschild_df = pd.DataFrame([bbschild_row])
             bbschild_df.to_csv(rc_bbschild_path, index=False)
+
+            # basic "iqschild" REDCap
+            rc_iqschild_path = os.path.join(
+                redcap_dir, self.build_rc_name("iqschild", ses, run)
+            )
+            iqschild_row = {
+                "record_id": self.sub_id,
+                f"psb_{ses}_{run}_e1_complete": 2,
+            }
+            iqschild_df = pd.DataFrame([iqschild_row])
+            iqschild_df.to_csv(rc_iqschild_path, index=False)
 
         # set up empty central tracker
 
