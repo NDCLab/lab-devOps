@@ -1,8 +1,24 @@
 import datetime
 
+import pandas as pd
 import pytest
 import pytz
-from hallmonitor.hmutils import get_timestamp
+
+from hallmonitor.hmutils import get_timestamp, get_variable_datatype
+
+
+@pytest.fixture
+def mock_datadict(monkeypatch):
+    dd_df = pd.DataFrame(
+        {
+            "variable": ["eeg", "psychopy", "var3"],
+            "expectedFileExt": ['".eeg,.vmrk,.vhdr"', '".txt,.csv"', '""'],
+            "dataType": ["visit_data", "other", "visit_data"],
+            "provenance": ["variables: eeg, psychopy", "variables: var3", ""],
+        }
+    )
+    monkeypatch.setattr("hallmonitor.hmutils.get_datadict", lambda _: dd_df)
+
 
 # test get_timestamp(), DT_FORMAT, and TZ_INFO
 
@@ -69,3 +85,8 @@ def test_get_timestamp_different_time(monkeypatch, mock_dt_format, mock_tz_info)
 
     # Assert that the timestamp matches the new MOCK_TIME
     assert get_timestamp() == "2023-12-25 12:00"
+
+
+def test_get_variable_datatype(mock_datadict):
+    assert get_variable_datatype("", "eeg") == "visit_data"
+    assert get_variable_datatype("", "psychopy") == "other"
