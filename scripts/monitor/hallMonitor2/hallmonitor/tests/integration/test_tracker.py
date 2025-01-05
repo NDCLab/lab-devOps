@@ -77,6 +77,7 @@ class BaseUpdateTrackerTestCase(TrackerTestCase):
             "bbs_data",
             # REDCap variables
             "abq",
+            "psb",
         ]
 
         expected_cols = set()
