@@ -666,3 +666,47 @@ class RelocatedREDCapColumnTestCase(TrackerTestCase):
 
 def test_relocated_redcap_column(request):
     RelocatedREDCapColumnTestCase.run_test_case(request)
+
+
+class RemoteAndInPersonREDCapTestCase(TrackerTestCase):
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        rc_dir = os.path.join("sourcedata", "checked", "redcap")
+        rc_stem = "bbschild"
+        original_rc = os.path.join(rc_dir, self.build_rc_name(rc_stem, "s1", "r1"))
+        new_rc = os.path.join(
+            rc_dir, self.build_rc_name(f"REMOTEONLY{rc_stem}", "s1", "r1")
+        )
+        # copy original content to new remote-only REDCap
+        modified_files[new_rc] = modified_files[original_rc]
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import hallMonitor
+
+        args = self.get_standard_args()
+        args.raw_only = True
+        args.no_qa = True
+
+        mock_logger = mock.Mock()
+        with (
+            mock.patch("logging.getLogger", return_value=mock_logger),
+            pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
+        ):
+            hallMonitor.main(args)
+
+        assert mock_logger.error.call_count == 1
+        # examine the arguments passed to the first call of logger.error()
+        err_call_args = mock_logger.error.call_args_list[0].args
+        target_keywords = ["remote-only", "in-person", str(self.sub_id)]
+        for arg in err_call_args:
+            arg_str = str(arg)
+            if all(kw in arg_str for kw in target_keywords):
+                return  # expected error found
+        raise AssertionError(f"Unexpected error: {err_call_args}")
+
+
+def test_remote_and_in_person_redcap(request):
+    RemoteAndInPersonREDCapTestCase.run_test_case(request)
