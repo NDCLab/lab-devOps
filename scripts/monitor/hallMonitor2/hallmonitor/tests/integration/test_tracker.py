@@ -413,7 +413,7 @@ class BBSDataZeroIncorrectDataTestCase(TrackerTestCase):
         assert sub_row["bbs_data_s3_r1_e1"] == 1
 
 
-def test_bbs_data_Zero_incorrect_data(request):
+def test_bbs_data_zero_incorrect_data(request):
     BBSDataZeroIncorrectDataTestCase.run_test_case(request)
 
 
