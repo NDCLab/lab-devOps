@@ -528,7 +528,8 @@ def main(
             duped_subs = set(remote_df[rc_id_col]) & set(rc_df[rc_id_col])
             if duped_subs:
                 raise ValueError(
-                    f"The following subjects are in the remote-only and in-person REDCaps: {', '.join(duped_subs)}"
+                    "The following subjects are in the remote-only and in-person REDCaps: "
+                    + ", ".join(str(sub) for sub in duped_subs)
                 )
 
             # ...append remote RC to in-person RC, since variables are the same
