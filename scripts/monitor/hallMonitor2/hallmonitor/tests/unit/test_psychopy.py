@@ -371,7 +371,8 @@ def test_multiple_filename_participant_mismatches(
     csv_file = tmp_path / f"{base_filename}.csv"
     log_file = tmp_path / f"{base_filename}.log"
     psydat_file = tmp_path / f"{base_filename}.psydat"
-    csv_file.write_text(f"participant\n{"\n".join(mismatched_ids)}")
+    newline = "\n"  # no backslashes in f-strings
+    csv_file.write_text(f"participant{newline}{newline.join(mismatched_ids)}")
     log_file.write_text(
         f"saved data to '{csv_file.name}'\nsaved data to '{psydat_file.name}'"
     )
