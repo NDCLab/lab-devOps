@@ -101,8 +101,6 @@ def get_redcap_columns(datadict_df: pd.DataFrame, session: str):
             allowed_duplicate_columns.append(key)
     return cols, allowed_duplicate_columns
 
-    """Returns list of subject IDs from the Redcap and column specified in the "id" row in the datadict"""
-
 
 def get_all_subject_ids(dataset):
     """
