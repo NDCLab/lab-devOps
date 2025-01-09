@@ -285,7 +285,7 @@ class DataDictionaryHasChangesTestCase(TestCase):
         return modified_files
 
     def validate(self):
-        from hallmonitor.hallMonitor import main
+        from hallmonitor.hallmonitor import main
 
         with pytest.raises(ValueError, match="Data dictionary has changed"):
             args = self.get_standard_args()
@@ -333,7 +333,7 @@ class PendingFilesCsvCreatedTestCase(TestCase):
         # Raw data validation deals with pending-files and pending-errors,
         # while checked data validation only uses pending-errors. In this
         # test case, we want to examine the program's behavior for both.
-        from hallmonitor.hallMonitor import raw_data_validation
+        from hallmonitor.hallmonitor import raw_data_validation
 
         # save start time for later
         start_dt = datetime.datetime.now(tz=TZ_INFO)
