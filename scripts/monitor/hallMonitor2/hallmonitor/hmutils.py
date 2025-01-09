@@ -43,14 +43,18 @@ FILE_RECORD_COLS = [
     "datetime",
     "user",
     "identifier",
-    "identifierDetails",
+    "subject",
+    "dataType",
+    "suffix",
 ]
 PENDING_FILES_COLS = [
     "datetime",
     "user",
     "passRaw",
     "identifier",
-    "identifierDetails",
+    "subject",
+    "dataType",
+    "suffix",
     "errorType",
     "errorDetails",
 ]
@@ -58,7 +62,9 @@ PENDING_ERRORS_COLS = [
     "datetime",
     "user",
     "identifier",
-    "identifierDetails",
+    "subject",
+    "dataType",
+    "suffix",
     "errorType",
     "errorDetails",
 ]
@@ -66,7 +72,9 @@ QA_CHECKLIST_COLS = [
     "datetime",
     "user",
     "identifier",
-    "identifierDetails",
+    "subject",
+    "dataType",
+    "suffix",
     "qa",
     "localMove",
 ]
@@ -881,7 +889,9 @@ def new_file_record_df():
         "datetime": "str",
         "user": "str",
         "identifier": "str",
-        "identifierDetails": "str",
+        "subject": "int",
+        "dataType": "str",
+        "suffix": "str",
     }
     return df_from_colmap(colmap)
 
@@ -895,8 +905,9 @@ def new_pending_df():
     - user (str): The user associated with the entry.
     - dataType (str): The type of data.
     - identifier (str): A unique identifier for the entry (machine-readable).
-    - identifierDetails (str): Human-readable information about the identifier.
-    - passRaw (bool): True for pass rows, False for error rows
+    - subject (int): The subject's
+    "dataType",
+    "suffix",    - passRaw (bool): True for pass rows, False for error rows
     - errorType (str): The type of error, if any.
     - errorDetails (str): Details about the error, if any.
 
@@ -907,7 +918,9 @@ def new_pending_df():
         "datetime": "str",
         "user": "str",
         "identifier": "str",
-        "identifierDetails": "str",
+        "subject": "int",
+        "dataType": "str",
+        "suffix": "str",
         "passRaw": "bool",
         "errorType": "str",
         "errorDetails": "str",
@@ -932,7 +945,9 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
     - "user" (str): The user who encountered the error.
     - "passRaw" (bool): Always False, indicating that an error has occurred.
     - identifier (str): A unique identifier for the entry (machine-readable).
-    - identifierDetails (str): Human-readable information about the identifier.
+    - "subject" (int): The subject's ID.
+    - "dataType" (str): The identifier's variable datatype.
+    - "suffix" (str): The identifier's session, run, and event information.
     - "errorType" (str): The type/category of the error.
     - "errorDetails" (str): Detailed information about the error.
     """
@@ -940,9 +955,13 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
         if not isinstance(identifier, Identifier):
             identifier = Identifier.from_str(str(identifier))
         id_str = str(identifier)
-        detailed_str = identifier.to_detailed_str(dataset)
+        subject = int(identifier.subject.removeprefix("sub-"))
+        datatype = (get_variable_datatype(dataset, identifier.variable),)
+        suffix = f"{identifier.session}_{identifier.run}_{identifier.event}"
+
     except ValueError:
-        id_str = detailed_str = "Unknown Identifier"
+        id_str = "Unknown Identifier"
+        subject = datatype = suffix = ""
 
     logger.error(
         "Error occurred with identifier %s: %s - %s",
@@ -955,7 +974,9 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
         "user": getuser(),
         "passRaw": False,
         "identifier": id_str,
-        "identifierDetails": detailed_str,
+        "subject": subject,
+        "dataType": datatype,
+        "suffix": suffix,
         "errorType": error_type,
         "errorDetails": error_details,
     }
@@ -975,7 +996,9 @@ def new_pass_record(dataset, identifier):
     - "user" (str): The username of the current user.
     - "passRaw" (bool): Always True, indicating no error has occurred.
     - identifier (str): A unique identifier for the entry (machine-readable).
-    - identifierDetails (str): Human-readable information about the identifier.
+    - "subject" (int): The subject's ID.
+    - "dataType" (str): The identifier's variable datatype.
+    - "suffix" (str): The identifier's session, run, and event information.
     - "errorType" (None): Placeholder for error type, initially None.
     - "errorDetails" (None): Placeholder for error details, initially None.
     """
@@ -983,16 +1006,22 @@ def new_pass_record(dataset, identifier):
         if not isinstance(identifier, Identifier):
             identifier = Identifier.from_str(str(identifier))
         id_str = str(identifier)
-        detailed_str = identifier.to_detailed_str(dataset)
+        subject = int(identifier.subject.removeprefix("sub-"))
+        datatype = get_variable_datatype(dataset, identifier.variable)
+        suffix = f"{identifier.session}_{identifier.run}_{identifier.event}"
+
     except ValueError:
-        id_str = detailed_str = "Unknown Identifier"
+        id_str = "Unknown Identifier"
+        subject = datatype = suffix = ""
 
     return {
         "datetime": get_timestamp(),
         "user": getuser(),
         "passRaw": True,
         "identifier": id_str,
-        "identifierDetails": detailed_str,
+        "subject": subject,
+        "dataType": datatype,
+        "suffix": suffix,
         "errorType": None,
         "errorDetails": None,
     }
@@ -1018,7 +1047,9 @@ def new_validation_record(dataset, identifier):
             - "datetime" (str): The current timestamp.
             - "user" (str): The username of the current user.
             - identifier (str): A unique identifier for the entry (machine-readable).
-            - identifierDetails (str): Human-readable information about the identifier.
+            - "subject" (int): The subject's ID.
+            - "dataType" (str): The identifier's variable datatype.
+            - "suffix" (str): The identifier's session, run, and event information.
 
     Raises:
         ValueError: If the identifier string cannot be converted to an
@@ -1029,7 +1060,6 @@ def new_validation_record(dataset, identifier):
         if not isinstance(identifier, Identifier):
             identifier = Identifier.from_str(str(identifier))
         id_str = str(identifier)
-        detailed_str = identifier.to_detailed_str(dataset)
     except ValueError as err:
         raise ValueError("Could not build Identifier from string") from err
 
@@ -1037,7 +1067,9 @@ def new_validation_record(dataset, identifier):
         "datetime": get_timestamp(),
         "user": getuser(),
         "identifier": id_str,
-        "identifierDetails": detailed_str,
+        "subject": int(identifier.subject.removeprefix("sub-")),
+        "dataType": get_variable_datatype(dataset, identifier.variable),
+        "suffix": f"{identifier.session}_{identifier.run}_{identifier.event}",
     }
 
 
@@ -1052,8 +1084,10 @@ def new_qa_record(dataset, identifier):
 
     Returns:
         dict: A dictionary containing the QA record with the following keys:
-    - identifier (str): A unique identifier for the entry (machine-readable).
-    - identifierDetails (str): Human-readable information about the identifier.
+    - "identifier" (str): A unique identifier for the entry (machine-readable).
+    - "subject" (int): The subject's ID.
+    - "dataType" (str): The identifier's variable datatype.
+    - "suffix" (str): The identifier's session, run, and event information.
     - "datetime" (str): The current timestamp.
     - "user" (str): The username of the current user.
     - "qa" (bool): The QA status, initialized to False.
@@ -1066,13 +1100,19 @@ def new_qa_record(dataset, identifier):
         if not isinstance(identifier, Identifier):
             identifier = Identifier.from_str(str(identifier))
         id_str = str(identifier)
-        detailed_str = identifier.to_detailed_str(dataset)
+        subject = int(identifier.subject.removeprefix("sub-"))
+        datatype = get_variable_datatype(dataset, identifier.variable)
+        suffix = f"{identifier.session}_{identifier.run}_{identifier.event}"
+
     except ValueError:
-        id_str = detailed_str = "Unknown Identifier"
+        id_str = "Unknown Identifier"
+        subject = datatype = suffix = ""
 
     return {
         "identifier": id_str,
-        "identifierDetails": detailed_str,
+        "subject": subject,
+        "dataType": datatype,
+        "suffix": suffix,
         "datetime": get_timestamp(),
         "user": getuser(),
         "qa": False,
@@ -1088,7 +1128,9 @@ def new_qa_checklist():
     - "datetime": str
     - "user": str
     - "identifier": str
-    - "identifierDetails": str
+    - "subject": int
+    - "dataType": str
+    - "suffix": (str)
     - "qa": bool
     - "localMove": bool
 
@@ -1099,7 +1141,9 @@ def new_qa_checklist():
         "datetime": "str",
         "user": "str",
         "identifier": "str",
-        "identifierDetails": "str",
+        "subject": "int",
+        "dataType": "str",
+        "suffix": "str",
         "qa": "bool",
         "localMove": "bool",
     }

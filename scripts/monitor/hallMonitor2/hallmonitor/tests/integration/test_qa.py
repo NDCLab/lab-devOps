@@ -46,7 +46,9 @@ class PendingQAFileTestCase(QATestCase):
                     "user": "dummy",
                     "passRaw": 1,
                     "identifier": identifier,
-                    "identifierDetails": "Dummy details",
+                    "subject": self.sub_id,
+                    "dataType": "eeg",
+                    "suffix": "s1_r1_e1",
                     "errorType": "",
                     "errorDetails": "",
                 }
@@ -124,7 +126,9 @@ class QAChecklistEntryTestCase(PendingQAFileTestCase):
 
         info = qa_rows.iloc[0].to_dict()
 
-        assert info["identifierDetails"] == f"sub-{self.sub_id}/all_eeg/s1_r1_e1 (eeg)"
+        assert info["subject"] == self.sub_id
+        assert info["dataType"] == "eeg"
+        assert info["suffix"] == "s1_r1_e1"
         assert not info["qa"]
         assert not info["localMove"]
 
@@ -178,7 +182,9 @@ class QAPassMovedToCheckedTestCase(QATestCase):
             "localMove": [1, 1, 0],  # pass, pass, fail
             "datetime": ["2024-01-01_12-30"] * 3,
             "user": ["dummyuser"] * 3,
-            "identifierDetails": ["Dummy details"] * 3,
+            "subject": [1, 2, 3],
+            "dataType": ["eeg"] * 3,
+            "suffix": ["s1_r1_e1"] * 3,
         }
         new_qa_df = pd.DataFrame(new_qa_checklist)
         modified_files[qa_checklist_path] = new_qa_df.to_csv(index=False)
@@ -420,7 +426,9 @@ class QAChecklistCreatedTestCase(QATestCase):
             "datetime",
             "user",
             "identifier",
-            "identifierDetails",
+            "subject",
+            "dataType",
+            "suffix",
             "qa",
             "localMove",
         }

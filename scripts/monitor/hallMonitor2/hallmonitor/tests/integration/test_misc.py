@@ -366,7 +366,9 @@ class PendingFilesCsvCreatedTestCase(TestCase):
             "user",
             "passRaw",
             "identifier",
-            "identifierDetails",
+            "subject",
+            "dataType",
+            "suffix",
             "errorType",
             "errorDetails",
         }
@@ -381,7 +383,9 @@ class PendingFilesCsvCreatedTestCase(TestCase):
             "datetime",
             "user",
             "identifier",
-            "identifierDetails",
+            "subject",
+            "dataType",
+            "suffix",
             "errorType",
             "errorDetails",
         }

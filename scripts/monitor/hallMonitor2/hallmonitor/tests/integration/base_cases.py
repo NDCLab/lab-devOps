@@ -231,7 +231,9 @@ class TestCase(ABC):
                 "datetime",
                 "user",
                 "identifier",
-                "identifierDetails",
+                "subject",
+                "dataType",
+                "suffix",
                 "qa",
                 "localMove",
             ]
@@ -252,7 +254,9 @@ class TestCase(ABC):
                 "datetime",
                 "user",
                 "identifier",
-                "identifierDetails",
+                "subject",
+                "dataType",
+                "suffix",
             ]
         )
         validated_files.to_csv(validated_files_path, index=False)
@@ -271,7 +275,9 @@ class TestCase(ABC):
                 "user",
                 "passRaw",
                 "identifier",
-                "identifierDetails",
+                "subject",
+                "dataType",
+                "suffix",
                 "errorType",
                 "errorDetails",
             ]
@@ -286,7 +292,9 @@ class TestCase(ABC):
                 "datetime",
                 "user",
                 "identifier",
-                "identifierDetails",
+                "subject",
+                "dataType",
+                "suffix",
                 "errorType",
                 "errorDetails",
             ]
