@@ -1563,35 +1563,35 @@ def get_eeg_errors(logger, dataset, files):
     id = ids[0]
 
     # don't error on missing files here, since they are handled in presence checks
-    headerfile = markerfile = datafile = ""
+    header_files = []
+    marker_files = []
     for file in files:
         file_ext = os.path.splitext(file)[1]
         if file_ext == ".vhdr":
-            headerfile = file
+            header_files.append(file)
         elif file_ext == ".vmrk":
-            markerfile = file
-        elif file_ext == ".eeg":
-            datafile = file
+            marker_files.append(file)
 
-    expected_eeg = os.path.basename(datafile) if datafile else "(no file)"
-    expected_vmrk = os.path.basename(markerfile) if markerfile else "(no file)"
+    for vhdr_file in header_files:
+        basename = os.path.basename(os.path.splitext(vhdr_file)[0])
+        expected_eeg = f"{basename}.eeg"
+        expected_vmrk = f"{basename}.vmrk"
 
-    if headerfile:
-        with open(headerfile, "r") as f:
+        with open(vhdr_file, "r") as f:
             contents = f.read()
 
         # look for .vmrk file in header file
         marker_match = re.search(r"MarkerFile=(.+)", contents)
         if marker_match is not None:
-            found_markerfile = marker_match.group(1).strip()
-            if found_markerfile != expected_vmrk:
+            found_vmrk = marker_match.group(1).strip()
+            if found_vmrk != expected_vmrk:
                 errors.append(
                     new_error_record(
                         logger,
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect MarkerFile {found_markerfile} in .vhdr file, expected {expected_vmrk}",
+                        f"Incorrect MarkerFile {found_vmrk} in .vhdr file, expected {expected_vmrk}",
                     )
                 )
         else:
@@ -1608,15 +1608,15 @@ def get_eeg_errors(logger, dataset, files):
         # look for .eeg file in header file
         data_match = re.search(r"DataFile=(.+)", contents)
         if data_match is not None:
-            found_datafile = data_match.group(1)
-            if found_datafile != expected_eeg:
+            found_eeg = data_match.group(1)
+            if found_eeg != expected_eeg:
                 errors.append(
                     new_error_record(
                         logger,
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect DataFile {found_datafile} in .vhdr file, expected {expected_eeg}",
+                        f"Incorrect DataFile {found_eeg} in .vhdr file, expected {expected_eeg}",
                     )
                 )
         else:
@@ -1626,22 +1626,25 @@ def get_eeg_errors(logger, dataset, files):
                 ),
             )
 
-    if markerfile:
-        with open(markerfile, "r") as f:
+    for vmrk_file in marker_files:
+        basename = os.path.basename(os.path.splitext(vmrk_file)[0])
+        expected_eeg = f"{basename}.eeg"
+
+        with open(vmrk_file, "r") as f:
             contents = f.read()
 
         # look for .eeg file in marker file
         data_match = re.search(r"DataFile=(.+)", contents)
         if data_match:
-            found_datafile = data_match.group(1).strip("'\" ")
-            if found_datafile != expected_eeg:
+            found_eeg = data_match.group(1).strip("'\" ")
+            if found_eeg != expected_eeg:
                 errors.append(
                     new_error_record(
                         logger,
                         dataset,
                         id,
                         "EEG error",
-                        f"Incorrect DataFile {found_datafile} in .vmrk file, expected {expected_eeg}",
+                        f"Incorrect DataFile {found_eeg} in .vmrk file, expected {expected_eeg}",
                     )
                 )
         else:
