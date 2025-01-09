@@ -561,7 +561,7 @@ def qa_validation(logger: logging.Logger, dataset: str):
     new_qa = pending_ids[~pending_ids["identifier"].isin(record_df["identifier"])]
 
     # copy files for new raw-validated identifiers to pending-qa/
-    for id in new_qa["identifier"]:
+    for id in new_qa["identifier"].unique():
         id = Identifier.from_str(id)
         identifier_dir = id.to_dir(dataset, is_raw=True)
         identifier_subdir = os.path.relpath(identifier_dir, raw_dir)
