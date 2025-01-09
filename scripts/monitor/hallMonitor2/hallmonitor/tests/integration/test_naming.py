@@ -330,7 +330,7 @@ class InvalidEventSuffixTestCase(NamingTestCase):
 
         naming_info = f"Suffix {new_suffix} not in allowed suffixes" + r".*"
         missing_info = re.escape(
-            f"Expected file {basename.replace("PATTERN", old_suffix)} not found"
+            f"Expected file {basename.replace('PATTERN', old_suffix)} not found"
         )
         extra_info = re.escape(
             f"Unexpected file {basename.replace("PATTERN", new_suffix)} found"

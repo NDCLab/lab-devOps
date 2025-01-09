@@ -840,7 +840,7 @@ class TestCase(ABC):
         Returns:
             pd.DataFrame: A DataFrame containing the errors reported by validate_data.
         """
-        from hallmonitor.hallMonitor import validate_data
+        from hallmonitor.hallmonitor import validate_data
 
         # set up a logger to save hallMonitor output
         logger = logging.getLogger(f"{self.case_name}_logger")
@@ -868,7 +868,7 @@ class TestCase(ABC):
         Returns:
             str: A string containing error text, if any error was raised during execution.
         """
-        from hallmonitor.hallMonitor import qa_validation
+        from hallmonitor.hallmonitor import qa_validation
 
         logger = logging.getLogger(f"{self.case_name}_logger")
         logger.setLevel(logging.ERROR)
@@ -992,9 +992,12 @@ class ValidationTestCase(TestCase):
         # check for missing errors
 
         if generated_errors_df.empty:
+            # can't put backslashes in f-strings
+            escape_char = "\\"
             # we may have no errors; in this case, all expected errors are missing
             missing = [
-                f"{error.error_type}: {error.info_regex.replace('\\', '')} (missing {error.multiplicity})"
+                f"{error.error_type}: {error.info_regex.replace(escape_char, '')}"
+                + f" (missing {error.multiplicity})"
                 for error in expected_errors
             ]
 
