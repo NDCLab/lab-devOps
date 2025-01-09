@@ -128,6 +128,31 @@ def get_variable_datatype(dataset, varname):
         return str(var_rows["dataType"].iloc[0])
 
 
+def is_variable_encrypted(dataset, varname):
+    """
+    Check if a variable in the dataset is encrypted.
+
+    Args:
+        dataset (str): The name or path of the dataset to check.
+        varname (str): The name of the variable to check for encryption.
+
+    Returns:
+        bool: True if the variable is encrypted, False otherwise.
+
+    Raises:
+        ValueError: ValueError: Raised when the number of rows in dd_df matching varname is not exactly 1.
+    """
+    dd_df = get_datadict(dataset)
+    var_rows = dd_df[dd_df["variable"] == varname]
+    num_rows = len(var_rows.index)
+    if num_rows == 0:
+        raise ValueError(f"No variable named {varname}")
+    elif num_rows > 1:
+        raise ValueError(f"Multiple variables named {varname}")
+    else:
+        return bool(var_rows["encrypted"].iloc[0])
+
+
 def get_allowed_suffixes(dd_df, variable):
     """
     Retrieve the allowed suffixes for a given variable from a data dictionary DataFrame.
