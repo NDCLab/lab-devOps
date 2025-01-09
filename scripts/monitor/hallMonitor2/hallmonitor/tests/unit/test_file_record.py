@@ -80,7 +80,8 @@ def test_write_file_record_valid(mock_dataset_dir):
             "user": ["user1"],
             "dataType": ["EEG"],
             "identifier": ["ID001"],
-            "identifierDetails": ["Detailed information"],
+            "subject": [1],
+            "suffix": ["none"],
         }
     )
 
@@ -112,7 +113,9 @@ def test_write_file_record_sorting(mock_dataset_dir):
             "datetime": ["2024-01-02", "2024-01-01"],
             "user": ["user2", "user1"],
             "identifier": ["ID002", "ID001"],
-            "identifierDetails": ["Detailed info 1", "Detailed info 2"],
+            "subject": [2, 1],
+            "dataType": ["dummyDataType"] * 2,
+            "suffix": ["none"] * 2,
         }
     )
 
