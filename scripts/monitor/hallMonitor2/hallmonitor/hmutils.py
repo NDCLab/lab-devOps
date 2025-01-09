@@ -1222,8 +1222,8 @@ def get_misplaced_redcaps(redcaps):
     for rc in redcaps:
         rc_base = os.path.basename(rc)
         ses = re.search(r"(s\d+)(?:r\d+)?_DATA_", rc_base)
-        if ses is None:
-            raise ValueError(f"{rc_base} is not a valid REDCap name")
+        if ses is None:  # REDCaps not tied to a session, like 'consent' for THRIVE
+            continue
         ses = ses.group(1)
         split_rc = split_path(rc)
         for part in split_rc:
