@@ -1790,7 +1790,12 @@ def get_psychopy_errors(logger, dataset, files):
             else:
                 raise ValueError("No ID column found in .csv file")
 
-            if id_col.isna().any():
+            # In Psychopy CSVs, the last row is always completely empty
+            # except for a timestamp marking the end of the trial. This
+            # means that we should ignore the first NaN for a participant ID,
+            # since we can always expect one NaN value due to this configuration.
+            # Any additional NaN values should be flagged as an error.
+            if id_col.isna().sum() > 1:
                 errors.append(
                     new_error_record(
                         logger,

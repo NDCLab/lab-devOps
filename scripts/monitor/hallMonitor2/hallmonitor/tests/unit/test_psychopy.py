@@ -178,7 +178,7 @@ def test_nan_values_in_id_column(
     csv_file = tmp_path / f"{base_filename}.csv"
     log_file = tmp_path / f"{base_filename}.log"
     psydat_file = tmp_path / f"{base_filename}.psydat"
-    csv_file.write_text("id\nNaN")
+    csv_file.write_text("id\nNaN\nNaN")
     log_file.write_text(
         f"saved data to '{csv_file.name}'\nsaved data to '{psydat_file.name}'"
     )
