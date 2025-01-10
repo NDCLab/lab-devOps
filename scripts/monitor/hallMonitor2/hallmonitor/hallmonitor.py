@@ -698,7 +698,7 @@ def main(args: Namespace):
         for rc_file in redcaps:
             rc_base = os.path.basename(rc_file)
             rc_out = os.path.join(rc_dir, rc_base)
-            subprocess.check_call(["cp", "-u", rc_file, rc_out])
+            shutil.copy(rc_file, rc_out)
 
     # check data dictionary
     try:
