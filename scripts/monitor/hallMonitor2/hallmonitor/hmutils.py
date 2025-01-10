@@ -45,6 +45,7 @@ FILE_RECORD_COLS = [
     "identifier",
     "subject",
     "dataType",
+    "encrypted",
     "suffix",
 ]
 PENDING_FILES_COLS = [
@@ -54,6 +55,7 @@ PENDING_FILES_COLS = [
     "identifier",
     "subject",
     "dataType",
+    "encrypted",
     "suffix",
     "errorType",
     "errorDetails",
@@ -64,6 +66,7 @@ PENDING_ERRORS_COLS = [
     "identifier",
     "subject",
     "dataType",
+    "encrypted",
     "suffix",
     "errorType",
     "errorDetails",
@@ -74,6 +77,7 @@ QA_CHECKLIST_COLS = [
     "identifier",
     "subject",
     "dataType",
+    "encrypted",
     "suffix",
     "qa",
     "localMove",
@@ -275,6 +279,8 @@ class Identifier:
         """
         datatype = get_variable_datatype(dataset, self.variable)
         s = f"{self.subject}/{self.variable}/{self.session}_{self.run}_{self.event} ({datatype})"
+        if is_variable_encrypted(dataset, self.variable):
+            s += " (encrypted)"
         if is_combination_var(dataset, self.variable):
             s += " (combination)"
         if self.is_missing:
@@ -861,6 +867,7 @@ def get_pending_files(dataset):
         latest_pending = os.path.join(pending_dir, pending_files[-1])
         pending_df = pd.read_csv(latest_pending)
         pending_df["passRaw"] = pending_df["passRaw"].astype(bool)
+        pending_df["encrypted"] = pending_df["encrypted"].astype(bool)
     else:
         pending_df = new_pending_df()
 
@@ -916,6 +923,7 @@ def new_file_record_df():
         "identifier": "str",
         "subject": "int",
         "dataType": "str",
+        "encrypted": "bool",
         "suffix": "str",
     }
     return df_from_colmap(colmap)
@@ -930,9 +938,11 @@ def new_pending_df():
     - user (str): The user associated with the entry.
     - dataType (str): The type of data.
     - identifier (str): A unique identifier for the entry (machine-readable).
-    - subject (int): The subject's
-    "dataType",
-    "suffix",    - passRaw (bool): True for pass rows, False for error rows
+    - subject (int): The subject's study ID.
+    - dataType (str): The datatype of the identifier's variable.
+    - encrypted (bool): Whether the datatype is encrypted.
+    - suffix (str): The session/run/event suffix for the identifier.
+    - passRaw (bool): True for pass rows, False for error rows.
     - errorType (str): The type of error, if any.
     - errorDetails (str): Details about the error, if any.
 
@@ -945,6 +955,7 @@ def new_pending_df():
         "identifier": "str",
         "subject": "int",
         "dataType": "str",
+        "encrypted": "bool",
         "suffix": "str",
         "passRaw": "bool",
         "errorType": "str",
@@ -972,6 +983,7 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
     - identifier (str): A unique identifier for the entry (machine-readable).
     - "subject" (int): The subject's ID.
     - "dataType" (str): The identifier's variable datatype.
+    - "encrypted" (bool): Whether the datatype is encrypted.
     - "suffix" (str): The identifier's session, run, and event information.
     - "errorType" (str): The type/category of the error.
     - "errorDetails" (str): Detailed information about the error.
@@ -983,10 +995,12 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
         subject = int(identifier.subject.removeprefix("sub-"))
         datatype = (get_variable_datatype(dataset, identifier.variable),)
         suffix = f"{identifier.session}_{identifier.run}_{identifier.event}"
+        encrypted = is_variable_encrypted(dataset, identifier.variable)
 
     except ValueError:
         id_str = "Unknown Identifier"
         subject = datatype = suffix = ""
+        encrypted = False
 
     logger.error(
         "Error occurred with identifier %s: %s - %s",
@@ -1001,6 +1015,7 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
         "identifier": id_str,
         "subject": subject,
         "dataType": datatype,
+        "encrypted": encrypted,
         "suffix": suffix,
         "errorType": error_type,
         "errorDetails": error_details,
@@ -1023,6 +1038,7 @@ def new_pass_record(dataset, identifier):
     - identifier (str): A unique identifier for the entry (machine-readable).
     - "subject" (int): The subject's ID.
     - "dataType" (str): The identifier's variable datatype.
+    - "encrypted" (bool): Whether the datatype is encrypted.
     - "suffix" (str): The identifier's session, run, and event information.
     - "errorType" (None): Placeholder for error type, initially None.
     - "errorDetails" (None): Placeholder for error details, initially None.
@@ -1034,10 +1050,12 @@ def new_pass_record(dataset, identifier):
         subject = int(identifier.subject.removeprefix("sub-"))
         datatype = get_variable_datatype(dataset, identifier.variable)
         suffix = f"{identifier.session}_{identifier.run}_{identifier.event}"
+        encrypted = is_variable_encrypted(dataset, identifier.variable)
 
     except ValueError:
         id_str = "Unknown Identifier"
         subject = datatype = suffix = ""
+        encrypted = False
 
     return {
         "datetime": get_timestamp(),
@@ -1046,6 +1064,7 @@ def new_pass_record(dataset, identifier):
         "identifier": id_str,
         "subject": subject,
         "dataType": datatype,
+        "encrypted": encrypted,
         "suffix": suffix,
         "errorType": None,
         "errorDetails": None,
@@ -1074,6 +1093,7 @@ def new_validation_record(dataset, identifier):
             - identifier (str): A unique identifier for the entry (machine-readable).
             - "subject" (int): The subject's ID.
             - "dataType" (str): The identifier's variable datatype.
+            - "encrypted" (bool): Whether the datatype is encrypted.
             - "suffix" (str): The identifier's session, run, and event information.
 
     Raises:
@@ -1094,6 +1114,7 @@ def new_validation_record(dataset, identifier):
         "identifier": id_str,
         "subject": int(identifier.subject.removeprefix("sub-")),
         "dataType": get_variable_datatype(dataset, identifier.variable),
+        "encrypted": is_variable_encrypted(dataset, identifier.variable),
         "suffix": f"{identifier.session}_{identifier.run}_{identifier.event}",
     }
 
@@ -1112,6 +1133,7 @@ def new_qa_record(dataset, identifier):
     - "identifier" (str): A unique identifier for the entry (machine-readable).
     - "subject" (int): The subject's ID.
     - "dataType" (str): The identifier's variable datatype.
+    - "encrypted" (bool): Whether the datatype is encrypted.
     - "suffix" (str): The identifier's session, run, and event information.
     - "datetime" (str): The current timestamp.
     - "user" (str): The username of the current user.
@@ -1128,15 +1150,18 @@ def new_qa_record(dataset, identifier):
         subject = int(identifier.subject.removeprefix("sub-"))
         datatype = get_variable_datatype(dataset, identifier.variable)
         suffix = f"{identifier.session}_{identifier.run}_{identifier.event}"
+        encrypted = is_variable_encrypted(dataset, identifier.variable)
 
     except ValueError:
         id_str = "Unknown Identifier"
         subject = datatype = suffix = ""
+        encrypted = False
 
     return {
         "identifier": id_str,
         "subject": subject,
         "dataType": datatype,
+        "encrypted": encrypted,
         "suffix": suffix,
         "datetime": get_timestamp(),
         "user": getuser(),
@@ -1155,7 +1180,8 @@ def new_qa_checklist():
     - "identifier": str
     - "subject": int
     - "dataType": str
-    - "suffix": (str)
+    - "encrypted": bool
+    - "suffix": str
     - "qa": bool
     - "localMove": bool
 
@@ -1168,6 +1194,7 @@ def new_qa_checklist():
         "identifier": "str",
         "subject": "int",
         "dataType": "str",
+        "encrypted": "bool",
         "suffix": "str",
         "qa": "bool",
         "localMove": "bool",
@@ -1217,6 +1244,7 @@ def get_qa_checklist(dataset):
     checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
     if os.path.exists(checklist_path):
         df = pd.read_csv(checklist_path)
+        df["encrypted"] = df["encrypted"].astype(bool)
         df["qa"] = df["qa"].astype(bool)
         df["localMove"] = df["localMove"].astype(bool)
         return df

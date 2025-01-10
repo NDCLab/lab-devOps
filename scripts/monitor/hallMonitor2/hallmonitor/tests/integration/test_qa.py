@@ -48,6 +48,7 @@ class PendingQAFileTestCase(QATestCase):
                     "identifier": identifier,
                     "subject": self.sub_id,
                     "dataType": "eeg",
+                    "encrypted": False,
                     "suffix": "s1_r1_e1",
                     "errorType": "",
                     "errorDetails": "",
@@ -184,6 +185,7 @@ class QAPassMovedToCheckedTestCase(QATestCase):
             "user": ["dummyuser"] * 3,
             "subject": [1, 2, 3],
             "dataType": ["eeg"] * 3,
+            "encrypted": [False] * 3,
             "suffix": ["s1_r1_e1"] * 3,
         }
         new_qa_df = pd.DataFrame(new_qa_checklist)
@@ -428,6 +430,7 @@ class QAChecklistCreatedTestCase(QATestCase):
             "identifier",
             "subject",
             "dataType",
+            "encrypted",
             "suffix",
             "qa",
             "localMove",
