@@ -1806,18 +1806,17 @@ def get_psychopy_errors(logger, dataset, files):
                     )
                 )
 
-            else:
-                bad_ids = id_col[id_col != id_num].unique()
-                if bad_ids.size != 0:
-                    errors.append(
-                        new_error_record(
-                            logger,
-                            dataset,
-                            identifier,
-                            "Psychopy error",
-                            f"ID value(s) [{', '.join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
-                        )
+            bad_ids = id_col[~id_col.isna() & (id_col != id_num)].unique()
+            if bad_ids.size != 0:
+                errors.append(
+                    new_error_record(
+                        logger,
+                        dataset,
+                        identifier,
+                        "Psychopy error",
+                        f"ID value(s) [{', '.join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
                     )
+                )
 
     return errors
 
