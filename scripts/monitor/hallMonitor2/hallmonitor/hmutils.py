@@ -20,7 +20,7 @@ IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>[\w\-]+)_(?P<sre>s\d+_r\d+
 FILE_RE = (
     IDENTIFIER_RE
     + r"(?P<dev>_deviation)?"
-    + r"(?P<info>_[\w\-]+)?"
+    + r"(?:_(?P<info>[\w\-]+))?"
     + r"(?P<ext>(?:\.[a-zA-Z0-9]+)+)"
 )
 
@@ -75,6 +75,7 @@ QA_CHECKLIST_COLS = [
     "datetime",
     "user",
     "identifier",
+    "deviationString",
     "subject",
     "dataType",
     "encrypted",
@@ -489,6 +490,29 @@ def datadict_has_changes(dataset):
         return not dd_diff.empty
     except ValueError:
         return True
+
+
+def get_deviation_string(filename):
+    """
+    Extracts and returns the deviation string from the given filename.
+    The function uses a regular expression to match the filename against a predefined pattern (FILE_RE).
+    If the filename does not match the pattern, a ValueError is raised.
+
+    Args:
+        filename (str): The filename to extract the deviation string from.
+    Returns:
+        str: The extracted deviation string if present, otherwise None.
+    Raises:
+        ValueError: If the filename does not match the expected pattern.
+    """
+    id_match = re.fullmatch(FILE_RE, str(filename))
+    if not id_match:
+        raise ValueError(f"Filename '{filename}' is not a valid identifier format")
+
+    dev_str = id_match.group("info")
+    if dev_str is None:
+        return None
+    return str(dev_str)
 
 
 def get_timestamp():
@@ -1119,7 +1143,7 @@ def new_validation_record(dataset, identifier):
     }
 
 
-def new_qa_record(dataset, identifier):
+def new_qa_record(dataset, identifier, deviation_string=""):
     """
     Creates a new QA record dictionary with the provided identifier.
 
@@ -1127,6 +1151,7 @@ def new_qa_record(dataset, identifier):
         dataset (str): The path to the dataset directory.
         identifier (str or Identifier): The identifier for the QA record. If a string is provided,
                                         it will be converted to an Identifier object.
+        deviation_string (str) (optional): The deviation string included in the identifier; defaults to the empty string.
 
     Returns:
         dict: A dictionary containing the QA record with the following keys:
@@ -1159,6 +1184,7 @@ def new_qa_record(dataset, identifier):
 
     return {
         "identifier": id_str,
+        "deviationString": str(deviation_string),
         "subject": subject,
         "dataType": datatype,
         "encrypted": encrypted,
@@ -1178,6 +1204,7 @@ def new_qa_checklist():
     - "datetime": str
     - "user": str
     - "identifier": str
+    - "deviationString": str
     - "subject": int
     - "dataType": str
     - "encrypted": bool
@@ -1192,6 +1219,7 @@ def new_qa_checklist():
         "datetime": "str",
         "user": "str",
         "identifier": "str",
+        "deviationString": "str",
         "subject": "int",
         "dataType": "str",
         "encrypted": "bool",
