@@ -993,7 +993,7 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
             identifier = Identifier.from_str(str(identifier))
         id_str = str(identifier)
         subject = int(identifier.subject.removeprefix("sub-"))
-        datatype = (get_variable_datatype(dataset, identifier.variable),)
+        datatype = get_variable_datatype(dataset, identifier.variable)
         suffix = f"{identifier.session}_{identifier.run}_{identifier.event}"
         encrypted = is_variable_encrypted(dataset, identifier.variable)
 
