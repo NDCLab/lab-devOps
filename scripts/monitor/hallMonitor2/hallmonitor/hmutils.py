@@ -1808,13 +1808,14 @@ def get_psychopy_errors(logger, dataset, files):
 
             bad_ids = id_col[~id_col.isna() & (id_col != id_num)].unique()
             if bad_ids.size != 0:
+                bad_id_strings = list(map(str, bad_ids.tolist()))
                 errors.append(
                     new_error_record(
                         logger,
                         dataset,
                         identifier,
                         "Psychopy error",
-                        f"ID value(s) [{', '.join(map(bad_ids, str))}]"
+                        f"ID value(s) [{', '.join(bad_id_strings)}]"
                         + f" in csvfile different from ID in filename ({id_num})",
                     )
                 )
