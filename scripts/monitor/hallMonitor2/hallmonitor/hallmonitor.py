@@ -114,7 +114,7 @@ def validate_data(
         if use_legacy_exceptions:
             no_data_file = "no-data.txt"
         else:
-            no_data_file = f"{id}-no-data.txt"
+            no_data_file = f"{id}_no-data.txt"
 
         if any([file == no_data_file for file in os.listdir(id_as_dir)]):
             logger.debug("Skipping %s, no-data.txt found", str(id))
@@ -243,8 +243,8 @@ def validate_data(
             has_deviation = "deviation.txt" in dir_filenames
             has_no_data = "no-data.txt" in dir_filenames
         else:
-            has_deviation = f"{id}-deviation.txt" in dir_filenames
-            has_no_data = f"{id}-no-data.txt" in dir_filenames
+            has_deviation = f"{id}_deviation.txt" in dir_filenames
+            has_no_data = f"{id}_no-data.txt" in dir_filenames
 
         logger.debug("has_deviation=%s, has_no_data=%s", has_deviation, has_no_data)
         if has_deviation and has_no_data:
@@ -269,7 +269,7 @@ def validate_data(
         if use_legacy_exceptions:
             deviation_file = "deviation.txt"
         else:
-            deviation_file = f"{id}-deviation.txt"
+            deviation_file = f"{id}_deviation.txt"
 
         misnamed_files = []
         for file in dir_filenames:
@@ -365,7 +365,7 @@ def validate_data(
             if use_legacy_exceptions:
                 expected_files = ["no-data.txt"]
             else:
-                expected_files = [f"{id}-no-data.txt"]
+                expected_files = [f"{id}_no-data.txt"]
         elif has_deviation:
             # expect at least 2 appropriately-named files
             # (deviation.txt and at least one other file)
