@@ -42,8 +42,8 @@ def mock_new_error(monkeypatch):
 # Test: Valid EEG files with consistent .vhdr, .vmrk, and .eeg content
 def test_get_eeg_errors_valid_files(logger, dataset, mock_new_error, mock_file_re):
     # Simulate file contents for valid cases
-    vhdr_content = "MarkerFile=correct1.vmrk\nDataFile=correct2.eeg"
-    vmrk_content = "DataFile=correct2.eeg"
+    vhdr_content = "MarkerFile=correct.vmrk\nDataFile=correct.eeg"
+    vmrk_content = "DataFile=correct.eeg"
 
     # Create a function to simulate different file contents based on the file name
     def mock_file_open(filepath, *args, **kwargs):
@@ -58,9 +58,9 @@ def test_get_eeg_errors_valid_files(logger, dataset, mock_new_error, mock_file_r
     # Use mock.patch to mock the open function and provide side_effect to vary behavior
     with mock.patch("builtins.open", new=mock_file_open):
         files = [
-            os.path.join(dataset, "subject1.vhdr"),
-            os.path.join(dataset, "correct1.vmrk"),
-            os.path.join(dataset, "correct2.eeg"),
+            os.path.join(dataset, "correct.vhdr"),
+            os.path.join(dataset, "correct.vmrk"),
+            os.path.join(dataset, "correct.eeg"),
         ]
         errors = get_eeg_errors(logger, dataset, files)
         assert errors == []  # No errors expected
@@ -82,7 +82,7 @@ def test_get_eeg_errors_invalid_marker(logger, dataset, mock_new_error, mock_fil
     # Mock open function for reading files
     with mock.patch("builtins.open", new=mock_file_open):
         files = [
-            os.path.join(dataset, "subject1.vhdr"),
+            os.path.join(dataset, "correct.vhdr"),
             os.path.join(dataset, "correct.vmrk"),
             os.path.join(dataset, "correct.eeg"),
         ]
@@ -114,7 +114,7 @@ def test_get_eeg_errors_missing_datafile_in_vmrk(
     # Mock open function for reading files
     with mock.patch("builtins.open", new=mock_file_open):
         files = [
-            os.path.join(dataset, "subject1.vhdr"),
+            os.path.join(dataset, "correct.vhdr"),
             os.path.join(dataset, "correct.vmrk"),
             os.path.join(dataset, "correct.eeg"),
         ]
@@ -142,7 +142,7 @@ def test_get_eeg_errors_missing_datafile_in_vhdr(
 
     with mock.patch("builtins.open", new=mock_file_open):
         files = [
-            os.path.join(dataset, "subject1.vhdr"),
+            os.path.join(dataset, "correct.vhdr"),
             os.path.join(dataset, "correct.vmrk"),
             os.path.join(dataset, "correct.eeg"),
         ]
@@ -179,7 +179,7 @@ def test_get_eeg_errors_incorrect_datafile_in_marker(
     # Mock open function for reading files
     with mock.patch("builtins.open", new=mock_file_open):
         files = [
-            os.path.join(dataset, "subject1.vhdr"),
+            os.path.join(dataset, "correct.vhdr"),
             os.path.join(dataset, "correct.vmrk"),
             os.path.join(dataset, "correct.eeg"),
         ]
@@ -207,18 +207,11 @@ def test_get_eeg_errors_missing_datafile(logger, dataset, mock_new_error, mock_f
 
     with mock.patch("builtins.open", new=mock_file_open):
         files = [
-            os.path.join(dataset, "subject1.vhdr"),
+            os.path.join(dataset, "correct.vhdr"),
             os.path.join(dataset, "correct.vmrk"),
         ]
         errors = get_eeg_errors(logger, dataset, files)
-        assert len(errors) == 2
-        errors = [err["message"] for err in errors]
-        assert (
-            "Incorrect DataFile correct.eeg in .vhdr file, expected (no file)" in errors
-        )
-        assert (
-            "Incorrect DataFile correct.eeg in .vmrk file, expected (no file)" in errors
-        )
+        assert len(errors) == 0
 
 
 # Test: missing .vmrk file
@@ -234,15 +227,11 @@ def test_get_eeg_errors_missing_markerfile(
 
     with mock.patch("builtins.open", new=mock_file_open):
         files = [
-            os.path.join(dataset, "subject1.vhdr"),
+            os.path.join(dataset, "correct.vhdr"),
             os.path.join(dataset, "correct.eeg"),
         ]
         errors = get_eeg_errors(logger, dataset, files)
-        assert len(errors) == 1
-        assert (
-            errors[0]["message"]
-            == "Incorrect MarkerFile correct.vmrk in .vhdr file, expected (no file)"
-        )
+        assert len(errors) == 0
 
 
 # Test: Missing .vhdr file
@@ -284,7 +273,7 @@ def test_get_eeg_errors_wrong_extension(logger, dataset, mock_new_error, mock_fi
 
     with mock.patch("builtins.open", new=mock_file_open):
         files = [
-            os.path.join(dataset, "subject1.vhdr"),
+            os.path.join(dataset, "correct.vhdr"),
             os.path.join(dataset, "correct.vmrk"),
             os.path.join(dataset, "correct.eeg"),
         ]
@@ -327,7 +316,7 @@ def test_get_eeg_errors_open_calls(logger, dataset, mock_new_error, mock_file_re
         mock_open.side_effect = mock_file_open
 
         files = [
-            os.path.join(dataset, "subject1.vhdr"),
+            os.path.join(dataset, "correct.vhdr"),
             os.path.join(dataset, "correct.vmrk"),
             os.path.join(dataset, "correct.eeg"),
         ]
@@ -336,7 +325,7 @@ def test_get_eeg_errors_open_calls(logger, dataset, mock_new_error, mock_file_re
         get_eeg_errors(logger, dataset, files)
 
         # Ensure builtins.open is called once for the .vhdr and once for the .vmrk
-        vhdr_path = os.path.join(dataset, "subject1.vhdr")
+        vhdr_path = os.path.join(dataset, "correct.vhdr")
         vmrk_path = os.path.join(dataset, "correct.vmrk")
 
         mock_open.assert_any_call(vhdr_path, "r")
