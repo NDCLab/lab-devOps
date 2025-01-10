@@ -19,7 +19,7 @@ TZ_INFO = pytz.timezone("US/Eastern")
 IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>[\w\-]+)_(?P<sre>s\d+_r\d+_e\d+))"
 FILE_RE = (
     IDENTIFIER_RE
-    + r"(?P<dev>-deviation)?"
+    + r"(?P<dev>_deviation)?"
     + r"(?P<info>_[\w\-]+)?"
     + r"(?P<ext>(?:\.[a-zA-Z0-9]+)+)"
 )
@@ -1485,7 +1485,7 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
     """
     errors = []
 
-    no_data_re = IDENTIFIER_RE + r"-no-data\.txt"
+    no_data_re = IDENTIFIER_RE + r"_no-data\.txt"
     no_data_match = re.fullmatch(no_data_re, filename)
     if no_data_match:
         return errors
