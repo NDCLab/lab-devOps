@@ -256,7 +256,8 @@ class TestCase(ABC):
                 "user",
                 "identifier",
                 "subject",
-                "dataType" "encrypted",
+                "dataType",
+                "encrypted",
                 "suffix",
             ]
         )
