@@ -1814,7 +1814,8 @@ def get_psychopy_errors(logger, dataset, files):
                         dataset,
                         identifier,
                         "Psychopy error",
-                        f"ID value(s) [{', '.join(bad_ids)}] in csvfile different from ID in filename ({id_num})",
+                        f"ID value(s) [{', '.join(map(bad_ids, str))}]"
+                        + f" in csvfile different from ID in filename ({id_num})",
                     )
                 )
 
