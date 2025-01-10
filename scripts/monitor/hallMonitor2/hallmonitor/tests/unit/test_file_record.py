@@ -79,6 +79,7 @@ def test_write_file_record_valid(mock_dataset_dir):
             "datetime": ["2024-01-01"],
             "user": ["user1"],
             "dataType": ["EEG"],
+            "encrypted": [False],
             "identifier": ["ID001"],
             "subject": [1],
             "suffix": ["none"],
@@ -99,7 +100,12 @@ def test_write_file_record_valid(mock_dataset_dir):
 # Test for write_file_record when DataFrame is missing required columns
 def test_write_file_record_missing_columns(mock_dataset_dir):
     df = pd.DataFrame(
-        {"datetime": ["2024-01-01"], "user": ["user1"], "identifier": ["ID001"]}
+        {
+            "datetime": ["2024-01-01"],
+            "user": ["user1"],
+            "identifier": ["ID001"],
+            "encrypted": [False],
+        }
     )  # Missing the 'dataType' column
 
     with pytest.raises(KeyError, match="does not contain required columns"):
@@ -115,6 +121,7 @@ def test_write_file_record_sorting(mock_dataset_dir):
             "identifier": ["ID002", "ID001"],
             "subject": [2, 1],
             "dataType": ["dummyDataType"] * 2,
+            "encrypted": [False] * 2,
             "suffix": ["none"] * 2,
         }
     )

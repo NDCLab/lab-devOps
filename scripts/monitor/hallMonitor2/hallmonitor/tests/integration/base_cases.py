@@ -233,6 +233,7 @@ class TestCase(ABC):
                 "identifier",
                 "subject",
                 "dataType",
+                "encrypted",
                 "suffix",
                 "qa",
                 "localMove",
@@ -255,7 +256,7 @@ class TestCase(ABC):
                 "user",
                 "identifier",
                 "subject",
-                "dataType",
+                "dataType" "encrypted",
                 "suffix",
             ]
         )
@@ -277,6 +278,7 @@ class TestCase(ABC):
                 "identifier",
                 "subject",
                 "dataType",
+                "encrypted",
                 "suffix",
                 "errorType",
                 "errorDetails",
@@ -294,6 +296,7 @@ class TestCase(ABC):
                 "identifier",
                 "subject",
                 "dataType",
+                "encrypted",
                 "suffix",
                 "errorType",
                 "errorDetails",
@@ -503,6 +506,11 @@ class TestCase(ABC):
             },
         ]
         mock_dd = pd.DataFrame(mock_dd)
+
+        mock_dd["encrypted"] = False
+        encrypted_dtypes = {"audacity", "zoom", "digi"}
+        mock_dd.loc[mock_dd["dataType"].isin(encrypted_dtypes), "encrypted"] = True
+
         mock_dd.to_csv(dd_path, index=False)
         mock_dd.to_csv(latest_dd_path, index=False)
 

@@ -14,6 +14,7 @@ def mock_datadict(monkeypatch):
             "variable": ["eeg", "psychopy", "var3"],
             "expectedFileExt": ['".eeg,.vmrk,.vhdr"', '".txt,.csv"', '""'],
             "dataType": ["visit_data", "other", "visit_data"],
+            "encrypted": [False] * 3,
             "provenance": ["variables: eeg, psychopy", "variables: var3", ""],
         }
     )
