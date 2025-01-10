@@ -181,6 +181,7 @@ class QAPassMovedToCheckedTestCase(QATestCase):
             ],
             "qa": [1, 0, 1],  # pass, fail, pass
             "localMove": [1, 1, 0],  # pass, pass, fail
+            "deviationString": [""] * 3,
             "datetime": ["2024-01-01_12-30"] * 3,
             "user": ["dummyuser"] * 3,
             "subject": [1, 2, 3],
@@ -428,6 +429,7 @@ class QAChecklistCreatedTestCase(QATestCase):
             "datetime",
             "user",
             "identifier",
+            "deviationString",
             "subject",
             "dataType",
             "encrypted",
@@ -439,3 +441,93 @@ class QAChecklistCreatedTestCase(QATestCase):
 
 def test_qa_checklist_created(request):
     QAChecklistCreatedTestCase.run_test_case(request)
+
+
+class QAChecklistOneRowPerDeviationStringTestCase(QATestCase):
+    case_name = "QAChecklistOneRowPerDeviationStringTestCase"
+
+    deviation_strings = ["test1", "test2", "test3"]
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        raw_dir = os.path.join(
+            "sourcedata", "raw", "s1_r1", "eeg", f"sub-{self.sub_id}"
+        )
+        identifier = f"sub-{self.sub_id}_all_eeg_s1_r1_e1"
+        eeg_exts = [".vmrk", ".vhdr", ".eeg"]
+
+        # add file copies with additional deviation strings
+        for ext in eeg_exts:
+            old_filename = os.path.join(raw_dir, identifier + ext)
+            for dev_str in self.deviation_strings:
+                new_filename = old_filename.replace(ext, f"_{dev_str}{ext}")
+                modified_files[new_filename] = modified_files[old_filename]
+
+            # we want to remove the original files, leaving just deviation variants
+            self.remove_file(modified_files, os.path.basename(old_filename))
+
+        # add deviation.txt file
+        deviation_file = os.path.join(raw_dir, identifier + "_deviation.txt")
+        modified_files[deviation_file] = "Multiple deviation strings for one identifier"
+
+        # indicate that our identifier has passed in pending-files CSV
+
+        pending_dir = os.path.join("data-monitoring", "pending")
+
+        # remove old pending-files CSV, keep pending-errors
+        modified_files = {
+            path: contents
+            for path, contents in modified_files.items()
+            if "pending-errors" in path or not path.startswith(pending_dir)
+        }
+
+        # add in our own pending-files CSV
+        identifier = f"sub-{self.sub_id}_all_eeg_s1_r1_e1"
+        pending_files_path = os.path.join(
+            pending_dir, "pending-files-2024-01-01_12-30.csv"
+        )
+        pending_df = pd.DataFrame(
+            [
+                {
+                    "datetime": "2024-01-01_12-30",
+                    "user": "dummy",
+                    "passRaw": 1,
+                    "identifier": identifier,
+                    "subject": self.sub_id,
+                    "dataType": "eeg",
+                    "encrypted": False,
+                    "suffix": "s1_r1_e1",
+                    "errorType": "",
+                    "errorDetails": "",
+                }
+            ]
+        )
+
+        modified_files[pending_files_path] = pending_df.to_csv(index=False)
+
+        return modified_files
+
+    def validate(self):
+        error = self.run_qa_validation()
+        if error:
+            raise AssertionError(f"Unexpected error occurred: {error}")
+
+        qa_df = pd.read_csv(
+            os.path.join(
+                self.case_dir,
+                "sourcedata",
+                "pending-qa",
+                "qa-checklist.csv",
+            )
+        )
+
+        assert len(qa_df.index) == len(self.deviation_strings)
+        assert (qa_df["identifier"] == f"sub-{self.sub_id}_all_eeg_s1_r1_e1").all()
+
+        for dev_str in self.deviation_strings:
+            assert len(qa_df[qa_df["deviationString"] == dev_str].index) == 1
+
+
+def test_qa_checklist_one_row_per_deviation_string(request):
+    QAChecklistOneRowPerDeviationStringTestCase.run_test_case(request)

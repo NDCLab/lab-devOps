@@ -17,6 +17,7 @@ from hallmonitor.hmutils import (
     LOGGING_SUBPATH,
     PENDING_QA_SUBDIR,
     PENDING_SUBDIR,
+    QA_CHECKLIST_COLS,
     RAW_SUBDIR,
     ColorfulFormatter,
     Identifier,
@@ -24,6 +25,7 @@ from hallmonitor.hmutils import (
     clean_empty_dirs,
     datadict_has_changes,
     get_args,
+    get_deviation_string,
     get_eeg_errors,
     get_expected_combination_rows,
     get_expected_files,
@@ -563,6 +565,7 @@ def qa_validation(logger: logging.Logger, dataset: str):
     pending_ids = pending_df[pending_df["passRaw"]]
     new_qa = pending_ids[~pending_ids["identifier"].isin(record_df["identifier"])]
 
+    new_rows = []
     # copy files for new raw-validated identifiers to pending-qa/
     for id in new_qa["identifier"].unique():
         id = Identifier.from_str(id)
@@ -577,10 +580,31 @@ def qa_validation(logger: logging.Logger, dataset: str):
         except subprocess.CalledProcessError as err:
             logger.error("Could not copy file(s) for %s to %s (%s)", id, dest_path, err)
 
+        id_files = os.listdir(identifier_dir)
+        deviation_strings = {
+            get_deviation_string(filename)
+            for filename in id_files
+            if not filename.endswith(("no-data.txt", "deviation.txt"))
+        }
+        for dev_str in deviation_strings:
+            # we only want to output the deviation string if it is not None (info string exists),
+            # or if no deviation strings are present besides the null string.
+            if dev_str is None and len(deviation_strings) > 1:
+                continue
+            qa_record = new_qa_record(dataset, id, dev_str)
+            new_rows.append(qa_record)
+
     # add new raw-validated identifiers to QA tracker
-    new_qa = [new_qa_record(dataset, id) for id in new_qa["identifier"]]
-    new_qa_df = pd.DataFrame(new_qa)
-    qa_df = pd.concat([qa_df, new_qa_df])
+    new_qarows_df = pd.DataFrame(new_rows, columns=QA_CHECKLIST_COLS)
+    if not new_qarows_df.empty:
+        new_qarows_df = new_qarows_df[
+            ~(
+                new_qarows_df["identifier"].isin(qa_df["identifier"])
+                & new_qarows_df["deviationString"].isin(qa_df["deviationString"])
+            )
+        ]
+        qa_df = pd.concat([qa_df, new_qarows_df])
+
     write_qa_tracker(dataset, qa_df)
 
     # recursively clean up empty directories in pending-qa/

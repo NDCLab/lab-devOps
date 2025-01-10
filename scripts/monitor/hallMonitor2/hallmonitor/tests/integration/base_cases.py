@@ -231,6 +231,7 @@ class TestCase(ABC):
                 "datetime",
                 "user",
                 "identifier",
+                "deviationString",
                 "subject",
                 "dataType",
                 "encrypted",
