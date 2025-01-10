@@ -30,7 +30,7 @@ class DeviationAndNoDataErrorTestCase(ExceptionTestCase):
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         deviation_file = self.build_path(
-            "s1_r1", "psychopy", f"{identifier}-deviation.txt"
+            "s1_r1", "psychopy", f"{identifier}_deviation.txt"
         )
         modified_files[deviation_file] = "Deviation reason: Testing no data condition."
 
@@ -75,9 +75,9 @@ class DeviationAndNoDataFilesErrorTestCase(ExceptionTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = f"{identifier}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
-        no_data_file = f"{identifier}-no-data.txt"
+        no_data_file = f"{identifier}_no-data.txt"
         no_data_file = self.build_path("s1_r1", "psychopy", no_data_file)
 
         # add deviation.txt and no-data.txt files
@@ -122,7 +122,7 @@ class DeviationFileWithFolderMismatchTestCase(ExceptionTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = f"{identifier}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
         modified_files[deviation_file] = "Deviation reason: Testing file mismatch."
 
@@ -167,7 +167,7 @@ class DeviationFilePreventsErrorWithExtraFilesTestCase(ExceptionTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = f"{identifier}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
         modified_files[deviation_file] = "Deviation reason: Testing extra files."
 
@@ -205,7 +205,7 @@ class NoDataAdditionalFilesTestCase(ExceptionTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        no_data_file = f"{identifier}-no-data.txt"
+        no_data_file = f"{identifier}_no-data.txt"
         no_data_file = self.build_path("s1_r1", "psychopy", no_data_file)
         modified_files[no_data_file] = "No data available for this test case."
 
@@ -241,7 +241,7 @@ class DeviationFileWithBadNamesTestCase(ExceptionTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = f"{identifier}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
         modified_files[deviation_file] = "Deviation reason: Testing bad file names."
 
@@ -284,7 +284,7 @@ class DeviationFileWithValidNamesTestCase(ExceptionTestCase):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
-        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = f"{identifier}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
         modified_files[deviation_file] = "Deviation reason: Testing valid file names."
 
@@ -398,7 +398,7 @@ class MissingIdentifierNoDataTestCase(ExceptionTestCase):
 
         identifier = f"sub-{self.sub_id}_all_digi_s1_r1_e1"
         old_basename = f"{identifier}.zip.gpg"
-        new_basename = f"{identifier}-no-data.txt"
+        new_basename = f"{identifier}_no-data.txt"
 
         if not self.replace_file_name(modified_files, old_basename, new_basename):
             raise FileNotFoundError(f"File matching basename {old_basename} not found")

@@ -128,7 +128,7 @@ class DeviationCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
                 raise FileNotFoundError(f"Could not find basename {new_name}")
 
         # add deviation.txt to raw/ and checked/
-        deviation_file = f"{identifier}-deviation.txt"
+        deviation_file = f"{identifier}_deviation.txt"
         deviation_content = "Deviation reason: Testing update_tracker."
         deviation_raw = self.build_path("s1_r1", "psychopy", deviation_file, True)
         deviation_checked = self.build_path("s1_r1", "psychopy", deviation_file, False)
@@ -171,7 +171,7 @@ class DeviationNoCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
         modified_files[new_name] = modified_files.pop(old_name)
 
         # add deviation.txt to raw/
-        deviation_file = f"{filename}-deviation.txt"
+        deviation_file = f"{filename}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file, True)
         modified_files[deviation_file] = "Deviation reason: Testing update_tracker."
 
