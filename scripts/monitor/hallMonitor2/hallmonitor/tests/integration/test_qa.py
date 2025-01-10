@@ -445,6 +445,17 @@ def test_qa_checklist_created(request):
 
 class QAChecklistOneRowPerDeviationStringTestCase(QATestCase):
     case_name = "QAChecklistOneRowPerDeviationStringTestCase"
+    description = (
+        "Sets up multiple deviation strings for a single identifier in the raw data "
+        "and verifies that each deviation string gets a separate entry in the QA checklist."
+    )
+    conditions = [
+        "Identifier 'A' is in sourcedata/raw/ and has multiple deviation strings.",
+        "The QA checklist should have one row per deviation string for identifier 'A'.",
+    ]
+    expected_output = (
+        "The QA checklist contains one row per deviation string for identifier 'A'."
+    )
 
     deviation_strings = ["test1", "test2", "test3"]
 
