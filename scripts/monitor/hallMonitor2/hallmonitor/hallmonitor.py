@@ -693,9 +693,11 @@ def main(args: Namespace):
             df.to_csv(rc_out, index=False)
 
     else:  # we still need to copy unmodified REDCaps to sourcedata/checked/redcap/
+        rc_dir = os.path.join(checked_dir, "redcap")
+        os.makedirs(rc_dir, exist_ok=True)
         for rc_file in redcaps:
             rc_base = os.path.basename(rc_file)
-            rc_out = os.path.join(checked_dir, "redcap", rc_base)
+            rc_out = os.path.join(rc_dir, rc_base)
             subprocess.check_call(["cp", "-u", rc_file, rc_out])
 
     # check data dictionary
