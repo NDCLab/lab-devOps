@@ -3,9 +3,15 @@
 dpath="/home/data/NDClab/datasets"
 backpath="/home/data/NDClab/other/backups"
 backup_list=("sourcedata" "derivatives")
+skipped_datasets="bug-testing-dataset"
 
 for dir in `ls $dpath`
 do
+  if [[ "$skipped_datasets" =~ $dir ]]; then
+    echo "Skipping $dir"
+    continue
+  fi
+
   echo "Checking $dir"
   if [ ! -d "$backpath/$dir" ]; then
     mkdir $backpath/$dir
