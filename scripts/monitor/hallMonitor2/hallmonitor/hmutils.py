@@ -572,8 +572,7 @@ def get_file_record(dataset):
     """
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
     if os.path.exists(record_path):
-        df = pd.read_csv(record_path)
-        df["encrypted"] = df["encrypted"].astype(bool)
+        df = pd.read_csv(record_path, dtype={"encrypted": bool})
         return df
     else:
         return new_file_record_df()
@@ -604,7 +603,7 @@ def write_file_record(dataset, df):
         )
 
     df = df.sort_values(by=["datetime", "identifier"])
-    df["encrypted"] = df["encrypted"].astype(int)
+    df.loc[:, "encrypted"] = df["encrypted"].astype(int)
     df.to_csv(record_path, index=False)
 
 
@@ -893,9 +892,9 @@ def get_pending_files(dataset):
 
     if pending_files:
         latest_pending = os.path.join(pending_dir, pending_files[-1])
-        pending_df = pd.read_csv(latest_pending)
-        pending_df["passRaw"] = pending_df["passRaw"].astype(bool)
-        pending_df["encrypted"] = pending_df["encrypted"].astype(bool)
+        pending_df = pd.read_csv(
+            latest_pending, dtype={"passRaw": bool, "encrypted": bool}
+        )
     else:
         pending_df = new_pending_df()
 
@@ -927,8 +926,8 @@ def write_pending_files(dataset, df, timestamp):
         raise KeyError(
             f"DataFrame does not contain required columns for a QA checklist (missing {missing_cols})"
         )
-    df["passRaw"] = df["passRaw"].astype(int)
-    df["encrypted"] = df["encrypted"].astype(int)
+    df.loc[:, "passRaw"] = df["passRaw"].astype(int)
+    df.loc[:, "encrypted"] = df["encrypted"].astype(int)
     df = df.sort_values(by=["identifier", "datetime"])
     df.to_csv(out, index=False)
 
@@ -1252,7 +1251,7 @@ def get_pending_errors(pending_df):
         raise KeyError(
             f"DataFrame does not contain required columns for a pending error CSV (missing {missing_cols})"
         )
-    errors["encrypted"] = errors["encrypted"].astype(bool)
+    errors.loc[:, "encrypted"] = errors["encrypted"].astype(bool)
     return errors
 
 
@@ -1266,7 +1265,7 @@ def write_pending_errors(dataset, df, timestamp):
         old_df = pd.read_csv(out)
         df = pd.concat([df, old_df])
     df = df.sort_values(by=["identifier", "datetime"])
-    df["encrypted"] = df["encrypted"].astype(int)
+    df.loc[:, "encrypted"] = df["encrypted"].astype(int)
     df.to_csv(out, index=False)
 
 
@@ -1285,10 +1284,9 @@ def get_qa_checklist(dataset):
     """
     checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
     if os.path.exists(checklist_path):
-        df = pd.read_csv(checklist_path)
-        df["encrypted"] = df["encrypted"].astype(bool)
-        df["qa"] = df["qa"].astype(bool)
-        df["localMove"] = df["localMove"].astype(bool)
+        df = pd.read_csv(
+            checklist_path, dtype={"encrypted": bool, "qa": bool, "localMove": bool}
+        )
         return df
     else:
         return new_qa_checklist()
@@ -1314,9 +1312,9 @@ def write_qa_tracker(dataset, df):
         raise KeyError(
             f"DataFrame does not contain required columns for a QA checklist (missing {missing_cols})"
         )
-    df["encrypted"] = df["encrypted"].astype(int)
-    df["qa"] = df["qa"].astype(int)
-    df["localMove"] = df["localMove"].astype(int)
+    df.loc[:, "encrypted"] = df["encrypted"].astype(int)
+    df.loc[:, "qa"] = df["qa"].astype(int)
+    df.loc[:, "localMove"] = df["localMove"].astype(int)
     df.to_csv(checklist_path, index=False)
 
 

@@ -44,7 +44,8 @@ def test_get_file_record_exists(mock_dataset_dir):
         mock.patch("hallmonitor.hmutils.FILE_RECORD_SUBPATH", FILE_RECORD_SUBPATH),
     ):
         result = get_file_record(mock_dataset_dir)
-        mock_read_csv.assert_called_once_with(file_path)
+        mock_read_csv.assert_called_once()
+        assert mock_read_csv.call_args[0][0] == file_path
         pd.testing.assert_frame_equal(result, mock_df)
 
 
