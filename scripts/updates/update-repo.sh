@@ -4,12 +4,12 @@ IFS=$'\n'
 TOOL_PATH="/home/data/NDClab/tools"
 DATA_PATH="/home/data/NDClab/datasets"
 ANA_PATH="/home/data/NDClab/analyses"
-ARCHIVED_REPOS="rwe-dataset social-context-dataset social-context-beta-dataset social-context-gamma-dataset autism-go-academy missing-link-dataset mind-reading"
+IGNORED_REPOS="rwe-dataset social-context-dataset social-context-beta-dataset social-context-gamma-dataset autism-go-academy missing-link-dataset mind-reading bug-testing-dataset"
 ### temporarily adding post-error-ddm, pepper to archived repos
-ARCHIVED_REPOS+=" post-error-ddm pepper-pipeline"
+IGNORED_REPOS+=" post-error-ddm pepper-pipeline"
 ###
 LOG_PATH="/home/data/NDClab/other/logs/repo-updates"
-LAB_MGR="ndclab"
+LAB_MGR=$(grep "lab-manager" $TOOL_PATH/lab-devOps/scripts/configs/config-leads.json | cut -d":" -f2 | tr -d '"",')
 LAB_TECH=$(grep "technician" $TOOL_PATH/lab-devOps/scripts/configs/config-leads.json | cut -d":" -f2 | tr -d '"",')
 repoarr=()
 
@@ -18,7 +18,7 @@ do
 	echo "Checking repos in $DIR"
 	for REPO in `ls $DIR`
 	do
-	  if [[ $ARCHIVED_REPOS != *"$REPO"* ]]; then
+	  if [[ $IGNORED_REPOS != *"$REPO"* ]]; then
 	    echo "Checking $REPO"
 	    if [ -e "$DIR/$REPO/.git" ]
 	      then
@@ -33,7 +33,7 @@ do
 		echo "Not a git repo. Skipping."
 	    fi
 	  else
-	    echo "Skipping archived repo $REPO"
+	    echo "Skipping ignored/archived repo $REPO"
 	  fi
 	done
 done
@@ -47,7 +47,7 @@ then
         if [[ $PROJ_LEAD == "" ]]; then
             echo "Can't find proj lead for $repo, emailing lab tech"
             echo "git status detects unpushed changes for $repo, no project lead found in config-leads.json." | mail -s \
-            "$repo needs re-sync with Github" "$LAB_TECH@fiu.edu"
+            "$repo needs re-sync with Github" "$LAB_TECH@fiu.edu" "$LAB_MGR@fiu.edu"
         else
             # email proj lead
             echo "Emailing project lead $PROJ_LEAD for $repo"

@@ -9,3 +9,5 @@ Thumbs.db
 scripts/MADE_pipeline_standard/eeg_preprocessing
 scripts/MADE_pipeline_standard/eeg_timing_test
 scripts/MADE_pipeline_standard/eeglab13_4_4b
+scripts/ndar_uploads/*.out
+scripts/ndar_uploads/*/*/

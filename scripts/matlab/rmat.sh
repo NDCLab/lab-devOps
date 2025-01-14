@@ -30,7 +30,7 @@ else
     cpus="1"
 fi
 
-MATLAB_VERSION="2019b"
+MATLAB_VERSION="2023b"
 
 echo -e "#!/bin/bash
 #SBATCH --nodes=$NODES

@@ -23,6 +23,8 @@ if [[ -z "$current_submission" ]]
   current_submission="jul-2024-submission"
 fi
 
+module load singularity-3.8.7
+
 output=$(singularity exec -e $PYIMG bash -c "python3 new_ndar_submission.py $dset $current_submission")
 
 # Directory to search for folders
