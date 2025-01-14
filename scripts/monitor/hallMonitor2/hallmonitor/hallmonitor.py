@@ -554,6 +554,9 @@ def qa_validation(logger: logging.Logger, dataset: str):
         )
         src_path = os.path.join(pending_qa_dir, id_raw_subdir, "*")
         files_to_move = glob.glob(src_path)
+        if len(files_to_move) == 0:
+            logger.error(f'No files to move for "passed" ID {id}, skipping')
+            continue
 
         # sourcedata/checked/ stores data in "checked order"
         dest_path = id.to_dir(dataset, is_raw=False)
