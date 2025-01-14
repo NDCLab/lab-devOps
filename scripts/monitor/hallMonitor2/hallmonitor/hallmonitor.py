@@ -538,6 +538,7 @@ def qa_validation(logger: logging.Logger, dataset: str):
     logger.info("Found %d identifier(s) that passed QA checks", len(passed_ids.index))
 
     # move fully-verified files from pending-qa/ to checked/
+    moved_ids = []
     for id in passed_ids:
         id = Identifier.from_str(id)
 
@@ -557,15 +558,16 @@ def qa_validation(logger: logging.Logger, dataset: str):
             # unpack list of files before passing to `mv` script
             subprocess.run(["mv", *files_to_move, dest_path], check=True)
             logger.debug("Moved file(s) for ID %s to %s", id, dest_path)
+            moved_ids.append(id)
         except subprocess.CalledProcessError as err:
             logger.error("Could not move file(s) for %s to %s (%s)", id, dest_path, err)
 
-    # remove fully-verified identifiers from QA checklist
-    qa_df = qa_df[~qa_df["identifier"].isin(passed_ids)]
+    # remove fully-verified and moved identifiers from QA checklist
+    qa_df = qa_df[~qa_df["identifier"].isin(moved_ids)]
     write_qa_tracker(dataset, qa_df)
 
-    # add fully-verified identifiers to validated file record
-    val_records = [new_validation_record(dataset, id) for id in passed_ids]
+    # add fully-verified and moved identifiers to validated file record
+    val_records = [new_validation_record(dataset, id) for id in moved_ids]
     val_df = pd.DataFrame(val_records)
     record_df = pd.concat([record_df, val_df])
     try:
