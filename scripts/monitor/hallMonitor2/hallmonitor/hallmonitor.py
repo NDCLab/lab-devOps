@@ -4,7 +4,6 @@ import glob
 import logging
 import os
 import re
-import shutil
 import subprocess
 from argparse import Namespace
 from datetime import datetime
@@ -749,7 +748,12 @@ def main(args: Namespace):
         for rc_file in redcaps:
             rc_base = os.path.basename(rc_file)
             rc_out = os.path.join(rc_dir, rc_base)
-            shutil.copy(rc_file, rc_out)
+            try:
+                subprocess.check_call(["cp", "-u", rc_base, rc_out])
+            except subprocess.CalledProcessError as err:
+                logger.error(
+                    "Could not move REDCap %s to %s (%s)", rc_base, rc_out, err
+                )
 
     # check data dictionary
     try:
