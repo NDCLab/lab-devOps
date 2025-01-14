@@ -8,6 +8,7 @@ from copy import copy
 from dataclasses import dataclass
 from functools import lru_cache, wraps
 from getpass import getuser
+from typing import Union
 
 import pandas as pd
 import pytz
@@ -988,7 +989,13 @@ def new_pending_df():
     return df_from_colmap(colmap)
 
 
-def new_error_record(logger, dataset, identifier, error_type, error_details):
+def new_error_record(
+    logger: logging.Logger,
+    dataset: str,
+    identifier: Union[str, Identifier],
+    error_type: str,
+    error_details: str,
+):
     """
     Creates a new error record with the given details and logs it to the logger object.
 
@@ -1026,8 +1033,8 @@ def new_error_record(logger, dataset, identifier, error_type, error_details):
         subject = datatype = suffix = ""
         encrypted = False
 
-    logger.error(
-        "Error occurred with identifier %s: %s - %s",
+    logger.info(
+        "Problem for identifier %s: %s - %s",
         id_str,
         error_type,
         error_details,
