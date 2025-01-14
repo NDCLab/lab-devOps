@@ -534,7 +534,12 @@ def qa_validation(logger: logging.Logger, dataset: str):
     qa_df = get_qa_checklist(dataset)
 
     # get fully-verified identifiers
-    passed_ids = qa_df[qa_df["qa"] & qa_df["localMove"]]["identifier"]
+    # group by "identifier" and keep only groups where all "qa" and "localMove" values are truthy
+    passed_ids = pd.Series(
+        qa_df.groupby("identifier")
+        .filter(lambda grp: grp["qa"].all() and grp["localMove"].all())["identifier"]
+        .unique()
+    )
     logger.info("Found %d identifier(s) that passed QA checks", len(passed_ids.index))
 
     # move fully-verified files from pending-qa/ to checked/
