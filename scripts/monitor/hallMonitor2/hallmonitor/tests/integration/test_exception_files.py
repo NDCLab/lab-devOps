@@ -370,8 +370,8 @@ class MissingIdentifierWithoutNoDataTestCase(ExceptionTestCase):
         return modified_files
 
     def get_expected_errors(self):
-        missing_info = re.escape("Missing identifier in ")
-        missing_info += r"(?:.*/)+"
+        missing_info = re.escape("Missing identifier (")
+        missing_info += r".*(?:.*/)+.*" + re.escape(")") + r".*"
         errors = [ExpectedError("Missing identifier", missing_info)]
 
         return errors

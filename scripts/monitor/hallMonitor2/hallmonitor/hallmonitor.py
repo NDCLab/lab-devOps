@@ -458,7 +458,7 @@ def validate_data(
         if is_raw:  # only log pass rows for raw data
             # check if this identifier has any errors
             if not any(
-                p["identifier"] == str(id) and p["passRaw"] == 0 for p in pending
+                not p["passRaw"] and p["identifier"] == str(id) for p in pending
             ):
                 pending.append(new_pass_record(dataset, id))
                 logger.debug("Identifier %s had no errors", str(id))
@@ -566,7 +566,7 @@ def qa_validation(logger: logging.Logger, dataset: str):
             # unpack list of files before passing to `mv` script
             subprocess.run(["mv", *files_to_move, dest_path], check=True)
             logger.debug("Moved file(s) for ID %s to %s", id, dest_path)
-            moved_ids.append(id)
+            moved_ids.append(str(id))
         except subprocess.CalledProcessError as err:
             logger.error("Could not move file(s) for %s to %s (%s)", id, dest_path, err)
 
@@ -788,7 +788,7 @@ def main(args: Namespace):
     # get passed/failed IDs as specified by pending-files.csv
     pending = get_pending_files(dataset)
     failed_ids = pending[
-        (pending["passRaw"] == 0) & (pending["identifier"] != "Unknown Identifier")
+        ~pending["passRaw"] & (pending["identifier"] != "Unknown Identifier")
     ]["identifier"].unique()
     failed_ids = list(failed_ids)
     passed_ids = pending[~pending["identifier"].isin(failed_ids)]["identifier"].tolist()
