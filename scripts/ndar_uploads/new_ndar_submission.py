@@ -50,7 +50,7 @@ if __name__ == "__main__":
             file_by_session[sess].sort()
             new_sub_files.extend(file_by_session[sess])
     for new_sub_file in new_sub_files:
-        file_re = re.match('(sub-[0-9]+)_[a-zA-Z0-9_-]+_(s[0-9]+_r[0-9]+)_e[0-9]+\.zip', file)
+        file_re = re.match('(sub-[0-9]+)_[a-zA-Z0-9_-]+_(s[0-9]+_r[0-9]+)_e[0-9]+\.zip', new_sub_file)
         if file_re:
             sub_folder = file_re.group(1)
             sess_folder = file_re.group(2)

@@ -517,6 +517,9 @@
                 },
                 "mapping_formula": "x + 1"
             },
+            "rcads_y18": {
+                "default": "-9"
+            },
             "rcads_y19": {
                 "rc_variable": "rcads_i19",
                 "redcap": "readbbschild",
@@ -746,6 +749,12 @@
                     "0": "2",
                     "missing": "-9"
                 }
+            },
+            "dsm_cross_ch24": {
+                "default": "-9"
+            },
+            "dsm_cross_ch25": {
+                "default": "-9"
             },
             "dsm_cross_ch26": {
                 "redcap": "readbbschild",
