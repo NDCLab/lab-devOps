@@ -623,7 +623,10 @@ def qa_validation(logger: logging.Logger, dataset: str):
         new_qarows_df = new_qarows_df[
             ~(
                 new_qarows_df["identifier"].isin(qa_df["identifier"])
-                & new_qarows_df["deviationString"].isin(qa_df["deviationString"])
+                & (
+                    (new_qarows_df["deviationString"] == "")
+                    | new_qarows_df["deviationString"].isin(qa_df["deviationString"])
+                )
             )
         ]
         qa_df = pd.concat([qa_df, new_qarows_df])
