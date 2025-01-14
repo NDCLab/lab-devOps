@@ -1,7 +1,3 @@
-from hallmonitor import hallmonitor
+from hallmonitor import hallmonitor, hmutils
 
-
-if __name__ == "__main__":
-    from hallmonitor import hallmonitor, hmutils
-
-    hallmonitor.main(hmutils.get_args())
+hallmonitor.main(hmutils.get_args())
