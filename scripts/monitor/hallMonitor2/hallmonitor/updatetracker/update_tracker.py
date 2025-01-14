@@ -253,7 +253,8 @@ def fill_status_data_columns(dataset: str, tracker_df: pd.DataFrame):
                 rc_df = pd.read_csv(matching_rc[0])
                 # find matching columns in redcap dataframe
                 matching_cols = rc_df.columns[
-                    rc_df.columns.str.contains(f"{prov_var}_{suffix}")
+                    (rc_df.columns.str.contains(f"{prov_var}_{suffix}"))
+                    & (rc_df.columns.str.endswith(COMPLETED_SUFFIX))
                 ]
                 if len(matching_cols) == 0:
                     continue
