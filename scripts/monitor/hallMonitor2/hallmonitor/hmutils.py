@@ -1195,7 +1195,7 @@ def new_qa_record(dataset, identifier, deviation_string=""):
 
     return {
         "identifier": id_str,
-        "deviationString": str(deviation_string),
+        "deviationString": str(deviation_string or ""),
         "subject": subject,
         "dataType": datatype,
         "encrypted": encrypted,
