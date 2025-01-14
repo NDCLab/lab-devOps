@@ -113,6 +113,18 @@ def validate_data(
         id.is_missing = True  # included in detailed stringification
         id_as_dir = id.to_dir(dataset, is_raw=is_raw)
 
+        if not os.path.isdir(id_as_dir):
+            pending.append(
+                new_error_record(
+                    logger,
+                    dataset,
+                    id,
+                    "Missing identifier",
+                    f"Missing identifier (should be at {id_as_dir}, folder is not present)",
+                )
+            )
+            continue
+
         if use_legacy_exceptions:
             no_data_file = "no-data.txt"
         else:
@@ -127,7 +139,8 @@ def validate_data(
                 dataset,
                 id,
                 "Missing identifier",
-                f"Missing identifier in {id_as_dir}",
+                f"Missing identifier (should be at {id_as_dir}, folder exists but"
+                + f" no identifier or {no_data_file} was found)",
             )
         )
 
