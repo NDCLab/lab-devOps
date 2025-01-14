@@ -591,7 +591,7 @@ def qa_validation(logger: logging.Logger, dataset: str):
             # or if no deviation strings are present besides the null string.
             if dev_str is None and len(deviation_strings) > 1:
                 continue
-            qa_record = new_qa_record(dataset, id, dev_str)
+            qa_record = new_qa_record(dataset, id, dev_str or "")
             new_rows.append(qa_record)
 
     # add new raw-validated identifiers to QA tracker
