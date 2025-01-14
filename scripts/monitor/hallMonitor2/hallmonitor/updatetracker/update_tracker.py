@@ -344,7 +344,7 @@ def get_parent_columns(
                     for suf in str(row["allowedSuffix"]).split(","):
                         suf = suf.strip()
                         if re.fullmatch(session + r"_e\d$", suf):
-                            tracker_df.loc[child_id, row["variable"] + "_" + suf] = (
+                            tracker_df.loc[child_id, row["variable"] + "_" + suf] = int(
                                 parent
                             )
                 except Exception:  # FIXME
@@ -385,7 +385,7 @@ def get_parent_columns(
                                     if re.fullmatch(session + r"_e\d+", suf):
                                         tracker_df.loc[
                                             child_id, row["variable"] + "_" + suf
-                                        ] = str(rc_row[col])
+                                        ] = int(rc_row[col])
                             except Exception:  # FIXME
                                 continue
 
