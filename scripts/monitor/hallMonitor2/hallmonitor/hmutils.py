@@ -578,7 +578,7 @@ def get_file_record(dataset):
         return new_file_record_df()
 
 
-def write_file_record(dataset, df):
+def write_file_record(dataset, df: pd.DataFrame):
     """Writes out the file record.
 
     Args:
@@ -593,6 +593,7 @@ def write_file_record(dataset, df):
     - The DataFrame is then sorted by the 'datetime' and 'identifier' columns before being written to the CSV file.
     """
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
+    df = convert_bool_cols_to_int(df)
     if set(FILE_RECORD_COLS).issubset(set(df.columns)):  # df has at least FILE_RECORD_COLS
         df = df[FILE_RECORD_COLS]
     else:
@@ -601,9 +602,7 @@ def write_file_record(dataset, df):
         raise KeyError(
             f"DataFrame does not contain required columns for a file record (missing {missing_cols})"
         )
-
     df = df.sort_values(by=["datetime", "identifier"])
-    df[["encrypted"]] = df[["encrypted"]].apply(pd.to_numeric)
     df.to_csv(record_path, index=False)
 
 
@@ -901,7 +900,7 @@ def get_pending_files(dataset):
     return pending_df
 
 
-def write_pending_files(dataset, df, timestamp):
+def write_pending_files(dataset, df: pd.DataFrame, timestamp):
     """
     Writes a DataFrame of pending files to a CSV file in a specified dataset directory.
 
@@ -918,6 +917,7 @@ def write_pending_files(dataset, df, timestamp):
     sorted by 'identifier' and 'datetime' columns before being written to the CSV file.
     """
     out = os.path.join(dataset, PENDING_SUBDIR, f"pending-files-{timestamp}.csv")
+    df = convert_bool_cols_to_int(df)
     if set(PENDING_FILES_COLS).issubset(set(df.columns)):  # df has at least PENDING_FILES_COLS
         df = df[PENDING_FILES_COLS]
     else:
@@ -926,7 +926,6 @@ def write_pending_files(dataset, df, timestamp):
         raise KeyError(
             f"DataFrame does not contain required columns for a QA checklist (missing {missing_cols})"
         )
-    df[["passRaw", "encrypted"]] = df[["passRaw", "encrypted"]].apply(pd.to_numeric)
     df = df.sort_values(by=["identifier", "datetime"])
     df.to_csv(out, index=False)
 
@@ -1239,8 +1238,9 @@ def new_qa_checklist():
     return df_from_colmap(colmap)
 
 
-def get_pending_errors(pending_df):
+def get_pending_errors(pending_df: pd.DataFrame):
     errors = pending_df[~pending_df["passRaw"]]
+    errors = convert_bool_cols_to_int(errors)
     # errors has at least PENDING_ERRORS_COLS
     if set(PENDING_ERRORS_COLS).issubset(set(errors.columns)):
         errors = errors[PENDING_ERRORS_COLS]
@@ -1250,21 +1250,20 @@ def get_pending_errors(pending_df):
         raise KeyError(
             f"DataFrame does not contain required columns for a pending error CSV (missing {missing_cols})"
         )
-    errors.loc[:, "encrypted"] = errors["encrypted"].astype(bool)
     return errors
 
 
-def write_pending_errors(dataset, df, timestamp):
+def write_pending_errors(dataset, df: pd.DataFrame, timestamp):
     """
     Write to pending-errors-[timestamp].csv, appending if data is already present
     """
+    df = convert_bool_cols_to_int(df)
     df = df[PENDING_ERRORS_COLS]
     out = os.path.join(dataset, PENDING_SUBDIR, f"pending-errors-{timestamp}.csv")
     if os.path.exists(out):
         old_df = pd.read_csv(out)
         df = pd.concat([df, old_df])
     df = df.sort_values(by=["identifier", "datetime"])
-    df[["encrypted"]] = df[["encrypted"]].apply(pd.to_numeric)
     df.to_csv(out, index=False)
 
 
@@ -1291,7 +1290,7 @@ def get_qa_checklist(dataset):
         return new_qa_checklist()
 
 
-def write_qa_tracker(dataset, df):
+def write_qa_tracker(dataset, df: pd.DataFrame):
     """
     Writes a QA checklist to a CSV file within the specified dataset directory.
 
@@ -1303,6 +1302,7 @@ def write_qa_tracker(dataset, df):
         None
     """
     checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
+    df = convert_bool_cols_to_int(df)
     if set(QA_CHECKLIST_COLS).issubset(set(df.columns)):  # df has at least QA_CHECKLIST_COLS
         df = df[QA_CHECKLIST_COLS]
     else:
@@ -1311,10 +1311,26 @@ def write_qa_tracker(dataset, df):
         raise KeyError(
             f"DataFrame does not contain required columns for a QA checklist (missing {missing_cols})"
         )
-    df[["encrypted", "qa", "localMove"]] = df[["encrypted", "qa", "localMove"]].apply(
-        pd.to_numeric
-    )
     df.to_csv(checklist_path, index=False)
+
+
+def convert_bool_cols_to_int(df: pd.DataFrame):
+    """
+    Converts boolean columns in a DataFrame to integer columns.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing boolean columns to be converted.
+
+    Returns:
+        pd.DataFrame: The DataFrame with boolean columns converted to integer columns.
+    """
+    bool_cols = df.select_dtypes(include="bool").columns
+    bool_col_data = {col: df[col].astype(int) for col in bool_cols}
+    df = df.drop(columns=bool_cols)
+    for col, data in bool_col_data.items():
+        df[col] = data
+
+    return df
 
 
 def split_path(path):
