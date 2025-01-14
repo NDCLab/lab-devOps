@@ -677,7 +677,7 @@ def main(
                     for var in parent_info[expected_rc]:
                         if re.fullmatch(f"{var}_{session}" + r"_e\d+", col):
                             try:
-                                tracker_df.loc[subj, col] = "NA"
+                                tracker_df.loc[subj, col] = None
                             except Exception:  # FIXME
                                 continue
 
