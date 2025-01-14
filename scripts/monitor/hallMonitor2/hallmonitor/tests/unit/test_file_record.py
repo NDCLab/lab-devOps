@@ -34,6 +34,7 @@ def test_get_file_record_exists(mock_dataset_dir):
             "user": ["user1"],
             "dataType": ["EEG"],
             "identifier": ["ID001"],
+            "encrypted": [False],
         }
     )
 
@@ -134,6 +135,7 @@ def test_write_file_record_sorting(mock_dataset_dir):
 
         # Retrieve the written-out DataFrame
         actual_df = pd.read_csv(os.path.join(mock_dataset_dir, FILE_RECORD_SUBPATH))
+        actual_df["encrypted"] = actual_df["encrypted"].astype(bool)
 
         # Retrieve the actual DataFrame that called to_csv
         pd.testing.assert_frame_equal(actual_df, sorted_df)
