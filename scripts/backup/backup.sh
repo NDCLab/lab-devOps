@@ -48,22 +48,6 @@ do
           # need parent folder to already exist to ln
           [[ ! -d "$backpath/$dir/$backup/$path" ]] && mkdir -p "$backpath/$dir/$backup/$path"
           ln "$orig_path/$filename" "$backpath/$dir/$backup/$path/$date_name"
-          continue
-      fi 
-      for i in "${!linked_files[@]}"; do
-          file_ln="${linked_files[$i]}"
-          echo "checking difference of $file_ln"
-          # check if it matches the contents of the original file.
-          res=$(cmp --silent "$file_ln" "$orig_path/$filename" || echo "diff")
-          if [[ "$res" == "" ]]; then
-              echo "File exists already, skipping"
-              break
-          fi
-      done
-      if [[ "$res" == "diff" ]]; then
-          # need parent folder to already exist to ln
-          [[ ! -d "$backpath/$dir/$backup/$path" ]] && mkdir -p "$backpath/$dir/$backup/$path"
-          ln "$orig_path/$filename" "$backpath/$dir/$backup/$path/$date_name"
       fi
     done
   done
