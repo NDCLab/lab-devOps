@@ -638,7 +638,7 @@ class TestCase(ABC):
         Returns:
             list[str]: A list of relative file paths found in the base directory.
         """
-        if not os.path.exists(base_dir) or not os.path.isdir(base_dir):
+        if not os.path.isdir(base_dir):
             raise FileNotFoundError(f"{base_dir} does not exist, or is not a directory")
 
         paths = []
@@ -662,7 +662,7 @@ class TestCase(ABC):
         """
         new_files = {}
 
-        if not os.path.exists(base_dir) or not os.path.isdir(base_dir):
+        if not os.path.isdir(base_dir):
             raise FileNotFoundError(f"{base_dir} does not exist, or is not a directory")
 
         for root, _, files in os.walk(base_dir):
