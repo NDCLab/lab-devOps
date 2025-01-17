@@ -82,10 +82,14 @@ fi
 if [ -f "${project}/${datam_path}/check-id.py" ]; then
     rm -f "${project}/${datam_path}/check-id.py"
 fi
+if [ -d "${project}/${datam_path}/hallMonitor2/" ]; then
+    rm -rf "${project}/${datam_path}/hallMonitor2/"
+fi
 cp "${labpath}/template/rename-cols.py" "${project}/${datam_path}"
 cp "${labpath}/template/update-tracker.py" "${project}/${datam_path}"
 cp "${labpath}/template/verify-copy.py" "${project}/${datam_path}"
 cp "${labpath}/template/check-id.py" "${project}/${datam_path}"
+cp -r "${labpath}/hallMonitor2/" "${project}/${datam_path}"
 cp "${labpath}/template/check-datadict.py" "${project}/${datam_path}"
 cp "${labpath}/template/check_existence_datatype_folders.py" "${project}/${datam_path}"
 cp "${MADE_path}/subjects_yet_to_process.py" "${project}/${datam_path}"
