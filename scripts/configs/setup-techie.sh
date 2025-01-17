@@ -12,8 +12,7 @@ crontab -l | { cat; echo "0 7 * * * /home/data/NDClab/tools/lab-devOps/scripts/u
 crontab -l | { cat; echo "0 7 1 1 * /home/data/NDClab/tools/lab-devOps/scripts/backup/clean-logs.sh /home/data/NDClab/other/logs > /home/data/NDClab/other/logs/clean-up/"\`date +"\\%m_\\%d_\\%Y::\\%H:\\%M:\\%S"\`".log 2>&1"; } | crontab -
 crontab -l | { cat; echo "0 7 3 7 * /home/data/NDClab/tools/lab-devOps/scripts/backup/clean-logs.sh /home/data/NDClab/other/logs > /home/data/NDClab/other/logs/clean-up/"\`date +"\\%m_\\%d_\\%Y::\\%H:\\%M:\\%S"\`".log 2>&1"; } | crontab -
 crontab -l | { cat; echo "0 7 * * * /home/data/NDClab/tools/lab-devOps/scripts/compl/verify-encryption.sh > /home/data/NDClab/other/logs/encrypt-checks/"\`date +"\\%m_\\%d_\\%Y::\\%H:\\%M:\\%S"\`".log 2>&1"; } | crontab -
-crontab -l | { cat; echo "0 0 * * 0 /home/data/NDClab/tools/lab-devOps/scripts/backup/backup.sh > /home/data/NDClab/other/logs/backups/"\`date +"\\%m_\\%d_\\%Y::\\%H:\\%M:\\%S"\`".log 2>&1"; } | crontab -
-crontab -l | { cat; echo "0 0 * * 3 /home/data/NDClab/tools/lab-devOps/scripts/backup/backup.sh > /home/data/NDClab/other/logs/backups/"\`date +"\\%m_\\%d_\\%Y::\\%H:\\%M:\\%S"\`".log 2>&1"; } | crontab -
+crontab -l | { cat; echo "*/10 0 * * * /home/data/NDClab/tools/lab-devOps/scripts/backup/backup.sh > /home/data/NDClab/other/logs/backups/"\`date +"\\%m_\\%d_\\%Y::\\%H:\\%M:\\%S"\`".log 2>&1"; } | crontab -
 
 # add umask
 
