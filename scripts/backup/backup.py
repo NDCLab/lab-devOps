@@ -12,6 +12,7 @@ SKIPPED_DATASETS = {"bug-testing-dataset"}
 
 def main():
     print("Beginning backup...")
+    print(f"Start time {datetime.datetime.now().isoformat()}")
     for dataset in os.listdir(DATASET_DIR):
         if dataset in SKIPPED_DATASETS:
             print(f"Skipping {dataset}")
@@ -20,6 +21,7 @@ def main():
         backup_dataset(dataset)
 
     print("Finished backup!")
+    print(f"End time {datetime.datetime.now().isoformat()}")
 
 
 def backup_dataset(dataset: str):
