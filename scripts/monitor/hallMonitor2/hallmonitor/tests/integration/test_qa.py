@@ -542,3 +542,66 @@ class QAChecklistOneRowPerDeviationStringTestCase(QATestCase):
 
 def test_qa_checklist_one_row_per_deviation_string(request):
     QAChecklistOneRowPerDeviationStringTestCase.run_test_case(request)
+
+
+class QAChecklistUniqueIdentifierDeviationStringTestCase(
+    QAChecklistOneRowPerDeviationStringTestCase
+):
+    case_name = "QAChecklistUniqueIdentifierDeviationStringTestCase"
+
+    def validate(self):
+        qa_df_path = os.path.join(
+            self.case_dir,
+            "sourcedata",
+            "pending-qa",
+            "qa-checklist.csv",
+        )
+
+        # we run QA validation twice to test behavior on persisted identifiers
+
+        error_1 = self.run_qa_validation()
+        if error_1:
+            raise AssertionError(f"Unexpected error occurred: {error_1}")
+
+        qa_df = pd.read_csv(qa_df_path)
+
+        devstr_iter = iter(self.deviation_strings)
+
+        # modify one of the rows to have qa = 1
+        passed_qa_devstr = next(devstr_iter)
+        qa_df.loc[qa_df["deviationString"] == passed_qa_devstr, "qa"] = 1
+
+        # modify one of the rows to have localMove = 1
+        local_move_devstr = next(devstr_iter)
+        qa_df.loc[qa_df["deviationString"] == local_move_devstr, "localMove"] = 1
+
+        # delete the remaining row
+        deleted_devstr = next(devstr_iter)
+        qa_df = qa_df[qa_df["deviationString"] != deleted_devstr]
+
+        qa_df.to_csv(qa_df_path)
+
+        error_2 = self.run_qa_validation()
+        if error_2:
+            raise AssertionError(f"Unexpected error occurred: {error_2}")
+
+        qa_df = pd.read_csv(qa_df_path)
+
+        # check that there are the correct number of rows
+        assert len(qa_df.index) == len(self.deviation_strings)
+
+        # check that the same row has qa = 1
+        assert qa_df[qa_df["deviationString"] == passed_qa_devstr]["qa"].iloc[0] == 1
+
+        # check that the same row has localMove = 1
+        assert (
+            qa_df[qa_df["deviationString"] == local_move_devstr]["localMove"].iloc[0]
+            == 1
+        )
+
+        # check that the deleted row was recovered
+        assert qa_df["deviationString"].str.contains(deleted_devstr).sum() == 1
+
+
+def test_qa_checklist_unique_identifier_deviation_string(request):
+    QAChecklistUniqueIdentifierDeviationStringTestCase.run_test_case(request)
