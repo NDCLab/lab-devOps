@@ -606,7 +606,7 @@ def qa_validation(logger: logging.Logger, dataset: str):
         deviation_strings = {
             get_deviation_string(filename)
             for filename in id_files
-            if not filename.endswith(("no-data.txt", "deviation.txt"))
+            if not filename.endswith("deviation.txt")
         }
         for dev_str in deviation_strings:
             # we only want to output the deviation string if it is not None (info string exists),
