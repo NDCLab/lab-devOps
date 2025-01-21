@@ -1,12 +1,12 @@
 #!/bin/python3
 
+import datetime
 import glob
 import logging
 import os
 import re
 import subprocess
 from argparse import Namespace
-from datetime import datetime
 
 import pandas as pd
 
@@ -716,7 +716,8 @@ def main(args: Namespace):
             df = df.rename(columns=col_map)
 
             # output RedCAP should be in checked directory with current datetime in file name
-            current_dt = datetime.now().strftime("%Y-%m-%d_%H%M")  # 2024-03-20_1522
+            # e.g. 2024-03-20_1522
+            current_dt = datetime.datetime.now().strftime("%Y-%m-%d_%H%M")
             rc_base = os.path.basename(rc_file)
             old_dt = re.fullmatch(r".*_DATA_(.+)\.csv", rc_base).group(1)
             rc_base = rc_base.replace(old_dt, current_dt)
@@ -735,7 +736,8 @@ def main(args: Namespace):
             df.columns = args.replace
 
             # see above
-            current_dt = datetime.now().strftime("%Y-%m-%d_%H%M")  # 2024-03-20_1522
+            # e.g. 2024-03-20_1522
+            current_dt = datetime.datetime.now().strftime("%Y-%m-%d_%H%M")
             rc_base = os.path.basename(rc_file)
             old_dt = re.fullmatch(r".*_DATA_(.+)\.csv", rc_base).group(1)
             rc_base = rc_base.replace(old_dt, current_dt)
