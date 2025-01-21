@@ -1,7 +1,9 @@
 import argparse
+import datetime
 from unittest import mock
 
 import pytest
+
 from hallmonitor.hmutils import (
     get_args,
     validated_dataset,
@@ -172,3 +174,21 @@ def test_get_args_quiet(mock_dataset_dir):
         args = get_args()
         assert args.quiet
         assert not args.verbose
+
+
+def test_get_args_ignore_before(mock_dataset_dir):
+    test_args = [VALID_DATASET, "--ignore-before", "2022-01-01"]
+    with mock.patch("sys.argv", ["program_name"] + test_args):
+        args = get_args()
+        assert args.ignore_before == datetime.date(2022, 1, 1)
+
+
+def test_get_args_ignore_before_bad_date(mock_dataset_dir):
+    base_args = [VALID_DATASET, "--ignore-before"]
+    test_dates = ["2022-01-32", "2022-13-01", "2022-01-01-01", "2022-301-01", "2022-04"]
+    for date in test_dates:
+        with (
+            mock.patch("sys.argv", ["program_name"] + base_args + [date]),
+            pytest.raises(SystemExit),
+        ):
+            get_args()

@@ -354,6 +354,13 @@ def validated_dataset(input):
     return dataset
 
 
+def validated_date(input):
+    try:
+        return datetime.datetime.strptime(input, "%Y-%m-%d").date()
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{input} is not a valid date")
+
+
 def validated_redcap_replace(input):
     col_re = r"[^:\s]+"
     if not re.fullmatch(col_re, input):
@@ -391,6 +398,12 @@ def get_args():
         "--child-data",
         action="store_true",
         help="dataset includes child data",
+    )
+    parser.add_argument(
+        "-i",
+        "--ignore-before",
+        type=validated_date,
+        help="automatically pass all identifiers whose files were last modified before this date",
     )
     parser.add_argument(
         "-l",
