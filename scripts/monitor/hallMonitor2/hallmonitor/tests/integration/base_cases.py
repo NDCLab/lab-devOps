@@ -837,6 +837,7 @@ class TestCase(ABC):
         class MockNamespace:
             dataset = self.case_dir
             child_data = None
+            ignore_before_date = None
             legacy_exceptions = False
             no_color = False
             no_qa = False
@@ -851,7 +852,7 @@ class TestCase(ABC):
 
         return MockNamespace()
 
-    def run_validate_data(self):
+    def run_validate_data(self, *args, **kwargs):
         """
         Run validate_data() on the generated data directory and collect errors.
 
@@ -868,8 +869,10 @@ class TestCase(ABC):
         pending = validate_data(
             logger,
             dataset=self.case_dir,
+            *args,
             use_legacy_exceptions=False,
             is_raw=False,
+            **kwargs,
         )
 
         pending_df = pd.DataFrame(pending)
@@ -880,7 +883,7 @@ class TestCase(ABC):
 
         return pending_df
 
-    def run_qa_validation(self) -> str:
+    def run_qa_validation(self, *args, **kwargs) -> str:
         """Run qa_validation() on the generated data directory.
 
         Returns:
@@ -894,7 +897,7 @@ class TestCase(ABC):
 
         error_text = ""
         try:
-            qa_validation(logger, dataset=self.case_dir)
+            qa_validation(logger, dataset=self.case_dir, *args, **kwargs)
         except Exception as err:
             error_text = str(err)
 

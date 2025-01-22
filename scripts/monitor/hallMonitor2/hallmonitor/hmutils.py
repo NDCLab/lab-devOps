@@ -529,6 +529,19 @@ def get_deviation_string(filename):
     return str(dev_str)
 
 
+def file_last_modified_date(file_path):
+    """
+    Get the last modified time of a file.
+
+    Args:
+        file_path (str): The path to the file.
+
+    Returns:
+        datetime.datetime: The last time the file was modified.
+    """
+    return datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+
+
 def get_timestamp():
     dt = datetime.datetime.now(TZ_INFO)
     return dt.strftime(DT_FORMAT)

@@ -440,3 +440,37 @@ class MissingTaskFromDataDictionaryTestCase(MiscellaneousTestCase):
 
 def test_missing_task_from_data_dictionary(request):
     MissingTaskFromDataDictionaryTestCase.run_test_case(request)
+
+
+class IgnoreBeforeDateTestCase(MiscellaneousTestCase):
+    case_name = "IgnoreBeforeDateTestCase"
+    description = "Sets an ignore date in the future."
+    conditions = ["File with error has a date before the ignore date."]
+    expected_output = "Error is not raised for file with date before ignore date."
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        target = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        target = self.build_path("s1_r1", "psychopy", target)
+
+        if target not in modified_files:
+            raise FileNotFoundError(f"File matching relative path {target} not found")
+
+        # simulate empty file (0 bytes)
+        modified_files[target] = ""
+
+        return modified_files
+
+    def get_expected_errors(self):
+        # file with error is ignored due to date of last modification
+        return []
+
+    def validate(self):
+        ignore_before_date = datetime.datetime.now() + datetime.timedelta(days=1)
+        error_df = self.run_validate_data(ignore_before_date=ignore_before_date)
+        self.compare_errors(error_df)
+
+
+def test_ignore_before_date(request):
+    IgnoreBeforeDateTestCase.run_test_case(request)
