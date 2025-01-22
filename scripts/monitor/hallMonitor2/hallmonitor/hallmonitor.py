@@ -23,6 +23,7 @@ from hallmonitor.hmutils import (
     SharedTimestamp,
     clean_empty_dirs,
     datadict_has_changes,
+    file_last_modified_date,
     get_args,
     get_deviation_string,
     get_eeg_errors,
@@ -59,6 +60,7 @@ def validate_data(
     logger: logging.Logger,
     dataset: str,
     use_legacy_exceptions: bool = False,
+    ignore_before_date: datetime.date = None,
     is_raw: bool = True,
 ):
     """
@@ -68,6 +70,7 @@ def validate_data(
         logger (logging.Logger): Logger object for logging information and errors.
         dataset (str): Path to the dataset to be validated.
         is_raw (bool): Flag indicating whether the dataset is raw or checked. Defaults to True.
+        ignore_before_date (datetime.date): Optional cutoff date for retroactive data validation checks. Defaults to None (all files checked).
 
     Returns:
         list[dict]: A list of error records found during validation.
@@ -219,6 +222,21 @@ def validate_data(
                 )
             )
             continue
+
+        # if all of the identifier's files are older than the ignore_before_date, skip validation
+        # (we automatically pass these files due to lack of backwards compatibility with old data monitoring protocols)
+        if ignore_before_date is not None:
+            if all(
+                file_last_modified_date(file) < ignore_before_date for file in id_files
+            ):
+                logger.debug(
+                    "Skipping identifier %s due to ignore_before_date",
+                    str(id),
+                )
+                if is_raw:  # only log pass rows for raw data
+                    pending.append(new_pass_record(dataset, id))
+                    logger.debug("Identifier %s had no errors", str(id))
+                continue
 
         # --- check for empty files ---
         for file in id_files:
@@ -468,12 +486,17 @@ def validate_data(
 
 
 def checked_data_validation(
-    logger: logging.Logger, dataset: str, use_legacy_exceptions=False
+    logger: logging.Logger,
+    dataset: str,
+    use_legacy_exceptions=False,
+    ignore_before_date: datetime.date = None,
 ):
     logger.info("Starting checked data validation...")
 
     # perform data validation for checked directory
-    pending = validate_data(logger, dataset, use_legacy_exceptions, is_raw=False)
+    pending = validate_data(
+        logger, dataset, use_legacy_exceptions, ignore_before_date, is_raw=False
+    )
 
     logger.info("Checked data validation complete, found %d errors", len(pending))
 
@@ -496,12 +519,17 @@ def checked_data_validation(
 
 
 def raw_data_validation(
-    logger: logging.Logger, dataset: str, use_legacy_exceptions=False
+    logger: logging.Logger,
+    dataset: str,
+    use_legacy_exceptions=False,
+    ignore_before_date: datetime.date = None,
 ):
     logger.info("Starting raw data validation...")
 
     # perform data validation for raw directory
-    pending = validate_data(logger, dataset, use_legacy_exceptions, is_raw=True)
+    pending = validate_data(
+        logger, dataset, use_legacy_exceptions, ignore_before_date, is_raw=True
+    )
 
     errors = [r for r in pending if not r["passRaw"]]
     logger.info("Raw data validation complete, found %d errors", len(errors))
@@ -774,16 +802,20 @@ def main(args: Namespace):
         "legacy" if use_legacy_exceptions else "standard",
     )
 
+    ignore_before = args.ignore_before_date
+    if ignore_before is not None:
+        logger.debug("Ignoring files modified before %s", ignore_before)
+
     # limit scope of data validation to raw or checked, if requested
     if args.raw_only:
         logger.info("Only running data validation for sourcedata/raw/")
-        raw_data_validation(logger, dataset, use_legacy_exceptions)
+        raw_data_validation(logger, dataset, use_legacy_exceptions, ignore_before)
     elif args.checked_only:
         logger.info("Only running data validation for sourcedata/checked/")
-        checked_data_validation(logger, dataset, use_legacy_exceptions)
+        checked_data_validation(logger, dataset, use_legacy_exceptions, ignore_before)
     else:
-        checked_data_validation(logger, dataset, use_legacy_exceptions)
-        raw_data_validation(logger, dataset, use_legacy_exceptions)
+        checked_data_validation(logger, dataset, use_legacy_exceptions, ignore_before)
+        raw_data_validation(logger, dataset, use_legacy_exceptions, ignore_before)
 
     if args.no_qa:
         logger.info("Skipping QA stage")
