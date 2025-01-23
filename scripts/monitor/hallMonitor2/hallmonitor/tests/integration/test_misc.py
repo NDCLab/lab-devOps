@@ -474,3 +474,106 @@ class IgnoreBeforeDateTestCase(MiscellaneousTestCase):
 
 def test_ignore_before_date(request):
     IgnoreBeforeDateTestCase.run_test_case(request)
+
+
+class DeleteFailedCheckedIdentifierTestCase(TestCase):
+    case_name = "DeleteFailedCheckedIdentifierTestCase"
+    description = "Deletes files for an identifier that failed checked data validation."
+    conditions = ["Identifier has failed checked data validation"]
+    behavior_to_test = "Ensures that files for identifiers failing checked data validation are removed."
+    expected_output = (
+        "All files related to the failed identifier are successfully deleted."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        target = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        target = self.build_path("s1_r1", "psychopy", target)
+
+        if target not in modified_files:
+            raise FileNotFoundError(f"File matching relative path {target} not found")
+
+        # simulate empty file (0 bytes)
+        modified_files[target] = ""
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import hallmonitor
+
+        try:
+            hallmonitor.checked_data_validation(logger=Mock(), dataset=self.case_dir)
+        except Exception as err:
+            raise AssertionError from err
+
+        filepaths = self.get_paths(self.case_dir)
+
+        # check that all files associated with the identifier were deleted from checked/
+        id_checked_dir = self.build_path("s1_r1", "psychopy", "")
+        assert not any(str(path).startswith(id_checked_dir) for path in filepaths)
+
+        # check that the identifier's files in raw/ were not deleted
+        id_raw_dir = self.build_path("s1_r1", "psychopy", "", True)
+        assert any(str(path).startswith(id_raw_dir) for path in filepaths)
+
+
+def test_delete_failed_checked_identifier(request):
+    DeleteFailedCheckedIdentifierTestCase.run_test_case(request)
+
+
+class KeepFailedIdentifierCheckedNoRawTestCase(TestCase):
+    case_name = "KeepFailedIdentifierCheckedNoRawTestCase"
+    description = (
+        "Deletes raw files for an identifier that failed checked data validation."
+    )
+    conditions = ["Identifier has failed checked data validation"]
+    expected_output = "No files related to the failed identifier are deleted."
+    behavior_to_test = (
+        "Ensures that checked files for identifiers failing checked "
+        + "data validation and missing raw data are retained."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        target = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        target = self.build_path("s1_r1", "psychopy", target)
+
+        if target not in modified_files:
+            raise FileNotFoundError(f"File matching relative path {target} not found")
+
+        # simulate empty file (0 bytes)
+        modified_files[target] = ""
+
+        # remove the identifier's files in the raw directory
+        raw_dir = self.build_path("s1_r1", "psychopy", "", True)
+        modified_files = {
+            relpath: contents
+            for relpath, contents in modified_files.items()
+            if not relpath.startswith(raw_dir)
+        }
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import hallmonitor
+
+        try:
+            hallmonitor.checked_data_validation(logger=Mock(), dataset=self.case_dir)
+        except Exception as err:
+            raise AssertionError from err
+
+        filepaths = self.get_paths(self.case_dir)
+
+        # check that the identifier's files in checked/ were not deleted
+        id_checked_dir = self.build_path("s1_r1", "psychopy", "")
+        assert any(str(path).startswith(id_checked_dir) for path in filepaths)
+
+        # check that the identifier's files in raw/ were not restored
+        id_raw_dir = self.build_path("s1_r1", "psychopy", "", True)
+        assert not any(str(path).startswith(id_raw_dir) for path in filepaths)
+
+
+def test_keep_failed_identifier_checked_no_raw(request):
+    KeepFailedIdentifierCheckedNoRawTestCase.run_test_case(request)

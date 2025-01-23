@@ -509,6 +509,35 @@ def checked_data_validation(
     timestamp = SharedTimestamp()
     write_pending_errors(dataset, pending_df, timestamp)
 
+    # if failed identifier exists in checked/ and raw/, remove its files from checked/
+    # (this keeps the checked directory in a state where only valid files are present)
+    failed_identifiers = [
+        Identifier.from_str(id) for id in pending_df["identifier"].unique()
+    ]
+    for identifier in failed_identifiers:
+        checked_dir = identifier.to_dir(dataset, is_raw=False)
+        raw_dir = identifier.to_dir(dataset, is_raw=True)
+        if os.path.isdir(raw_dir):
+            logger.debug(
+                "Removing failed identifier %s from checked/ (%s)",
+                identifier,
+                checked_dir,
+            )
+            try:
+                subprocess.run(["rm", "-r", checked_dir], check=True)
+                logger.debug("Removed failed identifier %s from checked/", identifier)
+            except subprocess.CalledProcessError as err:
+                logger.error(
+                    "Could not remove failed identifier %s from checked/ (%s)",
+                    identifier,
+                    err,
+                )
+        else:  # if the identifier is only in checked/, we raise an error for the data monitor
+            logger.error(
+                "Failed identifier %s is only present in checked/, not removing files",
+                identifier,
+            )
+
     # remove failing identifiers from validated file record
     failing_ids = pending_df["identifier"].unique()
     record_df = get_file_record(dataset)
