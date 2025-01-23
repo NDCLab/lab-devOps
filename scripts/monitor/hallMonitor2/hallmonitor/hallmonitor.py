@@ -525,7 +525,7 @@ def checked_data_validation(
             )
             try:
                 subprocess.run(["rm", "-r", checked_dir], check=True)
-                logger.debug("Removed failed identifier %s from checked/", identifier)
+                logger.info("Removed failed identifier %s from checked/", identifier)
             except subprocess.CalledProcessError as err:
                 logger.error(
                     "Could not remove failed identifier %s from checked/ (%s)",
