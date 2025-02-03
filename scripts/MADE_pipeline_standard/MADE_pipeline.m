@@ -181,16 +181,14 @@ output_format = 1; % 1 = .set (EEGLAB data structure), 2 = .mat (Matlab data str
 
 % List subject folders under EEG folder
 cd (rawdata_location_parent)
-subjects_to_process = string(split(subjects, "/"));
-subjects_to_process = subjects_to_process(subjects_to_process~=""); %nvm not necessary
-subjects_to_process = strcat("sub-", subjects_to_process);
+all_subjects = string(split(subjects, "/"));
+all_subjects = all_subjects(all_subjects~=""); %nvm not necessary
+all_subjects = strcat("sub-", all_subjects);
 
-% if job was run as a task array, divide up subjects; otherwise, process everyone
-
-subjects_to_process = all_subjects;
 n_tasks = str2double(getenv('SLURM_ARRAY_TASK_COUNT'));
 task_idx = str2double(getenv('SLURM_ARRAY_TASK_ID')); % index must start at 1
 
+% if job was run as a task array, divide up subjects; otherwise, process everyone
 if ~isnan(n_tasks) && ~isnan(task_idx) && n_tasks >= 1 && task_idx >= 1
     % Ensure valid task index
     if task_idx > n_tasks
@@ -212,6 +210,8 @@ else
     fprintf('Processing all %d subjects\n', length(subjects_to_process));
 end
 
+% set default output path
+output_report_path = [main_dir filesep 'output'];
 
 %for file_locater_counter = 1:length(subjects_to_process) % This for loop lists the folders containing the main data files
 for file_locater_counter = 1:length(subjects_to_process)
@@ -480,21 +480,9 @@ for file_locater_counter = 1:length(subjects_to_process)
             % Performing high pass filtering
             EEG = eeg_checkset( EEG );
             
-            raw_data = EEG.data;  % Extract data once
-            filteredData = zeros(size(raw_data));
+            fprintf('Processing high-pass filter...\n')
+            EEG = parallel_filter(EEG, hp_fl_order, high_cutoff, 'high');
             
-            % design filter
-            [hiPassFilterCoeffs, delay] = firws(hp_fl_order, high_cutoff/(EEG.srate/2), 'high', 'hamming');
-            
-            % Process each channel as a separate task
-            parfor chanIdx = 1:EEG.nbchan
-                filteredData(chanIdx, :) = filtfilt(hiPassFilterCoeffs, 1, double(raw_data(chanIdx, :)));
-            end
-            
-            % Compensate for filter delay
-            filteredData = filteredData(:, 1:end-delay);
-            
-            EEG.data = filteredData;
             
             % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
             
@@ -504,22 +492,19 @@ for file_locater_counter = 1:length(subjects_to_process)
             % Performing low pass filtering
             EEG = eeg_checkset( EEG );
             
-            [loPassFilterCoeffs, delay] = firws(lp_fl_order, low_cutoff/(EEG.srate/2), 'low', 'hamming');
-            
-            raw_data = EEG.data;  % Extract data once
-            filteredData = zeros(size(raw_data));
-            
-            % Process each channel as a separate task
-            parfor chanIdx = 1:EEG.nbchan
-                filteredData(chanIdx, :) = filtfilt(loPassFilterCoeffs, 1, double(raw_data(chanIdx, :)));
-            end
-            
-            % Compensate for filter delay
-            filteredData = filteredData(:, 1:end-delay);
-            
-            EEG.data = filteredData;
+            fprintf('Processing low-pass filter...\n')
+            EEG = parallel_filter(EEG, lp_fl_order, low_cutoff, 'low');
+
+            %% STEP 7: Run faster to find bad channels
             EEG = eeg_checkset( EEG );
             
+            
+            % pop_firws() - transition band width: 10 Hz
+            % pop_firws() - filter window type hamming ('wtype', 'hamming')
+            % pop_firws() - applying zero-phase (non-causal) filter ('minphase', 0)
+            
+            %% STEP 7: Run faster to find bad channels
+
             % pop_firws() - transition band width: 10 Hz
             % pop_firws() - filter window type hamming ('wtype', 'hamming')
             % pop_firws() - applying zero-phase (non-causal) filter ('minphase', 0)
@@ -531,7 +516,6 @@ for file_locater_counter = 1:length(subjects_to_process)
             all_chan_bad_FAST=0;
             
             % Extract essential data outside of parfor
-            raw_data = EEG.data;
             raw_data = EEG.data;
             srate = EEG.srate;
             chanlocs = EEG.chanlocs;
@@ -1011,7 +995,7 @@ for file_locater_counter = 1:length(subjects_to_process)
                 total_channels_interpolated=numel(FASTbadChans)+ numel(ica_prep_badChans);
             end
             
-            %% STEP 16: Parallel rereferencing
+            %% STEP 16: Rereference data
             if rerefer_data==1
                 if iscell(reref)
                     reref_idx = zeros(1, length(reref));
@@ -1080,9 +1064,6 @@ for file_locater_counter = 1:length(subjects_to_process)
             
         end % end of subject loop
         
-        delete(gcp); % Clean up parallel pool
-        
-        
         %writetable(final_report_table, [output_location filesep 'MADE_preprocessing_report.csv']);
         subjEnd = toc(subjStart);
         fprintf('MADE pipeline completed for subject %s in %d hours %.3f minutes, continuing.\n', subjects_to_process(file_locater_counter), floor(subjEnd/3600), rem(subjEnd,3600)/60);
@@ -1093,6 +1074,19 @@ for file_locater_counter = 1:length(subjects_to_process)
         
     catch
         fprintf('ERROR: failed for subject %s, look at log in %s/MADE_logfiles for details, continuing.\n', subjects_to_process(file_locater_counter), output_location);
+        % Get error info and write to log
+        err = lasterror;
+        diary on  % Ensure diary is on to capture error details
+        fprintf('\nError details:\n');
+        fprintf('Message: %s\n', err.message);
+        fprintf('Identifier: %s\n', err.identifier);
+        fprintf('Stack trace:\n');
+        for i = 1:length(err.stack)
+            fprintf('File: %s\n', err.stack(i).file);
+            fprintf('Line: %d\n', err.stack(i).line);
+            fprintf('Name: %s\n\n', err.stack(i).name);
+        end
+        diary off
         any_usable_data = 0;
         report_table=table({datafile_names{subject}}, {datetime('now')}, {reference_used_for_faster}, {faster_bad_channels}, {ica_preparation_bad_channels}, {length_ica_data}, ...
             {total_ICs}, {ICs_removed}, {total_epochs_before_artifact_rejection}, {total_epochs_after_artifact_rejection}, {total_channels_interpolated}, {any_usable_data});
@@ -1105,7 +1099,10 @@ for file_locater_counter = 1:length(subjects_to_process)
     
 end
 
-
+% Clean up parallel pool after all processing is complete
+if ~isempty(gcp('nocreate'))
+    delete(gcp('nocreate'));
+end
 
 end
 
@@ -1153,76 +1150,62 @@ end
 %     writetable(report_table, [output_location filesep 'MADE_preprocessing_report_' task '.csv'], "WriteMode", "append");
 % end
 
-function filteredData = parallel_filter_channels(data, srate, filterCoeffs)
-    % Parallel filtering of EEG channels
-    % data: raw EEG data (channels x timepoints)
-    % srate: sampling rate
-    % filterCoeffs: pre-computed filter coefficients
-    
-    filteredData = zeros(size(data));
-    parfor chanIdx = 1:size(data,1)
-        filteredData(chanIdx, :) = filtfilt(filterCoeffs, 1, double(data(chanIdx, :)));
-    end
-end
+%% Parallel processing utility functions
 
-function epochedData = parallel_create_epochs(data, srate, epochLength)
-    % Create fixed-length epochs in parallel
-    % data: continuous EEG data
-    % srate: sampling rate
-    % epochLength: length of each epoch in seconds
-    
-    epochSamples = epochLength * srate;
-    numEpochs = floor(size(data, 2) / epochSamples);
-    
-    epochedData = zeros(size(data,1), epochSamples, numEpochs);
-    parfor epochIdx = 1:numEpochs
-        startIdx = (epochIdx-1)*epochSamples + 1;
-        endIdx = startIdx + epochSamples - 1;
-        epochedData(:,:,epochIdx) = data(:,startIdx:endIdx);
+function [EEG] = parallel_filter(EEG, filter_order, cutoff_freq, filter_type)
+    p = gcp('nocreate');
+    if isempty(p)
+        throw MException("MADE_pipeline:SerialFiltering", "No parallel pool found.")
     end
-end
+    
+    if ~strcmp(filter_type, 'high') && ~strcmp(filter_type, 'low')
+        throw MException("MADE_pipeline:BadFilterType", "Unrecognized filter type.")
+    end
 
-function [badChans, tmpData] = parallel_artifact_detection(EEG, volt_threshold)
-    % Parallel artifact detection and interpolation across channels/epochs
-    % EEG: EEG structure
-    % volt_threshold: voltage threshold for artifact detection
-    
-    % Initialize variables
-    badChans = zeros(EEG.nbchan, EEG.trials);
-    
-    % Parallel artifact detection across channels
-    parfor ch = 1:EEG.nbchan
-        tmpEEG = pop_eegthresh(EEG, 1, ch, volt_threshold(1), volt_threshold(2), ...
-            EEG.xmin, EEG.xmax, 0, 0);
-        tmpEEG = eeg_rejsuperpose(tmpEEG, 1, 1, 1, 1, 1, 1, 1);
-        badChans(ch,:) = tmpEEG.reject.rejglobal;
+    if mod(filter_order, 2) ~= 0
+        throw MException("MADE_pipeline:OddFilterOrder", "Filter order must be even.");
     end
-    
-    % Parallel epoch interpolation
-    tmpData = zeros(EEG.nbchan, EEG.pnts, EEG.trials);
-    parfor e = 1:EEG.trials
-        tmpData(:,:,e) = interpolate_epoch(EEG.data(:,:,e), badChans(:,e), ...
-            EEG.nbchan, EEG.chanlocs);
-    end
-end
 
-function epochData = interpolate_epoch(data, badChanMask, nbchan, chanlocs)
-    % Helper function to interpolate bad channels in a single epoch
-    badChanIdx = find(badChanMask==1);
-    
-    if ~isempty(badChanIdx)
-        % Create temporary EEG structure for interpolation
-        tmpEEG = eeg_emptyset();
-        tmpEEG.data = data;
-        tmpEEG.nbchan = nbchan;
-        tmpEEG.chanlocs = chanlocs;
+    startTime = tic();
+
+    filterCoeffs = firws(filter_order, cutoff_freq/(0.5*EEG.srate), filter_type);
+    delay = 0.5*filter_order;
+
+    % Extract EEG data once
+    rawData = EEG.data;
+    totalChannels = EEG.nbchan;
+
+    % Dispatch filtering as async jobs
+    futures = parallel.FevalFuture.empty;
+    for chanIdx = 1:totalChannels
+        % We use 1 as the denominator coefficient for a FIR filter
+        futures(chanIdx) = parfeval(p, @(data) filtfilt(filterCoeffs, 1, ...
+            double(data)), 1, rawData(chanIdx, :));
+    end
+    % Make sure we don't leave any futures running on exit
+    cancelFutures = onCleanup(@() cancel(futures));
+
+    % Collect results
+    filteredData = zeros(size(rawData));
+    for idx = 1:totalChannels
+        [completedIdx, result] = fetchNext(futures);
+        filteredData(completedIdx, :) = result;
         
-        % Interpolate bad channels
-        tmpEEG = eeg_interp(tmpEEG, badChanIdx);
-        epochData = tmpEEG.data;
-    else
-        epochData = data;
+        % Get timing from FevalFuture properties
+        future = futures(completedIdx);
+        runtime = future.FinishDateTime - future.StartDateTime;
+        runtimeSeconds = seconds(runtime);
+
+        fprintf('[Job %02d/%02d] Channel %d processed in %.2f s\n', idx, totalChannels, ...
+            completedIdx, runtimeSeconds);
     end
+
+    % Compensate for filter delay
+    filteredData = filteredData(:, 1:end-delay);
+
+    EEG.data = filteredData;
+
+    fprintf('Total processing time: %.2f s\n', toc(startTime))
 end
 
 function interpData = parallel_channel_interpolation(EEG, channels_analysed, N_CPUS)
