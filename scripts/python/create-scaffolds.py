@@ -4,8 +4,29 @@ import re
 import string
 import sys
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 import pandas as pd
+
+
+@dataclass
+class Word:
+    text: str
+    clean_text: str
+
+
+@dataclass
+class Syllable:
+    text: str
+    clean_text: str
+    has_punctuation: bool
+    ends_sentence: bool
+
+
+@dataclass
+class SyllableEntry:
+    word: Word
+    syllables: list[Syllable]
 
 
 class FeatureExtractor(ABC):
@@ -15,7 +36,7 @@ class FeatureExtractor(ABC):
         pass
 
     @abstractmethod
-    def extract(self, syllable_dict: dict[str, list[str]]) -> list:
+    def extract(self, syllable_directory: list[SyllableEntry]) -> list:
         pass
 
 
@@ -34,19 +55,24 @@ class ScaffoldConstructor:
         self._extractors.extend(extractors)
 
     def build(self) -> pd.DataFrame:
-        syllable_dict = self.build_syllable_dict()
+        syllable_directory = self.build_syllable_directory()
 
         # Create a list of all syllables and their corresponding words
         syllables = []
+        cleaned_syllables = []
         words = []
+        cleaned_words = []
         word_ids = []
         syllable_ids = []
         word_index = 1
         syllable_index = 1
-        for word, syllable_list in syllable_dict.items():
-            for syllable in syllable_list:
-                syllables.append(syllable)
-                words.append(word)
+        for entry in syllable_directory:
+            for syllable in entry.syllables:
+                syllables.append(syllable.text)
+                cleaned_syllables.append(syllable.clean_text)
+                words.append(entry.word.text)
+                cleaned_words.append(entry.word.clean_text)
+                # Indices (useful for unique identification)
                 word_ids.append(f"{self.passage_name}_word{word_index}")
                 syllable_ids.append(f"{self.passage_name}_syll{syllable_index}")
                 syllable_index += 1
@@ -54,44 +80,64 @@ class ScaffoldConstructor:
 
         # Extract features
         features = {
-            extractor.feature_name: extractor.extract(syllable_dict)
+            extractor.feature_name: extractor.extract(syllable_directory)
             for extractor in self._extractors
         }
 
-        features["syllables"] = syllables
-        features["words"] = words
+        # for feature, items in features.items():
+        #     print(feature, len(items))
+
+        features["syllable"] = syllables
+        features["cleaned_syllable"] = cleaned_syllables
+        features["word"] = words
+        features["cleaned_word"] = cleaned_words
         features["word_id"] = word_ids
         features["syllable_id"] = syllable_ids
 
         return pd.DataFrame(features)
 
-    def build_syllable_dict(self) -> dict[str, list[str]]:
-        syllable_dict = {}
+    def build_syllable_directory(self) -> list[SyllableEntry]:
+        syllable_directory = []
         syllable_queue = self._syllables.copy()
 
         for word in self._words:
-            syllable_dict[word] = []
             current_length = 0
-            word_no_hyphen = word.replace("-", "")
-            word_length = len(word_no_hyphen)
+            cleaned_word = word.replace("-", "").lower().strip(string.punctuation)
+            word_length = len(cleaned_word)
 
+            syllable_list = []
             while syllable_queue and current_length < word_length:
-                syllable = syllable_queue.pop(0)
+                current_syllable = syllable_queue.pop(0).lower()
+                cleaned_syll = current_syllable.strip(string.punctuation)
                 # Check if the syllable matches the start of the remaining word
-                if word_no_hyphen.startswith(syllable, current_length):
-                    syllable_dict[word].append(syllable)
-                    current_length += len(syllable)
+                if cleaned_word.startswith(cleaned_syll, current_length):
+                    syllable_list.append(
+                        Syllable(
+                            current_syllable,
+                            cleaned_syll,
+                            current_syllable[-1] in string.punctuation,
+                            current_syllable[-1] in {".", "!", "?"},
+                        )
+                    )
+                    current_length += len(current_syllable)
 
-        return syllable_dict
+            if not syllable_list:
+                raise Exception(self.passage_name, word, syllable_directory)
+
+            syllable_directory.append(
+                SyllableEntry(Word(word, cleaned_word), syllable_list)
+            )
+
+        return syllable_directory
 
 
 class SyllableCountExtractor(FeatureExtractor):
     feature_name = "totalWordSyllables"
 
-    def extract(self, syllable_dict: dict[str, list[str]]) -> list[int]:
+    def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
         syllable_counts = []
-        for syllables in syllable_dict.values():
-            count = len(syllables)
+        for entry in syllable_directory:
+            count = len(entry.syllables)
             syllable_counts.extend([count] * count)
         return syllable_counts
 
@@ -99,60 +145,84 @@ class SyllableCountExtractor(FeatureExtractor):
 class StartSyllableExtractor(FeatureExtractor):
     feature_name = "syllableAtWordOnset"
 
-    def extract(self, syllable_dict: dict[str, list[str]]) -> list[int]:
-        starts = []
-        for syllables in syllable_dict.values():
-            for syllable in syllables:
-                is_start = int(syllable == syllables[0])
-                starts.append(is_start)
-        return starts
+    def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
+        syll_is_onset = []
+        for entry in syllable_directory:
+            count = len(entry.syllables)
+            syll_is_onset += [1] + [0] * (count - 1)
+        return syll_is_onset
 
 
 class EndSyllableExtractor(FeatureExtractor):
     feature_name = "syllableAtWordEnd"
 
-    def extract(self, syllable_dict: dict[str, list[str]]) -> list[int]:
-        ends = []
-        for syllables in syllable_dict.values():
-            for syllable in syllables:
-                is_end = int(syllable == syllables[-1])
-                ends.append(is_end)
-        return ends
+    def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
+        syll_is_last = []
+        for entry in syllable_directory:
+            count = len(entry.syllables)
+            syll_is_last += [0] * (count - 1) + [1]
+        return syll_is_last
 
 
 class PunctuationStartExtractor(FeatureExtractor):
     feature_name = "syllableAtSentenceOnset"
 
-    def extract(self, syllable_dict: dict[str, list[str]]) -> list[int]:
-        starts = []
+    def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
+        syll_at_sent_start = []
         # Assume start of text is a sentence start
-        previous_ends_with_punctuation = True
+        prev_ends_sentence = True
 
-        for syllables in syllable_dict.values():
-            for syllable in syllables:
-                if previous_ends_with_punctuation:
-                    starts.append(1)
-                else:
-                    starts.append(0)
-                previous_ends_with_punctuation = any(
-                    syllable[-1] in {".", "!", "?"} for syllable in syllables
-                )
+        for entry in syllable_directory:
+            count = len(entry.syllables)
+            syll_at_sent_start += [int(prev_ends_sentence)] + [0] * (count - 1)
 
-        return starts
+            prev_ends_sentence = entry.syllables[-1].ends_sentence
+
+        return syll_at_sent_start
 
 
 class PunctuationEndExtractor(FeatureExtractor):
     feature_name = "syllableAtSentenceEnd"
 
-    def extract(self, syllable_dict: dict[str, list[str]]) -> list[int]:
-        ends = []
-        for syllables in syllable_dict.values():
-            for syllable in syllables:
-                if syllable == syllables[-1] and syllable[-1] in {".", "!", "?"}:
-                    ends.append(1)
-                else:
-                    ends.append(0)
-        return ends
+    def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
+        syll_at_sent_end = []
+
+        for entry in syllable_directory:
+            count = len(entry.syllables)
+            last_syll = entry.syllables[-1]
+            syll_at_sent_end += [0] * (count - 1) + [int(last_syll.ends_sentence)]
+
+        return syll_at_sent_end
+
+
+class WordStartsSentenceExtractor(FeatureExtractor):
+    feature_name = "wordAtSentenceOnset"
+
+    def extract(self, syllable_directory):
+        word_at_sent_start = []
+        # Assume start of text is a sentence start
+        prev_ends_sentence = True
+
+        for entry in syllable_directory:
+            count = len(entry.syllables)
+            word_at_sent_start += [int(prev_ends_sentence)] * count
+
+            prev_ends_sentence = entry.syllables[-1].ends_sentence
+
+        return word_at_sent_start
+
+
+class WordEndsSentenceExtractor(FeatureExtractor):
+    feature_name = "wordAtSentenceEnd"
+
+    def extract(self, syllable_directory):
+        word_at_sent_end = []
+
+        for entry in syllable_directory:
+            count = len(entry.syllables)
+            word_at_sent_end += [int(entry.syllables[-1].ends_sentence)] * count
+
+        return word_at_sent_end
 
 
 class WordFrequencyExtractor(FeatureExtractor):
@@ -171,22 +241,21 @@ class WordFrequencyExtractor(FeatureExtractor):
                 frequencies[word] = freq_count
         return frequencies
 
-    def extract(self, syllable_dict: dict[str, list[str]]) -> list[int]:
+    def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
         frequencies = []
-        for word, syllables in syllable_dict.items():
-            word_lower = word.lower().strip(string.punctuation)
-            frequency = self.word_frequencies.get(word_lower, 0)
-            frequencies.extend([frequency] * len(syllables))
+        for entry in syllable_directory:
+            frequency = self.word_frequencies.get(entry.word.clean_text, 0)
+            frequencies.extend([frequency] * len(entry.syllables))
         return frequencies
 
 
 class SyllablePositionExtractor(FeatureExtractor):
     feature_name = "syllablePosition"
 
-    def extract(self, syllable_dict: dict[str, list[str]]) -> list[int]:
+    def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
         positions = []
-        for syllables in syllable_dict.values():
-            positions.extend(range(1, len(syllables) + 1))
+        for entry in syllable_directory:
+            positions += range(1, len(entry.syllables) + 1)
         return positions
 
 
@@ -199,20 +268,20 @@ def extract_words_and_syllables(
     with open(file_path, mode="r", encoding="utf-8") as file:
         reader = csv.reader(file, delimiter=sep)
 
-        # Read the first row for "TARGET TEXT"
+        # Read the first row for "target text"
         first_row = next(reader, [])
-        if "TARGET TEXT" in first_row:
-            target_text_index = first_row.index("TARGET TEXT")
+        if "target text" in first_row:
+            target_text_index = first_row.index("target text")
             words = [
                 cell.strip()
                 for cell in first_row[target_text_index + 1 :]
                 if cell.strip()
             ]
 
-        # Read the second row for "TARGET SYLLABLES"
+        # Read the second row for "target syllables"
         second_row = next(reader, [])
-        if "TARGET SYLLABLES" in second_row:
-            target_syllables_index = second_row.index("TARGET SYLLABLES")
+        if "target syllables" in second_row:
+            target_syllables_index = second_row.index("target syllables")
             syllables = [
                 cell.strip()
                 for cell in second_row[target_syllables_index + 1 :]
@@ -226,6 +295,8 @@ def main(data_dir: str):
     extractors = [
         StartSyllableExtractor(),
         EndSyllableExtractor(),
+        WordStartsSentenceExtractor(),
+        WordEndsSentenceExtractor(),
         SyllableCountExtractor(),
         PunctuationStartExtractor(),
         PunctuationEndExtractor(),
@@ -253,7 +324,10 @@ def main(data_dir: str):
             df_str = df.to_csv(index=False, sep="\t", encoding="utf-8")
             # Quirks introduced by trying to read non-relational data into Pandas
             df_str = re.sub(r"Unnamed:\s\d+", "\t", df_str)
-            df_str = re.sub(r"(\w+)\.\d+", r"\1", df_str)
+            df_str = re.sub(r"([^\.]+)\.+\d+", r"\1", df_str)
+            # Standardize text data to lower-case (syllables and words do not
+            # always match capitalization in practice)
+            df_str = df_str.lower()
 
             basename = os.path.splitext(basename)[0] + ".tsv"
             filepath = os.path.join(data_dir, basename)
