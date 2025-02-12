@@ -24,7 +24,14 @@ From: python:3.12-slim-bullseye
     # Install project dependencies into the container
     cd /app
     poetry config virtualenvs.create false
-    poetry install --no-interaction --no-ansi
+    poetry install --no-interaction --no-ansi --without dev
+
+    # Remove caches to save space
+    rm -rf /root/.cache/pypoetry
+    rm -rf /root/.cache/pip
+
+    # Remove build tools
+    apt-get purge -y --auto-remove build-essential git curl
 
 %environment
     export PATH="/opt/poetry/bin:$PATH"
@@ -32,4 +39,5 @@ From: python:3.12-slim-bullseye
     export PYTHONNOUSERSITE=1
 
 %runscript
+    cd /app
     exec poetry run python -m hallmonitor "$@"
