@@ -1,0 +1,35 @@
+Bootstrap: docker
+From: python:3.12-slim-bullseye
+
+%labels
+    Author Nolan Welch
+
+%setup
+    mkdir -p $SINGULARITY_ROOTFS/app
+    cp -r . $SINGULARITY_ROOTFS/app
+
+%post
+    apt-get update && apt-get install -y --no-install-recommends \
+        git \
+        curl \
+        build-essential \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Install Poetry into a custom location
+    export POETRY_HOME=/opt/poetry
+    curl -sSL https://install.python-poetry.org | python3 -
+    echo 'export PATH="/opt/poetry/bin:$PATH"' >> /environment
+    export PATH="/opt/poetry/bin:$PATH"
+
+    # Install project dependencies into the container
+    cd /app
+    poetry config virtualenvs.create false
+    poetry install --no-interaction --no-ansi
+
+%environment
+    export PATH="/opt/poetry/bin:$PATH"
+    export POETRY_VIRTUALENVS_CREATE=false
+    export PYTHONNOUSERSITE=1
+
+%runscript
+    exec poetry run python -m hallmonitor "$@"
