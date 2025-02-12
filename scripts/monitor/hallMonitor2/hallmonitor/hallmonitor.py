@@ -512,7 +512,9 @@ def checked_data_validation(
     # if failed identifier exists in checked/ and raw/, remove its files from checked/
     # (this keeps the checked directory in a state where only valid files are present)
     failed_identifiers = [
-        Identifier.from_str(id) for id in pending_df["identifier"].unique()
+        Identifier.from_str(id)
+        for id in pending_df["identifier"].unique()
+        if id != "Unknown Identifier"
     ]
     for identifier in failed_identifiers:
         checked_dir = identifier.to_dir(dataset, is_raw=False)
