@@ -1,7 +1,0 @@
-.git
-tests
-docs
-*.pyc
-__pycache__
-*.sif
-*.def
