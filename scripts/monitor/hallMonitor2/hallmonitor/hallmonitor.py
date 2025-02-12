@@ -831,7 +831,7 @@ def main(args: Namespace):
         "legacy" if use_legacy_exceptions else "standard",
     )
 
-    ignore_before = args.ignore_before_date
+    ignore_before = args.ignore_before
     if ignore_before is not None:
         logger.debug("Ignoring files modified before %s", ignore_before)
 
