@@ -1560,8 +1560,6 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
         logger (logging.Logger): The logger object used to log the error.
         dataset (str): The path to the dataset directory.
         filename (str): The name of the file to check.
-        dd_dict (dict): Dictionary containing information about each variable drawn from the datadict.
-        allowed_subs (str): String of allowed values for a subject ID in interval notation
         has_deviation (bool, optional): A flag indicating if the file has a deviation. Defaults to False.
 
     Returns:
