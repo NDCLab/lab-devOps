@@ -45,7 +45,11 @@ class DeviationAndNoDataErrorTestCase(ExceptionTestCase):
 
     def get_expected_errors(self):
         error_info = "deviation.txt cannot signify only 1 file; use no-data.txt."
-        combo_info = "Combination row arrow-alert_psychopy has no variables present."
+        combo_info = (
+            "Combination row arrow-alert_psychopy has no variables present in "
+            + os.path.join(self.case_dir, self.build_path("s1_r1", "psychopy", ""))
+        )
+
         errors = [
             ExpectedError("Improper exception files", re.escape(error_info)),
             ExpectedError("Combination variable error", re.escape(combo_info), 2),
