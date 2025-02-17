@@ -837,7 +837,7 @@ class TestCase(ABC):
         class MockNamespace:
             dataset = self.case_dir
             child_data = None
-            ignore_before_date = None
+            ignore_before = None
             legacy_exceptions = False
             no_color = False
             no_qa = False
