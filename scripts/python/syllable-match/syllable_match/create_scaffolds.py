@@ -324,7 +324,7 @@ def main(data_dir: str):
             df_str = df.to_csv(index=False, sep="\t", encoding="utf-8")
             # Quirks introduced by trying to read non-relational data into Pandas
             df_str = re.sub(r"Unnamed:\s\d+", "\t", df_str)
-            df_str = re.sub(r"([^\.]+)\.+\d+", r"\1", df_str)
+            df_str = re.sub(r"(.+?)\.\d+", r"\1", df_str)
             # Standardize text data to lower-case (syllables and words do not
             # always match capitalization in practice)
             df_str = df_str.lower()
