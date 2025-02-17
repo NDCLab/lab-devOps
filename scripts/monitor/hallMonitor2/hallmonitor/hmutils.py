@@ -1042,7 +1042,7 @@ def new_error_record(
     - "subject" (int): The subject's ID.
     - "dataType" (str): The identifier's variable datatype.
     - "encrypted" (bool): Whether the datatype is encrypted.
-    - "suffix" (str): The identifier's session, run, and event information.
+    - "suffix" (str): The identifier's session and run information.
     - "errorType" (str): The type/category of the error.
     - "errorDetails" (str): Detailed information about the error.
     """
@@ -1052,7 +1052,7 @@ def new_error_record(
         id_str = str(identifier)
         subject = int(identifier.subject.removeprefix("sub-"))
         datatype = get_variable_datatype(dataset, identifier.variable)
-        suffix = f"{identifier.session}_{identifier.run}_{identifier.event}"
+        suffix = f"{identifier.session}_{identifier.run}"
         encrypted = is_variable_encrypted(dataset, identifier.variable)
 
     except ValueError:
@@ -1097,7 +1097,7 @@ def new_pass_record(dataset, identifier):
     - "subject" (int): The subject's ID.
     - "dataType" (str): The identifier's variable datatype.
     - "encrypted" (bool): Whether the datatype is encrypted.
-    - "suffix" (str): The identifier's session, run, and event information.
+    - "suffix" (str): The identifier's session and run information.
     - "errorType" (None): Placeholder for error type, initially None.
     - "errorDetails" (None): Placeholder for error details, initially None.
     """
@@ -1107,7 +1107,7 @@ def new_pass_record(dataset, identifier):
         id_str = str(identifier)
         subject = int(identifier.subject.removeprefix("sub-"))
         datatype = get_variable_datatype(dataset, identifier.variable)
-        suffix = f"{identifier.session}_{identifier.run}_{identifier.event}"
+        suffix = f"{identifier.session}_{identifier.run}"
         encrypted = is_variable_encrypted(dataset, identifier.variable)
 
     except ValueError:
@@ -1152,7 +1152,7 @@ def new_validation_record(dataset, identifier):
             - "subject" (int): The subject's ID.
             - "dataType" (str): The identifier's variable datatype.
             - "encrypted" (bool): Whether the datatype is encrypted.
-            - "suffix" (str): The identifier's session, run, and event information.
+            - "suffix" (str): The identifier's session and run information.
 
     Raises:
         ValueError: If the identifier string cannot be converted to an
@@ -1173,7 +1173,7 @@ def new_validation_record(dataset, identifier):
         "subject": int(identifier.subject.removeprefix("sub-")),
         "dataType": get_variable_datatype(dataset, identifier.variable),
         "encrypted": is_variable_encrypted(dataset, identifier.variable),
-        "suffix": f"{identifier.session}_{identifier.run}_{identifier.event}",
+        "suffix": f"{identifier.session}_{identifier.run}",
     }
 
 
@@ -1193,7 +1193,7 @@ def new_qa_record(dataset, identifier, deviation_string=""):
     - "subject" (int): The subject's ID.
     - "dataType" (str): The identifier's variable datatype.
     - "encrypted" (bool): Whether the datatype is encrypted.
-    - "suffix" (str): The identifier's session, run, and event information.
+    - "suffix" (str): The identifier's session and run information.
     - "datetime" (str): The current timestamp.
     - "user" (str): The username of the current user.
     - "qa" (bool): The QA status, initialized to False.
@@ -1208,7 +1208,7 @@ def new_qa_record(dataset, identifier, deviation_string=""):
         id_str = str(identifier)
         subject = int(identifier.subject.removeprefix("sub-"))
         datatype = get_variable_datatype(dataset, identifier.variable)
-        suffix = f"{identifier.session}_{identifier.run}_{identifier.event}"
+        suffix = f"{identifier.session}_{identifier.run}"
         encrypted = is_variable_encrypted(dataset, identifier.variable)
 
     except ValueError:

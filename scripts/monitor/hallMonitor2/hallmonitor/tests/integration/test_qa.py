@@ -129,7 +129,7 @@ class QAChecklistEntryTestCase(PendingQAFileTestCase):
 
         assert info["subject"] == self.sub_id
         assert info["dataType"] == "eeg"
-        assert info["suffix"] == "s1_r1_e1"
+        assert info["suffix"] == "s1_r1"
         assert not info["qa"]
         assert not info["localMove"]
 
