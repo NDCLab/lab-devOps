@@ -177,7 +177,8 @@ def validate_data(
                             dataset,
                             identifier,
                             "Combination variable error",
-                            f"Combination row {combo.name} has no variables present.",
+                            f"Combination row {combo.name} has no variables present in "
+                            + identifier.to_dir(dataset, is_raw),
                         )
                     )
 
