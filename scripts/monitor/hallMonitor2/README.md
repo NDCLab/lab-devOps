@@ -15,7 +15,7 @@ To build `hallmonitor`, you should first install [Singularity](https://github.co
 
 Once you have Singularity installed, navigate to the root directory of this project (the directory containing `pyproject.toml`) and build the container:
 ```sh
-sudo singularity install image_name.sif Singularity.def
+sudo singularity build image_name.sif Singularity.def
 ```
 
 This will build a Singularity image containing `hallmonitor`, and should take around a minute depending on your computer's specs. The name of your image may be whatever you choose, but we recommend sticking with something like `appname_major-minor-patch.sif` to keep things consistent. For example, `hm2_0-1-0.sif` is an image containing version 0.1.0 of `hallmonitor`'s second iteration.
