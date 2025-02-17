@@ -10,6 +10,23 @@ The `hallmonitor` module is designed to ensure data integrity within the [NDCLab
 - **QA Preparation**: Prepares valid files for quality assurance checks.
 - **Central Tracker Update**: Updates a central tracker with the status of validated files.
 
+## Building with Singularity
+To build `hallmonitor`, you should first install [Singularity](https://github.com/sylabs/singularity/blob/main/INSTALL.md) using your preferred method.
+
+Once you have Singularity installed, navigate to the root directory of this project (the directory containing `pyproject.toml`) and build the container:
+```sh
+sudo singularity install image_name.sif Singularity.def
+```
+
+This will build a Singularity image containing `hallmonitor`, and should take around a minute depending on your computer's specs. The name of your image may be whatever you choose, but we recommend sticking with something like `appname_major-minor-patch.sif` to keep things consistent. For example, `hm2_0-1-0.sif` is an image containing version 0.1.0 of `hallmonitor`'s second iteration.
+
+> **Note:** As part of the build process, Singularity will run `pytest` on the `hallmonitor` module. Any failed tests will cause the build to exit with error.
+
+To run `hallmonitor` from within a Singularity container, simply execute:
+```sh
+singularity run image_name.sif dataset [OPTIONS]
+```
+
 ## Usage
 
 To use the `hallmonitor` module, you need to ensure that the module is installed and accessible from your Python environment. You can achieve this by installing the module using `pip` and then running the script from any directory.
