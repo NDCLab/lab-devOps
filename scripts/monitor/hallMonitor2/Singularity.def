@@ -33,7 +33,10 @@ From: python:3.13-slim-bullseye
     # Install project dependencies into the container
     cd /app
     poetry config virtualenvs.create false
-    poetry install --no-interaction --no-ansi --without dev
+    poetry install --no-interaction --no-ansi
+
+    # Run tests, failing the build if unsuccessful
+    poetry run python -m pytest
 
     # Remove caches to save space
     rm -rf /root/.cache/pypoetry
