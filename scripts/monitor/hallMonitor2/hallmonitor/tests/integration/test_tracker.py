@@ -695,9 +695,7 @@ class RemoteAndInPersonREDCapTestCase(TrackerTestCase):
         rc_dir = os.path.join("sourcedata", "checked", "redcap")
         rc_stem = "bbschild"
         original_rc = os.path.join(rc_dir, self.build_rc_name(rc_stem, "s1", "r1"))
-        new_rc = os.path.join(
-            rc_dir, self.build_rc_name(f"REMOTEONLY{rc_stem}", "s1", "r1")
-        )
+        new_rc = os.path.join(rc_dir, self.build_rc_name(rc_stem, "s1", "r1", True))
         # copy original content to new remote-only REDCap
         modified_files[new_rc] = modified_files[original_rc]
 
