@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: python:3.13-slim-bullseye
+From: python:3.13-slim
 
 %labels
     Author Nolan Welch
@@ -7,7 +7,6 @@ From: python:3.13-slim-bullseye
 %setup
     mkdir -p $SINGULARITY_ROOTFS/app
     cp -r ./hallmonitor $SINGULARITY_ROOTFS/app
-    cp ./poetry.lock $SINGULARITY_ROOTFS/app
     cp ./pyproject.toml $SINGULARITY_ROOTFS/app
     cp ./README.md $SINGULARITY_ROOTFS/app
 
@@ -18,38 +17,28 @@ From: python:3.13-slim-bullseye
     ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
     echo "America/New_York" > /etc/timezone
 
-    apt-get update && apt-get install -y --no-install-recommends \
-        git \
-        curl \
-        build-essential \
-        && rm -rf /var/lib/apt/lists/*
-
-    # Install Poetry into a custom location
-    export POETRY_HOME=/opt/poetry
-    curl -sSL https://install.python-poetry.org | python3 -
-    echo 'export PATH="/opt/poetry/bin:$PATH"' >> /environment
-    export PATH="/opt/poetry/bin:$PATH"
-
     # Install project dependencies into the container
     cd /app
-    poetry config virtualenvs.create false
-    poetry install --no-interaction --no-ansi
+    pip install --no-cache-dir --root-user-action=ignore .
+    
+    # Test-only dependencies
+    pip install --no-cache-dir --root-user-action=ignore mock pluggy pytest
 
     # Run tests, failing the build if unsuccessful
-    poetry run python -m pytest
+    python -m pytest
 
-    # Remove caches to save space
-    rm -rf /root/.cache/pypoetry
+    # Remove test-only dependencies
+    pip uninstall --no-cache-dir --root-user-action=ignore --yes mock pluggy pytest
+
+    # Remove pip cache to save space
     rm -rf /root/.cache/pip
 
-    # Remove build tools
-    apt-get purge -y --auto-remove build-essential git curl
+    # We can remove source code to save a bit of space,
+    #   since we've already installed the module.
+    cd /root && rm -rf /app
 
 %environment
-    export PATH="/opt/poetry/bin:$PATH"
-    export POETRY_VIRTUALENVS_CREATE=false
     export PYTHONNOUSERSITE=1
 
 %runscript
-    cd /app
-    exec poetry run python -m hallmonitor "$@"
+    exec python -m hallmonitor "$@"
