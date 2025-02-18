@@ -864,7 +864,7 @@ class TestCase(ABC):
         Returns:
             pd.DataFrame: A DataFrame containing the errors reported by validate_data.
         """
-        from hallmonitor.hallmonitor import validate_data
+        from hallmonitor.app import validate_data
 
         # set up a logger to save hallMonitor output
         logger = logging.getLogger(f"{self.case_name}_logger")
@@ -894,7 +894,7 @@ class TestCase(ABC):
         Returns:
             str: A string containing error text, if any error was raised during execution.
         """
-        from hallmonitor.hallmonitor import qa_validation
+        from hallmonitor.app import qa_validation
 
         logger = logging.getLogger(f"{self.case_name}_logger")
         logger.setLevel(logging.ERROR)

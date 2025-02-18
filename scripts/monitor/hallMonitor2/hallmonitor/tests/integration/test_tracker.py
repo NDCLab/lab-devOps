@@ -207,14 +207,14 @@ class BBSDataZeroMissingDatatypeFolderTestCase(TrackerTestCase):
         return modified_files
 
     def validate(self):
-        from hallmonitor import hallmonitor
+        from hallmonitor import app
 
         args = self.get_standard_args()
         args.raw_only = True
         args.no_qa = True
 
         try:
-            hallmonitor.main(args)
+            app.main(args)
         except Exception as err:
             raise AssertionError from err
 
@@ -265,14 +265,14 @@ class BBSDataZeroMissingDataTestCase(TrackerTestCase):
         return modified_files
 
     def validate(self):
-        from hallmonitor import hallmonitor
+        from hallmonitor import app
 
         args = self.get_standard_args()
         args.raw_only = True
         args.no_qa = True
 
         try:
-            hallmonitor.main(args)
+            app.main(args)
         except Exception as err:
             raise AssertionError from err
 
@@ -325,7 +325,7 @@ class BBSDataZeroNoDataFileTestCase(TrackerTestCase):
         return modified_files
 
     def validate(self):
-        from hallmonitor import hallmonitor
+        from hallmonitor import app
 
         args = self.get_standard_args()
         args.raw_only = True
@@ -333,7 +333,7 @@ class BBSDataZeroNoDataFileTestCase(TrackerTestCase):
         args.legacy_exceptions = True  # no-data.txt without identifier
 
         try:
-            hallmonitor.main(args)
+            app.main(args)
         except Exception as err:
             raise AssertionError from err
 
@@ -386,14 +386,14 @@ class BBSDataZeroIncorrectDataTestCase(TrackerTestCase):
         return modified_files
 
     def validate(self):
-        from hallmonitor import hallmonitor
+        from hallmonitor import app
 
         args = self.get_standard_args()
         args.raw_only = True
         args.no_qa = True
 
         try:
-            hallmonitor.main(args)
+            app.main(args)
         except Exception as err:
             raise AssertionError from err
 
@@ -449,7 +449,7 @@ class BBSDataOneDeviationFileTestCase(TrackerTestCase):
         return modified_files
 
     def validate(self):
-        from hallmonitor import hallmonitor
+        from hallmonitor import app
 
         args = self.get_standard_args()
         args.raw_only = True
@@ -457,7 +457,7 @@ class BBSDataOneDeviationFileTestCase(TrackerTestCase):
         args.legacy_exceptions = True  # deviation.txt without identifier
 
         try:
-            hallmonitor.main(args)
+            app.main(args)
         except Exception as err:
             raise AssertionError from err
 
@@ -512,7 +512,7 @@ class DuplicateREDCapColumnsTestCase(TrackerTestCase):
         return modified_files
 
     def validate(self):
-        from hallmonitor import hallmonitor
+        from hallmonitor import app
 
         args = self.get_standard_args()
         args.raw_only = True
@@ -523,7 +523,7 @@ class DuplicateREDCapColumnsTestCase(TrackerTestCase):
             mock.patch("logging.getLogger", return_value=mock_logger),
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
-            hallmonitor.main(args)
+            app.main(args)
 
         error_re = r".*[Dd]uplicate column.*"
         error_re += re.escape(self.duped_col)
@@ -569,7 +569,7 @@ class MissingREDCapColumnTestCase(TrackerTestCase):
         return modified_files
 
     def validate(self):
-        from hallmonitor import hallmonitor
+        from hallmonitor import app
 
         args = self.get_standard_args()
         args.raw_only = True
@@ -580,7 +580,7 @@ class MissingREDCapColumnTestCase(TrackerTestCase):
             mock.patch("logging.getLogger", return_value=mock_logger),
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
-            hallmonitor.main(args)
+            app.main(args)
 
         error_re = r".*" + re.escape(self.removed_col)
         error_re += r".*bbschild.*"
@@ -640,7 +640,7 @@ class RelocatedREDCapColumnTestCase(TrackerTestCase):
         return modified_files
 
     def validate(self):
-        from hallmonitor import hallmonitor
+        from hallmonitor import app
 
         args = self.get_standard_args()
         args.raw_only = True
@@ -651,7 +651,7 @@ class RelocatedREDCapColumnTestCase(TrackerTestCase):
             mock.patch("logging.getLogger", return_value=mock_logger),
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
-            hallmonitor.main(args)
+            app.main(args)
 
         assert mock_logger.error.call_count == 1
         # examine the arguments passed to the first call of logger.error()
@@ -702,7 +702,7 @@ class RemoteAndInPersonREDCapTestCase(TrackerTestCase):
         return modified_files
 
     def validate(self):
-        from hallmonitor import hallmonitor
+        from hallmonitor import app
 
         args = self.get_standard_args()
         args.raw_only = True
@@ -713,7 +713,7 @@ class RemoteAndInPersonREDCapTestCase(TrackerTestCase):
             mock.patch("logging.getLogger", return_value=mock_logger),
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
-            hallmonitor.main(args)
+            app.main(args)
 
         assert mock_logger.error.call_count == 1
         # examine the arguments passed to the first call of logger.error()
