@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import pandas as pd
 import pytest
 
-from hallmonitor.hmutils import get_new_redcaps
+from hallmonitor.hmutils import REMOTE_REDCAP_PREFIX, get_new_redcaps
 
 
 @dataclass
@@ -610,7 +610,9 @@ class TestCase(ABC):
 
         return base_files
 
-    def build_rc_name(self, rc_stem: str, ses: str = "", run: str = ""):
+    def build_rc_name(
+        self, rc_stem: str, ses: str = "", run: str = "", is_remote: bool = False
+    ):
         """
         Constructs a REDCap name string for the given test case.
 
@@ -618,13 +620,16 @@ class TestCase(ABC):
             rc_stem (str): The stem of the REDCap name.
             ses (str, optional): The session identifier. Defaults to an empty string.
             run (str, optional): The run identifier. Defaults to an empty string.
+            is_remote (bool, optional): Whether the REDCap's basename should indicate remote-only status.
+                Defaults to False.
 
         Returns:
             str: The constructed REDCap name string in the format
-                 "{case_name}{rc_stem}{ses}{run}_DATA_{RC_TIMESTAMP}.csv".
+                 "{remote_prefix?}{case_name}{rc_stem}{ses}{run}_DATA_{RC_TIMESTAMP}.csv".
         """
         RC_TIMESTAMP = "2024-01-01_1230"
-        return f"{self.case_name}{rc_stem}{ses}{run}_DATA_{RC_TIMESTAMP}.csv"
+        rc_prefix = REMOTE_REDCAP_PREFIX if is_remote else ""
+        return f"{rc_prefix}{self.case_name}{rc_stem}{ses}{run}_DATA_{RC_TIMESTAMP}.csv"
 
     def get_paths(self, base_dir: str):
         """Retrieve a list of relative file paths from a base directory.

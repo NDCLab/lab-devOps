@@ -5,7 +5,9 @@ import sys
 from collections import defaultdict
 
 import pandas as pd
+
 from hallmonitor.hmutils import (
+    REMOTE_REDCAP_PREFIX,
     Identifier,
     get_allowed_suffixes,
     get_datadict,
@@ -461,7 +463,9 @@ def main(
     all_rc_subjects = dict()
     for expected_rc in redcheck_columns.keys():
         present = False
-        remote_rcs = [r for r in redcaps if "remoteonly" in os.path.basename(r.lower())]
+        remote_rcs = [
+            r for r in redcaps if os.path.basename(r).startswith(REMOTE_REDCAP_PREFIX)
+        ]
         normal_rcs = [r for r in redcaps if r not in remote_rcs]
 
         matching_rcs = list(

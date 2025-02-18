@@ -15,6 +15,7 @@ import pytz
 
 #  :------------------------- formats and paths ------------------------:
 
+REMOTE_REDCAP_PREFIX = "R_"
 DT_FORMAT = r"%Y-%m-%d_%H-%M"
 TZ_INFO = pytz.timezone("US/Eastern")
 IDENTIFIER_RE = r"(?P<id>(?P<subject>sub-\d+)_(?P<var>[\w\-]+)_(?P<sre>s\d+_r\d+_e\d+))"
