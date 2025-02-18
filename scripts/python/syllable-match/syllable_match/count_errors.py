@@ -180,7 +180,13 @@ def get_raw_df(filepath: str):
         cleaned_passage_words, cleaned_passage_sylls
     )
     raw_data["CleanedSyllable"] = cleaned_passage_sylls
-    print([f"{k}: {len(k)}" for k in raw_data.keys()])
+
+    for col in raw_data.keys():
+        if col in {"CleanedWord", "CleanedSyllable"}:
+            continue
+        # truncate value lists for feature columns to number of syllables
+        raw_data[col] = raw_data[col][: len(cleaned_passage_sylls)]
+
     raw_df = pd.DataFrame(raw_data)
     return raw_df
 
