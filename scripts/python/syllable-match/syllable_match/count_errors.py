@@ -54,9 +54,26 @@ def match_syllable_to_word(word_list, syllable_list) -> tuple[list[str], list[in
     return matching_words, indices
 
 
-def count_sheet_errors(filepath: str):
-    df = get_raw_df(filepath)
-    return None
+def get_sheet_data(filepath: str):
+    raw_df = get_raw_df(filepath)
+
+    sheet_data = {}
+    sheet_data["SyllableCount"] = raw_df["SyllableID"].nunique()
+    sheet_data["WordCount"] = raw_df["WordID"].nunique()
+
+    for mistake_type in ["Error", "Disfluency"]:
+        mistake_cols = raw_df.columns[raw_df.columns.str.startswith(f"{mistake_type}_")]
+        for col in mistake_cols:
+            has_error = raw_df[raw_df[col] != 0]
+            raw_count = len(has_error.index)
+            # multiple errors in the same word are counted as the same error
+            word_error_count = has_error.groupby("WordID").size().count()
+            assert raw_count >= word_error_count
+
+            sheet_data[f"{col}_RawCount"] = raw_count
+            sheet_data[f"{col}_WordErrorCount"] = word_error_count
+
+    return sheet_data
 
 
 def get_raw_df(filepath: str):
