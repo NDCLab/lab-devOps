@@ -1,3 +1,3 @@
-from hallmonitor import hallmonitor, hmutils
+from hallmonitor import app, hmutils
 
-hallmonitor.main(hmutils.get_args())
+app.main(hmutils.get_args())
