@@ -29,11 +29,12 @@ RECONCILED_SUBS = {
 }
 
 
-def match_syllable_to_word(word_list, syllable_list) -> list[str]:
+def match_syllable_to_word(word_list, syllable_list) -> tuple[list[str], list[int]]:
     matching_words = []
+    indices = []
     syllable_queue = syllable_list.copy()
 
-    for word in word_list:
+    for word_index, word in enumerate(word_list):
         # Track how many characters of this word we've covered
         current_length = 0
         word_length = len(word)
@@ -46,10 +47,11 @@ def match_syllable_to_word(word_list, syllable_list) -> list[str]:
 
             # Assign that syllable to this word
             matching_words.append(word)
+            indices.append(word_index)
 
         # At this point, current_length == word_length
 
-    return matching_words
+    return matching_words, indices
 
 
 def count_sheet_errors(filepath: str):
@@ -176,10 +178,12 @@ def get_raw_df(filepath: str):
 
     # Match up each syllable with the corresponding word
     raw_data["Syllable"] = passage_sylls
-    raw_data["CleanedWord"] = match_syllable_to_word(
+    raw_data["CleanedWord"], raw_data["WordID"] = match_syllable_to_word(
         cleaned_passage_words, cleaned_passage_sylls
     )
     raw_data["CleanedSyllable"] = cleaned_passage_sylls
+    # assign sequential syllable IDs
+    raw_data["SyllableID"] = list(range(len(cleaned_passage_sylls)))
 
     for col in raw_data.keys():
         if col in {"CleanedWord", "CleanedSyllable"}:
