@@ -227,7 +227,7 @@ def process_subject_sheets(subject_dir: str):
         reconciled_dir = os.path.join(subject_dir, sheet_dir)
         for sheet in os.listdir(reconciled_dir):
             sheet_path = os.path.join(reconciled_dir, sheet)
-            sheet_df = count_sheet_errors(sheet_path)
+            sheet_df = get_sheet_data(sheet_path)
 
             if sheet_df is None:
                 continue
