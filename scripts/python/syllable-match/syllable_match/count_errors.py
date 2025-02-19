@@ -63,6 +63,12 @@ def get_sheet_data(filepath: str):
     ).group(1)
     sheet_data["SyllableCount"] = raw_df["SyllableID"].nunique()
     sheet_data["WordCount"] = raw_df["WordID"].nunique()
+    sheet_data["InsertedSyllableWithoutWordErrorCount"] = len(
+        raw_df[raw_df["InsertedSyllableWithoutWordError"] != 0].index
+    )
+    sheet_data["OmittedSyllableWithoutWordErrorCount"] = len(
+        raw_df[raw_df["OmittedSyllableWithoutWordError"] != 0].index
+    )
 
     for mistake_type in ["Error", "Disfluency"]:
         mistake_cols = raw_df.columns[raw_df.columns.str.startswith(f"{mistake_type}_")]
@@ -211,7 +217,26 @@ def get_raw_df(filepath: str):
         # truncate value lists for feature columns to number of syllables
         raw_data[col] = raw_data[col][: len(cleaned_passage_sylls)]
 
+    # Convert dict of iterables to DataFrame for easier manipulation
     raw_df = pd.DataFrame(raw_data)
+
+    # Add custom feature columns
+    raw_df["WordHasError"] = (
+        raw_df["Error_InsertedWord"].astype(bool)
+        | raw_df["Error_OmittedWord"].astype(bool)
+        | raw_df["Error_WordStressError"].astype(bool)
+        | raw_df["Disfluency_DuplicationRepetitionWord"].astype(bool)
+    ).astype(int)
+
+    raw_df["InsertedSyllableWithoutWordError"] = (
+        raw_df["Error_InsertedSyllable"].astype(bool)
+        & ~(raw_df["WordHasError"].astype(bool))
+    ).astype(int)
+    raw_df["OmittedSyllableWithoutWordError"] = (
+        raw_df["Error_OmittedSyllable"].astype(bool)
+        & ~(raw_df["WordHasError"].astype(bool))
+    ).astype(int)
+
     return raw_df
 
 
@@ -264,8 +289,10 @@ def main():
     print(f"Processed {len(sub_dfs)} subject(s)")
 
     # collation logic here
+    data_dir = os.path.join(base_dir, "data")
+    os.makedirs(data_dir, exist_ok=True)
     for subject, df in sub_dfs.items():
-        pass
+        df.to_csv(os.path.join(data_dir, f"{subject}-passage-data.csv"), index=False)
 
 
 if __name__ == "__main__":
