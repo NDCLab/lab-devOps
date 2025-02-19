@@ -226,10 +226,12 @@ def process_subject_sheets(subject_dir: str):
 
         subject_data = []
         reconciled_dir = os.path.join(subject_dir, sheet_dir)
-        for sheet in (pbar := tqdm(os.listdir(reconciled_dir), leave=False)):
-            if os.path.splitext(sheet)[1] != ".xlsx":
-                continue
-            pbar.set_description(f"Sheet {sheet}")
+        sheets = [
+            file
+            for file in os.listdir(reconciled_dir)
+            if os.path.splitext(file)[1] == ".xlsx"
+        ]
+        for sheet in tqdm(sheets, leave=False):
             sheet_path = os.path.join(reconciled_dir, sheet)
             sheet_data = get_sheet_data(sheet_path)
 
@@ -243,22 +245,27 @@ def process_subject_sheets(subject_dir: str):
 
 def main():
     base_dir = "/home/nwelch/Documents/error-coding"
+    print(f"Loading subjects from {base_dir}")
 
-    sub_dfs = {}
-    for subject in (pbar := tqdm(os.listdir(base_dir))):
+    sub_dfs: dict[str, pd.DataFrame] = {}
+    subs = [s for s in os.listdir(base_dir) if s in RECONCILED_SUBS]
+    for subject in (pbar := tqdm(subs)):
         pbar.set_description(f"Processing {subject}")
-        if subject not in RECONCILED_SUBS:
-            continue
 
         subject_dir = os.path.join(base_dir, subject)
         sub_df = process_subject_sheets(subject_dir)
 
         if sub_df is None:
+            print(f"{subject} has no reconciled file directory")
             continue
 
         sub_dfs[subject] = sub_df
 
+    print(f"Processed {len(sub_dfs)} subject(s)")
+
     # collation logic here
+    for subject, df in sub_dfs.items():
+        pass
 
 
 if __name__ == "__main__":
