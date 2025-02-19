@@ -113,16 +113,16 @@ def validate_data(
     # raise errors for missing identifiers without a no-data.txt
     for id in missing_ids:
         id.is_missing = True  # included in detailed stringification
-        id_as_dir = id.to_dir(dataset, is_raw=is_raw)
+        missing_id_dir = id.to_dir(dataset, is_raw=is_raw)
 
-        if not os.path.isdir(id_as_dir):
+        if not os.path.isdir(missing_id_dir):
             pending.append(
                 new_error_record(
                     logger,
                     dataset,
                     id,
                     "Missing identifier",
-                    f"Missing identifier (should be at {id_as_dir}, folder is not present)",
+                    f"Missing identifier (should be at {missing_id_dir}, folder is not present)",
                 )
             )
             continue
@@ -132,7 +132,7 @@ def validate_data(
         else:
             no_data_file = f"{id}_no-data.txt"
 
-        if any([file == no_data_file for file in os.listdir(id_as_dir)]):
+        if any([file == no_data_file for file in os.listdir(missing_id_dir)]):
             logger.debug("Skipping %s, no-data.txt found", str(id))
             continue
         pending.append(
@@ -141,7 +141,7 @@ def validate_data(
                 dataset,
                 id,
                 "Missing identifier",
-                f"Missing identifier (should be at {id_as_dir}, folder exists but"
+                f"Missing identifier (should be at {missing_id_dir}, folder exists but"
                 + f" no identifier or {no_data_file} was found)",
             )
         )
@@ -273,11 +273,14 @@ def validate_data(
 
         # --- check for exception files, set flags ---
         if use_legacy_exceptions:
-            has_deviation = "deviation.txt" in dir_filenames
-            has_no_data = "no-data.txt" in dir_filenames
+            deviation_file = "deviation.txt"
+            no_data_file = "no-data.txt"
         else:
-            has_deviation = f"{id}_deviation.txt" in dir_filenames
-            has_no_data = f"{id}_no-data.txt" in dir_filenames
+            deviation_file = f"{id}_deviation.txt"
+            no_data_file = f"{id}_no-data.txt"
+
+        has_deviation = deviation_file in dir_filenames
+        has_no_data = no_data_file in dir_filenames
 
         logger.debug("has_deviation=%s, has_no_data=%s", has_deviation, has_no_data)
         if has_deviation and has_no_data:
@@ -291,6 +294,22 @@ def validate_data(
                 )
             )
 
+        # first line of deviation file must contain the text "files to process"
+        if has_deviation:
+            deviation_fullpath = os.path.join(id_dir, deviation_file)
+            with open(deviation_fullpath, "r") as f:
+                first_line = f.readline()
+            if "files to process" not in first_line.lower():
+                pending.append(
+                    new_error_record(
+                        logger,
+                        dataset,
+                        id,
+                        "Missing files to process",
+                        f'First line of deviation file is "{first_line}", should contain "files to process"',
+                    )
+                )
+
         # construct list of missing identifiers that should be in this directory
         dir_missing_ids = [
             id for id in missing_ids if id.to_dir(dataset, is_raw=is_raw) == id_dir
@@ -298,11 +317,6 @@ def validate_data(
         logger.debug("Found %d missing identifier(s)", len(dir_missing_ids))
 
         # handle misnamed files
-
-        if use_legacy_exceptions:
-            deviation_file = "deviation.txt"
-        else:
-            deviation_file = f"{id}_deviation.txt"
 
         misnamed_files = []
         for file in dir_filenames:

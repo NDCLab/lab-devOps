@@ -129,7 +129,7 @@ class DeviationCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
 
         # add deviation.txt to raw/ and checked/
         deviation_file = f"{identifier}_deviation.txt"
-        deviation_content = "Deviation reason: Testing update_tracker."
+        deviation_content = "Files to process: NA"
         deviation_raw = self.build_path("s1_r1", "psychopy", deviation_file, True)
         deviation_checked = self.build_path("s1_r1", "psychopy", deviation_file, False)
         modified_files[deviation_raw] = deviation_content
@@ -173,7 +173,7 @@ class DeviationNoCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
         # add deviation.txt to raw/
         deviation_file = f"{filename}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file, True)
-        modified_files[deviation_file] = "Deviation reason: Testing update_tracker."
+        modified_files[deviation_file] = "Files to process: NA"
 
         return modified_files
 
@@ -444,7 +444,7 @@ class BBSDataOneDeviationFileTestCase(TrackerTestCase):
 
         # add our deviation.txt file
         deviation_file = self.build_path("s1_r1", "psychopy", "deviation.txt", True)
-        modified_files[deviation_file] = "Deviation reason: Testing update_tracker."
+        modified_files[deviation_file] = "Files to process: NA"
 
         return modified_files
 
