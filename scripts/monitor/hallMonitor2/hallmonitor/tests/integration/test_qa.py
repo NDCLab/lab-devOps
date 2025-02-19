@@ -480,7 +480,7 @@ class QAChecklistOneRowPerDeviationStringTestCase(QATestCase):
 
         # add deviation.txt file
         deviation_file = os.path.join(raw_dir, identifier + "_deviation.txt")
-        modified_files[deviation_file] = "Multiple deviation strings for one identifier"
+        modified_files[deviation_file] = "Files to process: NA"
 
         # indicate that our identifier has passed in pending-files CSV
 

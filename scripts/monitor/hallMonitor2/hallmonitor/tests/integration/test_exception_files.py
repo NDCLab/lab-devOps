@@ -32,7 +32,7 @@ class DeviationAndNoDataErrorTestCase(ExceptionTestCase):
         deviation_file = self.build_path(
             "s1_r1", "psychopy", f"{identifier}_deviation.txt"
         )
-        modified_files[deviation_file] = "Deviation reason: Testing no data condition."
+        modified_files[deviation_file] = "Files to process: NA"
 
         # remove all s1_r1 psychopy files except deviation.txt
         info = os.path.join("s1_r1", "psychopy", "")
@@ -85,7 +85,7 @@ class DeviationAndNoDataFilesErrorTestCase(ExceptionTestCase):
         no_data_file = self.build_path("s1_r1", "psychopy", no_data_file)
 
         # add deviation.txt and no-data.txt files
-        modified_files[deviation_file] = "Deviation reason: Testing with no-data.txt"
+        modified_files[deviation_file] = "Files to process: NA"
         modified_files[no_data_file] = "No data available for this test case."
 
         return modified_files
@@ -128,7 +128,7 @@ class DeviationFileWithFolderMismatchTestCase(ExceptionTestCase):
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
-        modified_files[deviation_file] = "Deviation reason: Testing file mismatch."
+        modified_files[deviation_file] = "Files to process: NA"
 
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
         new_name = old_name.replace(str(self.sub_id), str(self.sub_id + 1))
@@ -173,7 +173,7 @@ class DeviationFilePreventsErrorWithExtraFilesTestCase(ExceptionTestCase):
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
-        modified_files[deviation_file] = "Deviation reason: Testing extra files."
+        modified_files[deviation_file] = "Files to process: NA"
 
         base_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
         base_file = self.build_path("s1_r1", "psychopy/", base_file)
@@ -247,7 +247,7 @@ class DeviationFileWithBadNamesTestCase(ExceptionTestCase):
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
-        modified_files[deviation_file] = "Deviation reason: Testing bad file names."
+        modified_files[deviation_file] = "Files to process: NA"
 
         # rename existing file to invalid name
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
@@ -290,7 +290,7 @@ class DeviationFileWithValidNamesTestCase(ExceptionTestCase):
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
         deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
-        modified_files[deviation_file] = "Deviation reason: Testing valid file names."
+        modified_files[deviation_file] = "Files to process: NA"
 
         # rename existing file to include additional string
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
@@ -415,3 +415,24 @@ class MissingIdentifierNoDataTestCase(ExceptionTestCase):
 
 def test_missing_identifier_no_data(request):
     MissingIdentifierNoDataTestCase.run_test_case(request)
+
+
+class DeviationNoFilesToProcess(ExceptionTestCase):
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        deviation_file = self.build_path(
+            "s1_r1", "psychopy", f"{identifier}_deviation.txt"
+        )
+        modified_files[deviation_file] = "42"  # no "files to process" line
+
+        return modified_files
+
+    def get_expected_errors(self):
+        errors = [ExpectedError("Missing files to process", r".*files to process.*")]
+        return errors
+
+
+def test_deviation_no_files_to_process(request):
+    DeviationNoFilesToProcess.run_test_case(request)
