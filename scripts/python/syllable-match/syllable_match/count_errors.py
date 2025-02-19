@@ -3,7 +3,7 @@ import re
 import string
 
 import pandas as pd
-
+from tqdm import tqdm
 
 RECONCILED_SUBS = {
     f"sub-{id}"
@@ -224,26 +224,29 @@ def process_subject_sheets(subject_dir: str):
         ):
             continue
 
+        subject_data = []
         reconciled_dir = os.path.join(subject_dir, sheet_dir)
-        for sheet in os.listdir(reconciled_dir):
-            sheet_path = os.path.join(reconciled_dir, sheet)
-            sheet_df = get_sheet_data(sheet_path)
-
-            if sheet_df is None:
+        for sheet in (pbar := tqdm(os.listdir(reconciled_dir), leave=False)):
+            if os.path.splitext(sheet)[1] != ".xlsx":
                 continue
+            pbar.set_description(f"Sheet {sheet}")
+            sheet_path = os.path.join(reconciled_dir, sheet)
+            sheet_data = get_sheet_data(sheet_path)
 
-            # saving logic here
+            subject_data.append(sheet_data)
 
-        # collation logic here (return at this point)
+        subject_df = pd.DataFrame(subject_data)
+        return subject_df
 
     return None
 
 
 def main():
     base_dir = "/home/nwelch/Documents/error-coding"
-    print(base_dir)
 
-    for subject in os.listdir(base_dir):
+    sub_dfs = {}
+    for subject in (pbar := tqdm(os.listdir(base_dir))):
+        pbar.set_description(f"Processing {subject}")
         if subject not in RECONCILED_SUBS:
             continue
 
@@ -253,7 +256,7 @@ def main():
         if sub_df is None:
             continue
 
-        # saving logic here
+        sub_dfs[subject] = sub_df
 
     # collation logic here
 
