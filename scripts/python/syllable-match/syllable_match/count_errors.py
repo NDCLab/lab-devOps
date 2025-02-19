@@ -58,8 +58,8 @@ def get_sheet_data(filepath: str):
     raw_df = get_raw_df(filepath)
 
     sheet_data = {}
-    sheet_data["PassageName"] = re.fullmatch(
-        r"sub-\d+_(.+?)_reconciled\.\w+", os.path.basename(filepath)
+    sheet_data["PassageName"] = re.match(
+        r"sub-\d+_(.+?)_reconciled.+", os.path.basename(filepath)
     ).group(1)
     sheet_data["SyllableCount"] = raw_df["SyllableID"].nunique()
     sheet_data["WordCount"] = raw_df["WordID"].nunique()
