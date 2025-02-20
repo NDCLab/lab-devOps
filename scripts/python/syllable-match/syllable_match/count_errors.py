@@ -288,11 +288,36 @@ def main():
 
     print(f"Processed {len(sub_dfs)} subject(s)")
 
-    # collation logic here
+    # output each DataFrame separately
     data_dir = os.path.join(base_dir, "data")
     os.makedirs(data_dir, exist_ok=True)
     for subject, df in sub_dfs.items():
         df.to_csv(os.path.join(data_dir, f"{subject}-passage-data.csv"), index=False)
+
+    # make a "master sheet" with averages
+    master_df = pd.concat(sub_dfs.values(), ignore_index=True)
+    master_df = master_df.groupby("PassageName", as_index=False).mean(numeric_only=True)
+    master_df.insert(0, "Statistic", "Mean")
+
+    # compute overall mean and std across ALL passages and subjects
+    df_combined = pd.concat(sub_dfs.values(), ignore_index=True)
+    all_stats = df_combined.select_dtypes(include="number").agg(["mean", "std"])
+
+    # create two new rows for overall mean and std
+    row_mean = {"PassageName": "All", "Statistic": "Mean"}
+    row_std = {"PassageName": "All", "Statistic": "Standard Deviation"}
+
+    for col in all_stats.columns:
+        row_mean[col] = all_stats.loc["mean", col]
+        row_std[col] = all_stats.loc["std", col]
+
+    # append new rows to the master DataFrame
+    master_df = pd.concat(
+        [master_df, pd.DataFrame([row_mean, row_std])], ignore_index=True
+    )
+
+    # save master DataFrame
+    master_df.to_csv(os.path.join(data_dir, "master-statistics.csv"), index=False)
 
 
 if __name__ == "__main__":
