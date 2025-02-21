@@ -69,6 +69,12 @@ def get_sheet_data(filepath: str):
     sheet_data["OmittedSyllableWithoutWordErrorCount"] = len(
         raw_df[raw_df["OmittedSyllableWithoutWordError"] != 0].index
     )
+    sheet_data["WordSubstitutionCount"] = len(
+        raw_df[raw_df["Outcome_WordSubstitution"] != 0].index
+    )
+    sheet_data["WordApproximationCount"] = len(
+        raw_df[raw_df["Outcome_WordApproximation"] != 0].index
+    )
 
     for mistake_type in ["Error", "Disfluency"]:
         mistake_cols = raw_df.columns[raw_df.columns.str.startswith(f"{mistake_type}_")]
