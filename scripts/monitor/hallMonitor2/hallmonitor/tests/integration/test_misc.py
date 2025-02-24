@@ -7,6 +7,7 @@ import pytest
 import pytz
 from mock import Mock
 
+from hallmonitor.hmutils import Identifier
 from hallmonitor.tests.integration.base_cases import (
     ExpectedError,
     TestCase,
@@ -577,3 +578,92 @@ class KeepFailedIdentifierCheckedNoRawTestCase(TestCase):
 
 def test_keep_failed_identifier_checked_no_raw(request):
     KeepFailedIdentifierCheckedNoRawTestCase.run_test_case(request)
+
+
+class PurgeInaccurateFileRecordEntriesTestCase(TestCase):
+    case_name = "PurgeInaccurateFileRecordEntriesTestCase"
+    description = (
+        "Ensures that inaccurate entries in the validated file record are purged."
+    )
+    conditions = ["An identifier's files are deleted from the checked directory."]
+    expected_output = (
+        "The identifier's entry is removed from the validated file record."
+    )
+    behavior_to_test = (
+        "Ensures that inaccurate entries in the validated file record are purged."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        # build identifiers
+        deleted_identifier = Identifier(
+            f"sub-{self.sub_id}", "all_eeg", "s1", "r1", "e1"
+        )
+        kept_identifier = Identifier(
+            f"sub-{self.sub_id}", "all_audacity", "s1", "r1", "e1"
+        )
+
+        # create validated file record with identifier entry
+        record_path = os.path.join("data-monitoring", "validated-file-record.csv")
+        record_df = pd.DataFrame(
+            {
+                "datetime": ["2024-01-01_12-30"] * 2,
+                "user": ["foo"] * 2,
+                "identifier": [str(deleted_identifier), str(kept_identifier)],
+                "subject": [f"sub-{self.sub_id}"] * 2,
+                "dataType": ["eeg", "audacity"],
+                "encrypted": [1] * 2,
+                "suffix": ["s1_r1"] * 2,
+            }
+        )
+        modified_files[record_path] = record_df.to_csv(index=False)
+
+        # remove specified entry from sourcedata/checked/
+        id_dir = self.build_path("s1_r1", "eeg", "", False)
+        modified_files = {
+            relpath: contents
+            for relpath, contents in modified_files.items()
+            if not relpath.startswith(id_dir)
+        }
+
+        return modified_files
+
+    def validate(self):
+        from hallmonitor import app
+
+        args = self.get_standard_args()
+        args.raw_only = True
+        args.no_qa = True
+
+        try:
+            app.main(args)
+        except Exception as err:
+            raise AssertionError from err
+
+        record_path = os.path.join(
+            self.case_dir,
+            "data-monitoring",
+            "validated-file-record.csv",
+        )
+        record_df = pd.read_csv(record_path)
+
+        # ensure deleted identifier is devalidated
+        assert record_df[
+            record_df["identifier"] == f"sub-{self.sub_id}_all_eeg_s1_r1_e1"
+        ].empty
+
+        # ensure untouched identifier is left alone
+        assert (
+            len(
+                record_df[
+                    record_df["identifier"]
+                    == f"sub-{self.sub_id}_all_audacity_s1_r1_e1"
+                ].index
+            )
+            == 1
+        )
+
+
+def test_purge_inaccurate_file_record_entries(request):
+    PurgeInaccurateFileRecordEntriesTestCase.run_test_case(request)
