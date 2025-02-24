@@ -852,6 +852,18 @@ def main(args: Namespace):
     if ignore_before is not None:
         logger.debug("Ignoring files modified before %s", ignore_before)
 
+    # purge inaccurate records from the validated file record
+    record_df = get_file_record(dataset)
+    validated_ids = [Identifier.from_str(id) for id in record_df["identifier"].unique()]
+    missing_ids = set()
+    for id_entry in validated_ids:
+        if not os.path.isdir(id_entry.to_dir(dataset, False)):
+            logger.info("Devalidating identifier %s", id_entry)
+            missing_ids.add(str(id_entry))
+    record_df = record_df[~record_df["identifier"].isin(missing_ids)]
+    logger.debug("Devalidated %d identifier(s)", len(missing_ids))
+    write_file_record(dataset, record_df)
+
     # limit scope of data validation to raw or checked, if requested
     if args.raw_only:
         logger.info("Only running data validation for sourcedata/raw/")

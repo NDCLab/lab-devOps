@@ -1,6 +1,6 @@
 [project]
 name = "hallmonitor"
-version = "0.1.6"
+version = "0.2.0"
 description = ""
 authors = [{ name = "Nolan Welch", email = "nolanwelch@outlook.com" }]
 readme = "README.md"
