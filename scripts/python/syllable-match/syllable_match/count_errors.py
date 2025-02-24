@@ -88,6 +88,16 @@ def get_sheet_data(filepath: str):
             sheet_data[f"{col}_RawCount"] = raw_count
             sheet_data[f"{col}_WordErrorCount"] = word_error_count
 
+            # count unattempted, successful, and unsuccessful corrections
+            no_correction_attempt_count = len(has_error[has_error[col] == 1].index)
+            unsuccessful_correction_count = len(has_error[has_error[col] == 2].index)
+            successful_correction_count = len(has_error[has_error[col] == 3].index)
+            sheet_data[f"{col}_NoCorrectionAttemptCount"] = no_correction_attempt_count
+            sheet_data[f"{col}_UnsuccessfulCorrectionCount"] = (
+                unsuccessful_correction_count
+            )
+            sheet_data[f"{col}_SuccessfulCorrectionCount"] = successful_correction_count
+
     return sheet_data
 
 
