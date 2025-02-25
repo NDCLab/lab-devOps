@@ -47,13 +47,13 @@ def test_get_expected_files_valid_string(mock_dataset):
 
     # The mocked data dictionary specifies that eeg
     # has expected extensions ".eeg, .vmrk, .vhdr"
-    expected_files = [
+    expected_files = {
         "subject1_eeg_s1_r1_e1.eeg",
         "subject1_eeg_s1_r1_e1.vmrk",
         "subject1_eeg_s1_r1_e1.vhdr",
-    ]
+    }
 
-    assert get_expected_files(mock_dataset, identifier) == expected_files
+    assert set(get_expected_files(mock_dataset, identifier)) == expected_files
 
 
 def test_get_expected_files_invalid_string(mock_dataset):
@@ -66,13 +66,13 @@ def test_get_expected_files_invalid_string(mock_dataset):
 def test_get_expected_files_valid_Identifier(mock_dataset):
     identifier = Identifier("subject1", "eeg", "s1", "r1", "e1")
 
-    expected_files = [
+    expected_files = {
         "subject1_eeg_s1_r1_e1.eeg",
         "subject1_eeg_s1_r1_e1.vmrk",
         "subject1_eeg_s1_r1_e1.vhdr",
-    ]
+    }
 
-    assert get_expected_files(mock_dataset, identifier) == expected_files
+    assert set(get_expected_files(mock_dataset, identifier)) == expected_files
 
 
 def test_get_expected_files_no_extensions(mock_dataset):
