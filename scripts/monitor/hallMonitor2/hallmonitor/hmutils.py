@@ -567,6 +567,7 @@ class SharedTimestamp:
         __new__(cls): Overrides the default new method to ensure a single instance
                       of the timestamp is created and shared.
     """
+
     _ts = None
 
     def __new__(cls):
@@ -626,7 +627,9 @@ def write_file_record(dataset, df: pd.DataFrame):
     """
     record_path = os.path.join(dataset, FILE_RECORD_SUBPATH)
     df = convert_bool_cols_to_int(df)
-    if set(FILE_RECORD_COLS).issubset(set(df.columns)):  # df has at least FILE_RECORD_COLS
+    if set(FILE_RECORD_COLS).issubset(
+        set(df.columns)
+    ):  # df has at least FILE_RECORD_COLS
         df = df[FILE_RECORD_COLS]
     else:
         missing_cols = set(FILE_RECORD_COLS) - set(df.columns)
@@ -640,8 +643,7 @@ def write_file_record(dataset, df: pd.DataFrame):
 
 @cache_with_metadata(maxsize=64)
 def is_combination_var(dataset, variable):
-    """Returns bool for whether a variable is present in a combination row
-    """
+    """Returns bool for whether a variable is present in a combination row"""
     dd_df = get_datadict(dataset)
     dtype = dd_df[dd_df["variable"] == variable]["dataType"]
     if dtype.empty:
@@ -733,7 +735,7 @@ def get_present_identifiers(dataset, is_raw=True):
             except ValueError:
                 continue
 
-    return list(present_ids)
+    return sorted(list(present_ids))
 
 
 def get_expected_identifiers(dataset, present_ids):
@@ -787,7 +789,7 @@ def get_expected_identifiers(dataset, present_ids):
         for var in expected_vars
     ]
 
-    return expected_ids
+    return sorted(expected_ids)
 
 
 @dataclass
@@ -820,7 +822,7 @@ def get_expected_combination_rows(dataset) -> list[CombinationRow]:
             vars = [v.strip() for v in vars]
             expected_combos.append(CombinationRow(row["variable"], vars))
 
-    return expected_combos
+    return sorted(expected_combos)
 
 
 def get_unique_sub_ses_run(identifiers):
@@ -845,7 +847,7 @@ def get_unique_sub_ses_run(identifiers):
 
     sub_ses = [(id.subject, id.session, id.run) for id in identifiers]
     sub_ses = list(set(sub_ses))  # remove duplicates
-    return sub_ses
+    return sorted(sub_ses)
 
 
 def get_identifier_files(basedir, identifier, datatype, is_raw=True):
@@ -902,7 +904,7 @@ def get_identifier_files(basedir, identifier, datatype, is_raw=True):
         if re.fullmatch(FILE_RE, file)
     ]
 
-    return id_files
+    return sorted(id_files)
 
 
 def get_pending_files(dataset):
@@ -950,7 +952,9 @@ def write_pending_files(dataset, df: pd.DataFrame, timestamp):
     """
     out = os.path.join(dataset, PENDING_SUBDIR, f"pending-files-{timestamp}.csv")
     df = convert_bool_cols_to_int(df)
-    if set(PENDING_FILES_COLS).issubset(set(df.columns)):  # df has at least PENDING_FILES_COLS
+    if set(PENDING_FILES_COLS).issubset(
+        set(df.columns)
+    ):  # df has at least PENDING_FILES_COLS
         df = df[PENDING_FILES_COLS]
     else:
         missing_cols = set(PENDING_FILES_COLS) - set(df.columns)
@@ -1335,7 +1339,9 @@ def write_qa_tracker(dataset, df: pd.DataFrame):
     """
     checklist_path = os.path.join(dataset, QA_CHECKLIST_SUBPATH)
     df = convert_bool_cols_to_int(df)
-    if set(QA_CHECKLIST_COLS).issubset(set(df.columns)):  # df has at least QA_CHECKLIST_COLS
+    if set(QA_CHECKLIST_COLS).issubset(
+        set(df.columns)
+    ):  # df has at least QA_CHECKLIST_COLS
         df = df[QA_CHECKLIST_COLS]
     else:
         missing_cols = set(QA_CHECKLIST_COLS) - set(df.columns)
@@ -1456,7 +1462,9 @@ def clean_empty_dirs(basedir):
 
 def get_visit_pairs(datadict: pd.DataFrame):
     vars = datadict[["variable", "dataType", "provenance"]]
-    vars["root"] = vars["variable"].str.removesuffix("_status").str.removesuffix("_data")
+    vars["root"] = (
+        vars["variable"].str.removesuffix("_status").str.removesuffix("_data")
+    )
 
     # get visit status vars, strip out type suffix
     status_vars = vars[vars["dataType"] == "visit_status"]
@@ -1481,11 +1489,11 @@ def get_visit_pairs(datadict: pd.DataFrame):
 
 
 def get_datafiles_from_provenance(provenance: str):
-    idx = provenance.find('variables:') + len('variables:')
-    provenance = provenance[idx:] # take the substring after "variables"
+    idx = provenance.find("variables:") + len("variables:")
+    provenance = provenance[idx:]  # take the substring after "variables"
     task_files = []
     for task in provenance.split(","):
-        task = task.strip("\";, ")
+        task = task.strip('";, ')
         task_files.append(task)
     return task_files
 
@@ -1519,7 +1527,8 @@ def get_expected_files(dataset, identifier):
     expected_exts = expected_exts.iloc[0]
     expected_exts = str(expected_exts).strip('"').replace(" ", "").split(",")
     expected_files = [str(identifier) + ext for ext in expected_exts if ext]
-    return expected_files
+    return sorted(expected_files)
+
 
 def allowed_val(allowed_vals, value):
     """
@@ -1538,7 +1547,7 @@ def allowed_val(allowed_vals, value):
         result = allowed_val(allowed_vals, value)  # Returns True
     """
     allowed_vals = allowed_vals.replace(" ", "")
-    
+
     # Handle case where allowed_vals is a comma-separated list
     if "," in allowed_vals and "[" not in allowed_vals:
         allowed_values = allowed_vals.split(",")
@@ -1965,4 +1974,4 @@ def get_new_redcaps(basedir):
                 )
             newest_files.append(newest_file)
 
-    return newest_files
+    return sorted(newest_files)
