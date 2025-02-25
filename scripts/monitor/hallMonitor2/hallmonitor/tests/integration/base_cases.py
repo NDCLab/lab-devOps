@@ -699,7 +699,7 @@ class TestCase(ABC):
             except IsADirectoryError:  # some test cases require empty directories
                 continue
 
-    def build_path(self, ses: str, datatype: str, filename: str, is_raw=False):
+    def build_path(self, ses: str, datatype: str, filename: str, is_raw=True):
         """
         Constructs a file path by joining the base directory with session, datatype, and filename.
 
@@ -707,7 +707,7 @@ class TestCase(ABC):
             ses (str): The session identifier.
             datatype (str): The datatype.
             filename (str): The name of the file.
-            is_raw (bool): Whether a raw filepath should be generated. Defaults to False.
+            is_raw (bool): Whether a raw filepath should be generated. Defaults to True.
 
         Returns:
             str: The constructed file path, rooted at "sourcedata".
@@ -731,7 +731,7 @@ class TestCase(ABC):
                 filename,
             )
 
-    def replace_file_name(self, base_files, old_name, new_name):
+    def replace_file_name(self, base_files, old_name, new_name, raw=True):
         """
         Searches for a file by its basename in the given dictionary of files and replaces its name if found.
 
@@ -739,11 +739,19 @@ class TestCase(ABC):
             base_files (dict[str, str]): A dictionary where keys are relative file paths and values are file contents.
             old_name (str): The basename of the file to search for.
             new_name (str): The new basename to replace the old one with.
+            raw (bool, optional): Whether a match should be searched for in sourcedata/raw (True) or sourcedata/checked (False).
+                Defaults to True.
 
         Returns:
             bool: True if the file was found and replaced; False otherwise.
         """
-        for relpath in base_files:
+        data_dir = os.path.join("sourcedata", "raw" if raw else "checked")
+        filtered_files = {
+            relpath: contents
+            for relpath, contents in base_files.items()
+            if relpath.startswith(data_dir)
+        }
+        for relpath in filtered_files:
             if os.path.basename(relpath) == old_name:
                 old_dir = os.path.dirname(relpath)
                 new_relpath = os.path.join(old_dir, new_name)
@@ -752,19 +760,26 @@ class TestCase(ABC):
 
         return False
 
-    def remove_file(self, base_files, file):
+    def remove_file(self, base_files, file, raw=True):
         """
         Removes a file from the given dictionary of files if it exists.
 
         Args:
             base_files (dict[str, str]): A dictionary where keys are relative file paths and values are file contents.
             file (str): The basename of the file to remove.
+            raw (bool, optional): Whether the file should be searched for in raw (True) or checked (False). Defaults to True.
 
         Returns:
             bool: True if the file was found and removed, False otherwise.
         """
+        data_dir = os.path.join("sourcedata", "raw" if raw else "checked")
+        filtered_files = {
+            relpath: contents
+            for relpath, contents in base_files.items()
+            if relpath.startswith(data_dir)
+        }
         path = ""
-        for relpath in base_files:
+        for relpath in filtered_files:
             if os.path.basename(relpath) == file:
                 path = relpath
                 break
@@ -873,11 +888,9 @@ class TestCase(ABC):
 
         pending = validate_data(
             logger,
-            dataset=self.case_dir,
-            *args,
-            use_legacy_exceptions=False,
-            is_raw=False,
-            **kwargs,
+            dataset=kwargs.get("dataset", self.case_dir),
+            use_legacy_exceptions=kwargs.get("use_legacy_exceptions", False),
+            is_raw=kwargs.get("is_raw", False),
         )
 
         pending_df = pd.DataFrame(pending)
@@ -984,6 +997,14 @@ class ValidationTestCase(TestCase):
     expected_output = "Correct error generated for data validation issues."
 
     @property
+    @abstractmethod
+    def is_raw(self) -> bool:
+        """
+        Whether the test case modifies raw (True) or checked (False) files.
+        """
+        pass
+
+    @property
     def behavior_to_test(self) -> str:
         return "Tests for errors related to pending errors."
 
@@ -1015,8 +1036,10 @@ class ValidationTestCase(TestCase):
         """
         expected_errors = self.get_expected_errors()
 
-        # check for missing errors
+        # Log expected errors
+        logging.debug(f"Expected errors: {expected_errors}")
 
+        # check for missing errors
         if generated_errors_df.empty:
             # can't put backslashes in f-strings
             escape_char = "\\"
@@ -1026,7 +1049,6 @@ class ValidationTestCase(TestCase):
                 + f" (missing {error.multiplicity})"
                 for error in expected_errors
             ]
-
         else:
             missing = []
             for error in expected_errors:
@@ -1044,6 +1066,9 @@ class ValidationTestCase(TestCase):
                         f"{error.error_type}: {error.info_regex.replace('\\', '')} (missing {n_missing})"
                     )
 
+        # Log missing errors
+        logging.debug(f"Missing errors: {missing}")
+
         # check for extraneous errors
         extra = []
         for _, row in generated_errors_df.iterrows():
@@ -1055,6 +1080,9 @@ class ValidationTestCase(TestCase):
             if not is_expected:
                 extra.append(f'{row["errorType"]}: {row["errorDetails"]}')
 
+        # Log extra errors
+        logging.debug(f"Extra errors: {extra}")
+
         # construct failure message
         fail_reason = ""
         if missing:
@@ -1063,10 +1091,15 @@ class ValidationTestCase(TestCase):
             fail_reason += "Extra errors:\n" + "\n".join(extra) + "\n"
 
         if fail_reason:
+            logging.debug(f"Fail reason: {fail_reason}")
             raise AssertionError(fail_reason)
 
     def validate(self):
-        errors_df = self.run_validate_data()
+        pending_df = self.run_validate_data(is_raw=self.is_raw)
+        if self.is_raw:
+            errors_df = pending_df[~pending_df["passRaw"]]
+        else:
+            errors_df = pending_df
         self.compare_errors(errors_df)
 
 
