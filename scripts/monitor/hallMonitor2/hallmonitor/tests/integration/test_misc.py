@@ -105,7 +105,7 @@ class ExtraFilesInFolderTestCase(MiscellaneousTestCase):
 
         base_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{original_suffix}.csv"
         base_file = self.build_path("s1_r1", "psychopy", base_file, self.is_raw)
-        additional_file = base_file.replace(original_suffix, new_suffix, self.is_raw)
+        additional_file = base_file.replace(original_suffix, new_suffix)
 
         # copy original file contents
         modified_files[additional_file] = modified_files[base_file]
@@ -113,11 +113,23 @@ class ExtraFilesInFolderTestCase(MiscellaneousTestCase):
         return modified_files
 
     def get_expected_errors(self):
-        naming_info = r"Suffix s1_r1_e2 not in allowed suffixes.*"
-        unexpected_info = f"Unexpected file sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e2.csv found"
+        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_PATTERN"
+        new_suffix = "s1_r1_e2"
+        old_suffix = "s1_r1_e1"
+
+        naming_info = re.escape(f"Suffix {new_suffix} not in allowed suffixes") + r".*"
+        unexpected_info = (
+            re.escape(f"Unexpected file {identifier.replace('PATTERN', old_suffix)}")
+            + r"\..+ found"
+        )
+        missing_info = (
+            re.escape(f"Expected file {identifier.replace('PATTERN', new_suffix)}")
+            + r"\..+ not found"
+        )
         errors = [
             ExpectedError("Naming error", naming_info),
-            ExpectedError("Unexpected file", re.escape(unexpected_info)),
+            ExpectedError("Unexpected file", unexpected_info, 3),
+            ExpectedError("Missing file", missing_info, 2),
         ]
 
         return errors
@@ -510,7 +522,7 @@ class DeleteFailedCheckedIdentifierTestCase(TestCase):
         modified_files = base_files.copy()
 
         target = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        target = self.build_path("s1_r1", "psychopy", target)
+        target = self.build_path("s1_r1", "psychopy", target, False)
 
         if target not in modified_files:
             raise FileNotFoundError(f"File matching relative path {target} not found")
@@ -531,7 +543,7 @@ class DeleteFailedCheckedIdentifierTestCase(TestCase):
         filepaths = self.get_paths(self.case_dir)
 
         # check that all files associated with the identifier were deleted from checked/
-        id_checked_dir = self.build_path("s1_r1", "psychopy", "")
+        id_checked_dir = self.build_path("s1_r1", "psychopy", "", False)
         assert not any(str(path).startswith(id_checked_dir) for path in filepaths)
 
         # check that the identifier's files in raw/ were not deleted
