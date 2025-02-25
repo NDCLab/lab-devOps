@@ -130,20 +130,18 @@ class DeviationFileWithFolderMismatchTestCase(ExceptionTestCase):
     ]
     expected_output = "Error is raised for the presence of deviation.txt when file names do not match their folder."
 
-    is_raw = False
+    is_raw = True
 
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_all_eeg_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
-        deviation_file = self.build_path(
-            "s1_r1", "psychopy", deviation_file, self.is_raw
-        )
+        deviation_file = self.build_path("s1_r1", "eeg", deviation_file, self.is_raw)
         modified_files[deviation_file] = "Files to process: NA"
 
         old_name = f"sub-{self.sub_id}_all_eeg_s1_r1_e1.eeg"
-        new_name = old_name.replace(str(self.sub_id), str(self.sub_id + 1))
+        new_name = old_name.replace(str(self.sub_id), str(self.SUBJECT_ID))
 
         if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
@@ -152,7 +150,7 @@ class DeviationFileWithFolderMismatchTestCase(ExceptionTestCase):
 
     def get_expected_errors(self):
         misplaced_info = re.escape(
-            f"Found file in wrong directory: sub-{self.sub_id + 1}_all_eeg_s1_r1_e1.eeg found in "
+            f"Found file in wrong directory: sub-{self.SUBJECT_ID}_all_eeg_s1_r1_e1.eeg found in "
         )
         misplaced_info += r"(?:.*/)+"
         errors = [ExpectedError("Misplaced file", misplaced_info)]
@@ -264,16 +262,14 @@ class DeviationFileWithBadNamesTestCase(ExceptionTestCase):
     def modify(self, base_files):
         modified_files = base_files.copy()
 
-        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        identifier = f"sub-{self.sub_id}_all_eeg_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
-        deviation_file = self.build_path(
-            "s1_r1", "psychopy", deviation_file, self.is_raw
-        )
+        deviation_file = self.build_path("s1_r1", "eeg", deviation_file, self.is_raw)
         modified_files[deviation_file] = "Files to process: NA"
 
         # rename existing file to invalid name
-        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        new_name = "badfilename.csv"
+        old_name = f"sub-{self.sub_id}_all_eeg_s1_r1_e1.eeg"
+        new_name = "badfilename.eeg"
 
         if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
@@ -281,7 +277,7 @@ class DeviationFileWithBadNamesTestCase(ExceptionTestCase):
         return modified_files
 
     def get_expected_errors(self):
-        error_info = "File badfilename.csv does not match expected identifier format"
+        error_info = "File badfilename.eeg does not match expected identifier format"
         errors = [ExpectedError("Naming error", re.escape(error_info))]
 
         return errors
