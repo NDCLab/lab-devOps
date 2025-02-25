@@ -559,7 +559,7 @@ class KeepFailedIdentifierCheckedNoRawTestCase(TestCase):
         modified_files = base_files.copy()
 
         target = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        target = self.build_path("s1_r1", "psychopy", target)
+        target = self.build_path("s1_r1", "psychopy", target, False)
 
         if target not in modified_files:
             raise FileNotFoundError(f"File matching relative path {target} not found")
@@ -588,7 +588,7 @@ class KeepFailedIdentifierCheckedNoRawTestCase(TestCase):
         filepaths = self.get_paths(self.case_dir)
 
         # check that the identifier's files in checked/ were not deleted
-        id_checked_dir = self.build_path("s1_r1", "psychopy", "")
+        id_checked_dir = self.build_path("s1_r1", "psychopy", "", False)
         assert any(str(path).startswith(id_checked_dir) for path in filepaths)
 
         # check that the identifier's files in raw/ were not restored
