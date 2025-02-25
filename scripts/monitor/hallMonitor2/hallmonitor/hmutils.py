@@ -243,6 +243,11 @@ class Identifier:
             other.run,
         )
 
+    def __lt__(self, other):
+        if not isinstance(other, Identifier):
+            return NotImplemented
+        return str(self) < str(other)
+
     def __hash__(self):
         return hash((self.subject, self.variable, self.session, self.run))
 
