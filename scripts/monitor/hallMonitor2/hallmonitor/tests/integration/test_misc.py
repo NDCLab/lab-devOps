@@ -31,6 +31,8 @@ class BaseTestCase(MiscellaneousTestCase):
     conditions = ["No variations to base subject data"]
     expected_output = "No errors are raised."
 
+    is_raw = True
+
     @property
     def behavior_to_test(self) -> str:
         return "Tests to make sure no errors are raised for unaltered data."
@@ -56,11 +58,13 @@ class InsufficientFilesTestCase(MiscellaneousTestCase):
     conditions = ["Folder contains fewer files than expected"]
     expected_output = "Error is raised for insufficient number of files in folder."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         target_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
 
-        if not self.remove_file(modified_files, target_file):
+        if not self.remove_file(modified_files, target_file, self.is_raw):
             raise FileNotFoundError(f"File matching basename {target_file} not found")
 
         return modified_files
@@ -91,6 +95,8 @@ class ExtraFilesInFolderTestCase(MiscellaneousTestCase):
     ]
     expected_output = "Error is raised for folder containing extra files."
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
@@ -98,8 +104,8 @@ class ExtraFilesInFolderTestCase(MiscellaneousTestCase):
         new_suffix = "s1_r1_e2"
 
         base_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{original_suffix}.csv"
-        base_file = self.build_path("s1_r1", "psychopy", base_file)
-        additional_file = base_file.replace(original_suffix, new_suffix)
+        base_file = self.build_path("s1_r1", "psychopy", base_file, self.is_raw)
+        additional_file = base_file.replace(original_suffix, new_suffix, self.is_raw)
 
         # copy original file contents
         modified_files[additional_file] = modified_files[base_file]
@@ -136,11 +142,13 @@ class EmptyFileTestCase(MiscellaneousTestCase):
         "Error is raised for file that is correctly named but contains no data."
     )
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         target = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        target = self.build_path("s1_r1", "psychopy", target)
+        target = self.build_path("s1_r1", "psychopy", target, self.is_raw)
 
         if target not in modified_files:
             raise FileNotFoundError(f"File matching relative path {target} not found")
@@ -180,6 +188,8 @@ class ExpectedFileMissingTestCase(MiscellaneousTestCase):
     ]
     expected_output = "Error is raised for missing expected file."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         target_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
@@ -216,11 +226,13 @@ class MultipleTasksFromCombinationRowTestCase(MiscellaneousTestCase):
         "Error is raised for multiple tasks present in the same combination row."
     )
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         template = f"sub-{self.sub_id}_VARNAME_s1_r1_e1.csv"
-        template = self.build_path("s1_r1", "psychopy", template)
+        template = self.build_path("s1_r1", "psychopy", template, self.is_raw)
         existing_file = template.replace("VARNAME", "arrow-alert-v1-1_psychopy")
         duplicate_file = template.replace("VARNAME", "arrow-alert-v1-2_psychopy")
 
@@ -421,14 +433,20 @@ class MissingTaskFromDataDictionaryTestCase(MiscellaneousTestCase):
     conditions = ["Removed file specified in the bbs_status variable."]
     expected_output = "An error is raised for the missing file."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         filename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
 
-        for _ in range(2):  # once for raw, once for checked
-            if not self.remove_file(modified_files, filename):
-                raise FileNotFoundError(f"File with basename {filename} not found")
+        # once for raw, once for checked
+        if not self.remove_file(modified_files, filename, True):
+            raise FileNotFoundError(f"File with basename {filename} not found in raw")
+        if not self.remove_file(modified_files, filename, False):
+            raise FileNotFoundError(
+                f"File with basename {filename} not found in checked"
+            )
 
         return modified_files
 
@@ -449,11 +467,13 @@ class IgnoreBeforeDateTestCase(MiscellaneousTestCase):
     conditions = ["File with error has a date before the ignore date."]
     expected_output = "Error is not raised for file with date before ignore date."
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         target = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        target = self.build_path("s1_r1", "psychopy", target)
+        target = self.build_path("s1_r1", "psychopy", target, self.is_raw)
 
         if target not in modified_files:
             raise FileNotFoundError(f"File matching relative path {target} not found")

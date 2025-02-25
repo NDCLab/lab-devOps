@@ -19,6 +19,8 @@ class EEGDataFileVHDRMismatchTestCase(EEGTestCase):
     ]
     expected_output = "Error is raised for mismatched DataFile line in the .vhdr file."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
@@ -67,12 +69,14 @@ class EEGMarkerFileVHDRMismatchTestCase(EEGTestCase):
         "Error is raised for mismatched MarkerFile line in the .vhdr file."
     )
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         # define the .vhdr file and the incorrect MarkerFile line
         vhdr_file = f"sub-{self.sub_id}_all_eeg_s1_r1_e1.vhdr"
-        vhdr_file = self.build_path("s1_r1", "eeg", vhdr_file)
+        vhdr_file = self.build_path("s1_r1", "eeg", vhdr_file, self.is_raw)
         if vhdr_file not in modified_files:
             raise FileNotFoundError(f"File matching basename {vhdr_file} not found")
 
@@ -113,12 +117,14 @@ class EEGDataFileVMRKMismatchTestCase(EEGTestCase):
     ]
     expected_output = "Error is raised for mismatched DataFile line in the .vmrk file."
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         # define the .vmrk file and the incorrect DataFile line
         vmrk_file = f"sub-{self.sub_id}_all_eeg_s1_r1_e1.vmrk"
-        vmrk_file = self.build_path("s1_r1", "eeg", vmrk_file)
+        vmrk_file = self.build_path("s1_r1", "eeg", vmrk_file, self.is_raw)
         if vmrk_file not in modified_files:
             raise FileNotFoundError(f"File matching basename {vmrk_file} not found")
 

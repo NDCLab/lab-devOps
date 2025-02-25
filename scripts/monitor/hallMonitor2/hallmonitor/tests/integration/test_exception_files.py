@@ -25,12 +25,14 @@ class DeviationAndNoDataErrorTestCase(ExceptionTestCase):
         "Error is raised for the presence of deviation.txt without any data files."
     )
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         deviation_file = self.build_path(
-            "s1_r1", "psychopy", f"{identifier}_deviation.txt"
+            "s1_r1", "psychopy", f"{identifier}_deviation.txt", self.is_raw
         )
         modified_files[deviation_file] = "Files to process: NA"
 
@@ -47,7 +49,9 @@ class DeviationAndNoDataErrorTestCase(ExceptionTestCase):
         error_info = "deviation.txt cannot signify only 1 file; use no-data.txt."
         combo_info = (
             "Combination row arrow-alert_psychopy has no variables present in "
-            + os.path.join(self.case_dir, self.build_path("s1_r1", "psychopy", ""))
+            + os.path.join(
+                self.case_dir, self.build_path("s1_r1", "psychopy", "", self.is_raw)
+            )
         )
 
         errors = [
@@ -75,14 +79,18 @@ class DeviationAndNoDataFilesErrorTestCase(ExceptionTestCase):
     ]
     expected_output = "Error is raised for the presence of both deviation.txt and no-data.txt in the folder."
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
-        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
+        deviation_file = self.build_path(
+            "s1_r1", "psychopy", deviation_file, self.is_raw
+        )
         no_data_file = f"{identifier}_no-data.txt"
-        no_data_file = self.build_path("s1_r1", "psychopy", no_data_file)
+        no_data_file = self.build_path("s1_r1", "psychopy", no_data_file, self.is_raw)
 
         # add deviation.txt and no-data.txt files
         modified_files[deviation_file] = "Files to process: NA"
@@ -122,25 +130,29 @@ class DeviationFileWithFolderMismatchTestCase(ExceptionTestCase):
     ]
     expected_output = "Error is raised for the presence of deviation.txt when file names do not match their folder."
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
-        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        identifier = f"sub-{self.sub_id}_all_eeg_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
-        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
+        deviation_file = self.build_path(
+            "s1_r1", "psychopy", deviation_file, self.is_raw
+        )
         modified_files[deviation_file] = "Files to process: NA"
 
-        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        old_name = f"sub-{self.sub_id}_all_eeg_s1_r1_e1.eeg"
         new_name = old_name.replace(str(self.sub_id), str(self.sub_id + 1))
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
     def get_expected_errors(self):
         misplaced_info = re.escape(
-            f"Found file in wrong directory: sub-{self.sub_id + 1}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv found in "
+            f"Found file in wrong directory: sub-{self.sub_id + 1}_all_eeg_s1_r1_e1.eeg found in "
         )
         misplaced_info += r"(?:.*/)+"
         errors = [ExpectedError("Misplaced file", misplaced_info)]
@@ -167,16 +179,20 @@ class DeviationFilePreventsErrorWithExtraFilesTestCase(ExceptionTestCase):
         "No error is raised for extra files when deviation.txt is present."
     )
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
-        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
+        deviation_file = self.build_path(
+            "s1_r1", "psychopy", deviation_file, self.is_raw
+        )
         modified_files[deviation_file] = "Files to process: NA"
 
         base_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        base_file = self.build_path("s1_r1", "psychopy/", base_file)
+        base_file = self.build_path("s1_r1", "psychopy/", base_file, self.is_raw)
         # additional valid file with extra string
         additional_file = base_file.replace(".csv", "_extra.csv")
 
@@ -205,12 +221,14 @@ class NoDataAdditionalFilesTestCase(ExceptionTestCase):
     conditions = ["Folder contains no-data.txt"]
     expected_output = "Error is raised for the presence of no-data.txt when additional files are present for the same identifier."
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         no_data_file = f"{identifier}_no-data.txt"
-        no_data_file = self.build_path("s1_r1", "psychopy", no_data_file)
+        no_data_file = self.build_path("s1_r1", "psychopy", no_data_file, self.is_raw)
         modified_files[no_data_file] = "No data available for this test case."
 
         return modified_files
@@ -241,19 +259,23 @@ class DeviationFileWithBadNamesTestCase(ExceptionTestCase):
     ]
     expected_output = "Error is raised for the presence of deviation.txt when file names do not match naming convention."
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
-        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
+        deviation_file = self.build_path(
+            "s1_r1", "psychopy", deviation_file, self.is_raw
+        )
         modified_files[deviation_file] = "Files to process: NA"
 
         # rename existing file to invalid name
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
         new_name = "badfilename.csv"
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -284,19 +306,23 @@ class DeviationFileWithValidNamesTestCase(ExceptionTestCase):
         "No error is raised for valid file names with deviation.txt present."
     )
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
         deviation_file = f"{identifier}_deviation.txt"
-        deviation_file = self.build_path("s1_r1", "psychopy", deviation_file)
+        deviation_file = self.build_path(
+            "s1_r1", "psychopy", deviation_file, self.is_raw
+        )
         modified_files[deviation_file] = "Files to process: NA"
 
         # rename existing file to include additional string
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
         new_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1_addstring.csv"
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -326,9 +352,11 @@ class IssueFileTestCase(ExceptionTestCase):
         "Error is raised for the presence of issue.txt file in the folder."
     )
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
-        issue_file = self.build_path("s1_r1", "psychopy", "issue.txt")
+        issue_file = self.build_path("s1_r1", "psychopy", "issue.txt", self.is_raw)
 
         if issue_file in modified_files:
             raise FileExistsError(f"File matching relpath {issue_file} already exists")
@@ -364,11 +392,13 @@ class MissingIdentifierWithoutNoDataTestCase(ExceptionTestCase):
     ]
     expected_output = "Error is raised for the missing identifier."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         basename = f"sub-{self.sub_id}_all_digi_s1_r1_e1.zip.gpg"
 
-        if not self.replace_file_name(modified_files, basename, ""):
+        if not self.replace_file_name(modified_files, basename, "", self.is_raw):
             raise FileNotFoundError(f"File matching basename {basename} not found")
 
         return modified_files
@@ -397,6 +427,8 @@ class MissingIdentifierNoDataTestCase(ExceptionTestCase):
     conditions = ["Folder is empty.", "Folder contains a no-data.txt file."]
     expected_output = "No error is raised for the missing identifier."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
@@ -404,7 +436,9 @@ class MissingIdentifierNoDataTestCase(ExceptionTestCase):
         old_basename = f"{identifier}.zip.gpg"
         new_basename = f"{identifier}_no-data.txt"
 
-        if not self.replace_file_name(modified_files, old_basename, new_basename):
+        if not self.replace_file_name(
+            modified_files, old_basename, new_basename, self.is_raw
+        ):
             raise FileNotFoundError(f"File matching basename {old_basename} not found")
 
         return modified_files
@@ -418,12 +452,14 @@ def test_missing_identifier_no_data(request):
 
 
 class DeviationNoFilesToProcess(ExceptionTestCase):
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
-        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+        identifier = f"sub-{self.sub_id}_all_eeg_s1_r1_e1"
         deviation_file = self.build_path(
-            "s1_r1", "psychopy", f"{identifier}_deviation.txt"
+            "s1_r1", "eeg", f"{identifier}_deviation.txt", self.is_raw
         )
         modified_files[deviation_file] = "42"  # no "files to process" line
 

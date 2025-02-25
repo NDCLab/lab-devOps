@@ -25,11 +25,13 @@ class PsychopyFileIDMismatchTestCase(PsychopyTestCase):
         "Error is raised for mismatched ID in the psychopy file and its filename."
     )
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
         psychopy_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        psychopy_file = self.build_path("s1_r1", "psychopy", psychopy_file)
+        psychopy_file = self.build_path("s1_r1", "psychopy", psychopy_file, self.is_raw)
         if psychopy_file not in modified_files:
             raise FileNotFoundError(f"File matching basename {psychopy_file} not found")
 

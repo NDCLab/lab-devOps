@@ -17,12 +17,14 @@ class InvalidVariableNameTestCase(NamingTestCase):
     conditions = ["Variable name is invalid"]
     expected_output = "Error is raised for incorrect variable name in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
         new_name = f"sub-{self.sub_id}_bad-taskname_s1_r1_e1.csv"
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -61,13 +63,15 @@ class MissingVariableNameTestCase(NamingTestCase):
     conditions = ["Variable name is missing"]
     expected_output = "Error is raised for missing variable name in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         variable = "arrow-alert-v1-1_psychopy"
         old_name = f"sub-{self.sub_id}_{variable}_s1_r1_e1.csv"
         new_name = old_name.replace(variable, "")
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -108,19 +112,21 @@ class MissingSubjectNumberTestCase(NamingTestCase):
     conditions = ["Subject number is missing"]
     expected_output = "Error is raised for missing subject number in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         sub = f"sub-{self.sub_id}"
-        old_name = f"{sub}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        old_name = f"{sub}_all_eeg_s1_r1_e1.eeg"
         new_name = old_name.replace(sub, "sub-")
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
     def get_expected_errors(self):
-        basename = "sub-PATTERN_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        basename = "sub-PATTERN_all_eeg_s1_r1_e1.eeg"
         old_sub = str(self.sub_id)
         new_sub = ""
         old_basename = basename.replace("PATTERN", old_sub)
@@ -155,19 +161,21 @@ class InvalidSubjectNumberTestCase(NamingTestCase):
     conditions = ["Subject number is invalid"]
     expected_output = "Error is raised for invalid subject number in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         sub = f"sub-{self.sub_id}"
-        old_name = f"{sub}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        old_name = f"{sub}_all_eeg_s1_r1_e1.eeg"
         new_name = old_name.replace(sub, "sub-303")
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
     def get_expected_errors(self):
-        basename = "sub-PATTERN_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        basename = "sub-PATTERN_all_eeg_s1_r1_e1.eeg"
         old_sub = str(self.sub_id)
         new_sub = "303"
         old_basename = basename.replace("PATTERN", old_sub)
@@ -205,6 +213,8 @@ class InvalidSessionSuffixTestCase(NamingTestCase):
     conditions = ["Session number in suffix is invalid"]
     expected_output = "Error is raised for invalid session suffix in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         old_suffix = "s1_r1_e1"
@@ -212,7 +222,7 @@ class InvalidSessionSuffixTestCase(NamingTestCase):
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
         new_name = old_name.replace(old_suffix, new_suffix)
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -258,6 +268,8 @@ class InvalidRunSuffixTestCase(NamingTestCase):
     conditions = ["Run number in suffix is invalid"]
     expected_output = "Error is raised for invalid run suffix in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         old_suffix = "s1_r1_e1"
@@ -265,7 +277,7 @@ class InvalidRunSuffixTestCase(NamingTestCase):
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
         new_name = old_name.replace(old_suffix, new_suffix)
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -311,6 +323,8 @@ class InvalidEventSuffixTestCase(NamingTestCase):
     conditions = ["Event number in suffix is invalid"]
     expected_output = "Error is raised for invalid event suffix in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         old_suffix = "s1_r1_e1"
@@ -318,7 +332,7 @@ class InvalidEventSuffixTestCase(NamingTestCase):
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
         new_name = old_name.replace(old_suffix, new_suffix)
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -358,6 +372,8 @@ class MissingSessionSuffixTestCase(NamingTestCase):
     description = "Removes the session number from the file name, making it incomplete."
     conditions = ["Session number in suffix is missing"]
     expected_output = "Error is raised for missing session number in file name."
+
+    is_raw = True
 
     def modify(self, base_files):
         modified_files = base_files.copy()
@@ -407,6 +423,8 @@ class MissingRunSuffixTestCase(NamingTestCase):
     conditions = ["Run number in suffix is missing"]
     expected_output = "Error is raised for missing run number in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         old_suffix = "s1_r1_e1"
@@ -414,7 +432,7 @@ class MissingRunSuffixTestCase(NamingTestCase):
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
         new_name = old_name.replace(old_suffix, new_suffix)
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -455,6 +473,8 @@ class MissingEventSuffixTestCase(NamingTestCase):
     conditions = ["Event number in suffix is missing"]
     expected_output = "Error is raised for missing event number in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         old_suffix = "s1_r1_e1"
@@ -462,7 +482,7 @@ class MissingEventSuffixTestCase(NamingTestCase):
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
         new_name = old_name.replace(old_suffix, new_suffix)
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -503,6 +523,8 @@ class InvalidExtensionTestCase(NamingTestCase):
     conditions = ["File extension is invalid"]
     expected_output = "Error is raised for invalid file extension in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         old_ext = ".csv"
@@ -510,7 +532,7 @@ class InvalidExtensionTestCase(NamingTestCase):
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1{old_ext}"
         new_name = old_name.replace(old_ext, new_ext)
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -554,13 +576,15 @@ class MissingExtensionTestCase(NamingTestCase):
     conditions = ["File extension is missing"]
     expected_output = "Error is raised for missing file extension in file name."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
         old_ext = ".csv"
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1{old_ext}"
         new_name = old_name.replace(old_ext, "")
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files

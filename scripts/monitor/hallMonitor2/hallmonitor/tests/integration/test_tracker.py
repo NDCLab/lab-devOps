@@ -123,9 +123,11 @@ class DeviationCheckedUpdateTrackerTestCase(BaseUpdateTrackerTestCase):
         # rename file incorrectly
         old_name = f"{identifier}.csv"
         new_name = old_name.replace(".csv", "_deviation.csv")
-        for _ in range(2):  # do once for raw and once for checked
-            if not self.replace_file_name(modified_files, old_name, new_name):
-                raise FileNotFoundError(f"Could not find basename {new_name}")
+        # do once for raw and once for checked
+        if not self.replace_file_name(modified_files, old_name, new_name, True):
+            raise FileNotFoundError(f"Could not find basename {new_name} in raw")
+        if not self.replace_file_name(modified_files, old_name, new_name, False):
+            raise FileNotFoundError(f"Could not find basename {new_name} in checked")
 
         # add deviation.txt to raw/ and checked/
         deviation_file = f"{identifier}_deviation.txt"

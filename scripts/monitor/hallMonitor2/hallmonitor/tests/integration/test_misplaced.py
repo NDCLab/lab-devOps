@@ -17,6 +17,8 @@ class FolderSessionSuffixMismatchTestCase(MisplacedFileTestCase):
     conditions = ["File's session suffix does not match session folder"]
     expected_output = "Error is raised for file whose session suffix does not match its session folder."
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
@@ -25,7 +27,7 @@ class FolderSessionSuffixMismatchTestCase(MisplacedFileTestCase):
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
         new_name = old_name.replace(old_suffix, new_suffix)
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -67,6 +69,8 @@ class FolderRunSuffixMismatchTestCase(MisplacedFileTestCase):
         "Error is raised for file whose run suffix does not match its session folder."
     )
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
@@ -75,7 +79,7 @@ class FolderRunSuffixMismatchTestCase(MisplacedFileTestCase):
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
         new_name = old_name.replace(old_suffix, new_suffix)
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
@@ -116,20 +120,22 @@ class FolderSubjectMismatchTestCase(MisplacedFileTestCase):
         "Error is raised for file whose subject does not match its subject folder."
     )
 
+    is_raw = True
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
-        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        old_name = f"sub-{self.sub_id}_all_eeg_s1_r1_e1.eeg"
         new_name = old_name.replace(str(self.sub_id), str(self.sub_id + 1))
 
-        if not self.replace_file_name(modified_files, old_name, new_name):
+        if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
             raise FileNotFoundError(f"File matching basename {old_name} not found")
 
         return modified_files
 
     def get_expected_errors(self):
-        old_basename = f"sub-{self.sub_id }_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
-        new_basename = f"sub-{self.sub_id + 1}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
+        old_basename = f"sub-{self.sub_id }_all_eeg_s1_r1_e1.eeg"
+        new_basename = f"sub-{self.sub_id + 1}_all_eeg_s1_r1_e1.eeg"
 
         misplaced_info = re.escape(
             f"Found file in wrong directory: {new_basename} found in "
@@ -161,6 +167,8 @@ class FolderVariableMismatchTestCase(MisplacedFileTestCase):
     conditions = ["File's variable name does not match enclosing data type folder"]
     expected_output = "Error is raised for file whose variable name does not match the enclosing data type folder."
 
+    is_raw = False
+
     def modify(self, base_files):
         modified_files = base_files.copy()
 
@@ -170,6 +178,7 @@ class FolderVariableMismatchTestCase(MisplacedFileTestCase):
             "s1_r1",
             old_folder,
             f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv",
+            self.is_raw,
         )
         new_path = old_path.replace(old_folder, new_folder, count=1)
 
