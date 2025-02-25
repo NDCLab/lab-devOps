@@ -329,7 +329,7 @@ class InvalidEventSuffixTestCase(NamingTestCase):
         modified_files = base_files.copy()
         old_suffix = "s1_r1_e1"
         new_suffix = "s1_r1_e3"
-        old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_{old_suffix}.csv"
+        old_name = f"sub-{self.sub_id}_all_eeg_{old_suffix}.eeg"
         new_name = old_name.replace(old_suffix, new_suffix)
 
         if not self.replace_file_name(modified_files, old_name, new_name, self.is_raw):
@@ -338,22 +338,24 @@ class InvalidEventSuffixTestCase(NamingTestCase):
         return modified_files
 
     def get_expected_errors(self):
-        basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_PATTERN.csv"
+        identifier = f"sub-{self.sub_id}_all_eeg_PATTERN"
         old_suffix = "s1_r1_e1"
         new_suffix = "s1_r1_e3"
 
         naming_info = f"Suffix {new_suffix} not in allowed suffixes" + r".*"
-        missing_info = re.escape(
-            f"Expected file {basename.replace('PATTERN', old_suffix)} not found"
+        missing_info = (
+            re.escape(f"Expected file {identifier.replace('PATTERN', new_suffix) }")
+            + r"\..+ not found"
         )
-        extra_info = re.escape(
-            f"Unexpected file {basename.replace("PATTERN", new_suffix)} found"
+        extra_info = (
+            re.escape(f"Unexpected file {identifier.replace("PATTERN", old_suffix)}")
+            + r"\..+ found"
         )
 
         errors = [
             ExpectedError("Naming error", naming_info),
-            ExpectedError("Missing file", missing_info),
-            ExpectedError("Unexpected file", extra_info),
+            ExpectedError("Missing file", missing_info, 2),
+            ExpectedError("Unexpected file", extra_info, 2),
         ]
 
         return errors
