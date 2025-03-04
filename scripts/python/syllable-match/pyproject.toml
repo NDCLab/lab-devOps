@@ -18,4 +18,4 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-include = ["syllable_match/resources/word_frequency.csv.zip"]
+include = ["syllable_match/resources/word_frequency.tsv.zip"]
