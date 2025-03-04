@@ -2,7 +2,7 @@ import string
 
 import pandas as pd
 
-from .models import FeatureExtractor, SyllableEntry
+from syllable_match.models import FeatureExtractor, SyllableEntry
 
 
 class SyllableAtPassageBeginningExtractor(FeatureExtractor):
