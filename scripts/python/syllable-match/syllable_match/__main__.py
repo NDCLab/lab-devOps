@@ -42,7 +42,11 @@ def get_args():
         "--accepted_subjects",
         nargs="*",  # Allows multiple values
         default=[],  # Default to an empty list if not provided
-        help="List of accepted subjects. If not provided, all subjects are accepted.",
+        help=(
+            "List of accepted subjects in 'sub-ID' format. If not provided as a "
+            "command line option, the script will look in the config file. If absent "
+            "there, all subjects are accepted."
+        ),
     )
 
     # Add --force flag
