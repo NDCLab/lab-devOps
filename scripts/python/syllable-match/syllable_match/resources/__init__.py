@@ -10,6 +10,7 @@ def load_word_frequencies():
     # Load the compressed CSV into a DataFrame
     try:
         df = pd.read_csv(tsv_path, sep="\t", compression="zip")
+        df.dropna(inplace=True)
         return df
     except FileNotFoundError:
         print(f"Error: The file {tsv_path} was not found.")
