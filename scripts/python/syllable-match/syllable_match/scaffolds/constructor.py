@@ -1,5 +1,5 @@
 import string
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import pandas as pd
 
@@ -38,7 +38,7 @@ class ScaffoldConstructor:
     passage_name: str
     words: list[str]
     syllables: list[str]
-    extractors: list[FeatureExtractor] = []
+    extractors: list[FeatureExtractor] = field(default_factory=list)
 
     def register_extractor(self, extractor: FeatureExtractor):
         self.extractors.append(extractor)
@@ -83,13 +83,17 @@ class ScaffoldConstructor:
         features["word_id"] = word_ids
         features["syllable_id"] = syllable_ids
 
+        # Sanity check: assert that the lengths of feature lists are identical
+        feature_lengths = [len(value) for value in features.values()]
+        assert len(set(feature_lengths)) == 1
+
         return pd.DataFrame(features)
 
     def build_syllable_directory(self) -> list[SyllableEntry]:
         syllable_directory = []
-        syllable_queue = self._syllables.copy()
+        syllable_queue = self.syllables.copy()
 
-        for word in self._words:
+        for word in self.words:
             current_length = 0
             cleaned_word = word.replace("-", "").lower().strip(string.punctuation)
             word_length = len(cleaned_word)
@@ -108,7 +112,7 @@ class ScaffoldConstructor:
                             current_syllable[-1] in {".", "!", "?"},
                         )
                     )
-                    current_length += len(current_syllable)
+                    current_length += len(cleaned_syll)
 
             if not syllable_list:
                 raise Exception(self.passage_name, word, syllable_directory)
