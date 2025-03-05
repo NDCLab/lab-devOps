@@ -100,7 +100,7 @@ def read_csv_files(dirname: str, exclude: list[str] = []) -> list[pd.DataFrame]:
 def extract_words_and_syllables(
     file_path: str, sep: str = "\t"
 ) -> tuple[list[str], list[str]]:
-    """Extract words and syllables from a file."""
+    """Extract words and syllables from a template file."""
     words = []
     syllables = []
 

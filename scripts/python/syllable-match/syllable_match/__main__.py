@@ -2,6 +2,8 @@ import argparse
 import json
 import os
 
+import pandas as pd
+
 from syllable_match.feature_extractors import (
     SyllableAtPassageBeginningExtractor,
     SyllableAtPassageEndExtractor,
@@ -14,9 +16,10 @@ from syllable_match.feature_extractors import (
     WordFrequencyExtractor,
 )
 from syllable_match.models import FeatureExtractor
+from syllable_match.parsing import get_raw_df
 from syllable_match.resources import load_word_frequencies
 from syllable_match.scaffolds import create_scaffolds
-from syllable_match.stats import make_master_sheet
+from syllable_match.stats import generate_summary_statistics, make_master_sheet
 from syllable_match.utils import (
     create_output_directory,
     extract_passage_name,
@@ -97,8 +100,10 @@ def main():
     config = load_config(os.path.join(args.input_dir, "config.json"))
 
     # Step 0: Start with an empty output_dir
+    print("Step 0: Checking output directory...")
     if os.path.exists(args.output_dir):
         if args.force:
+            print("Output directory exists. Emptying the directory...")
             # Empty the output directory
             for root, dirs, files in os.walk(args.output_dir, topdown=False):
                 for name in files:
@@ -110,9 +115,11 @@ def main():
                 f"The output directory '{args.output_dir}' already exists."
             )
     else:
+        print("Output directory does not exist. Creating directory...")
         os.makedirs(args.output_dir)
 
     # Step 1: Construct basic scaffolds for each passage template
+    print("Step 1: Constructing basic scaffolds...")
     template_dir = os.path.join(args.input_dir, "templates")
     if not os.path.exists(template_dir):
         raise FileNotFoundError(
@@ -123,54 +130,82 @@ def main():
         get_templates(template_dir), scaffold_dir, get_scaffold_extractors()
     )
 
+    sub_dfs = {}  # Dictionary to store scaffold dataframes for each participant
+
     # Step 2: Loop over each participant
-    for participant_dir in get_participants(args.input_dir, args.accepted_subjects):
+    print("Step 2: Processing participants...")
+    for participant_dir in get_participants(
+        args.input_dir, args.accepted_subjects or config.get("accepted_subjects", [])
+    ):
+        print(f"Processing participant: {os.path.basename(participant_dir)}")
         # Step 3: Loop over each passage for the participant
         for passage_path in get_passages(participant_dir):
+            print(f"Processing passage: {os.path.basename(passage_path)}")
             # Load the corresponding scaffold
             passage_name = extract_passage_name(passage_path)
-            scaffold = load_scaffold(scaffold_dir, passage_name)
+            scaffold_df = load_scaffold(scaffold_dir, passage_name)
+
+            # Load the passage data
+            passage_df = get_raw_df(passage_path)
+            # Combine the scaffold and passage data
+            passage_df = pd.concat([scaffold_df, passage_df], axis=1)
 
             # Add new fields with NaN values
-            output_file = initialize_output_file(scaffold)
+            print("Adding new fields with NaN values...")
             add_nan_fields(
-                output_file,
-                fields=config["calculated_fields"],
+                passage_df,
+                fields=config["default_fields"],
             )
 
             # Preprocessing loop to populate simple fields
-            preprocess_fields(output_file)
+            print("Preprocessing fields...")
+            preprocess_fields(passage_df)
 
             # Hesitation labeling loop
-            label_hesitations(output_file)
+            print("Labeling hesitations...")
+            label_hesitations(passage_df)
 
             # Hesitation matching loop
-            match_hesitations(output_file)
+            print("Matching hesitations...")
+            match_hesitations(passage_df)
 
             # Error labeling loop
-            label_errors(output_file)
+            print("Labeling errors...")
+            label_errors(passage_df)
 
             # Error matching loop
-            match_errors(output_file)
+            print("Matching errors...")
+            match_errors(passage_df)
 
             # Duplication labeling loop
-            label_duplications(output_file)
+            print("Labeling duplications...")
+            label_duplications(scaffold_df)
 
             # Duplication matching loop
-            match_duplications(output_file)
+            print("Matching duplications...")
+            match_duplications(scaffold_df)
 
             # Save the output file for the passage
-            save_output_file(output_file, args.output_dir)
+            print(f"Saving output file for passage: {os.path.basename(passage_path)}")
+            save_output_file(scaffold_df, args.output_dir)
+
+            sub_dfs[os.path.basename(participant_dir)] = scaffold_df
 
     # Step 4: After processing all participants and passages, generate summary statistics
-    generate_summary_statistics(args.output_dir)
+    print("Step 4: Generating summary statistics...")
+    generate_summary_statistics(sub_dfs, args.output_dir)
 
     # Loop over all output files to count occurrences and output count files
+    print("Counting occurrences in output files...")
     for participant_dir in get_participants(args.output_dir):
         count_occurrences(participant_dir, args.output_dir)
 
     # Generate a master file with all participants and summary stats
-    make_master_sheet(args.output_dir)
+    print("Generating master file with all participants and summary stats...")
+    master_df = make_master_sheet(sub_dfs.values())
+    print("Master file generated successfully.")
+    master_df.to_csv(os.path.join(args.output_dir, "master_file.csv"), index=False)
+    print("Master file saved successfully.")
 
 
 if __name__ == "__main__":
