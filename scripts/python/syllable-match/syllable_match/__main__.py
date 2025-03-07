@@ -15,6 +15,7 @@ from syllable_match.feature_extractors import (
     WordBeforePeriodExtractor,
     WordFrequencyExtractor,
 )
+from syllable_match.matching import match_hesitations
 from syllable_match.models import FeatureExtractor
 from syllable_match.parsing import get_raw_df
 from syllable_match.resources import load_word_frequencies
