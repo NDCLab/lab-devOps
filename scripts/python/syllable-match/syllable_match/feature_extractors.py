@@ -36,14 +36,16 @@ class SyllableAtPassageEndExtractor(FeatureExtractor):
 
     def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
         end_passage = []
+        remaining_syllables = sum(len(entry.syllables) for entry in syllable_directory)
         for entry in syllable_directory:
             count = len(entry.syllables)
             for i in range(count):
-                # Check if the syllable index is within the last 7 syllables
-                if i >= count - 7:
+                # Check if the syllable index is within the last 7 syllables in the passage
+                if remaining_syllables - i <= 7:
                     end_passage.append(1)
                 else:
                     end_passage.append(0)
+            remaining_syllables -= count
         return end_passage
 
 
