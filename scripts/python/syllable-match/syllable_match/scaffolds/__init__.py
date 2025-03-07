@@ -7,7 +7,7 @@ from syllable_match.models import FeatureExtractor
 from syllable_match.utils import extract_words_and_syllables
 
 from .constructor import ScaffoldConstructor
-from .utils import convert_xlsx_to_csv_string
+from .utils import convert_xlsx_to_csv_string, set_nan_fields
 
 
 def create_scaffolds(
