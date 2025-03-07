@@ -14,14 +14,16 @@ class SyllableAtPassageBeginningExtractor(FeatureExtractor):
 
     def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
         beg_passage = []
+        total_syllables = 0
         for entry in syllable_directory:
             count = len(entry.syllables)
             for i in range(count):
-                # Check if the syllable index is within the first 7 syllables
-                if i < 7:
+                # Check if the syllable index is within the first 7 syllables in the passage
+                if total_syllables + i < 7:
                     beg_passage.append(1)
                 else:
                     beg_passage.append(0)
+            total_syllables += count
         return beg_passage
 
 
