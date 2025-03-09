@@ -8,23 +8,6 @@ from syllable_match.utils import extract_words_and_syllables
 from .constructor import ScaffoldConstructor
 
 
-def set_nan_fields(df: pd.DataFrame, fields: list[str]):
-    """
-    Adds new fields to a DataFrame with NaN values.
-
-    This function iterates over a list of field names and adds each field to the DataFrame with NaN values.
-
-    Parameters:
-    - df (pd.DataFrame): The DataFrame to which new fields will be added.
-    - fields (list[str]): A list of field names to be added to the DataFrame.
-
-    Returns:
-    - None: This function modifies the DataFrame in place and does not return a value.
-    """
-    for field in fields:
-        df[field] = None
-
-
 def convert_xlsx_to_csv_string(filepath: str, sep: str = "\t"):
     """
     Converts a single .xlsx file to .csv format as a string.

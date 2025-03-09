@@ -20,7 +20,7 @@ from syllable_match.matching import match_hesitations
 from syllable_match.models import FeatureExtractor
 from syllable_match.parsing import get_raw_df
 from syllable_match.resources import load_word_frequencies
-from syllable_match.scaffolds import create_scaffolds, set_nan_fields
+from syllable_match.scaffolds import create_scaffolds
 from syllable_match.stats import generate_summary_statistics, make_master_sheet
 from syllable_match.utils import (
     create_output_directory,
@@ -154,10 +154,9 @@ def main():
 
             # Add new fields with NaN values
             print("Adding new fields with NaN values...")
-            set_nan_fields(
-                passage_df,
-                fields=config["default_fields"],
-            )
+            for field in config["default_fields"]:
+                if field not in passage_df.columns:
+                    passage_df[field] = None
 
             # Hesitation labeling loop
             print("Labeling hesitations...")
