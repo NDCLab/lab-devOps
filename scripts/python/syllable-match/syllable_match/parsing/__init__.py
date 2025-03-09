@@ -160,6 +160,17 @@ def get_raw_df(filepath: str):
 
 
 def match_syllable_to_word(word_list, syllable_list) -> tuple[list[str], list[int]]:
+    """
+    This function matches syllables to words in a given list.
+
+    Args:
+        word_list (list): A list of words.
+        syllable_list (list): A list of syllables.
+
+    Returns:
+        tuple: A tuple containing two lists. The first list contains the words that each syllable belongs to,
+               and the second list contains the indices of these words in the original word list.
+    """
     matching_words = []
     indices = []
     syllable_queue = syllable_list.copy()
