@@ -147,7 +147,7 @@ def main():
             passage_name = extract_passage_name(passage_path)
             scaffold_df = load_scaffold(scaffold_dir, passage_name)
 
-            # Load the passage data
+            # Load the passage data (preprocessing step)
             passage_df = get_raw_df(passage_path)
             # Combine the scaffold and passage data
             passage_df = pd.concat([scaffold_df, passage_df], axis=1)
@@ -158,10 +158,6 @@ def main():
                 passage_df,
                 fields=config["default_fields"],
             )
-
-            # Preprocessing loop to populate simple fields
-            print("Preprocessing fields...")
-            preprocess_fields(passage_df)
 
             # Hesitation labeling loop
             print("Labeling hesitations...")
