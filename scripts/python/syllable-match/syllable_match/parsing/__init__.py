@@ -3,6 +3,8 @@ import string
 
 import pandas as pd
 
+from syllable_match.utils import compute_window_indicator
+
 
 def get_raw_df(filepath: str):
     """
@@ -171,6 +173,51 @@ def get_raw_df(filepath: str):
         raw_df["Error_OmittedSyllable"].astype(bool)
         & ~(raw_df["WordHasError"].astype(bool))
     ).astype(int)
+
+    # Mark any error
+    error_cols = raw_df.columns[raw_df.columns.str.startswith("Error_")]
+    raw_df["any-error"] = raw_df[error_cols].any(axis=1).astype(int)
+    error_before, error_after = compute_window_indicator(raw_df["any-error"], 7)
+    raw_df["any-error-before"] = error_before
+    raw_df["any-error-after"] = error_after
+
+    # Mark any disfluency
+    disfluency_cols = raw_df.columns[raw_df.columns.str.startswith("Disfluency_")]
+    raw_df["any-disfluency"] = raw_df[disfluency_cols].any(axis=1).astype(int)
+    disfluency_before, disfluency_after = compute_window_indicator(
+        raw_df["any-disfluency"], 7
+    )
+    raw_df["any-disfluency-before"] = disfluency_before
+    raw_df["any-disfluency-after"] = disfluency_after
+
+    # Mark any deviation (defined as any disfluency or error)
+    raw_df["any-deviation"] = (
+        raw_df["any-disfluency"].astype(bool) | raw_df["any-error"].astype(bool)
+    ).astype(int)
+    deviation_before, deviation_after = compute_window_indicator(
+        raw_df["any-deviation"], 7
+    )
+    raw_df["any-deviation-before"] = deviation_before
+    raw_df["any-deviation-after"] = deviation_after
+
+    # Mark correction for syllable (whether any correction was attempted)
+    correction_cols = raw_df.columns[raw_df.columns.str.startswith("SyllInfo_")]
+    raw_df["correction-syll"] = raw_df[correction_cols].any(axis=1).astype(int)
+    correction_before, correction_after = compute_window_indicator(
+        raw_df["correction-syll"], 7
+    )
+    raw_df["correction-syll-before"] = correction_before
+    raw_df["correction-syll-after"] = correction_after
+
+    # Mark hesitation disfluency
+    raw_df["hesitation-disfluency"] = (
+        raw_df["Disfluency_Hesitation"].astype(bool)
+    ).astype(int)
+    hesitation_before, hesitation_after = compute_window_indicator(
+        raw_df["hesitation-disfluency"], 7
+    )
+    raw_df["hesitation-disfluency-before"] = hesitation_before
+    raw_df["hesitation-disfluency-after"] = hesitation_after
 
     return raw_df
 
