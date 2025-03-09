@@ -5,6 +5,22 @@ import pandas as pd
 
 
 def get_raw_df(filepath: str):
+    """
+    Reads an Excel file and processes its content to create a raw DataFrame for further analysis.
+
+    This function reads an Excel file specified by the `filepath` parameter, renames its columns to "Category" and "Item",
+        and then iterates over each row to categorize and collect data based on specific conditions. It identifies and
+        separates data into lists for errors, disfluencies, outcomes, and syllables involved in correction.
+        The function also parses out passage words and syllables, matches each syllable with the corresponding word, and
+        assigns sequential syllable IDs. Finally, it converts the collected data into a DataFrame, adds custom feature
+        columns, and truncates value lists for feature columns to match the number of syllables.
+
+    Parameters:
+        filepath (str): The path to the Excel file to be processed.
+
+    Returns:
+        pd.DataFrame: A raw DataFrame containing the processed data with custom feature columns.
+    """
     df = pd.read_excel(filepath)
     cols = df.columns
     df.rename(columns={cols[0]: "Category", cols[1]: "Item"}, inplace=True)
