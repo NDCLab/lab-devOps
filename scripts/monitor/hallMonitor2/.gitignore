@@ -1,0 +1,3 @@
+# Singularity build files
+*.sif
+*.simg
