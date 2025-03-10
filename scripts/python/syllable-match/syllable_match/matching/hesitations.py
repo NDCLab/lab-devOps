@@ -15,7 +15,7 @@ def match_hesitations(df: pd.DataFrame) -> None:
         & (df["any-deviation-after"] == 0)
     ]
     # Remove any syllables where the N+1 syllable does not also meet these criteria
-    candidate_df = candidate_df[candidate_df["any-deviation-after"].shift(1) == 0]
+    candidate_df = candidate_df[candidate_df["any-deviation-after"].shift(-1) == 0]
 
     # Loop over hesitations
     for index, hesitation_start in df[df["hesitation-start"] == 1].iterrows():
