@@ -28,33 +28,54 @@ def match_hesitations(df: pd.DataFrame) -> None:
         # Find candidate syllables that match perfectly on:
         #   first-syll-word, last-syll-word, word-before-period,
         #   word-after-period, word-before-comma, and word-after-comma
-        potential_syllables = [
-            p
-            for p in potential_syllables
-            if p["first-syll-word"] == hesitation_start["first-syll-word"]
-            and p["last-syll-word"] == hesitation_start["last-syll-word"]
-            and p["word-before-period"] == hesitation_start["word-before-period"]
-            and p["word-after-period"] == hesitation_start["word-after-period"]
-            and p["word-before-comma"] == hesitation_start["word-before-comma"]
-            and p["word-after-comma"] == hesitation_start["word-after-comma"]
+        potential_syllables = potential_syllables[
+            (
+                potential_syllables["first-syll-word"]
+                == hesitation_start["first-syll-word"]
+            )
+            & (
+                potential_syllables["last-syll-word"]
+                == hesitation_start["last-syll-word"]
+            )
+            & (
+                potential_syllables["word-before-period"]
+                == hesitation_start["word-before-period"]
+            )
+            & (
+                potential_syllables["word-after-period"]
+                == hesitation_start["word-after-period"]
+            )
+            & (
+                potential_syllables["word-before-comma"]
+                == hesitation_start["word-before-comma"]
+            )
+            & (
+                potential_syllables["word-after-comma"]
+                == hesitation_start["word-after-comma"]
+            )
         ]
         # Of these potential matches, identify which potential-syllables-to-match have an N+1
         #   syllable that matches the corresponding hesitation-end syllable on the following fields:
         #   first-syll-word, last-syll-word, word-before-period,
         #   word-after-period, word-before-comma, and word-after-comma
-        potential_syllables = [
-            p
-            for idx, p in enumerate(potential_syllables)
-            if potential_syllables[idx + 1]["first-syll-word"]
-            == hesitation_end["first-syll-word"]
-            and potential_syllables[idx + 1]["last-syll-word"]
-            == hesitation_end["last-syll-word"]
-            and potential_syllables[idx + 1]["word-before-period"]
-            == hesitation_end["word-before-period"]
-            and potential_syllables[idx + 1]["word-after-period"]
-            == hesitation_end["word-after-period"]
+        potential_syllables = potential_syllables[
+            (
+                potential_syllables.shift(-1)["first-syll-word"]
+                == hesitation_end["first-syll-word"]
+            )
+            & (
+                potential_syllables.shift(-1)["last-syll-word"]
+                == hesitation_end["last-syll-word"]
+            )
+            & (
+                potential_syllables.shift(-1)["word-before-period"]
+                == hesitation_end["word-before-period"]
+            )
+            & (
+                potential_syllables.shift(-1)["word-after-period"]
+                == hesitation_end["word-after-period"]
+            )
         ]
-        potential_syllables = pd.DataFrame(potential_syllables)
 
         # If no syllable pairs at all match the target hesitation start/end pair,
         #   then mark the target hesitation start/end as matched = 0
