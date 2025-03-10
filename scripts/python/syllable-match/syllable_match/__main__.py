@@ -15,10 +15,10 @@ from syllable_match.feature_extractors import (
     WordBeforePeriodExtractor,
     WordFrequencyExtractor,
 )
-from syllable_match.labels import label_errors, label_hesitations
-from syllable_match.matching import match_hesitations
+from syllable_match.labels import label_duplications, label_errors, label_hesitations
+from syllable_match.matching import match_errors, match_hesitations
 from syllable_match.models import FeatureExtractor
-from syllable_match.parsing import get_raw_df
+from syllable_match.parsing import get_raw_df, preprocess_fields
 from syllable_match.resources import load_word_frequencies
 from syllable_match.scaffolds import create_scaffolds
 from syllable_match.stats import generate_summary_statistics, make_master_sheet
@@ -147,8 +147,10 @@ def main():
             passage_name = extract_passage_name(passage_path)
             scaffold_df = load_scaffold(scaffold_dir, passage_name)
 
-            # Load the passage data (preprocessing step)
+            # Load the passage data
             passage_df = get_raw_df(passage_path)
+            # Preprocess the passage data
+            preprocess_fields(passage_df)
             # Combine the scaffold and passage data
             passage_df = pd.concat([scaffold_df, passage_df], axis=1)
 
@@ -176,17 +178,18 @@ def main():
 
             # Duplication labeling loop
             print("Labeling duplications...")
-            label_duplications(scaffold_df)
+            label_duplications(passage_df)
 
             # Duplication matching loop
             print("Matching duplications...")
-            match_duplications(scaffold_df)
+            # match_duplications(passage_df)
 
-            # Save the output file for the passage
-            print(f"Saving output file for passage: {os.path.basename(passage_path)}")
-            save_output_file(scaffold_df, args.output_dir)
+            # # Save the output file for the passage
+            # print(f"Saving output file for passage: {os.path.basename(passage_path)}")
+            # passage_df = passage_df[config["default_fields"]]
+            # save_output_file(passage_df, args.output_dir)
 
-            sub_dfs[os.path.basename(participant_dir)] = scaffold_df
+            sub_dfs[os.path.basename(participant_dir)] = passage_df
 
     # Step 4: After processing all participants and passages, generate summary statistics
     print("Step 4: Generating summary statistics...")
