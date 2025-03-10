@@ -1,8 +1,10 @@
 import os
+from functools import lru_cache
 
 import pandas as pd
 
 
+@lru_cache(maxsize=1)
 def load_word_frequencies():
     # Determine the path to the compressed CSV file
     tsv_path = os.path.join(os.path.dirname(__file__), "word_frequency.tsv.zip")
