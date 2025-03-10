@@ -59,8 +59,8 @@ def match_hesitations(df: pd.DataFrame) -> None:
         # If no syllable pairs at all match the target hesitation start/end pair,
         #   then mark the target hesitation start/end as matched = 0
         if potential_syllables.empty:
-            df.at[index, "matched"] = 0
-            df.at[index + 1, "matched"] = 0
+            df.at[index, "hesitation-start-matched"] = 0
+            df.at[index + 1, "hesitation-end-matched"] = 0
             return
 
         # Compute the average word-freq for the current
@@ -98,8 +98,8 @@ def match_hesitations(df: pd.DataFrame) -> None:
                 best_freq_diff_idx = idx
 
         # Mark the target hesitation start/end as matched = 1
-        df.at[index, "matched"] = 1
-        df.at[index + 1, "matched"] = 1
+        df.at[index, "hesitation-start-matched"] = 1
+        df.at[index + 1, "hesitation-end-matched"] = 1
 
         # Mark the potential pair of N, N+1 syllables as matching
         df.at[best_freq_diff_idx, "comparison-hesitation-start"] = 1
