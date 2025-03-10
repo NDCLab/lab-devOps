@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def label_hesitations(df: pd.DataFrame) -> pd.DataFrame:
+def label_hesitations(df: pd.DataFrame) -> None:
     """
     Identifies and labels hesitations within a given DataFrame. This function marks the start and end of hesitations,
     and assigns a unique index to each hesitation sequence. The output DataFrame includes three new columns:
@@ -27,5 +27,3 @@ def label_hesitations(df: pd.DataFrame) -> pd.DataFrame:
         ~(df["hesitation-start"].astype(bool) | df["hesitation-end"].astype(bool)),
         "hesitation-idx",
     ] = None
-
-    return df
