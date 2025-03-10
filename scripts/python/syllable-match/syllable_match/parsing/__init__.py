@@ -157,31 +157,22 @@ def get_raw_df(filepath: str):
     # Convert dict of iterables to DataFrame for easier manipulation
     raw_df = pd.DataFrame(raw_data)
 
-    # Add custom feature columns
-    raw_df["WordHasError"] = (
-        raw_df["Error_InsertedWord"].astype(bool)
-        | raw_df["Error_OmittedWord"].astype(bool)
-        | raw_df["Error_WordStressError"].astype(bool)
-        | raw_df["Disfluency_DuplicationRepetitionWord"].astype(bool)
-    ).astype(int)
+    return raw_df
 
-    raw_df["InsertedSyllableWithoutWordError"] = (
-        raw_df["Error_InsertedSyllable"].astype(bool)
-        & ~(raw_df["WordHasError"].astype(bool))
-    ).astype(int)
-    raw_df["OmittedSyllableWithoutWordError"] = (
-        raw_df["Error_OmittedSyllable"].astype(bool)
-        & ~(raw_df["WordHasError"].astype(bool))
-    ).astype(int)
 
-    # Mark any error
+def preprocess_fields(raw_df: pd.DataFrame) -> None:
+    """
+    Preprocesses the fields of a raw DataFrame.
+    """
+
+    # Mark whether the syllable has any error
     error_cols = raw_df.columns[raw_df.columns.str.startswith("Error_")]
     raw_df["any-error"] = raw_df[error_cols].any(axis=1).astype(int)
     error_before, error_after = compute_window_indicator(raw_df["any-error"], 7)
     raw_df["any-error-before"] = error_before
     raw_df["any-error-after"] = error_after
 
-    # Mark any disfluency
+    # Mark whether the syllable has any disfluency
     disfluency_cols = raw_df.columns[raw_df.columns.str.startswith("Disfluency_")]
     raw_df["any-disfluency"] = raw_df[disfluency_cols].any(axis=1).astype(int)
     disfluency_before, disfluency_after = compute_window_indicator(
@@ -218,8 +209,6 @@ def get_raw_df(filepath: str):
     )
     raw_df["hesitation-disfluency-before"] = hesitation_before
     raw_df["hesitation-disfluency-after"] = hesitation_after
-
-    return raw_df
 
 
 def match_syllable_to_word(word_list, syllable_list) -> tuple[list[str], list[int]]:
