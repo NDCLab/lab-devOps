@@ -74,14 +74,14 @@ PENDING_ERRORS_COLS = [
     "errorDetails",
 ]
 QA_CHECKLIST_COLS = [
-    "datetime",
     "user",
+    "datetime",
+    "subject",
+    "suffix",
+    "dataType",
     "identifier",
     "deviationString",
-    "subject",
-    "dataType",
     "encrypted",
-    "suffix",
     "qa",
     "localMove",
 ]
