@@ -1,8 +1,9 @@
 import argparse
-import json
 import os
+from typing import Optional
 
 import pandas as pd
+from pydantic_settings import BaseSettings
 
 from syllable_match.feature_extractors import (
     SyllableAtPassageBeginningExtractor,
@@ -64,9 +65,14 @@ def get_args():
     return parser.parse_args()
 
 
-def load_config(config_path: str) -> dict:
-    with open(config_path, "r") as f:
-        return json.load(f)
+class Config(BaseSettings):
+    default_fields: list[str]
+    accepted_subjects: Optional[list[str]] = []
+
+
+def load_config(config_path: str) -> Config:
+    config = Config.model_validate_json(open(config_path).read())
+    return config
 
 
 def get_scaffold_extractors() -> list[FeatureExtractor]:
@@ -137,7 +143,7 @@ def main():
     # Step 2: Loop over each participant
     print("Step 2: Processing participants...")
     for participant_dir in get_participants(
-        args.input_dir, args.accepted_subjects or config.get("accepted_subjects", [])
+        args.input_dir, args.accepted_subjects or config.accepted_subjects
     ):
         print(f"Processing participant: {os.path.basename(participant_dir)}")
         # Step 3: Loop over each passage for the participant
@@ -156,7 +162,7 @@ def main():
 
             # Add new fields with NaN values
             print("Adding new fields with NaN values...")
-            for field in config["default_fields"]:
+            for field in config.default_fields:
                 if field not in passage_df.columns:
                     passage_df[field] = None
 
@@ -189,7 +195,9 @@ def main():
             # passage_df = passage_df[config["default_fields"]]
             # save_output_file(passage_df, args.output_dir)
 
-            sub_dfs[os.path.basename(participant_dir)] = passage_df
+            sub_dfs[os.path.basename(participant_dir)] = passage_df[
+                config.default_fields
+            ]
 
     # Step 4: After processing all participants and passages, generate summary statistics
     print("Step 4: Generating summary statistics...")
