@@ -67,7 +67,7 @@ def get_args():
 
 class Config(BaseSettings):
     default_fields: list[str]
-    accepted_subjects: Optional[list[str]] = []
+    accepted_subjects: list[str] = []
 
 
 def load_config(config_path: str) -> Config:
