@@ -105,10 +105,10 @@ def label_errors(df: pd.DataFrame) -> None:
             ):
                 row["high-error-end"] = 1
 
-        # Generate before/after indicators with a window size of 7
-        df["high-error-before"], df["high-error-after"] = compute_window_indicator(
-            df["high-error"], 7
-        )
-        df["low-error-before"], df["low-error-after"] = compute_window_indicator(
-            df["low-error"], 7
-        )
+    # Generate before/after indicators with a window size of 7
+    df["high-error-before"], df["high-error-after"] = compute_window_indicator(
+        df["high-error"], 7
+    )
+    df["low-error-before"], df["low-error-after"] = compute_window_indicator(
+        df["low-error"], 7
+    )
