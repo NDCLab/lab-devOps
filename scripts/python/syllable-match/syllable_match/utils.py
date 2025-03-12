@@ -12,17 +12,22 @@ def compute_window_indicator(series: pd.Series, window: int = 7):
     n = len(series)
     before = [0] * n
     after = [0] * n
+
+    # Precompute the rolling max for the 'before' and 'after' windows
+    rolling_max_before = (
+        series.rolling(window=window, min_periods=1).max().shift(1, fill_value=0)
+    )
+    rolling_max_after = (
+        series[::-1]
+        .rolling(window=window, min_periods=1)
+        .max()
+        .shift(1, fill_value=0)[::-1]
+    )
+
     for i in range(n):
-        # Check previous window rows (i-window to i-1)
-        if i > 0:
-            before[i] = 1 if series[max(0, i - window) : i].max() > 0 else 0
-        else:
-            before[i] = 0
-        # Check next window rows (i+1 to i+window)
-        if i < n - 1:
-            after[i] = 1 if series[i + 1 : min(n, i + window + 1)].max() > 0 else 0
-        else:
-            after[i] = 0
+        before[i] = 1 if rolling_max_before[i] > 0 else 0
+        after[i] = 1 if rolling_max_after[i] > 0 else 0
+
     return before, after
 
 
