@@ -71,7 +71,9 @@ def extract_passage_name(passage_path: str) -> str:
     import re
 
     base_name = os.path.basename(passage_path)
-    match = re.fullmatch(r"sub-\d+_(.*?)_reconciled\.xlsx", base_name)
+    match = re.fullmatch(
+        r"sub-\d+_([a-zA-Z]+_\d+[a-zA-Z]+).*reconciled.*\.xlsx", base_name
+    )
     return match.group(1) if match else ""
 
 
