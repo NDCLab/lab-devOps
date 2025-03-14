@@ -13,7 +13,7 @@ def label_hesitations(df: pd.DataFrame) -> None:
 
     # Determine 'hesitation-end' by shifting 'hesitation-start' down
     #    by one row and filling NaNs with 0
-    df["hesitation-end"] = df["hesitation-start"].shift(-1).fillna(0)
+    df["hesitation-end"] = df["hesitation-start"].shift(1, fill_value=0)
 
     # Assign a unique index to each hesitation sequence
     df["hesitation-idx"] = (
