@@ -204,23 +204,21 @@ def main():
         for passage_name, df in sub_dfs[participant_id].items():
             df.to_csv(os.path.join(participant_dir, f"{passage_name}.csv"), index=False)
 
-    exit()
+    # # Step 4: After processing all participants and passages, generate summary statistics
+    # print("Step 4: Generating summary statistics...")
+    # generate_summary_statistics(sub_dfs, args.output_dir)
 
-    # Step 4: After processing all participants and passages, generate summary statistics
-    print("Step 4: Generating summary statistics...")
-    generate_summary_statistics(sub_dfs, args.output_dir)
+    # # Loop over all output files to count occurrences and output count files
+    # print("Counting occurrences in output files...")
+    # for participant_dir in get_participants(args.output_dir):
+    #     count_occurrences(participant_dir, args.output_dir)
 
-    # Loop over all output files to count occurrences and output count files
-    print("Counting occurrences in output files...")
-    for participant_dir in get_participants(args.output_dir):
-        count_occurrences(participant_dir, args.output_dir)
-
-    # Generate a master file with all participants and summary stats
-    print("Generating master file with all participants and summary stats...")
-    master_df = make_master_sheet(sub_dfs.values())
-    print("Master file generated successfully.")
-    master_df.to_csv(os.path.join(args.output_dir, "master_file.csv"), index=False)
-    print("Master file saved successfully.")
+    # # Generate a master file with all participants and summary stats
+    # print("Generating master file with all participants and summary stats...")
+    # master_df = make_master_sheet(sub_dfs.values())
+    # print("Master file generated successfully.")
+    # master_df.to_csv(os.path.join(args.output_dir, "master_file.csv"), index=False)
+    # print("Master file saved successfully.")
 
 
 if __name__ == "__main__":
