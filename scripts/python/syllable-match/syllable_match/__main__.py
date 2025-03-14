@@ -1,9 +1,10 @@
 import argparse
 import os
-from typing import Optional
+from collections import defaultdict
 
 import pandas as pd
 from pydantic_settings import BaseSettings
+from tqdm import tqdm
 
 from syllable_match.feature_extractors import (
     SyllableAtPassageBeginningExtractor,
@@ -17,7 +18,7 @@ from syllable_match.feature_extractors import (
     WordFrequencyExtractor,
 )
 from syllable_match.labels import label_duplications, label_errors, label_hesitations
-from syllable_match.matching import match_errors, match_hesitations
+from syllable_match.matching import match_duplications, match_errors, match_hesitations
 from syllable_match.models import FeatureExtractor
 from syllable_match.parsing import get_raw_df, preprocess_fields
 from syllable_match.resources import load_word_frequencies
@@ -138,17 +139,21 @@ def main():
         get_templates(template_dir), scaffold_dir, get_scaffold_extractors()
     )
 
-    sub_dfs = {}  # Dictionary to store scaffold dataframes for each participant
+    # Dictionary to store scaffold dataframes for each participant
+    # Format: {participant_id: {passage_name: dataframe}}
+    sub_dfs = defaultdict(dict)
 
     # Step 2: Loop over each participant
     print("Step 2: Processing participants...")
-    for participant_dir in get_participants(
-        args.input_dir, args.accepted_subjects or config.accepted_subjects
+    for participant_dir in tqdm(
+        get_participants(
+            args.input_dir, args.accepted_subjects or config.accepted_subjects
+        ),
     ):
-        print(f"Processing participant: {os.path.basename(participant_dir)}")
         # Step 3: Loop over each passage for the participant
-        for passage_path in get_passages(participant_dir):
-            print(f"Processing passage: {os.path.basename(passage_path)}")
+        for passage_path in tqdm(
+            get_passages(participant_dir), desc="Processing passages", leave=False
+        ):
             # Load the corresponding scaffold
             passage_name = extract_passage_name(passage_path)
             scaffold_df = load_scaffold(scaffold_dir, passage_name)
@@ -161,43 +166,45 @@ def main():
             passage_df = pd.concat([scaffold_df, passage_df], axis=1)
 
             # Add new fields with NaN values
-            print("Adding new fields with NaN values...")
             for field in config.default_fields:
                 if field not in passage_df.columns:
                     passage_df[field] = None
 
             # Hesitation labeling loop
-            print("Labeling hesitations...")
             label_hesitations(passage_df)
 
             # Hesitation matching loop
-            print("Matching hesitations...")
             match_hesitations(passage_df)
 
             # Error labeling loop
-            print("Labeling errors...")
             label_errors(passage_df)
 
             # Error matching loop
-            print("Matching errors...")
             match_errors(passage_df)
 
             # Duplication labeling loop
-            print("Labeling duplications...")
             label_duplications(passage_df)
 
             # Duplication matching loop
-            print("Matching duplications...")
-            # match_duplications(passage_df)
+            match_duplications(passage_df)
 
             # # Save the output file for the passage
             # print(f"Saving output file for passage: {os.path.basename(passage_path)}")
             # passage_df = passage_df[config["default_fields"]]
             # save_output_file(passage_df, args.output_dir)
 
-            sub_dfs[os.path.basename(participant_dir)] = passage_df[
+            sub_dfs[os.path.basename(participant_dir)][passage_name] = passage_df[
                 config.default_fields
             ]
+
+    # Save the sub_dfs to CSV files
+    sub_dfs_dir = create_output_directory(args.output_dir, "processed_passages")
+    for participant_id in sub_dfs:
+        participant_dir = create_output_directory(sub_dfs_dir, participant_id)
+        for passage_name, df in sub_dfs[participant_id].items():
+            df.to_csv(os.path.join(participant_dir, f"{passage_name}.csv"), index=False)
+
+    exit()
 
     # Step 4: After processing all participants and passages, generate summary statistics
     print("Step 4: Generating summary statistics...")
