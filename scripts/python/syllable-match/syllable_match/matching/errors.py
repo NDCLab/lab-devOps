@@ -71,12 +71,18 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
         potential_syllables = [
             (syll_a, syll_b)
             for syll_a, syll_b in potential_syllables
-            if (syll_b["first-syll-word"] == df.iloc[idx + 1]["first-syll-word"])
-            & (syll_b["last-syll-word"] == df.iloc[idx + 1]["last-syll-word"])
-            & (syll_b["word-before-period"] == df.iloc[idx + 1]["word-before-period"])
-            & (syll_b["word-after-period"] == df.iloc[idx + 1]["word-after-period"])
-            & (syll_b["word-before-comma"] == df.iloc[idx + 1]["word-before-comma"])
-            & (syll_b["word-after-comma"] == df.iloc[idx + 1]["word-after-comma"])
+            if (idx < len(df) - 1)
+            and (
+                (syll_b["first-syll-word"] == df.iloc[idx + 1]["first-syll-word"])
+                & (syll_b["last-syll-word"] == df.iloc[idx + 1]["last-syll-word"])
+                & (
+                    syll_b["word-before-period"]
+                    == df.iloc[idx + 1]["word-before-period"]
+                )
+                & (syll_b["word-after-period"] == df.iloc[idx + 1]["word-after-period"])
+                & (syll_b["word-before-comma"] == df.iloc[idx + 1]["word-before-comma"])
+                & (syll_b["word-after-comma"] == df.iloc[idx + 1]["word-after-comma"])
+            )
         ]
         if not potential_syllables:
             row[f"{marker_type}-matched"] = 0
@@ -106,7 +112,7 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
             elif potential_syll_word_freq == 0 and potential_next_word_freq == 0:
                 potential_syll_word_freq = -1
                 potential_next_word_freq = -1
-            
+
             mean_candidate_freq = 0.5 * (
                 potential_syll_word_freq + potential_next_word_freq
             )
