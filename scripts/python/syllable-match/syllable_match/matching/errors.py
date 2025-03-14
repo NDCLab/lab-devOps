@@ -1,6 +1,8 @@
 import pandas as pd
 
-from syllable_match.resources import load_word_frequencies
+from syllable_match.resources import get_word_freq
+
+from .utils import extract_marker_type
 
 
 def match_errors(df: pd.DataFrame) -> pd.DataFrame:
@@ -27,93 +29,84 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
     """
     # Start by finding all syllables where any-deviation = 0
     #   AND any-deviation-before = 0 AND any-deviation-after = 0
-    potential_syllables = df[
+    candidate_df = df[
         (df["any-deviation"] == 0)
         & (df["any-deviation-before"] == 0)
         & (df["any-deviation-after"] == 0)
     ]
     # Remove any syllables where the N+1 syllable does not also meet these criteria
-    potential_syllables = potential_syllables[
-        potential_syllables["any-deviation-after"].shift(-1) == 0
-    ]
+    candidate_df = candidate_df[candidate_df["any-deviation-after"].shift(-1) == 0]
 
     for idx, row in df.iterrows():
         if row[marker_type] != 1:
             continue
         # Remove syllables matched on the previous iteration
-        potential_syllables = potential_syllables[
-            potential_syllables[f"{marker_type}-start"] != 1
+        candidate_df = candidate_df[
+            candidate_df[f"{extract_marker_type(marker_type)}-start"] != 1
+        ]
+
+        # Build a list of tuples of adjacent syllables
+        potential_syllables = [
+            (candidate_df.iloc[i], candidate_df.iloc[i + 1])
+            for i in range(len(candidate_df) - 1)
+            if candidate_df.iloc[i + 1].name == candidate_df.iloc[i].name + 1
         ]
         # Find candidate syllables that match perfectly on: first-syll-word,
         #   last-syll-word, word-before-period, word-after-period,
         #   word-before-comma, word-after-comma
-        potential_syllables = potential_syllables[
-            (potential_syllables["first-syll-word"] == row["first-syll-word"])
-            & (potential_syllables["last-syll-word"] == row["last-syll-word"])
-            & (potential_syllables["word-before-period"] == row["word-before-period"])
-            & (potential_syllables["word-after-period"] == row["word-after-period"])
-            & (potential_syllables["word-before-comma"] == row["word-before-comma"])
-            & (potential_syllables["word-after-comma"] == row["word-after-comma"])
+        potential_syllables = [
+            (syll_a, syll_b)
+            for syll_a, syll_b in potential_syllables
+            if (syll_a["first-syll-word"] == row["first-syll-word"])
+            & (syll_a["last-syll-word"] == row["last-syll-word"])
+            & (syll_a["word-before-period"] == row["word-before-period"])
+            & (syll_a["word-after-period"] == row["word-after-period"])
+            & (syll_a["word-before-comma"] == row["word-before-comma"])
+            & (syll_a["word-after-comma"] == row["word-after-comma"])
         ]
         # Of these potential matches, identify the candidates with an N+1 syllable
         #   that matches the target syllable's N+1 syllable on: first-syll-word,
         #   last-syll-word, word-before-period, word-after-period,
         #   word-before-comma, word-after-comma
-        potential_syllables = potential_syllables[
-            (
-                potential_syllables["first-syll-word"].shift(-1)
-                == df[idx + 1]["first-syll-word"]
-            )
-            & (
-                potential_syllables["last-syll-word"].shift(-1)
-                == df[idx + 1]["last-syll-word"]
-            )
-            & (
-                potential_syllables["word-before-period"].shift(-1)
-                == df[idx + 1]["word-before-period"]
-            )
-            & (
-                potential_syllables["word-after-period"].shift(-1)
-                == df[idx + 1]["word-after-period"]
-            )
-            & (
-                potential_syllables["word-before-comma"].shift(-1)
-                == df[idx + 1]["word-before-comma"]
-            )
-            & (
-                potential_syllables["word-after-comma"].shift(-1)
-                == df[idx + 1]["word-after-comma"]
-            )
+        potential_syllables = [
+            (syll_a, syll_b)
+            for syll_a, syll_b in potential_syllables
+            if (syll_b["first-syll-word"] == df.iloc[idx + 1]["first-syll-word"])
+            & (syll_b["last-syll-word"] == df.iloc[idx + 1]["last-syll-word"])
+            & (syll_b["word-before-period"] == df.iloc[idx + 1]["word-before-period"])
+            & (syll_b["word-after-period"] == df.iloc[idx + 1]["word-after-period"])
+            & (syll_b["word-before-comma"] == df.iloc[idx + 1]["word-before-comma"])
+            & (syll_b["word-after-comma"] == df.iloc[idx + 1]["word-after-comma"])
         ]
-        if potential_syllables.empty:
+        if not potential_syllables:
             row[f"{marker_type}-matched"] = 0
             continue
 
         # Compute the average word-freq for the target syllable
         #   and its subsequent (N+1) syllable
-        word_freqs = load_word_frequencies()
-        target_syll_word_freq = word_freqs[word_freqs["Word"] == row["CleanedWord"]][
-            "FREQcount"
-        ]
-        next_syll_word_freq = word_freqs[
-            word_freqs["word"] == df[idx + 1]["CleanedWord"]
-        ]["word-freq"]
+        target_syll_word_freq = get_word_freq(row["CleanedWord"])
+        next_syll_word_freq = get_word_freq(df.iloc[idx + 1]["CleanedWord"])
         mean_actual_freq = 0.5 * (target_syll_word_freq + next_syll_word_freq)
 
         # We find the potential pair of N, N+1 syllables
         #   that have the closest average word frequency
         best_freq_diff = float("inf")
         best_freq_diff_idx = None
-        for potential_idx, p in potential_syllables.iterrows():
+        for syll_a, syll_b in potential_syllables:
             # Compute the average word-freq for the current
             #   potential-syllable-to-match and hesitation-end words
-            potential_syll_word_freq = word_freqs[
-                word_freqs["Word"] == p["CleanedWord"]
-            ]["FREQcount"]
-            potential_next_word_freq = word_freqs[
-                word_freqs["Word"]
-                == potential_syllables[potential_idx + 1]["CleanedWord"]
-            ]["FREQcount"]
+            potential_syll_word_freq = get_word_freq(syll_a["CleanedWord"])
+            potential_next_word_freq = get_word_freq(syll_b["CleanedWord"])
+
+            # Handle the case where one or both word frequencies are 0
+            if potential_syll_word_freq == 0 and potential_next_word_freq != 0:
+                potential_syll_word_freq = potential_next_word_freq
+            elif potential_syll_word_freq != 0 and potential_next_word_freq == 0:
+                potential_next_word_freq = potential_syll_word_freq
+            elif potential_syll_word_freq == 0 and potential_next_word_freq == 0:
+                potential_syll_word_freq = -1
+                potential_next_word_freq = -1
+            
             mean_candidate_freq = 0.5 * (
                 potential_syll_word_freq + potential_next_word_freq
             )
@@ -122,13 +115,15 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
             freq_diff = abs(mean_candidate_freq - mean_actual_freq)
             if freq_diff < best_freq_diff:
                 best_freq_diff = freq_diff
-                best_freq_diff_idx = potential_idx
+                best_freq_diff_idx = syll_a.name
 
         # Mark the target syllable as matched
         df.at[idx, f"{marker_type}-matched"] = 1
 
-        # Mark the best-fit syllable as matching
+        # Mark the best-fit as matching
         df.at[best_freq_diff_idx, f"comparison-{marker_type}"] = 1
 
         # Indicate which error we've matched to
-        df.at[best_freq_diff_idx, f"comparison-{marker_type}-idx"] = idx
+        df.at[
+            best_freq_diff_idx, f"comparison-{extract_marker_type(marker_type)}-idx"
+        ] = row[f"{extract_marker_type(marker_type)}-idx"]
