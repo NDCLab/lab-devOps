@@ -28,97 +28,97 @@ def get_raw_df(filepath: str):
     df.rename(columns={cols[0]: "Category", cols[1]: "Item"}, inplace=True)
 
     # Lists to hold each category's items
-    errors = []
-    disfluencies = []
-    outcomes = []
-    syllables_involved = []
 
-    # Flags for tracking which category we're currently collecting
-    collecting_errors = False
-    collecting_disfluencies = False
-    collecting_outcomes = False
-    collecting_syllables_involved = False
+    errors = [
+        "Misproduction",
+        "Inserted Syllable",
+        "Omitted Syllable",
+        "Inserted Word",
+        "Omitted Word",
+        "Word Stress Error",
+    ]
 
-    for _, row in df.iterrows():
-        # Convert both Category and Item to strings, then strip
-        category = str(row["Category"]).strip()
-        item = str(row["Item"]).strip()
+    disfluencies = [
+        "Inserted Prosodic Break",
+        "Missing Prosodic Break",
+        "Filled Pause",
+        "Hesitation",
+        "Elongation",
+        "Duplication/ Repetition (Syllable)",
+        "Duplication/ Repetition (Word)",
+        "Duplication/ Repetition (Phrase)",
+    ]
 
-        if category == "Types of Errors":
-            # Switch to collecting Errors
-            collecting_errors = True
-            collecting_disfluencies = False
-            collecting_outcomes = False
-            collecting_syllables_involved = False
+    outcomes = [
+        "Word Substitution",
+        "Word Approximation",
+    ]
 
-            if item:
-                errors.append(item)
-
-        elif category == "Types of Disfluencies":
-            # Switch to collecting Disfluencies
-            collecting_errors = False
-            collecting_disfluencies = True
-            collecting_outcomes = False
-            collecting_syllables_involved = False
-
-            if item:
-                disfluencies.append(item)
-
-        elif category == "Outcomes":
-            # Switch to collecting Outcomes
-            collecting_errors = False
-            collecting_disfluencies = False
-            collecting_outcomes = True
-            collecting_syllables_involved = False
-
-            if item:
-                outcomes.append(item)
-
-        elif category == "Syllables Involved in Correction":
-            # Switch to collecting Syllables Involved in Correction
-            collecting_errors = False
-            collecting_disfluencies = False
-            collecting_outcomes = False
-            collecting_syllables_involved = True
-
-            if item:
-                syllables_involved.append(item)
-
-        else:
-            # Blank category cell → continue collecting under the current heading
-            if collecting_errors and item:
-                errors.append(item)
-            elif collecting_disfluencies and item:
-                disfluencies.append(item)
-            elif collecting_outcomes and item:
-                outcomes.append(item)
-            elif collecting_syllables_involved and item:
-                syllables_involved.append(item)
+    syllables_involved = [
+        "Last Pre-Correction Syllable",
+        "Syllables in correction 1",
+        "Syllables in correction 2",
+        "Syllables in correction 3",
+        "Syllables in correction 4",
+    ]
 
     other_cols = df.columns[~df.columns.isin({"Category", "Item"})]
     raw_data = {}
 
     for error_type in errors:
         err_row = df[df["Item"] == error_type].iloc[0][other_cols]
+        # Replace non-numeric characters with empty string and convert to int
+        err_row = (
+            pd.to_numeric(
+                err_row.astype(str).str.replace(r"[^\d]", "", regex=True),
+                errors="coerce",
+            )
+            .fillna(0)
+            .astype(int)
+        )
         colname = "Error_" + re.sub(r"[^\w]", "", error_type.title())
-        raw_data[colname] = err_row.dropna().tolist()
+        raw_data[colname] = err_row.tolist()
 
     for disfluency_type in disfluencies:
         dis_row = df[df["Item"] == disfluency_type].iloc[0][other_cols]
+        dis_row = (
+            pd.to_numeric(
+                dis_row.astype(str).str.replace(r"[^\d]", "", regex=True),
+                errors="coerce",
+            )
+            .fillna(0)
+            .astype(int)
+        )
         colname = "Disfluency_" + re.sub(r"[^\w]", "", disfluency_type.title())
-        raw_data[colname] = dis_row.dropna().tolist()
+        raw_data[colname] = dis_row.tolist()
 
     for outcome_type in outcomes:
         out_row = df[df["Item"] == outcome_type].iloc[0][other_cols]
+        out_row = (
+            pd.to_numeric(
+                out_row.astype(str).str.replace(r"[^\d]", "", regex=True),
+                errors="coerce",
+            )
+            .fillna(0)
+            .astype(int)
+        )
         colname = "Outcome_" + re.sub(r"[^\w]", "", outcome_type.title())
-        raw_data[colname] = out_row.dropna().tolist()
+        raw_data[colname] = out_row.tolist()
 
     for syll_info in syllables_involved:
         if "syllable" not in syll_info.lower():
             continue
         syll_row = df[df["Item"] == syll_info].iloc[0][other_cols]
+        syll_row = (
+            pd.to_numeric(
+                syll_row.astype(str).str.replace(r"[^\d]", "", regex=True),
+                errors="coerce",
+            )
+            .fillna(0)
+            .astype(int)
+        )
         colname = "SyllInfo_" + re.sub(r"[^\w]", "", syll_info.title())
-        raw_data[colname] = syll_row.dropna().tolist()
+        raw_data[colname] = syll_row.tolist()
 
     # parse out passage words and syllables
     passage = " ".join(
