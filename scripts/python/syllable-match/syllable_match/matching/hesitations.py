@@ -81,6 +81,16 @@ def match_hesitations(df: pd.DataFrame) -> None:
             #   potential-syllable-to-match and hesitation-end words
             potential_start_word_freq = get_word_freq(syll_a["CleanedWord"])
             potential_end_word_freq = get_word_freq(syll_b["CleanedWord"])
+
+            # Handle the case where one or both word frequencies are 0
+            if potential_start_word_freq == 0 and potential_end_word_freq != 0:
+                potential_start_word_freq = potential_end_word_freq
+            elif potential_start_word_freq != 0 and potential_end_word_freq == 0:
+                potential_end_word_freq = potential_start_word_freq
+            elif potential_start_word_freq == 0 and potential_end_word_freq == 0:
+                potential_start_word_freq = -1
+                potential_end_word_freq = -1
+
             mean_candidate_freq = 0.5 * (
                 potential_start_word_freq + potential_end_word_freq
             )
