@@ -129,7 +129,13 @@ class WordBeforePeriodExtractor(FeatureExtractor):
     feature_name = "word-before-period"
 
     def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
-        return [1 if syll.word.text.endswith(".") else 0 for syll in syllable_directory]
+        features = []
+        for entry in syllable_directory:
+            if entry.word.text.endswith("."):
+                features += [1] * len(entry.syllables)
+            else:
+                features += [0] * len(entry.syllables)
+        return features
 
 
 class WordAfterPeriodExtractor(FeatureExtractor):
@@ -140,13 +146,13 @@ class WordAfterPeriodExtractor(FeatureExtractor):
     feature_name = "word-after-period"
 
     def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
-        result = []
-        for i in range(len(syllable_directory)):
+        features = []
+        for i, entry in enumerate(syllable_directory):
             if i > 0 and syllable_directory[i - 1].word.text.endswith("."):
-                result.append(1)
+                features += [1] * len(entry.syllables)
             else:
-                result.append(0)
-        return result
+                features += [0] * len(entry.syllables)
+        return features
 
 
 class WordBeforeCommaExtractor(FeatureExtractor):
@@ -157,7 +163,13 @@ class WordBeforeCommaExtractor(FeatureExtractor):
     feature_name = "word-before-comma"
 
     def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
-        return [1 if syll.word.text.endswith(",") else 0 for syll in syllable_directory]
+        features = []
+        for entry in syllable_directory:
+            if entry.word.text.endswith(","):
+                features += [1] * len(entry.syllables)
+            else:
+                features += [0] * len(entry.syllables)
+        return features
 
 
 class WordAfterCommaExtractor(FeatureExtractor):
@@ -168,13 +180,13 @@ class WordAfterCommaExtractor(FeatureExtractor):
     feature_name = "word-after-comma"
 
     def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
-        result = []
-        for i in range(len(syllable_directory)):
+        features = []
+        for i, entry in enumerate(syllable_directory):
             if i > 0 and syllable_directory[i - 1].word.text.endswith(","):
-                result.append(1)
+                features += [1] * len(entry.syllables)
             else:
-                result.append(0)
-        return result
+                features += [0] * len(entry.syllables)
+        return features
 
 
 class SyllableCountExtractor(FeatureExtractor):
