@@ -6,8 +6,10 @@ import nltk
 import pandas as pd
 
 nltk.download("wordnet")
-from nltk.stem import WordNetLemmatizer as wnl
+from nltk.stem import WordNetLemmatizer
 
+
+wnl = WordNetLemmatizer()
 
 
 @lru_cache(maxsize=1)
