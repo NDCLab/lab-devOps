@@ -7,9 +7,11 @@ import pandas as pd
 
 nltk.download("wordnet")
 from nltk.stem import WordNetLemmatizer
+from nltk.stem.lancaster import LancasterStemmer
 
 
 wnl = WordNetLemmatizer()
+stemmer = LancasterStemmer()
 
 
 @lru_cache(maxsize=1)
@@ -61,14 +63,15 @@ def get_word_freq(word: str) -> float:
     """
     Get the frequency for a word from the word frequency database.
 
-    The word is first lemmatized (e.g. 'running' -> 'run') before looking up its frequency.
-    If the word is not found in the database, returns 0.
+    We first check for an exact match in the database. If not found, we lemmatize the word
+    and check again. If still not found, we stem the word. If still not found, we return the
+    corpus median.
 
     Args:
         word: The (uncleaned) word to look up the frequency for
 
     Returns:
-        int: The word's frequency per million words in the corpus, or the corpus median if not found
+        float: The word's frequency per million words in the corpus, or the corpus median if not found
 
     Raises:
         ValueError: If the word frequency database failed to load
@@ -96,6 +99,12 @@ def get_word_freq(word: str) -> float:
     # If no exact match, look for lemmatized matches
     lemmatized_word = wnl.lemmatize(word)
     matching_entries = word_freqs[word_freqs["word"] == lemmatized_word]
+    if not matching_entries.empty:
+        return int(matching_entries["frequency_per_million"].iloc[0])
+
+    # If no lemmatized match, look for stemmed matches
+    stemmed_word = stemmer.stem(word)
+    matching_entries = word_freqs[word_freqs["word"] == stemmed_word]
     if not matching_entries.empty:
         return int(matching_entries["frequency_per_million"].iloc[0])
 
