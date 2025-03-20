@@ -2,6 +2,8 @@ import argparse
 import os
 from collections import defaultdict
 
+# TODO: Add new summary totals
+
 import pandas as pd
 from pydantic_settings import BaseSettings
 from tqdm import tqdm

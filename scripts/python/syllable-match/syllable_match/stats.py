@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 
 
@@ -88,3 +90,20 @@ def check_identical_columns(sub_dfs: list[pd.DataFrame]) -> None:
     for df in sub_dfs[1:]:
         if not first_df_columns.equals(df.columns):
             raise ValueError("All DataFrames must have identical columns.")
+
+
+def generate_summary_statistics(
+    sub_dfs: dict[str, pd.DataFrame], output_dir: str
+) -> None:
+    """
+    Generate summary statistics for each participant and save them to a CSV file.
+
+    Parameters:
+        sub_dfs (dict[str, pd.DataFrame]): A dictionary of DataFrames with participant names as keys.
+        output_dir (str): The directory to save the summary statistics.
+    """
+    for participant_name, df in sub_dfs.items():
+        df.to_csv(
+            os.path.join(output_dir, f"{participant_name}_summary_statistics.csv"),
+            index=False,
+        )
