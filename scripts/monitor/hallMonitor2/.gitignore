@@ -1,3 +1,6 @@
 # Singularity build files
 *.sif
 *.simg
+
+# Singularity container build directory
+build/
