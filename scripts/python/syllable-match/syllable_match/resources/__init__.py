@@ -5,9 +5,9 @@ import nltk
 import pandas as pd
 
 nltk.download("wordnet")
-from nltk.stem import WordNetLemmatizer
+from nltk.stem import WordNetLemmatizer as wnl
+from nltk.stem import LancasterStemmer as ls
 
-wnl = WordNetLemmatizer()
 
 
 @lru_cache(maxsize=1)
