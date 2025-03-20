@@ -88,7 +88,7 @@ class WordFrequencyExtractor(FeatureExtractor):
     def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
         frequencies = []
         for entry in syllable_directory:
-            frequency = get_word_freq(entry.word)
+            frequency = get_word_freq(entry.word.text)
             frequencies.extend([frequency] * len(entry.syllables))
         return frequencies
 
