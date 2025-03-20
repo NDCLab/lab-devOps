@@ -34,7 +34,7 @@ class DeviationAndNoDataErrorTestCase(ExceptionTestCase):
         deviation_file = self.build_path(
             "s1_r1", "psychopy", f"{identifier}_deviation.txt", self.is_raw
         )
-        modified_files[deviation_file] = "Files to process: NA"
+        modified_files[deviation_file] = "Deviation and no-data file."
 
         # remove all s1_r1 psychopy files except deviation.txt
         info = os.path.join("s1_r1", "psychopy", "")
@@ -93,7 +93,7 @@ class DeviationAndNoDataFilesErrorTestCase(ExceptionTestCase):
         no_data_file = self.build_path("s1_r1", "psychopy", no_data_file, self.is_raw)
 
         # add deviation.txt and no-data.txt files
-        modified_files[deviation_file] = "Files to process: NA"
+        modified_files[deviation_file] = "Deviation and no-data file."
         modified_files[no_data_file] = "No data available for this test case."
 
         return modified_files
@@ -187,7 +187,7 @@ class DeviationFilePreventsErrorWithExtraFilesTestCase(ExceptionTestCase):
         deviation_file = self.build_path(
             "s1_r1", "psychopy", deviation_file, self.is_raw
         )
-        modified_files[deviation_file] = "Files to process: NA"
+        modified_files[deviation_file] = "Extra files"
 
         base_file = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
         base_file = self.build_path("s1_r1", "psychopy/", base_file, self.is_raw)
@@ -312,7 +312,7 @@ class DeviationFileWithValidNamesTestCase(ExceptionTestCase):
         deviation_file = self.build_path(
             "s1_r1", "psychopy", deviation_file, self.is_raw
         )
-        modified_files[deviation_file] = "Files to process: NA"
+        modified_files[deviation_file] = "Valid file names"
 
         # rename existing file to include additional string
         old_name = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
@@ -468,3 +468,37 @@ class DeviationNoFilesToProcess(ExceptionTestCase):
 
 def test_deviation_no_files_to_process(request):
     DeviationNoFilesToProcess.run_test_case(request)
+
+
+class DeviationNoFilesToProcessNonEEG(ExceptionTestCase):
+    """
+    Test case for deviation.txt presence with a non-EEG datatype.
+    """
+
+    case_name = "DeviationNoFilesToProcessNonEEG"
+    description = "Adds a 'deviation.txt' file to the folder for a non-EEG datatype."
+    conditions = [
+        "Folder contains deviation.txt",
+        "Datatype is not EEG",
+    ]
+    expected_output = "No error is raised for deviation.txt lacking 'files to process' line in a non-EEG datatype."
+
+    is_raw = False
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_all_audacity_s1_r1_e1"
+        deviation_file = self.build_path(
+            "s1_r1", "audacity", f"{identifier}_deviation.txt", self.is_raw
+        )
+        modified_files[deviation_file] = "42"  # no "files to process" line
+
+        return modified_files
+
+    def get_expected_errors(self):
+        return []
+
+
+def test_deviation_no_files_to_process_non_eeg(request):
+    DeviationNoFilesToProcessNonEEG.run_test_case(request)
