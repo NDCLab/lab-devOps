@@ -14,7 +14,7 @@ class Scaffold:
 class Word:
     text: str
     clean_text: str
-
+    pos: str
 
 @dataclass
 class Syllable:
