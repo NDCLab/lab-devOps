@@ -1,6 +1,12 @@
 import os
+import string
 
 import pandas as pd
+from nltk.corpus import wordnet
+from nltk.stem import WordNetLemmatizer
+from nltk.stem.lancaster import LancasterStemmer
+
+from syllable_match.resources import load_word_frequencies
 
 
 def make_master_sheet(sub_dfs: list[pd.DataFrame]) -> pd.DataFrame:
@@ -107,3 +113,116 @@ def generate_summary_statistics(
             os.path.join(output_dir, f"{participant_name}_summary_statistics.csv"),
             index=False,
         )
+
+
+def get_wordnet_pos(pos_str: str) -> str:
+    if pd.isna(pos_str):
+        return wordnet.NOUN  # Default
+    pos_str = pos_str.upper()
+    if pos_str.startswith("V"):
+        return wordnet.VERB
+    elif pos_str.startswith("J"):
+        return wordnet.ADJ
+    elif pos_str.startswith("R"):
+        return wordnet.ADV
+    elif pos_str.startswith("N"):
+        return wordnet.NOUN
+    return wordnet.NOUN  # Fallback default
+
+
+def summarize_word_matches(scaffold_dir: str, output_file: str) -> None:
+    wnl = WordNetLemmatizer()
+    stemmer = LancasterStemmer()
+
+    if os.path.exists(output_file):
+        os.remove(output_file)
+
+    # Summary statistics for number of direct matches, lemmatized matches, stemmed matches, and no matches
+    word_freqs = load_word_frequencies()
+    for scaffold in os.listdir(scaffold_dir):
+        scaffold_path = os.path.join(scaffold_dir, scaffold)
+        scaffold_df = pd.read_csv(scaffold_path)
+
+        # Basic text normalization
+        scaffold_df["cleaned_word"] = (
+            scaffold_df["word"].str.lower().str.strip(string.punctuation)
+        )
+        # Standardize apostrophes
+        scaffold_df["cleaned_word"] = scaffold_df["cleaned_word"].str.replace(
+            "\u2018", "'"
+        )
+        scaffold_df["cleaned_word"] = scaffold_df["cleaned_word"].str.replace(
+            "\u2019", "'"
+        )
+
+        # Identify hyphenated and apostrophe-containing words
+        hyphenated_mask = scaffold_df["cleaned_word"].str.contains("-")
+        apostrophe_mask = scaffold_df["cleaned_word"].str.contains("'")
+
+        # Split and expand hyphenated words while preserving other columns
+        hyphenated_rows = scaffold_df[hyphenated_mask].copy()
+        if not hyphenated_rows.empty:
+            hyphenated_split = hyphenated_rows["cleaned_word"].str.split("-")
+            hyphenated_df = hyphenated_rows.loc[
+                hyphenated_rows.index.repeat(hyphenated_split.str.len())
+            ]
+            hyphenated_df["word"] = [
+                word for words in hyphenated_split for word in words
+            ]
+
+        # Split and expand apostrophe words while preserving other columns
+        apostrophe_rows = scaffold_df[apostrophe_mask].copy()
+        if not apostrophe_rows.empty:
+            apostrophe_split = apostrophe_rows["cleaned_word"].str.split("'")
+            apostrophe_df = apostrophe_rows.loc[
+                apostrophe_rows.index.repeat(apostrophe_split.str.len())
+            ]
+            apostrophe_df["word"] = [
+                word for words in apostrophe_split for word in words
+            ]
+
+        # Keep words that had neither hyphens nor apostrophes
+        clean_df = scaffold_df[~(hyphenated_mask | apostrophe_mask)].copy()
+        clean_df["word"] = clean_df["cleaned_word"]
+
+        # Combine everything
+        final_df = pd.concat(
+            [clean_df, hyphenated_df, apostrophe_df], ignore_index=True
+        )
+        # Strip punctuation again, just in case
+        final_df["word"] = final_df["word"].str.strip(string.punctuation)
+
+        # Get direct matches
+        direct_match = final_df[final_df["word"].isin(word_freqs["word"])]
+        final_df = final_df[~final_df["word"].isin(word_freqs["word"])]
+
+        # Get lemmatized matches
+        lemmatized_words = final_df.apply(
+            lambda row: wnl.lemmatize(row["word"], get_wordnet_pos(row["word-pos"])),
+            axis=1,
+        )
+        lemmatized_mask = lemmatized_words.isin(word_freqs["word"])
+        lemmatized_match = final_df[lemmatized_mask]
+        final_df = final_df[~lemmatized_mask]
+
+        # Get stemmed matches
+        stemmed_words = final_df["word"].apply(stemmer.stem)
+        stemmed_mask = stemmed_words.isin(word_freqs["word"])
+        stemmed_match = final_df[stemmed_mask]
+        final_df = final_df[~stemmed_mask]
+
+        # Output summary statistics for number of direct/lemmatized/stemmed/no matches to a file
+        with open(output_file, "a") as f:
+            f.write(f"Scaffold: {scaffold}\n")
+            f.write(f"Direct matches: {len(direct_match)}\n")
+            f.write(f"Lemmatized matches: {len(lemmatized_match)}\n")
+            f.write(f"Stemmed matches: {len(stemmed_match)}\n")
+
+            # Build no-matches string
+            no_match_entries = []
+            for _, row in final_df.iterrows():
+                entry = f"{row['word']} ({row['word-pos']})"
+                no_match_entries.append(entry)
+
+            f.write(f"No matches: {len(final_df)} ({', '.join(no_match_entries)})\n")
+            f.write("\n")

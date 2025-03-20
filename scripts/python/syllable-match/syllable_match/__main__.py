@@ -1,9 +1,9 @@
 import argparse
 import os
+import string
 from collections import defaultdict
 
 # TODO: Add new summary totals
-
 import pandas as pd
 from pydantic_settings import BaseSettings
 from tqdm import tqdm
@@ -18,13 +18,14 @@ from syllable_match.feature_extractors import (
     WordBeforeCommaExtractor,
     WordBeforePeriodExtractor,
     WordFrequencyExtractor,
+    WordPOSExtractor,
 )
 from syllable_match.labels import label_duplications, label_errors, label_hesitations
 from syllable_match.matching import match_duplications, match_errors, match_hesitations
 from syllable_match.models import FeatureExtractor
 from syllable_match.parsing import get_raw_df, preprocess_fields
 from syllable_match.scaffolds import create_scaffolds
-from syllable_match.stats import generate_summary_statistics, make_master_sheet
+from syllable_match.stats import summarize_word_matches
 from syllable_match.utils import (
     create_output_directory,
     extract_passage_name,
@@ -102,6 +103,7 @@ def get_scaffold_extractors() -> list[FeatureExtractor]:
         WordBeforeCommaExtractor(),
         WordAfterCommaExtractor(),
         WordFrequencyExtractor(),
+        WordPOSExtractor(),
     ]
 
 
@@ -139,6 +141,11 @@ def main():
     create_scaffolds(
         get_templates(template_dir), scaffold_dir, get_scaffold_extractors()
     )
+
+    summarize_word_matches(
+        scaffold_dir, os.path.join(args.output_dir, "summary_statistics.txt")
+    )
+    exit()
 
     # Dictionary to store scaffold dataframes for each participant
     # Format: {participant_id: {passage_name: dataframe}}
