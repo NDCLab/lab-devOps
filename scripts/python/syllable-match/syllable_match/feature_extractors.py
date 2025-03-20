@@ -1,8 +1,5 @@
-import string
-
-import pandas as pd
-
 from syllable_match.models import FeatureExtractor, SyllableEntry
+from syllable_match.resources import get_word_freq
 
 
 class SyllableAtPassageBeginningExtractor(FeatureExtractor):
@@ -88,21 +85,10 @@ class WordFrequencyExtractor(FeatureExtractor):
 
     feature_name = "word-freq"
 
-    def __init__(self, frequency_df: pd.DataFrame):
-        self.word_frequencies = self.load_frequencies(frequency_df)
-
-    def load_frequencies(self, frequency_df: pd.DataFrame) -> dict[str, int]:
-        frequencies = {}
-        for _, row in frequency_df.iterrows():
-            word = row["Word"].lower().strip(string.punctuation)
-            freq_count = int(row["FREQcount"])
-            frequencies[word] = freq_count
-        return frequencies
-
     def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
         frequencies = []
         for entry in syllable_directory:
-            frequency = self.word_frequencies.get(entry.word.clean_text, 0)
+            frequency = get_word_freq(entry.word)
             frequencies.extend([frequency] * len(entry.syllables))
         return frequencies
 
