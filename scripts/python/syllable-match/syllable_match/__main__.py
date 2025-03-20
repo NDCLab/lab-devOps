@@ -23,7 +23,6 @@ from syllable_match.labels import label_duplications, label_errors, label_hesita
 from syllable_match.matching import match_duplications, match_errors, match_hesitations
 from syllable_match.models import FeatureExtractor
 from syllable_match.parsing import get_raw_df, preprocess_fields
-from syllable_match.resources import load_word_frequencies
 from syllable_match.scaffolds import create_scaffolds
 from syllable_match.stats import generate_summary_statistics, make_master_sheet
 from syllable_match.utils import (
@@ -102,7 +101,7 @@ def get_scaffold_extractors() -> list[FeatureExtractor]:
         WordAfterPeriodExtractor(),
         WordBeforeCommaExtractor(),
         WordAfterCommaExtractor(),
-        WordFrequencyExtractor(load_word_frequencies()),
+        WordFrequencyExtractor(),
     ]
 
 
