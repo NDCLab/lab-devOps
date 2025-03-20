@@ -1,3 +1,7 @@
 from hallmonitor import app, hmutils
 
-app.main(hmutils.get_args())
+try:
+    app.main(hmutils.get_args())
+except Exception as e:
+    print("Unexpected error:", e)
+    raise
