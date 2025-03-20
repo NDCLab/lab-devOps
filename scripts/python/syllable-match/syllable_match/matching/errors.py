@@ -5,7 +5,7 @@ from syllable_match.resources import get_word_freq
 from .utils import extract_marker_type
 
 
-def match_errors(df: pd.DataFrame) -> pd.DataFrame:
+def match_errors(df: pd.DataFrame) -> None:
     """
     Matches errors in the DataFrame.
     """
