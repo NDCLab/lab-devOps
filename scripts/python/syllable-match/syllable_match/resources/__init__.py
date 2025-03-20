@@ -59,7 +59,7 @@ def get_corpus_median():
 
 
 @lru_cache(maxsize=512)
-def get_word_freq(word: str) -> float:
+def get_word_freq(word: str, pos: str) -> float:
     """
     Get the frequency for a word from the word frequency database.
 
@@ -69,7 +69,7 @@ def get_word_freq(word: str) -> float:
 
     Args:
         word: The (uncleaned) word to look up the frequency for
-
+        pos: The part of speech of the word
     Returns:
         float: The word's frequency per million words in the corpus, or the corpus median if not found
 
@@ -91,7 +91,7 @@ def get_word_freq(word: str) -> float:
     #   average the frequencies of the n word parts
     if "'" in word or "-" in word:
         parts = word.split("'") if "'" in word else word.split("-")
-        freqs = [get_word_freq(part) for part in parts]
+        freqs = [get_word_freq(part, pos) for part in parts]
         return sum(freqs) / len(freqs)
 
     # Look for exact matches first
@@ -100,7 +100,7 @@ def get_word_freq(word: str) -> float:
         return int(matching_entries["frequency_per_million"].iloc[0])
 
     # If no exact match, look for lemmatized matches
-    lemmatized_word = wnl.lemmatize(word)
+    lemmatized_word = wnl.lemmatize(word, pos)
     matching_entries = word_freqs[word_freqs["word"] == lemmatized_word]
     if not matching_entries.empty:
         return int(matching_entries["frequency_per_million"].iloc[0])

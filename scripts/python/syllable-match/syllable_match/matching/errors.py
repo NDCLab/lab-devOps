@@ -90,8 +90,10 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
 
         # Compute the average word-freq for the target syllable
         #   and its subsequent (N+1) syllable
-        target_syll_word_freq = get_word_freq(row["CleanedWord"])
-        next_syll_word_freq = get_word_freq(df.iloc[idx + 1]["CleanedWord"])
+        target_syll_word_freq = get_word_freq(row["CleanedWord"], row["word-pos"])
+        next_syll_word_freq = get_word_freq(
+            df.iloc[idx + 1]["CleanedWord"], df.iloc[idx + 1]["word-pos"]
+        )
         mean_actual_freq = 0.5 * (target_syll_word_freq + next_syll_word_freq)
 
         # We find the potential pair of N, N+1 syllables
@@ -101,8 +103,12 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
         for syll_a, syll_b in potential_syllables:
             # Compute the average word-freq for the current
             #   potential-syllable-to-match and hesitation-end words
-            potential_syll_word_freq = get_word_freq(syll_a["CleanedWord"])
-            potential_next_word_freq = get_word_freq(syll_b["CleanedWord"])
+            potential_syll_word_freq = get_word_freq(
+                syll_a["CleanedWord"], syll_a["word-pos"]
+            )
+            potential_next_word_freq = get_word_freq(
+                syll_b["CleanedWord"], syll_b["word-pos"]
+            )
 
             # Handle the case where one or both word frequencies are 0
             if potential_syll_word_freq == 0 and potential_next_word_freq != 0:

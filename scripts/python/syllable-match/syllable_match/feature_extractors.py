@@ -1,3 +1,5 @@
+from nltk.tag import pos_tag
+
 from syllable_match.models import FeatureExtractor, SyllableEntry
 from syllable_match.resources import get_word_freq
 
@@ -88,7 +90,7 @@ class WordFrequencyExtractor(FeatureExtractor):
     def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
         frequencies = []
         for entry in syllable_directory:
-            frequency = get_word_freq(entry.word.text)
+            frequency = get_word_freq(entry.word.text, entry.word.pos)
             frequencies.extend([frequency] * len(entry.syllables))
         return frequencies
 
@@ -188,3 +190,24 @@ class SyllableCountExtractor(FeatureExtractor):
             count = len(entry.syllables)
             syllable_counts.extend([count] * count)
         return syllable_counts
+
+
+class WordPOSExtractor(FeatureExtractor):
+    """
+    Marks the part of speech of the word.
+    """
+
+    feature_name = "word-pos"
+
+    def extract(self, syllable_directory: list[SyllableEntry]) -> list[int]:
+        pos_tags = pos_tag(
+            [entry.word.text for entry in syllable_directory], tagset="wordnet"
+        )
+        all_tags = []
+        for entry, tag in zip(syllable_directory, pos_tags):
+            if tag[1] == "UNK":
+                pos = "n"
+            else:
+                pos = tag[1]
+            all_tags.extend([pos] * len(entry.syllables))
+        return all_tags

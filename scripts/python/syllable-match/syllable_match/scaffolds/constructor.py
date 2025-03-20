@@ -2,6 +2,7 @@ import string
 from dataclasses import dataclass, field
 
 import pandas as pd
+from nltk.tag import pos_tag
 
 from syllable_match.models import FeatureExtractor, Syllable, SyllableEntry, Word
 
@@ -93,7 +94,7 @@ class ScaffoldConstructor:
         syllable_directory = []
         syllable_queue = self.syllables.copy()
 
-        for word in self.words:
+        for word, pos in zip(self.words, pos_tag(self.words, tagset="wordnet")):
             current_length = 0
             cleaned_word = word.replace("-", "").lower().strip(string.punctuation)
             word_length = len(cleaned_word)
@@ -117,8 +118,12 @@ class ScaffoldConstructor:
             if not syllable_list:
                 raise Exception(self.passage_name, word, syllable_directory)
 
+            clean_pos = pos[1] if pos[1] != "UNK" else "n"
             syllable_directory.append(
-                SyllableEntry(Word(word, cleaned_word), syllable_list)
+                SyllableEntry(
+                    Word(word, cleaned_word, clean_pos),
+                    syllable_list,
+                )
             )
 
         return syllable_directory
