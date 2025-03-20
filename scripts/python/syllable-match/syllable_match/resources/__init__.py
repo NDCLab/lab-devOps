@@ -83,6 +83,9 @@ def get_word_freq(word: str) -> float:
     # Apply basic word normalization
     word = word.lower()
     word = word.strip(string.punctuation)
+    # Standardize apostrophes
+    word = word.replace("\u2018", "'")
+    word = word.replace("\u2019", "'")
 
     # Special handling for words split by apostrophe or hyphen:
     #   average the frequencies of the n word parts
