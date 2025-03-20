@@ -190,10 +190,9 @@ def fill_combination_columns(dataset: str, tracker_df: pd.DataFrame):
         pd.DataFrame: The updated central tracker.
     """
     combination_rows = get_expected_combination_rows(dataset)
-    dd_df = get_datadict(dataset)
 
     for combo in combination_rows:
-        combo_suffixes = get_allowed_suffixes(dd_df, combo.name)
+        combo_suffixes = get_allowed_suffixes(dataset, combo.name)
         for suffix in combo_suffixes:
             combo_col = f"{combo.name}_{suffix}"
             var_cols = pd.Index([f"{var}_{suffix}" for var in combo.variables])
@@ -228,7 +227,7 @@ def fill_status_data_columns(dataset: str, tracker_df: pd.DataFrame):
 
     for _, row in status_var_rows.iterrows():
         prov = str(row["provenance"])
-        suffixes = get_allowed_suffixes(dd_df, row["variable"])
+        suffixes = get_allowed_suffixes(dataset, row["variable"])
         prov_file = re.search(r'file:\s*"([^"\s]+)"', prov)
         prov_var = re.search(r'variable:\s*"([^"\s]+)"', prov)
         if None not in {prov_file, prov_var}:  # ensure both matches exist
@@ -273,7 +272,7 @@ def fill_status_data_columns(dataset: str, tracker_df: pd.DataFrame):
 
     for _, row in data_var_rows.iterrows():
         prov = str(row["provenance"])
-        suffixes = get_allowed_suffixes(dd_df, row["variable"])
+        suffixes = get_allowed_suffixes(dataset, row["variable"])
         if "variables:" in prov and "file:" not in prov:
             prov_vars = re.findall(r'"([^"]+)"', prov)
             for suffix in suffixes:

@@ -294,8 +294,8 @@ def validate_data(
                 )
             )
 
-        # first line of deviation file must contain the text "files to process"
-        if has_deviation:
+        # for EEG datatype, first line of deviation file must contain the text "files to process"
+        if has_deviation and get_variable_datatype(dataset, id.variable) == "eeg":
             deviation_fullpath = os.path.join(id_dir, deviation_file)
             with open(deviation_fullpath, "r") as f:
                 first_line = f.readline()

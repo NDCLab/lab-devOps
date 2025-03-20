@@ -110,7 +110,7 @@ def cache_with_metadata(maxsize=64):
     return decorator
 
 
-@cache_with_metadata
+@cache_with_metadata()
 def get_variable_datatype(dataset, varname):
     """Retrieve a variable's dataType from the data dictionary
 
@@ -135,7 +135,7 @@ def get_variable_datatype(dataset, varname):
         return str(var_rows["dataType"].iloc[0])
 
 
-@cache_with_metadata
+@cache_with_metadata()
 def is_variable_encrypted(dataset, varname):
     """
     Check if a variable in the dataset is encrypted.
@@ -161,13 +161,13 @@ def is_variable_encrypted(dataset, varname):
         return bool(var_rows["encrypted"].iloc[0])
 
 
-@cache_with_metadata
-def get_allowed_suffixes(dd_df, variable):
+@cache_with_metadata()
+def get_allowed_suffixes(dataset, variable):
     """
     Retrieve the allowed suffixes for a given variable from a data dictionary DataFrame.
 
     Args:
-        dd_df (pd.DataFrame): The data dictionary DataFrame containing variable information.
+        dataset (str): The path to the dataset directory.
         variable (str): The variable name for which allowed suffixes are to be retrieved.
 
     Returns:
@@ -177,6 +177,7 @@ def get_allowed_suffixes(dd_df, variable):
     Raises:
         ValueError: If the specified variable is not found in the data dictionary.
     """
+    dd_df = get_datadict(dataset)
     var_row = dd_df[dd_df["variable"] == variable]
     if var_row.empty:
         raise ValueError(f"Variable {variable} not found in data dictionary")
@@ -188,13 +189,13 @@ def get_allowed_suffixes(dd_df, variable):
     return allowed
 
 
-@cache_with_metadata
-def get_possible_exts(dd_df, variable):
+@cache_with_metadata()
+def get_possible_exts(dataset, variable):
     """
     Retrieve possible file extensions for a given variable from a data dictionary DataFrame.
 
     Args:
-        dd_df (pd.DataFrame): The data dictionary DataFrame containing variable information.
+        dataset (str): The path to the dataset directory.
         variable (str): The variable name for which to retrieve possible file extensions.
 
     Returns:
@@ -204,6 +205,7 @@ def get_possible_exts(dd_df, variable):
     Raises:
         ValueError: If the specified variable is not found in the data dictionary.
     """
+    dd_df = get_datadict(dataset)
     var_row = dd_df[dd_df["variable"] == variable]
     if var_row.empty:
         raise ValueError(f"Variable {variable} not found in data dictionary")
@@ -644,7 +646,7 @@ def write_file_record(dataset, df: pd.DataFrame):
     df.to_csv(record_path, index=False)
 
 
-@cache_with_metadata
+@cache_with_metadata()
 def is_combination_var(dataset, variable):
     """Returns bool for whether a variable is present in a combination row"""
     dd_df = get_datadict(dataset)
@@ -664,7 +666,7 @@ def is_combination_var(dataset, variable):
     return False
 
 
-@cache_with_metadata
+@cache_with_metadata()
 def get_present_identifiers(dataset, is_raw=True):
     """
     Extracts and returns a list of present identifiers from a dataset directory, excluding combination variables.
@@ -1491,7 +1493,7 @@ def get_visit_pairs(datadict: pd.DataFrame):
     return visit_pairs
 
 
-@cache_with_metadata
+@cache_with_metadata()
 def get_datafiles_from_provenance(provenance: str):
     idx = provenance.find("variables:") + len("variables:")
     provenance = provenance[idx:]  # take the substring after "variables"
@@ -1534,7 +1536,7 @@ def get_expected_files(dataset, identifier):
     return sorted(expected_files)
 
 
-@cache_with_metadata
+@cache_with_metadata()
 def allowed_val(allowed_vals, value):
     """
     Check if a given value is within the intervals specified in allowed_vals.
@@ -1637,7 +1639,7 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
                 )
             )
 
-        allowed_suffixes = get_allowed_suffixes(dd_df, var)
+        allowed_suffixes = get_allowed_suffixes(dataset, var)
         if sre not in allowed_suffixes:
             errors.append(
                 new_error_record(
@@ -1649,7 +1651,7 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
                 )
             )
 
-        possible_exts = get_possible_exts(dd_df, var)
+        possible_exts = get_possible_exts(dataset, var)
         if file_ext and file_ext not in possible_exts:
             errors.append(
                 new_error_record(
