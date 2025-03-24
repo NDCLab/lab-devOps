@@ -130,6 +130,105 @@ def get_wordnet_pos(pos_str: str) -> str:
     return wordnet.NOUN  # Fallback default
 
 
+def get_sheet_stats(df: pd.DataFrame, passage_name: str) -> pd.DataFrame:
+    sheet_data = {}
+    sheet_data["PassageName"] = passage_name
+    sheet_data["SyllableCount"] = df["SyllableID"].nunique()
+    sheet_data["WordCount"] = df["WordID"].nunique()
+
+    # Convenience column for word errors
+    df["WordError"] = (
+        (df["Error_InsertedWord"] == 1)
+        | (df["Error_OmittedWord"] == 1)
+        | (df["Error_WordStressError"] == 1)
+    )
+
+    # Calculate counts of inserted and omitted syllables without word errors
+    sheet_data["InsertedSyllableWithoutWordErrorCount"] = len(
+        df[(df["Error_InsertedSyllable"] == 1) & (df["WordError"] == 0)].index
+    )
+    sheet_data["OmittedSyllableWithoutWordErrorCount"] = len(
+        df[(df["Error_OmittedSyllable"] == 1) & (df["WordError"] == 0)].index
+    )
+
+    sheet_data["WordSubstitutionCount"] = len(
+        df[df["Outcome_WordSubstitution"] != 0].index
+    )
+    sheet_data["WordApproximationCount"] = len(
+        df[df["Outcome_WordApproximation"] != 0].index
+    )
+
+    for mistake_type in ["Error", "Disfluency"]:
+        mistake_cols = df.columns[df.columns.str.startswith(f"{mistake_type}_")]
+        for col in mistake_cols:
+            has_error = df[df[col] != 0]
+            raw_count = len(has_error.index)
+            # multiple errors in the same word are counted as the same error
+            word_error_count = has_error.groupby("WordID").size().count()
+            assert raw_count >= word_error_count
+
+            sheet_data[f"{col}_RawCount"] = raw_count
+            sheet_data[f"{col}_WordErrorCount"] = word_error_count
+
+            # count unattempted, successful, and unsuccessful corrections
+            no_correction_attempt_count = len(has_error[has_error[col] == 1].index)
+            unsuccessful_correction_count = len(has_error[has_error[col] == 2].index)
+            successful_correction_count = len(has_error[has_error[col] == 3].index)
+            sheet_data[f"{col}_NoCorrectionAttemptCount"] = no_correction_attempt_count
+            sheet_data[f"{col}_UnsuccessfulCorrectionCount"] = (
+                unsuccessful_correction_count
+            )
+            sheet_data[f"{col}_SuccessfulCorrectionCount"] = successful_correction_count
+
+    # Calculate counts of matched high / low errors and hesitations
+    for error_type in ["high-error", "low-error", "hesitation"]:
+        start_col = f"{error_type}-start-matched"
+        end_col = f"{error_type}-end-matched"
+        # Get the counts of matched high / low errors and hesitation start/endpoints
+        sheet_data[f"{start_col}_Count"] = len(df[df[start_col] == 1].index)
+        sheet_data[f"{end_col}_Count"] = len(df[df[end_col] == 1].index)
+        # Get counts of full matches
+        sheet_data[f"{error_type}-full-match_Count"] = len(
+            df[(df[start_col] == 1) & (df[end_col] == 1)].index
+        )
+        # Get counts of partial matches
+        sheet_data[f"{error_type}-partial-match_Count"] = len(
+            df[  # XOR; one must be 1 and the other must be 0
+                (df[start_col] == 1) ^ (df[end_col] == 1)
+            ].index
+        )
+
+    # Calculate percentage of fully matched high / low errors and hesitations
+    sheet_data["high-error-full-match_Percentage"] = 100 * (
+        sheet_data["high-error-full-match_Count"]
+        / max(len(df[~df["high-error-start"].isna()].index), 1)
+    )
+    sheet_data["low-error-full-match_Percentage"] = 100 * (
+        sheet_data["low-error-full-match_Count"]
+        / max(len(df[~df["low-error-start"].isna()].index), 1)
+    )
+    sheet_data["hesitation-full-match_Percentage"] = 100 * (
+        sheet_data["hesitation-full-match_Count"]
+        / max(len(df[~df["hesitation-start"].isna()].index), 1)
+    )
+
+    # Calculate percentage of partial matches
+    sheet_data["high-error-partial-match_Percentage"] = 100 * (
+        sheet_data["high-error-partial-match_Count"]
+        / max(len(df[~df["high-error-start"].isna()].index), 1)
+    )
+    sheet_data["low-error-partial-match_Percentage"] = 100 * (
+        sheet_data["low-error-partial-match_Count"]
+        / max(len(df[~df["low-error-start"].isna()].index), 1)
+    )
+    sheet_data["hesitation-partial-match_Percentage"] = 100 * (
+        sheet_data["hesitation-partial-match_Count"]
+        / max(len(df[~df["hesitation-start"].isna()].index), 1)
+    )
+
+    return pd.DataFrame([sheet_data])
+
+
 def summarize_word_matches(scaffold_dir: str, output_file: str) -> None:
     wnl = WordNetLemmatizer()
     stemmer = LancasterStemmer()
