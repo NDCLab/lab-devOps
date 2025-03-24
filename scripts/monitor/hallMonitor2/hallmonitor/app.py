@@ -10,6 +10,7 @@ from argparse import Namespace
 
 import pandas as pd
 
+from hallmonitor import update_tracker
 from hallmonitor.hmutils import (
     CHECKED_SUBDIR,
     FILE_RE,
@@ -53,7 +54,6 @@ from hallmonitor.hmutils import (
     write_pending_files,
     write_qa_tracker,
 )
-from hallmonitor.updatetracker import update_tracker
 
 
 def validate_data(
