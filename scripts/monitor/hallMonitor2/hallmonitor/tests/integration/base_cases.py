@@ -936,7 +936,7 @@ class TestCase(ABC):
         Returns:
             str: A string containing error text, if any error was raised during execution.
         """
-        from hallmonitor.updatetracker import update_tracker
+        from hallmonitor import update_tracker
 
         if dataset is None:
             dataset = self.case_dir
