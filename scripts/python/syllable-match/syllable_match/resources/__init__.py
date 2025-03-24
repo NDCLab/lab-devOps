@@ -61,7 +61,7 @@ def get_corpus_median():
 @lru_cache(maxsize=512)
 def get_word_freq(word: str, pos: str) -> float:
     """
-    Get the frequency for a word from the word frequency database.
+    Get the log10 frequency for a word from the word frequency database.
 
     We first check for an exact match in the database. If not found, we lemmatize the word
     and check again. If still not found, we stem the word. If still not found, we return the
@@ -71,7 +71,7 @@ def get_word_freq(word: str, pos: str) -> float:
         word: The (uncleaned) word to look up the frequency for
         pos: The part of speech of the word
     Returns:
-        float: The word's frequency per million words in the corpus, or the corpus median if not found
+        float: Log10 of the word's frequency per million words in the corpus, or the corpus median if not found
 
     Raises:
         ValueError: If the word frequency database failed to load
@@ -97,19 +97,19 @@ def get_word_freq(word: str, pos: str) -> float:
     # Look for exact matches first
     matching_entries = word_freqs[word_freqs["word"] == word]
     if not matching_entries.empty:
-        return int(matching_entries["frequency_per_million"].iloc[0])
+        return float(matching_entries["log10_frequency"].iloc[0])
 
     # If no exact match, look for lemmatized matches
     lemmatized_word = wnl.lemmatize(word, pos)
     matching_entries = word_freqs[word_freqs["word"] == lemmatized_word]
     if not matching_entries.empty:
-        return int(matching_entries["frequency_per_million"].iloc[0])
+        return float(matching_entries["log10_frequency"].iloc[0])
 
     # If no lemmatized match, look for stemmed matches
     stemmed_word = stemmer.stem(word)
     matching_entries = word_freqs[word_freqs["word"] == stemmed_word]
     if not matching_entries.empty:
-        return int(matching_entries["frequency_per_million"].iloc[0])
+        return float(matching_entries["log10_frequency"].iloc[0])
 
     # If no matches, return corpus median
     return get_corpus_median()
