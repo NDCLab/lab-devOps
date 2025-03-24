@@ -1,9 +1,7 @@
 import argparse
 import os
-import string
 from collections import defaultdict
 
-# TODO: Add new summary totals
 import pandas as pd
 from pydantic_settings import BaseSettings
 from tqdm import tqdm
@@ -25,7 +23,7 @@ from syllable_match.matching import match_duplications, match_errors, match_hesi
 from syllable_match.models import FeatureExtractor
 from syllable_match.parsing import get_raw_df, preprocess_fields
 from syllable_match.scaffolds import create_scaffolds
-from syllable_match.stats import summarize_word_matches
+from syllable_match.stats import get_sheet_stats, summarize_word_matches
 from syllable_match.utils import (
     create_output_directory,
     extract_passage_name,
@@ -143,9 +141,8 @@ def main():
     )
 
     summarize_word_matches(
-        scaffold_dir, os.path.join(args.output_dir, "summary_statistics.txt")
+        scaffold_dir, os.path.join(args.output_dir, "word_matching_statistics.txt")
     )
-    exit()
 
     # Dictionary to store scaffold dataframes for each participant
     # Format: {participant_id: {passage_name: dataframe}}
@@ -201,32 +198,53 @@ def main():
             # passage_df = passage_df[config["default_fields"]]
             # save_output_file(passage_df, args.output_dir)
 
-            sub_dfs[os.path.basename(participant_dir)][passage_name] = passage_df[
-                config.default_fields
-            ]
+            sub_dfs[os.path.basename(participant_dir)][passage_name] = passage_df
 
-    # Save the sub_dfs to CSV files
+    # Save the sub_dfs to CSV files, calculate summary statistics for each participant
     sub_dfs_dir = create_output_directory(args.output_dir, "processed_passages")
+    summary_dfs = []
     for participant_id in sub_dfs:
         participant_dir = create_output_directory(sub_dfs_dir, participant_id)
+        counts = []
         for passage_name, df in sub_dfs[participant_id].items():
-            df.to_csv(os.path.join(participant_dir, f"{passage_name}.csv"), index=False)
+            counts.append(get_sheet_stats(df, passage_name))
+            df_limited = df[config.default_fields]
+            df_limited.to_csv(
+                os.path.join(participant_dir, f"{passage_name}.csv"), index=False
+            )
+        counts = pd.concat(counts, ignore_index=True)
+        counts.to_csv(
+            os.path.join(participant_dir, f"{participant_id}-passage-data.csv"),
+            index=False,
+        )
+        summary_dfs.append(counts)
 
-    # # Step 4: After processing all participants and passages, generate summary statistics
-    # print("Step 4: Generating summary statistics...")
-    # generate_summary_statistics(sub_dfs, args.output_dir)
+    # Step 4: After processing all participants and passages, generate summary statistics
+    master_df = pd.concat(summary_dfs, ignore_index=True)
+    master_df = master_df.groupby("PassageName", as_index=False).mean(numeric_only=True)
+    master_df.insert(0, "Statistic", "Mean")
 
-    # # Loop over all output files to count occurrences and output count files
-    # print("Counting occurrences in output files...")
-    # for participant_dir in get_participants(args.output_dir):
-    #     count_occurrences(participant_dir, args.output_dir)
+    # Compute overall mean and standard deviation across ALL passages and subjects
+    df_combined = pd.concat(summary_dfs, ignore_index=True)
+    all_stats = df_combined.select_dtypes(include="number").agg(["mean", "std"])
 
-    # # Generate a master file with all participants and summary stats
-    # print("Generating master file with all participants and summary stats...")
-    # master_df = make_master_sheet(sub_dfs.values())
-    # print("Master file generated successfully.")
-    # master_df.to_csv(os.path.join(args.output_dir, "master_file.csv"), index=False)
-    # print("Master file saved successfully.")
+    # Create two new rows for overall mean and std
+    row_mean = {"PassageName": "All", "Statistic": "Mean"}
+    row_std = {"PassageName": "All", "Statistic": "Standard Deviation"}
+
+    for col in all_stats.columns:
+        row_mean[col] = all_stats.loc["mean", col]
+        row_std[col] = all_stats.loc["std", col]
+
+    # Append new rows to the master DataFrame
+    master_df = pd.concat(
+        [master_df, pd.DataFrame([row_mean, row_std])], ignore_index=True
+    )
+
+    # Save master DataFrame
+    master_df.to_csv(
+        os.path.join(args.output_dir, "master-statistics.csv"), index=False
+    )
 
 
 if __name__ == "__main__":
