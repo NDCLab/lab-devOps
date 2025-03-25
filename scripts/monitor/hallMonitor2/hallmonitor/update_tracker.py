@@ -17,6 +17,8 @@ from hallmonitor.hmutils import (
 )
 
 COMPLETED_SUFFIX = "_complete"
+ENGLISH_LANGCODE = 1
+SPANISH_LANGCODE = 2
 
 
 class c:
@@ -375,11 +377,11 @@ def get_parent_columns(
                         if child_id_match is not None:
                             child_id = study_no + "0" + child_id_match.group(1)
                             child_id = int(child_id)
-                            # FIXME consider splitting into constants
-                            if rc_row[col] not in {1, 2}:
+                            if rc_row[col] not in {ENGLISH_LANGCODE, SPANISH_LANGCODE}:
                                 raise ValueError(
-                                    f"Unknown value {rc_row[col]} seen for parent language, "
-                                    + "should be 1 for English and 2 for Spanish."
+                                    f"Unknown value {rc_row[col]} seen for parent language "
+                                    + f"in REDCap {all_redcap_paths[rc_filename]}, "
+                                    + f"should be {ENGLISH_LANGCODE} for English and {SPANISH_LANGCODE} for Spanish."
                                 )
 
                             try:
@@ -603,10 +605,8 @@ def main(
                 id = int(row.name)
             else:
                 print(
-                    "skipping nan value in ",
-                    str(all_redcap_paths[expected_rc]),
-                    ": ",
-                    str(index),
+                    "Skipping NaN value in " + str(all_redcap_paths[expected_rc]),
+                    ": " + str(index),
                 )
                 continue
             if child:
