@@ -655,7 +655,7 @@ class RelocatedREDCapColumnTestCase(TrackerTestCase):
         ):
             app.main(args)
 
-        assert mock_logger.error.call_count == 1
+        assert mock_logger.error.call_count == 1, mock_logger.error._calls_repr()
         # examine the arguments passed to the first call of logger.error()
         err_call_args = mock_logger.error.call_args_list[0].args
         target_keywords = [self.moved_col, "bbschild", "iqschild"]
@@ -717,7 +717,7 @@ class RemoteAndInPersonREDCapTestCase(TrackerTestCase):
         ):
             app.main(args)
 
-        assert mock_logger.error.call_count == 1
+        assert mock_logger.error.call_count == 1, mock_logger.error._calls_repr()
         # examine the arguments passed to the first call of logger.error()
         err_call_args = mock_logger.error.call_args_list[0].args
         target_keywords = ["remote-only", "in-person", str(self.sub_id)]
