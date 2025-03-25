@@ -439,7 +439,7 @@ def main(
     study_no = get_study_num(dataset)
 
     tracker_df = get_central_tracker(dataset)
-    proj_name = os.path.basename(os.path.normpath(dataset))
+    proj_name = os.path.basename(os.path.normpath(dataset)).removesuffix("-dataset")
     data_tracker_file = os.path.join(
         dataset, "data-monitoring", f"central-tracker_{proj_name}.csv"
     )
