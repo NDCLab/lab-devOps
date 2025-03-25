@@ -40,6 +40,12 @@ def get_args():
     )
 
     parser.add_argument(
+        "command",
+        type=str,
+        help="The command to run. Either 'process' or 'summarize'.",
+    )
+
+    parser.add_argument(
         "input_dir", type=str, help="The input directory containing data."
     )
     parser.add_argument("output_dir", type=str, help="The directory to output results.")
@@ -105,43 +111,47 @@ def get_scaffold_extractors() -> list[FeatureExtractor]:
     ]
 
 
-def main():
-    args = get_args()
-    config = load_config(os.path.join(args.input_dir, "config.json"))
+def process_subject_data(
+    input_dir: str,
+    output_dir: str,
+    accepted_subjects: list[str],
+    force: bool = False,
+):
+    config = load_config(os.path.join(input_dir, "config.json"))
 
     # Step 0: Start with an empty output_dir
     print("Step 0: Checking output directory...")
-    if os.path.exists(args.output_dir):
-        if args.force:
+    if os.path.exists(output_dir):
+        if force:
             print("Output directory exists. Emptying the directory...")
             # Empty the output directory
-            for root, dirs, files in os.walk(args.output_dir, topdown=False):
+            for root, dirs, files in os.walk(output_dir, topdown=False):
                 for name in files:
                     os.remove(os.path.join(root, name))
                 for name in dirs:
                     os.rmdir(os.path.join(root, name))
         else:
             raise FileExistsError(
-                f"The output directory '{args.output_dir}' already exists."
+                f"The output directory '{output_dir}' already exists."
             )
     else:
         print("Output directory does not exist. Creating directory...")
-        os.makedirs(args.output_dir)
+        os.makedirs(output_dir)
 
     # Step 1: Construct basic scaffolds for each passage template
     print("Step 1: Constructing basic scaffolds...")
-    template_dir = os.path.join(args.input_dir, "templates")
+    template_dir = os.path.join(input_dir, "templates")
     if not os.path.exists(template_dir):
         raise FileNotFoundError(
             f"The templates directory '{template_dir}' does not exist."
         )
-    scaffold_dir = create_output_directory(args.output_dir, "scaffolds")
+    scaffold_dir = create_output_directory(output_dir, "scaffolds")
     create_scaffolds(
         get_templates(template_dir), scaffold_dir, get_scaffold_extractors()
     )
 
     summarize_word_matches(
-        scaffold_dir, os.path.join(args.output_dir, "word_matching_statistics.txt")
+        scaffold_dir, os.path.join(output_dir, "word_matching_statistics.txt")
     )
 
     # Dictionary to store scaffold dataframes for each participant
@@ -151,9 +161,7 @@ def main():
     # Step 2: Loop over each participant
     print("Step 2: Processing participants...")
     for participant_dir in tqdm(
-        get_participants(
-            args.input_dir, args.accepted_subjects or config.accepted_subjects
-        ),
+        get_participants(input_dir, accepted_subjects or config.accepted_subjects),
     ):
         # Step 3: Loop over each passage for the participant
         for passage_path in tqdm(
@@ -193,28 +201,57 @@ def main():
             # Duplication matching loop
             match_duplications(passage_df)
 
-            # # Save the output file for the passage
-            # print(f"Saving output file for passage: {os.path.basename(passage_path)}")
-            # passage_df = passage_df[config["default_fields"]]
-            # save_output_file(passage_df, args.output_dir)
-
             sub_dfs[os.path.basename(participant_dir)][passage_name] = passage_df
 
     # Save the sub_dfs to CSV files, calculate summary statistics for each participant
-    sub_dfs_dir = create_output_directory(args.output_dir, "processed_passages")
-    summary_dfs = []
+    sub_dfs_dir = create_output_directory(output_dir, "processed_passages")
     for participant_id in sub_dfs:
         participant_dir = create_output_directory(sub_dfs_dir, participant_id)
-        counts = []
         for passage_name, df in sub_dfs[participant_id].items():
-            counts.append(get_sheet_stats(df, passage_name))
+            df.to_csv(
+                os.path.join(participant_dir, f"{passage_name}_all-cols.csv"),
+                index=False,
+            )
             df_limited = df[config.default_fields]
             df_limited.to_csv(
                 os.path.join(participant_dir, f"{passage_name}.csv"), index=False
             )
+
+
+def summarize(input_dir: str, output_dir: str):
+    sub_dfs = defaultdict(dict)
+    sub_dfs_dir = os.path.join(input_dir, "processed_passages")
+    for participant_id in os.listdir(sub_dfs_dir):
+        all_col_passages = [
+            os.path.join(sub_dfs_dir, participant_id, f)
+            for f in os.listdir(os.path.join(sub_dfs_dir, participant_id))
+            if f.endswith("_all-cols.csv")
+        ]
+        for passage_name in all_col_passages:
+            sub_dfs[participant_id][passage_name] = pd.read_csv(
+                os.path.join(sub_dfs_dir, participant_id, passage_name)
+            )
+
+    # Calculate summary statistics for each participant
+    summary_dfs = []
+    for participant_id in sub_dfs:
+        counts = []
+
+        participant_dir = create_output_directory(
+            output_dir, os.path.join("processed_passages", participant_id)
+        )
+        for passage_name, df in sub_dfs[participant_id].items():
+            counts.append(
+                get_sheet_stats(
+                    df,
+                    os.path.splitext(os.path.basename(passage_name))[0].removesuffix(
+                        "_all-cols"
+                    ),
+                )
+            )
         counts = pd.concat(counts, ignore_index=True)
         counts.to_csv(
-            os.path.join(participant_dir, f"{participant_id}-passage-data.csv"),
+            os.path.join(participant_dir, f"{participant_id}-passage-counts.csv"),
             index=False,
         )
         summary_dfs.append(counts)
@@ -242,10 +279,17 @@ def main():
     )
 
     # Save master DataFrame
-    master_df.to_csv(
-        os.path.join(args.output_dir, "master-statistics.csv"), index=False
-    )
+    master_df.to_csv(os.path.join(output_dir, "master-statistics.csv"), index=False)
 
 
 if __name__ == "__main__":
-    main()
+    args = get_args()
+    if args.command == "process":
+        process_subject_data(
+            args.input_dir,
+            args.output_dir,
+            args.accepted_subjects,
+            args.force,
+        )
+    elif args.command == "summarize":
+        summarize(args.input_dir, args.output_dir)

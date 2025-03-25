@@ -192,10 +192,15 @@ def get_sheet_stats(df: pd.DataFrame, passage_name: str) -> pd.DataFrame:
             df[(df[start_col] == 1) & (df[end_col] == 1)].index
         )
         # Get counts of partial matches
-        sheet_data[f"{error_type}-partial-match_Count"] = len(
-            df[  # XOR; one must be 1 and the other must be 0
-                (df[start_col] == 1) ^ (df[end_col] == 1)
-            ].index
+        sheet_data[f"{error_type}-start-match_Count"] = len(
+            df[(df[start_col] == 1) & (df[end_col] == 0)].index
+        )
+        sheet_data[f"{error_type}-end-match_Count"] = len(
+            df[(df[start_col] == 0) & (df[end_col] == 1)].index
+        )
+        # Get counts of no matches
+        sheet_data[f"{error_type}-no-match_Count"] = len(
+            df[(df[start_col] == 0) & (df[end_col] == 0)].index
         )
 
     # Calculate percentage of fully matched high / low errors and hesitations
@@ -213,16 +218,58 @@ def get_sheet_stats(df: pd.DataFrame, passage_name: str) -> pd.DataFrame:
     )
 
     # Calculate percentage of partial matches
-    sheet_data["high-error-partial-match_Percentage"] = 100 * (
-        sheet_data["high-error-partial-match_Count"]
+
+    # High error partial matches
+    sheet_data["high-error-start-match_Percentage"] = 100 * (
+        sheet_data["high-error-start-match_Count"]
         / max(len(df[~df["high-error-start"].isna()].index), 1)
     )
-    sheet_data["low-error-partial-match_Percentage"] = 100 * (
-        sheet_data["low-error-partial-match_Count"]
+    sheet_data["high-error-end-match_Percentage"] = 100 * (
+        sheet_data["high-error-end-match_Count"]
+        / max(len(df[~df["high-error-end"].isna()].index), 1)
+    )
+    sheet_data["high-error-partial-match_Percentage"] = (
+        sheet_data["high-error-start-match_Percentage"]
+        + sheet_data["high-error-end-match_Percentage"]
+    )
+    # Low error partial matches
+    sheet_data["low-error-start-match_Percentage"] = 100 * (
+        sheet_data["low-error-start-match_Count"]
         / max(len(df[~df["low-error-start"].isna()].index), 1)
     )
-    sheet_data["hesitation-partial-match_Percentage"] = 100 * (
-        sheet_data["hesitation-partial-match_Count"]
+    sheet_data["low-error-end-match_Percentage"] = 100 * (
+        sheet_data["low-error-end-match_Count"]
+        / max(len(df[~df["low-error-end"].isna()].index), 1)
+    )
+    sheet_data["low-error-partial-match_Percentage"] = (
+        sheet_data["low-error-start-match_Percentage"]
+        + sheet_data["low-error-end-match_Percentage"]
+    )
+    # Hesitation partial matches
+    sheet_data["hesitation-start-match_Percentage"] = 100 * (
+        sheet_data["hesitation-start-match_Count"]
+        / max(len(df[~df["hesitation-start"].isna()].index), 1)
+    )
+    sheet_data["hesitation-end-match_Percentage"] = 100 * (
+        sheet_data["hesitation-end-match_Count"]
+        / max(len(df[~df["hesitation-end"].isna()].index), 1)
+    )
+    sheet_data["hesitation-partial-match_Percentage"] = (
+        sheet_data["hesitation-start-match_Percentage"]
+        + sheet_data["hesitation-end-match_Percentage"]
+    )
+
+    # Calculate percentage of no matches
+    sheet_data["high-error-no-match_Percentage"] = 100 * (
+        sheet_data["high-error-no-match_Count"]
+        / max(len(df[~df["high-error-start"].isna()].index), 1)
+    )
+    sheet_data["low-error-no-match_Percentage"] = 100 * (
+        sheet_data["low-error-no-match_Count"]
+        / max(len(df[~df["low-error-start"].isna()].index), 1)
+    )
+    sheet_data["hesitation-no-match_Percentage"] = 100 * (
+        sheet_data["hesitation-no-match_Count"]
         / max(len(df[~df["hesitation-start"].isna()].index), 1)
     )
 
