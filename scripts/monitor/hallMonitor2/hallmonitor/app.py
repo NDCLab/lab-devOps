@@ -541,7 +541,7 @@ def checked_data_validation(
                 checked_dir,
             )
             try:
-                subprocess.run(["rm", "-r", checked_dir], check=True)
+                subprocess.run(["rm", "-rf", checked_dir], check=True)
                 logger.info("Removed failed identifier %s from checked/", identifier)
             except subprocess.CalledProcessError as err:
                 logger.error(
