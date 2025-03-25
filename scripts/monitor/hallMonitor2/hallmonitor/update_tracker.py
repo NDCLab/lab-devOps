@@ -463,7 +463,9 @@ def main(
     for expected_rc in redcheck_columns.keys():
         present = False
         remote_rcs = [
-            r for r in redcaps if os.path.basename(r).startswith(REMOTE_REDCAP_PREFIX)
+            r
+            for r in redcaps
+            if os.path.basename(r).startswith(REMOTE_REDCAP_PREFIX + proj_name)
         ]
         normal_rcs = [r for r in redcaps if r not in remote_rcs]
 
