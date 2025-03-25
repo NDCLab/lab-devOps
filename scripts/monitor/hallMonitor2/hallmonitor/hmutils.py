@@ -696,7 +696,7 @@ def get_present_identifiers(dataset, is_raw=True):
         source_dir = os.path.join(dataset, CHECKED_SUBDIR)
         FIRST_RE, SECOND_RE, THIRD_RE = SUB_RE, SES_RE, DTYPE_RE
 
-    present_ids = set()
+    present_ids = {}
     for path, _, files in os.walk(source_dir):
         relpath = os.path.relpath(path, source_dir)
         dirs = relpath.split("/")
@@ -736,11 +736,22 @@ def get_present_identifiers(dataset, is_raw=True):
                 # when we check whether a combination row has any variables present,
                 #    files labeled as "deviation.txt" should not count.
                 new_id.is_from_deviation = match.group("dev") is not None
-                present_ids.add(new_id)
+                key = (new_id.subject, new_id.variable, new_id.session, new_id.run)
+                # If an identifier for this key already exists and it comes from a deviation file,
+                # but the new identifier is not, then update the stored value.
+                # We prefer non-deviation identifiers to simplify combination row matching.
+                if key in present_ids:
+                    if (
+                        present_ids[key].is_from_deviation
+                        and not new_id.is_from_deviation
+                    ):
+                        present_ids[key] = new_id
+                else:
+                    present_ids[key] = new_id
             except ValueError:
                 continue
 
-    return sorted(list(present_ids))
+    return sorted(list(present_ids.values()))
 
 
 def get_expected_identifiers(dataset, present_ids):
