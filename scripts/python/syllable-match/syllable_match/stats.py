@@ -1,5 +1,6 @@
 import os
 import string
+from typing import Any
 
 import pandas as pd
 from nltk.corpus import wordnet
@@ -130,7 +131,7 @@ def get_wordnet_pos(pos_str: str) -> str:
     return wordnet.NOUN  # Fallback default
 
 
-def get_sheet_stats(df: pd.DataFrame, passage_name: str) -> pd.DataFrame:
+def get_sheet_stats(df: pd.DataFrame, passage_name: str) -> dict[str, Any]:
     sheet_data = {}
     sheet_data["PassageName"] = passage_name
     sheet_data["SyllableCount"] = df["SyllableID"].nunique()
@@ -180,100 +181,93 @@ def get_sheet_stats(df: pd.DataFrame, passage_name: str) -> pd.DataFrame:
             )
             sheet_data[f"{col}_SuccessfulCorrectionCount"] = successful_correction_count
 
-    # Calculate counts of matched high / low errors and hesitations
+    # Calculate counts and percentages for each error type
     for error_type in ["high-error", "low-error", "hesitation"]:
+        # Get total errors of this type by counting unique error indices
+        idx_col = f"{error_type}-idx"
+        total_errors = df[df[idx_col].notna()][idx_col].nunique()
+        if total_errors == 0:
+            print(f'No "{error_type}" errors found in {passage_name}')
+            # Store empty values for all relevant columns
+            sheet_data[f"{error_type}-full-match_Count"] = None
+            sheet_data[f"{error_type}-start-match-only_Count"] = None
+            sheet_data[f"{error_type}-end-match-only_Count"] = None
+            sheet_data[f"{error_type}-no-match_Count"] = None
+            sheet_data[f"{error_type}-full-match_Percentage"] = None
+            sheet_data[f"{error_type}-start-match-only_Percentage"] = None
+            sheet_data[f"{error_type}-end-match-only_Percentage"] = None
+            sheet_data[f"{error_type}-no-match_Percentage"] = None
+            sheet_data[f"{error_type}-total_Count"] = 0
+            continue
+
         start_col = f"{error_type}-start-matched"
         end_col = f"{error_type}-end-matched"
-        # Get the counts of matched high / low errors and hesitation start/endpoints
-        sheet_data[f"{start_col}_Count"] = len(df[df[start_col] == 1].index)
-        sheet_data[f"{end_col}_Count"] = len(df[df[end_col] == 1].index)
-        # Get counts of full matches
-        sheet_data[f"{error_type}-full-match_Count"] = len(
-            df[(df[start_col] == 1) & (df[end_col] == 1)].index
+
+        # Group by error index to count unique errors
+        error_groups = df[df[idx_col].notna()].groupby(idx_col)
+
+        # Count full matches (both start and end)
+        full_matches = (
+            error_groups.apply(
+                lambda x: (x[start_col] == 1).any() and (x[end_col] == 1).any()
+            )
+            .astype(int)
+            .sum()
+        )  # Convert boolean to int before summing
+
+        # Count start-only matches
+        start_only_matches = (
+            error_groups.apply(
+                lambda x: (x[start_col] == 1).any() and not (x[end_col] == 1).any()
+            )
+            .astype(int)
+            .sum()
         )
-        # Get counts of partial matches
-        sheet_data[f"{error_type}-start-match_Count"] = len(
-            df[(df[start_col] == 1) & (df[end_col] == 0)].index
-        )
-        sheet_data[f"{error_type}-end-match_Count"] = len(
-            df[(df[start_col] == 0) & (df[end_col] == 1)].index
-        )
-        # Get counts of no matches
-        sheet_data[f"{error_type}-no-match_Count"] = len(
-            df[(df[start_col] == 0) & (df[end_col] == 0)].index
+
+        # Count end-only matches
+        end_only_matches = (
+            error_groups.apply(
+                lambda x: not (x[start_col] == 1).any() and (x[end_col] == 1).any()
+            )
+            .astype(int)
+            .sum()
         )
 
-    # Calculate percentage of fully matched high / low errors and hesitations
-    sheet_data["high-error-full-match_Percentage"] = 100 * (
-        sheet_data["high-error-full-match_Count"]
-        / max(len(df[~df["high-error-start"].isna()].index), 1)
-    )
-    sheet_data["low-error-full-match_Percentage"] = 100 * (
-        sheet_data["low-error-full-match_Count"]
-        / max(len(df[~df["low-error-start"].isna()].index), 1)
-    )
-    sheet_data["hesitation-full-match_Percentage"] = 100 * (
-        sheet_data["hesitation-full-match_Count"]
-        / max(len(df[~df["hesitation-start"].isna()].index), 1)
-    )
+        # Count no matches
+        no_matches = (
+            error_groups.apply(
+                lambda x: not (x[start_col] == 1).any() and not (x[end_col] == 1).any()
+            )
+            .astype(int)
+            .sum()
+        )
 
-    # Calculate percentage of partial matches
+        # Store counts
+        sheet_data[f"{error_type}-full-match_Count"] = full_matches
+        sheet_data[f"{error_type}-start-match-only_Count"] = start_only_matches
+        sheet_data[f"{error_type}-end-match-only_Count"] = end_only_matches
+        sheet_data[f"{error_type}-no-match_Count"] = no_matches
 
-    # High error partial matches
-    sheet_data["high-error-start-match_Percentage"] = 100 * (
-        sheet_data["high-error-start-match_Count"]
-        / max(len(df[~df["high-error-start"].isna()].index), 1)
-    )
-    sheet_data["high-error-end-match_Percentage"] = 100 * (
-        sheet_data["high-error-end-match_Count"]
-        / max(len(df[~df["high-error-end"].isna()].index), 1)
-    )
-    sheet_data["high-error-partial-match_Percentage"] = (
-        sheet_data["high-error-start-match_Percentage"]
-        + sheet_data["high-error-end-match_Percentage"]
-    )
-    # Low error partial matches
-    sheet_data["low-error-start-match_Percentage"] = 100 * (
-        sheet_data["low-error-start-match_Count"]
-        / max(len(df[~df["low-error-start"].isna()].index), 1)
-    )
-    sheet_data["low-error-end-match_Percentage"] = 100 * (
-        sheet_data["low-error-end-match_Count"]
-        / max(len(df[~df["low-error-end"].isna()].index), 1)
-    )
-    sheet_data["low-error-partial-match_Percentage"] = (
-        sheet_data["low-error-start-match_Percentage"]
-        + sheet_data["low-error-end-match_Percentage"]
-    )
-    # Hesitation partial matches
-    sheet_data["hesitation-start-match_Percentage"] = 100 * (
-        sheet_data["hesitation-start-match_Count"]
-        / max(len(df[~df["hesitation-start"].isna()].index), 1)
-    )
-    sheet_data["hesitation-end-match_Percentage"] = 100 * (
-        sheet_data["hesitation-end-match_Count"]
-        / max(len(df[~df["hesitation-end"].isna()].index), 1)
-    )
-    sheet_data["hesitation-partial-match_Percentage"] = (
-        sheet_data["hesitation-start-match_Percentage"]
-        + sheet_data["hesitation-end-match_Percentage"]
-    )
+        # Calculate and store percentages - explicitly cast to float64
+        sheet_data[f"{error_type}-full-match_Percentage"] = pd.Series(
+            [(full_matches / total_errors) * 100], dtype="float64"
+        )[0]
+        sheet_data[f"{error_type}-start-match-only_Percentage"] = pd.Series(
+            [(start_only_matches / total_errors) * 100], dtype="float64"
+        )[0]
+        sheet_data[f"{error_type}-end-match-only_Percentage"] = pd.Series(
+            [(end_only_matches / total_errors) * 100], dtype="float64"
+        )[0]
+        sheet_data[f"{error_type}-no-match_Percentage"] = pd.Series(
+            [(no_matches / total_errors) * 100], dtype="float64"
+        )[0]
 
-    # Calculate percentage of no matches
-    sheet_data["high-error-no-match_Percentage"] = 100 * (
-        sheet_data["high-error-no-match_Count"]
-        / max(len(df[~df["high-error-start"].isna()].index), 1)
-    )
-    sheet_data["low-error-no-match_Percentage"] = 100 * (
-        sheet_data["low-error-no-match_Count"]
-        / max(len(df[~df["low-error-start"].isna()].index), 1)
-    )
-    sheet_data["hesitation-no-match_Percentage"] = 100 * (
-        sheet_data["hesitation-no-match_Count"]
-        / max(len(df[~df["hesitation-start"].isna()].index), 1)
-    )
+        # Also store total error count for reference
+        sheet_data[f"{error_type}-total_Count"] = pd.Series(
+            [total_errors], dtype="float64"
+        )[0]
 
-    return pd.DataFrame([sheet_data])
+    return sheet_data
 
 
 def summarize_word_matches(scaffold_dir: str, output_file: str) -> None:
