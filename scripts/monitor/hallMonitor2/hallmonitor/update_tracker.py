@@ -1,3 +1,4 @@
+import logging
 import math
 import os
 import re
@@ -403,7 +404,7 @@ def main(
     child: bool,
     passed_id_list: list[str],
     failed_id_list: list[str],
-):
+) -> bool:
     dataset = os.path.abspath(dataset)
     if not os.path.exists(dataset):
         raise FileNotFoundError(f"{dataset} does not exist")
@@ -418,6 +419,12 @@ def main(
 
     if not passed_id_list and not failed_id_list:
         raise ValueError("No passed or failed identifiers passed")
+
+    logger = logging.getLogger()
+    logger = logger.getChild("UpdateTracker")
+
+    # function-level global variable to check whether any errors occurred
+    successful_update = True
 
     passed_ids = [(Identifier.from_str(s), 1) for s in passed_id_list]
     failed_ids = [(Identifier.from_str(s), 0) for s in failed_id_list]
@@ -435,13 +442,20 @@ def main(
         ]
     )
 
+    # Log our passed/failed ID info
+    logger.debug(f"Got {len(passed_ids)} passed identifier(s)")
+    logger.debug(f"Got {len(failed_ids)} failed identifier(s)")
+
     dd_df = get_datadict(dataset)
     redcheck_columns, allowed_duplicate_columns = get_redcap_columns(dd_df, session)
+    logger.debug(f"Redcheck columns: {redcheck_columns}")
+    logger.debug(f"Allowed duplicate columns: {", ".join(allowed_duplicate_columns)}")
     ids = get_all_subject_ids(dataset)
     study_no = get_study_num(dataset)
 
     tracker_df = get_central_tracker(dataset)
     proj_name = os.path.basename(os.path.normpath(dataset)).removesuffix("-dataset")
+    logger.debug(f"Project name: {proj_name}")
     data_tracker_file = os.path.join(
         dataset, "data-monitoring", f"central-tracker_{proj_name}.csv"
     )
@@ -449,6 +463,7 @@ def main(
     # add new subjects to the central tracker, if there are any
     tracker_ids = tracker_df["id"].tolist()
     new_subjects = list(set(ids).difference(tracker_ids))
+    logger.debug(f"Found {len(new_subjects)} new subject(s)")
     new_subjects_df = pd.DataFrame({"id": new_subjects})
     tracker_df = pd.concat([tracker_df, new_subjects_df])
 
@@ -463,6 +478,7 @@ def main(
     all_rc_dfs = dict()
     all_rc_subjects = dict()
     for expected_rc in redcheck_columns.keys():
+        logger.debug(f"Processing expected REDCap {expected_rc}")
         present = False
         remote_rcs = [
             r
@@ -470,6 +486,9 @@ def main(
             if os.path.basename(r).startswith(REMOTE_REDCAP_PREFIX + proj_name)
         ]
         normal_rcs = [r for r in redcaps if r not in remote_rcs]
+        logger.debug(
+            f"Found {len(normal_rcs)} normal RC(s), {len(remote_rcs)} remote RC(s)"
+        )
 
         matching_rcs = list(
             filter(
@@ -477,19 +496,27 @@ def main(
                 normal_rcs,
             )
         )
+        logger.debug(f"Found {len(matching_rcs)} matching RC(s)")
         if len(matching_rcs) == 0:
-            raise FileNotFoundError(f"Could not find a file matching {expected_rc}")
+            logger.error(f"Could not find a file matching {expected_rc}")
+            successful_update = False
+            continue
         elif len(matching_rcs) > 1:
-            raise FileExistsError(
+            logger.error(
                 f'Multiple REDCaps found with name "{expected_rc}" specified in datadict: '
                 + ", ".join(matching_rcs)
             )
+            successful_update = False
+            continue
         else:  # desired case with N=1 match
             redcap_path = matching_rcs[0]
             all_redcap_paths[expected_rc] = redcap_path
+            present = True
+            logger.debug(f"Found match {redcap_path}")
 
         remote_rc = ""
         for redcap in remote_rcs:
+            logger.debug(f"Processing remote RC {redcap}")
             rc_basename = os.path.basename(redcap.lower())
             if expected_rc not in rc_basename:
                 continue
@@ -498,25 +525,29 @@ def main(
             if expected_rc in all_redcap_paths:
                 # save remote redcap for later
                 remote_rc = redcap
+                logger.debug("Saving remote RC for later")
             else:
                 # treat remote redcap as the only redcap
                 redcap_path = redcap
                 all_redcap_paths[expected_rc] = redcap
+                logger.debug("Treating remote RC as only REDCap")
 
             break
 
         if not present:
-            FileNotFoundError(
-                f'Can\'t find redcap "{expected_rc}" specified in datadict'
-            )
+            logger.error(f'Can\'t find redcap "{expected_rc}" specified in datadict')
+            successful_update = False
+            continue
 
         # re-index redcap and save to redcheck_columns
 
         if "id_column" in redcheck_columns[expected_rc].keys():
             # ID column has been specified
             id_col = str(redcheck_columns[expected_rc]["id_column"])
+            logger.debug(f"ID column specified: {id_col}")
         else:  # no ID column specified, use default
             id_col = "record_id"
+            logger.debug(f"ID column unspecified, using {id_col}")
 
         rc_df = pd.read_csv(redcap_path)
 
@@ -524,7 +555,10 @@ def main(
         rc_cols = rc_df.columns
         col_matches = rc_cols[rc_cols.str.startswith(id_col)]
         if col_matches.empty:  # column match not found, raise an error
-            raise ValueError(f"Column {id_col} not found for RedCAP {redcap_path}")
+            logger.error(f"Column {id_col} not found for RedCAP {redcap_path}")
+            successful_update = False
+            continue
+        logger.debug(f"Found column matches {", ".join(col_matches)}")
         rc_id_col = col_matches[0]
 
         if remote_rc:  # if there is both a remote and in-person redcap...
@@ -533,10 +567,12 @@ def main(
             # ...ensure that each subject is only in one redcap or the other, then...
             duped_subs = set(remote_df[rc_id_col]) & set(rc_df[rc_id_col])
             if duped_subs:
-                raise ValueError(
+                logger.error(
                     "The following subjects are in the remote-only and in-person REDCaps: "
                     + ", ".join(str(sub) for sub in duped_subs)
                 )
+                successful_update = False
+                continue
 
             # ...append remote RC to in-person RC, since variables are the same
             rc_df = pd.concat([rc_df, remote_df])
@@ -552,11 +588,15 @@ def main(
             for rc_col in vals.keys():
                 if vals[rc_col] > 1:
                     dupes.append(rc_col)
-            raise ValueError(
+            logger.error(
                 f"Duplicate columns found in redcap {redcap_path}: " + ", ".join(dupes)
             )
+            successful_update = False
+
+    logger.debug("Finished initial REDCap matching, proceeding to update tracker")
 
     for expected_rc in redcheck_columns.keys():
+        logger.debug(f"Updating tracker for {expected_rc}")
         rc_df = all_rc_dfs[expected_rc]
         rc_subjects = []
         rc_ids = rc_df.index.tolist()
@@ -567,6 +607,7 @@ def main(
                 if child_id_match is not None:
                     child_id = int(study_no + "0" + child_id_match.group(1))
                     rc_subjects.append(child_id)
+                    logger.debug(f"Child ID {child_id} found for parent ID {id}")
         else:
             rc_subjects = rc_ids
         rc_subjects.sort()
@@ -590,13 +631,17 @@ def main(
                     if key in other_rc_df.columns:
                         other_rcs.append(redcap)
                 if len(other_rcs) >= 1:
-                    raise KeyError(
+                    logger.error(
                         f'Can\'t find "{key}" in {expected_rc} redcap, but found in '
                         + ", ".join(other_rcs)
                         + " redcaps"
                     )
+                    successful_update = False
+                    continue
                 else:
-                    raise KeyError(f'Can\'t find "{key}" in {expected_rc} redcap')
+                    logger.error(f'Can\'t find "{key}" in {expected_rc} redcap')
+                    successful_update = False
+                    continue
 
         for index, row in rc_df.iterrows():
             if (isinstance(index, float) or isinstance(index, int)) and not math.isnan(
@@ -604,7 +649,7 @@ def main(
             ):
                 id = int(row.name)
             else:
-                print(
+                logger.info(
                     "Skipping NaN value in " + str(all_redcap_paths[expected_rc]),
                     ": " + str(index),
                 )
@@ -616,7 +661,7 @@ def main(
                     child_id = study_no + "0" + child_id_match.group(1)
                     child_id = int(child_id)
                 else:
-                    print(
+                    logger.info(
                         str(id),
                         "doesn't match expected child or parent id format of \""
                         + study_no
@@ -627,7 +672,7 @@ def main(
                 child_id = id
 
             if child_id not in tracker_df.index:
-                print(child_id, "missing in tracker file, skipping")
+                logger.info(child_id, "missing in tracker file, skipping")
                 continue
 
             keys_in_redcap = dict()
@@ -694,17 +739,17 @@ def main(
             redcaps_of_duplicates.append(", ".join(rcs))
 
     if len(all_duplicate_cols) > 0:
-        errmsg = c.RED + "Error: Duplicate columns were found across Redcaps: "
+        errmsg = "Duplicate columns were found across Redcaps: "
         for i in range(0, len(all_duplicate_cols)):
             errmsg = (
                 errmsg
                 + all_duplicate_cols[i]
                 + " in "
                 + redcaps_of_duplicates[i]
-                + "; "
+                + "; Exiting."
             )
-        print(errmsg + "Exiting." + c.ENDC)
-        raise ValueError(errmsg)
+        logger.error(errmsg)
+        successful_update = False
 
     # update central tracker with a 1 for each fully-verified identifier
 
@@ -743,11 +788,11 @@ def main(
 
     updated_datatypes = ", ".join(id_df["variable"].unique())
     if updated_datatypes:
-        print(c.GREEN + f"Success: {updated_datatypes} data tracker updated." + c.ENDC)
+        logger.info(f"Success: {updated_datatypes} data tracker updated.")
     else:
-        print(c.GREEN + "Success: No datatypes updated." + c.ENDC)
+        logger.info("Success: No datatypes updated.")
 
-    return True
+    return successful_update
 
 
 def get_central_tracker(dataset):
