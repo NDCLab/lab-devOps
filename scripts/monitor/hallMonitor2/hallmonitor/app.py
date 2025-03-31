@@ -730,7 +730,8 @@ def main(args: Namespace):
 
     # set up logging to file and console
 
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger()
+    logger.name = "hallMonitor"
     logger.setLevel(logging.DEBUG)
     logger.propagate = False
 
@@ -916,11 +917,26 @@ def main(args: Namespace):
         ]
         sr_redcaps += universal_redcaps
         try:
-            update_tracker.main(
-                dataset, sr_redcaps, sr, bool(args.child_data), passed_ids, failed_ids
+            success = update_tracker.main(
+                dataset,
+                sr_redcaps,
+                sr,
+                bool(args.child_data),
+                passed_ids,
+                failed_ids,
             )
-        except Exception as err:
-            logger.error("update_tracker.py failed for ses/run %s (%s)", sr, err)
+            if not success:
+                logger.warning(
+                    "Non-critical error(s) when updating tracker"
+                    + "for ses/run %s (see logs)",
+                    sr,
+                )
+                failed_sr.append(sr)
+        except Exception:
+            logger.exception(
+                "Critical error when updating tracker for ses/run %s",
+                sr,
+            )
             failed_sr.append(sr)
 
     if failed_sr:

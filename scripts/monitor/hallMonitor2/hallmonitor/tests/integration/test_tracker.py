@@ -522,7 +522,7 @@ class DuplicateREDCapColumnsTestCase(TrackerTestCase):
 
         mock_logger = mock.Mock()
         with (
-            mock.patch("logging.getLogger", return_value=mock_logger),
+            mock.patch("logging.Logger.getChild", return_value=mock_logger),
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
             app.main(args)
@@ -578,8 +578,9 @@ class MissingREDCapColumnTestCase(TrackerTestCase):
         args.no_qa = True
 
         mock_logger = mock.Mock()
+        # update_tracker.py inits logger from base logger using baselogger.getChild()
         with (
-            mock.patch("logging.getLogger", return_value=mock_logger),
+            mock.patch("logging.Logger.getChild", return_value=mock_logger),
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
             app.main(args)
@@ -650,7 +651,7 @@ class RelocatedREDCapColumnTestCase(TrackerTestCase):
 
         mock_logger = mock.Mock()
         with (
-            mock.patch("logging.getLogger", return_value=mock_logger),
+            mock.patch("logging.Logger.getChild", return_value=mock_logger),
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
             app.main(args)
@@ -712,7 +713,7 @@ class RemoteAndInPersonREDCapTestCase(TrackerTestCase):
 
         mock_logger = mock.Mock()
         with (
-            mock.patch("logging.getLogger", return_value=mock_logger),
+            mock.patch("logging.Logger.getChild", return_value=mock_logger),
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
             app.main(args)
