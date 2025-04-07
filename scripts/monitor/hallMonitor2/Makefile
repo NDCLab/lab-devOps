@@ -11,4 +11,4 @@ $(CONTAINER): Singularity.def pyproject.toml
 	sudo singularity build $(CONTAINER) Singularity.def
 
 clean:
-	rm -rf build 
+	rm -rf build
