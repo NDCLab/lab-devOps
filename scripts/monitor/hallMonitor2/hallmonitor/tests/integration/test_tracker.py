@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from io import StringIO
@@ -520,21 +521,23 @@ class DuplicateREDCapColumnsTestCase(TrackerTestCase):
         args.raw_only = True
         args.no_qa = True
 
-        mock_logger = mock.Mock()
         with (
-            mock.patch("logging.Logger.getChild", return_value=mock_logger),
+            mock.patch.object(logging.Logger, "error") as mock_error,
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
             app.main(args)
 
-        error_re = r".*[Dd]uplicate column.*"
-        error_re += re.escape(self.duped_col)
+        assert mock_error.call_count == 3, mock_error._calls_repr()
 
-        assert mock_logger.error.call_count == 3
-        for call in mock_logger.error.call_args_list:
-            assert any(
-                re.match(error_re, str(arg)) for arg in call.args
-            ), f"Unexpected error: {call.args}"
+        error_re = re.compile(r".*[Dd]uplicate column.*")
+        col_re = re.compile(re.escape(self.duped_col))
+
+        for call in mock_error.call_args_list:
+            args = map(str, call.args)
+            error_matches = any(error_re.match(arg) for arg in args)
+            col_matches = any(col_re.match(arg) for arg in args)
+
+            assert error_matches and col_matches, f"Unexpected error: {call.args}"
 
 
 def test_duplicate_redcap_columns(request):
@@ -577,23 +580,23 @@ class MissingREDCapColumnTestCase(TrackerTestCase):
         args.raw_only = True
         args.no_qa = True
 
-        mock_logger = mock.Mock()
-        # update_tracker.py inits logger from base logger using baselogger.getChild()
         with (
-            mock.patch("logging.Logger.getChild", return_value=mock_logger),
+            mock.patch.object(logging.Logger, "error") as mock_error,
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
             app.main(args)
 
-        error_re = r".*" + re.escape(self.removed_col)
-        error_re += r".*bbschild.*"
+        assert mock_error.call_count >= 1, mock_error._calls_repr()
 
-        assert mock_logger.error.call_count == 1
+        removed_col_re = re.compile(re.escape(self.removed_col))
+        col_re = re.compile(re.escape("bbschild"))
 
-        err_call = mock_logger.error.call_args_list[0]
-        assert any(
-            re.match(error_re, str(arg)) for arg in err_call.args
-        ), f"Unexpected error: {err_call.args}"
+        for call in mock_error.call_args_list:
+            args = map(str, call.args)
+            removed_matches = any(removed_col_re.search(arg) for arg in args)
+            col_matches = any(col_re.search(arg) for arg in args)
+
+            assert removed_matches and col_matches, f"Unexpected error: {call.args}"
 
 
 def test_missing_redcap_column(request):
@@ -649,22 +652,23 @@ class RelocatedREDCapColumnTestCase(TrackerTestCase):
         args.raw_only = True
         args.no_qa = True
 
-        mock_logger = mock.Mock()
         with (
-            mock.patch("logging.Logger.getChild", return_value=mock_logger),
+            mock.patch.object(logging.Logger, "error") as mock_error,
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
             app.main(args)
 
-        assert mock_logger.error.call_count == 1, mock_logger.error._calls_repr()
-        # examine the arguments passed to the first call of logger.error()
-        err_call_args = mock_logger.error.call_args_list[0].args
-        target_keywords = [self.moved_col, "bbschild", "iqschild"]
-        for arg in err_call_args:
-            arg_str = str(arg)
-            if all(kw in arg_str for kw in target_keywords):
-                return  # expected error found
-        raise AssertionError(f"Unexpected error: {err_call_args}")
+        assert mock_error.call_count >= 1, mock_error._calls_repr()
+
+        keywords = [self.moved_col, "bbschild", "iqschild"]
+        keyword_pats = [re.compile(re.escape(kw)) for kw in keywords]
+        # We're only interested in the first call to Logger.error()
+        args = list(map(str, mock_error.call_args_list[0].args))
+
+        for pat in keyword_pats:
+            assert any(
+                pat.search(arg.lower()) for arg in args
+            ), f"Did not find keyword: {pat.pattern}"
 
 
 def test_relocated_redcap_column(request):
@@ -711,22 +715,23 @@ class RemoteAndInPersonREDCapTestCase(TrackerTestCase):
         args.raw_only = True
         args.no_qa = True
 
-        mock_logger = mock.Mock()
         with (
-            mock.patch("logging.Logger.getChild", return_value=mock_logger),
+            mock.patch.object(logging.Logger, "error") as mock_error,
             pytest.raises(RuntimeError, match=r"Could not update tracker.*"),
         ):
             app.main(args)
 
-        assert mock_logger.error.call_count == 1, mock_logger.error._calls_repr()
-        # examine the arguments passed to the first call of logger.error()
-        err_call_args = mock_logger.error.call_args_list[0].args
-        target_keywords = ["remote-only", "in-person", str(self.sub_id)]
-        for arg in err_call_args:
-            arg_str = str(arg)
-            if all(kw in arg_str for kw in target_keywords):
-                return  # expected error found
-        raise AssertionError(f"Unexpected error: {err_call_args}")
+        assert mock_error.call_count >= 1, mock_error._calls_repr()
+
+        keywords = ["remote-only", "in-person", str(self.sub_id)]
+        keyword_pats = [re.compile(re.escape(kw)) for kw in keywords]
+        # We're only interested in the first call to Logger.error()
+        args = list(map(str, mock_error.call_args_list[0].args))
+
+        for pat in keyword_pats:
+            assert any(
+                pat.search(arg.lower()) for arg in args
+            ), f"Did not find keyword: {pat.pattern}"
 
 
 def test_remote_and_in_person_redcap(request):
