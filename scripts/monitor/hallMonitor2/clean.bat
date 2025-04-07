@@ -1,0 +1,3 @@
+@echo off
+echo Cleaning build artifacts using WSL...
+wsl make clean

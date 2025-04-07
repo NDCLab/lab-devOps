@@ -1,0 +1,3 @@
+@echo off
+echo Building Singularity container using WSL...
+wsl make

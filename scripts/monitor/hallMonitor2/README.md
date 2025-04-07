@@ -11,14 +11,28 @@ The `hallmonitor` module is designed to ensure data integrity within the [NDCLab
 - **Central Tracker Update**: Updates a central tracker with the status of validated files.
 
 ## Building with Singularity
-To build `hallmonitor`, you should first install [Singularity](https://github.com/sylabs/singularity/blob/main/INSTALL.md) using your preferred method.
+To build `hallmonitor`, you'll need:
+* [Singularity](https://github.com/sylabs/singularity/blob/main/INSTALL.md) — Install via your preferred method (e.g. package manager or from source).
+* `make` utility — Required to run the build script:
+    * **Linux**: Typically preinstalled.
+    * **macOS**: Install via [Homebrew](https://formulae.brew.sh/formula/make).
+    * **Windows**: Use [WSL (Windows Subsystem for Linux)](https://learn.microsoft.com/en-us/windows/wsl/install), which includes access to standard Linux tooling like `make` and can run Singularity if installed within the WSL environment.
 
 Once you have Singularity installed, navigate to the root directory of this project (the directory containing `pyproject.toml`) and run:
 ```sh
 make
 ```
 
-This will build a Singularity container in the `build/` directory. The build process should take around a minute depending on your computer's specs. The container will be named according to the version in `pyproject.toml` (e.g., `build/hm2_0-1-0.sif` for version 0.1.0).
+> **Windows users**: You can either run the `make` command directly from within WSL, or run the included `build.bat` from **Command Prompt**. This will automatically invoke the build inside WSL:
+> ```bat
+> build.bat
+> ```
+> To clean old builds from **Command Prompt**, use:
+> ```bat
+> clean.bat
+> ```
+
+This will build a Singularity container in the `build/` directory. The build process typically takes about a minute, depending on your system. The container will be named based on the version in `pyproject.toml` (e.g., `build/hm2_0-1-0.sif` for version 0.1.0).
 
 To remove old builds from the `build/` directory, run:
 ```sh
