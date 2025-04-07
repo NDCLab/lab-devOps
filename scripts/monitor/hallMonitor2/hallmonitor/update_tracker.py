@@ -443,19 +443,22 @@ def main(
     )
 
     # Log our passed/failed ID info
-    logger.debug(f"Got {len(passed_ids)} passed identifier(s)")
-    logger.debug(f"Got {len(failed_ids)} failed identifier(s)")
+    logger.debug("Got %d passed identifier(s)", len(passed_ids))
+    logger.debug("Got %d failed identifier(s)", len(failed_ids))
 
     dd_df = get_datadict(dataset)
     redcheck_columns, allowed_duplicate_columns = get_redcap_columns(dd_df, session)
-    logger.debug(f"Redcheck columns: {redcheck_columns}")
-    logger.debug(f"Allowed duplicate columns: {", ".join(allowed_duplicate_columns)}")
+    logger.debug(
+        "Redcheck columns: %s",
+        ", ".join(f"{k} ({v})" for k, v in redcheck_columns.items()),
+    )
+    logger.debug("Allowed duplicate columns: %s", ", ".join(allowed_duplicate_columns))
     ids = get_all_subject_ids(dataset)
     study_no = get_study_num(dataset)
 
     tracker_df = get_central_tracker(dataset)
     proj_name = os.path.basename(os.path.normpath(dataset)).removesuffix("-dataset")
-    logger.debug(f"Project name: {proj_name}")
+    logger.debug("Project name: %s", proj_name)
     data_tracker_file = os.path.join(
         dataset, "data-monitoring", f"central-tracker_{proj_name}.csv"
     )
@@ -463,7 +466,7 @@ def main(
     # add new subjects to the central tracker, if there are any
     tracker_ids = tracker_df["id"].tolist()
     new_subjects = list(set(ids).difference(tracker_ids))
-    logger.debug(f"Found {len(new_subjects)} new subject(s)")
+    logger.debug("Found %d new subject(s)", len(new_subjects))
     new_subjects_df = pd.DataFrame({"id": new_subjects})
     tracker_df = pd.concat([tracker_df, new_subjects_df])
 
@@ -478,7 +481,7 @@ def main(
     all_rc_dfs = dict()
     all_rc_subjects = dict()
     for expected_rc in redcheck_columns.keys():
-        logger.debug(f"Processing expected REDCap {expected_rc}")
+        logger.debug("Processing expected REDCap %s", expected_rc)
         present = False
         remote_rcs = [
             r
@@ -487,7 +490,7 @@ def main(
         ]
         normal_rcs = [r for r in redcaps if r not in remote_rcs]
         logger.debug(
-            f"Found {len(normal_rcs)} normal RC(s), {len(remote_rcs)} remote RC(s)"
+            "Found %d normal RC(s), %d remote RC(s)", len(normal_rcs), len(remote_rcs)
         )
 
         matching_rcs = list(
@@ -496,15 +499,16 @@ def main(
                 normal_rcs,
             )
         )
-        logger.debug(f"Found {len(matching_rcs)} matching RC(s)")
+        logger.debug("Found %d matching RC(s)", len(matching_rcs))
         if len(matching_rcs) == 0:
-            logger.error(f"Could not find a file matching {expected_rc}")
+            logger.error("Could not find a file matching %s", expected_rc)
             successful_update = False
             continue
         elif len(matching_rcs) > 1:
             logger.error(
-                f'Multiple REDCaps found with name "{expected_rc}" specified in datadict: '
-                + ", ".join(matching_rcs)
+                'Multiple REDCaps found with name "%s" specified in datadict: %s',
+                expected_rc,
+                ", ".join(matching_rcs),
             )
             successful_update = False
             continue
@@ -512,11 +516,11 @@ def main(
             redcap_path = matching_rcs[0]
             all_redcap_paths[expected_rc] = redcap_path
             present = True
-            logger.debug(f"Found match {redcap_path}")
+            logger.debug("Found match %s", redcap_path)
 
         remote_rc = ""
         for redcap in remote_rcs:
-            logger.debug(f"Processing remote RC {redcap}")
+            logger.debug("Processing remote RC %s", redcap)
             rc_basename = os.path.basename(redcap.lower())
             if expected_rc not in rc_basename:
                 continue
@@ -535,7 +539,7 @@ def main(
             break
 
         if not present:
-            logger.error(f'Can\'t find redcap "{expected_rc}" specified in datadict')
+            logger.error('Can\'t find redcap "%s" specified in datadict', expected_rc)
             successful_update = False
             continue
 
@@ -544,10 +548,10 @@ def main(
         if "id_column" in redcheck_columns[expected_rc].keys():
             # ID column has been specified
             id_col = str(redcheck_columns[expected_rc]["id_column"])
-            logger.debug(f"ID column specified: {id_col}")
+            logger.debug("ID column specified: %s", id_col)
         else:  # no ID column specified, use default
             id_col = "record_id"
-            logger.debug(f"ID column unspecified, using {id_col}")
+            logger.debug("ID column unspecified, using %s", id_col)
 
         rc_df = pd.read_csv(redcap_path)
 
@@ -555,10 +559,10 @@ def main(
         rc_cols = rc_df.columns
         col_matches = rc_cols[rc_cols.str.startswith(id_col)]
         if col_matches.empty:  # column match not found, raise an error
-            logger.error(f"Column {id_col} not found for RedCAP {redcap_path}")
+            logger.error("Column %s not found for RedCAP %s", id_col, redcap_path)
             successful_update = False
             continue
-        logger.debug(f"Found column matches {", ".join(col_matches)}")
+        logger.debug("Found column matches %s", ", ".join(col_matches))
         rc_id_col = col_matches[0]
 
         if remote_rc:  # if there is both a remote and in-person redcap...
@@ -568,8 +572,8 @@ def main(
             duped_subs = set(remote_df[rc_id_col]) & set(rc_df[rc_id_col])
             if duped_subs:
                 logger.error(
-                    "The following subjects are in the remote-only and in-person REDCaps: "
-                    + ", ".join(str(sub) for sub in duped_subs)
+                    "The following subjects are in the remote-only and in-person REDCaps: %s",
+                    ", ".join(str(sub) for sub in duped_subs),
                 )
                 successful_update = False
                 continue
@@ -589,14 +593,16 @@ def main(
                 if vals[rc_col] > 1:
                     dupes.append(rc_col)
             logger.error(
-                f"Duplicate columns found in redcap {redcap_path}: " + ", ".join(dupes)
+                "Duplicate columns found in redcap %s: %s",
+                redcap_path,
+                ", ".join(dupes),
             )
-            successful_update = False
+            return False
 
     logger.debug("Finished initial REDCap matching, proceeding to update tracker")
 
     for expected_rc in redcheck_columns.keys():
-        logger.debug(f"Updating tracker for {expected_rc}")
+        logger.debug("Updating tracker for %s", expected_rc)
         rc_df = all_rc_dfs[expected_rc]
         rc_subjects = []
         rc_ids = rc_df.index.tolist()
@@ -607,7 +613,9 @@ def main(
                 if child_id_match is not None:
                     child_id = int(study_no + "0" + child_id_match.group(1))
                     rc_subjects.append(child_id)
-                    logger.debug(f"Child ID {child_id} found for parent ID {id}")
+                    logger.debug(
+                        "Child ID %s found for parent ID %s", str(child_id), str(id)
+                    )
         else:
             rc_subjects = rc_ids
         rc_subjects.sort()
@@ -632,14 +640,15 @@ def main(
                         other_rcs.append(redcap)
                 if len(other_rcs) >= 1:
                     logger.error(
-                        f'Can\'t find "{key}" in {expected_rc} redcap, but found in '
-                        + ", ".join(other_rcs)
-                        + " redcaps"
+                        'Can\'t find "%s" in %s redcap, but found in %s redcaps',
+                        key,
+                        expected_rc,
+                        ", ".join(other_rcs),
                     )
                     successful_update = False
                     continue
                 else:
-                    logger.error(f'Can\'t find "{key}" in {expected_rc} redcap')
+                    logger.error('Can\'t find "%s" in %s redcap', key, expected_rc)
                     successful_update = False
                     continue
 
@@ -650,8 +659,9 @@ def main(
                 id = int(row.name)
             else:
                 logger.info(
-                    "Skipping NaN value in " + str(all_redcap_paths[expected_rc]),
-                    ": " + str(index),
+                    "Skipping NaN value in %s: %s",
+                    str(all_redcap_paths[expected_rc]),
+                    str(index),
                 )
                 continue
             if child:
@@ -662,17 +672,16 @@ def main(
                     child_id = int(child_id)
                 else:
                     logger.info(
+                        '%s doesn\'t match expected child or parent id format of "%s{0,8, or 9}XXXX", skipping',
                         str(id),
-                        "doesn't match expected child or parent id format of \""
-                        + study_no
-                        + '{0,8, or 9}XXXX", skipping',
+                        study_no,
                     )
                     continue
             else:
                 child_id = id
 
             if child_id not in tracker_df.index:
-                logger.info(child_id, "missing in tracker file, skipping")
+                logger.info("%s missing in tracker file, skipping", str(child_id))
                 continue
 
             keys_in_redcap = dict()
@@ -763,7 +772,9 @@ def main(
 
     invalid_ids = id_df[~id_df["id"].isin(tracker_df.index)]["id"]
     if not invalid_ids.empty:
-        print(f"Invalid ID(s) found: {', '.join(invalid_ids.unique())}, skipping")
+        logger.error(
+            f"Invalid ID(s) found: {', '.join(map(str, invalid_ids.unique()))}, skipping"
+        )
         id_df = id_df[~id_df["id"].isin(invalid_ids)]
 
     # we're all set, update the tracker with an appropriate pass/fail value
@@ -788,7 +799,7 @@ def main(
 
     updated_datatypes = ", ".join(id_df["variable"].unique())
     if updated_datatypes:
-        logger.info(f"Success: {updated_datatypes} data tracker updated.")
+        logger.info("Success: %s data tracker updated.", updated_datatypes)
     else:
         logger.info("Success: No datatypes updated.")
 

@@ -927,7 +927,7 @@ def main(args: Namespace):
             )
             if not success:
                 logger.warning(
-                    "Non-critical error(s) when updating tracker"
+                    "Non-critical error(s) when updating tracker "
                     + "for ses/run %s (see logs)",
                     sr,
                 )
