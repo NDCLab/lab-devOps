@@ -27,23 +27,23 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
         marker_type (str): The type of error marker to match. It may be one of the following:
                           'low-error-start', 'low-error-end', 'high-error-start', or 'high-error-end'.
     """
-    # Start by finding all syllables where any-deviation = 0
-    #   AND any-deviation-before = 0 AND any-deviation-after = 0
-    candidate_df = df[
-        (df["any-deviation"] == 0)
-        & (df["any-deviation-before"] == 0)
-        & (df["any-deviation-after"] == 0)
-    ]
-    # Remove any syllables where the N+1 syllable does not also meet these criteria
-    candidate_df = candidate_df[candidate_df["any-deviation-after"].shift(-1) == 0]
+    print(f"Matching {marker_type} errors...")
 
     for idx, row in df.iterrows():
         if row[marker_type] != 1:
             continue
-        # Remove syllables matched on the previous iteration
-        candidate_df = candidate_df[
-            candidate_df[f"{extract_marker_type(marker_type)}-start"] != 1
+        # Start by finding all syllables where any-deviation = 0
+        #   AND any-deviation-before = 0 AND any-deviation-after = 0
+        candidate_df = df[
+            (df["any-deviation"] == 0)
+            & (df["any-deviation-before"] == 0)
+            & (df["any-deviation-after"] == 0)
+            # Remove any syllables where the N+1 syllable does not also meet these criteria
+            & (df["any-deviation-after"].shift(-1) == 0)
+            # Remove syllables matched on the previous iteration
+            & (df[f"comparison-{marker_type}"] != 1)
         ]
+        print(f"Size of candidate_df: {len(candidate_df)}")
 
         # Build a list of tuples of adjacent syllables
         potential_syllables = [
@@ -51,6 +51,7 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
             for i in range(len(candidate_df) - 1)
             if candidate_df.iloc[i + 1].name == candidate_df.iloc[i].name + 1
         ]
+        print(f"Size of potential_syllables: {len(potential_syllables)}")
         # Find candidate syllables that match perfectly on: first-syll-word,
         #   last-syll-word, word-before-period, word-after-period,
         #   word-before-comma, word-after-comma
@@ -64,6 +65,9 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
             & (syll_a["word-before-comma"] == row["word-before-comma"])
             & (syll_a["word-after-comma"] == row["word-after-comma"])
         ]
+        print(
+            f"Size of potential_syllables after first filter: {len(potential_syllables)}"
+        )
         # Of these potential matches, identify the candidates with an N+1 syllable
         #   that matches the target syllable's N+1 syllable on: first-syll-word,
         #   last-syll-word, word-before-period, word-after-period,
@@ -84,8 +88,30 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
                 & (syll_b["word-after-comma"] == df.iloc[idx + 1]["word-after-comma"])
             )
         ]
+        print(
+            f"Size of potential_syllables after second filter: {len(potential_syllables)}"
+        )
         if not potential_syllables:
             row[f"{marker_type}-matched"] = 0
+            if idx > 0:
+                print(
+                    "Previous syllable info:\t"
+                    + ", ".join([f"{col}: {row[col]}" for col in row.index])
+                )
+            print(
+                "Syllable info:\t"
+                + ", ".join([f"{col}: {row[col]}" for col in row.index])
+            )
+            if idx < len(df) - 1:
+                print(
+                    "Next syllable info:\t"
+                    + ", ".join(
+                        [
+                            f"{col}: {df.iloc[idx + 1][col]}"
+                            for col in df.iloc[idx + 1].index
+                        ]
+                    )
+                )
             continue
 
         # Compute the average word-freq for the target syllable
@@ -95,6 +121,7 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
             df.iloc[idx + 1]["CleanedWord"], df.iloc[idx + 1]["word-pos"]
         )
         mean_actual_freq = 0.5 * (target_syll_word_freq + next_syll_word_freq)
+        print(f"Mean actual freq: {mean_actual_freq}")
 
         # We find the potential pair of N, N+1 syllables
         #   that have the closest average word frequency
@@ -129,6 +156,8 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
                 best_freq_diff = freq_diff
                 best_freq_diff_idx = syll_a.name
 
+        print(f"Best freq diff: {best_freq_diff}")
+
         # Mark the target syllable as matched
         df.at[idx, f"{marker_type}-matched"] = 1
 
@@ -139,3 +168,6 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
         df.at[
             best_freq_diff_idx, f"comparison-{extract_marker_type(marker_type)}-idx"
         ] = row[f"{extract_marker_type(marker_type)}-idx"]
+        print(
+            f"Matched {row['syllable_id']} to {df.at[best_freq_diff_idx, 'syllable_id']}"
+        )
