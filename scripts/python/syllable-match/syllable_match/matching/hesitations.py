@@ -42,11 +42,11 @@ def match_hesitations(df: pd.DataFrame) -> None:
             (syll_a, syll_b)
             for syll_a, syll_b in potential_syllables
             if (syll_a["first-syll-word"] == hesitation_start["first-syll-word"])
-            & (syll_a["last-syll-word"] == hesitation_start["last-syll-word"])
-            & (syll_a["word-before-period"] == hesitation_start["word-before-period"])
-            & (syll_a["word-after-period"] == hesitation_start["word-after-period"])
-            & (syll_a["word-before-comma"] == hesitation_start["word-before-comma"])
-            & (syll_a["word-after-comma"] == hesitation_start["word-after-comma"])
+            and (syll_a["last-syll-word"] == hesitation_start["last-syll-word"])
+            and (syll_a["word-before-period"] == hesitation_start["word-before-period"])
+            and (syll_a["word-after-period"] == hesitation_start["word-after-period"])
+            and (syll_a["word-before-comma"] == hesitation_start["word-before-comma"])
+            and (syll_a["word-after-comma"] == hesitation_start["word-after-comma"])
         ]
         print(
             f"Size of potential_syllables after first filter: {len(potential_syllables)}"
@@ -59,9 +59,9 @@ def match_hesitations(df: pd.DataFrame) -> None:
             (syll_a, syll_b)
             for syll_a, syll_b in potential_syllables
             if (syll_b["first-syll-word"] == hesitation_end["first-syll-word"])
-            & (syll_b["last-syll-word"] == hesitation_end["last-syll-word"])
-            & (syll_b["word-before-period"] == hesitation_end["word-before-period"])
-            & (syll_b["word-after-period"] == hesitation_end["word-after-period"])
+            and (syll_b["last-syll-word"] == hesitation_end["last-syll-word"])
+            and (syll_b["word-before-period"] == hesitation_end["word-before-period"])
+            and (syll_b["word-after-period"] == hesitation_end["word-after-period"])
         ]
         print(
             f"Size of potential_syllables after second filter: {len(potential_syllables)}"
