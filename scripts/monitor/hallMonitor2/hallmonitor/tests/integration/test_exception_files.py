@@ -277,7 +277,11 @@ class DeviationFileWithBadNamesTestCase(ExceptionTestCase):
         return modified_files
 
     def get_expected_errors(self):
-        error_info = "File badfilename.eeg does not match expected identifier format"
+        new_path = os.path.join(
+            self.case_dir,
+            self.build_path("s1_r1", "eeg", "badfilename.eeg", self.is_raw),
+        )
+        error_info = f"File {new_path} does not match expected identifier format"
         errors = [ExpectedError("Naming error", re.escape(error_info))]
 
         return errors
@@ -362,7 +366,11 @@ class IssueFileTestCase(ExceptionTestCase):
         return modified_files
 
     def get_expected_errors(self):
-        issue_info = "Found issue.txt in identifier's directory"
+        issue_location = os.path.join(
+            self.case_dir,
+            self.build_path("s1_r1", "psychopy", "issue.txt", self.is_raw),
+        )
+        issue_info = f"Found issue.txt in {os.path.dirname(issue_location)}"
         unexpected_info = "Unexpected file issue.txt found"
         errors = [
             ExpectedError("Issue file", re.escape(issue_info)),

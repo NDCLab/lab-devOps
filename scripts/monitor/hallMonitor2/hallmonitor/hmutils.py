@@ -1592,13 +1592,15 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
     Args:
         logger (logging.Logger): The logger object used to log the error.
         dataset (str): The path to the dataset directory.
-        filename (str): The name of the file to check.
+        filepath (str): The path to the file to check.
         has_deviation (bool, optional): A flag indicating if the file has a deviation. Defaults to False.
 
     Returns:
         errors: List of errors associated with the file name.
     """
     errors = []
+
+    filename = os.path.basename(filepath)
 
     no_data_re = IDENTIFIER_RE + r"_no-data\.txt"
     no_data_match = re.fullmatch(no_data_re, filename)
@@ -1613,7 +1615,7 @@ def get_naming_errors(logger, dataset, filename, has_deviation=False):
                 dataset,
                 "",
                 "Naming error",
-                f"File {filename} does not match expected identifier format",
+                f"File {filepath} does not match expected identifier format",
             )
         )
         return errors
