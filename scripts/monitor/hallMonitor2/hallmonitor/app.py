@@ -319,33 +319,37 @@ def validate_data(
         # handle misnamed files
 
         misnamed_files = []
-        for file in dir_filenames:
-            if file == deviation_file:
+        dir_filepaths = [os.path.join(id_dir, f) for f in dir_filenames]
+        for file_path in dir_filepaths:
+            file_name = os.path.basename(file_path)
+            if file_name == deviation_file:
                 continue
-            elif file == "issue.txt":
+            elif file_name == "issue.txt":
                 pending.append(
                     new_error_record(
                         logger,
                         dataset,
                         id,
                         "Issue file",
-                        "Found issue.txt in identifier's directory",
+                        f"Found issue.txt in {os.path.dirname(file_path)}",
                     )
                 )
                 continue
 
-            naming_errors = get_naming_errors(logger, dataset, file, has_deviation)
+            naming_errors = get_naming_errors(logger, dataset, file_path, has_deviation)
             if len(naming_errors) > 0:
                 pending.extend(naming_errors)
                 logger.debug(
-                    "Found %d naming error(s) in file %s", len(naming_errors), file
+                    "Found %d naming error(s) in file at %s",
+                    len(naming_errors),
+                    file_path,
                 )
-                misnamed_files.append(file)
+                misnamed_files.append(file_name)
 
         logger.debug("Found %d misnamed file(s)", len(misnamed_files))
         for file in misnamed_files:
             err_type = "Improper file name"
-            err_msg = f"Found file with improper name: {file}"
+            err_msg = f"Found file with improper name: {os.path.basename(file)} (in {os.path.dirname(file)})"
 
             # log missing identifiers once for this directory and error type
             if err_type not in logged_missing_ids[id_dir]:

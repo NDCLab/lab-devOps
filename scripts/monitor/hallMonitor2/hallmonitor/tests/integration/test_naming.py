@@ -1,3 +1,4 @@
+import os
 import re
 
 from hallmonitor.tests.integration.base_cases import ExpectedError, ValidationTestCase
@@ -83,8 +84,13 @@ class MissingVariableNameTestCase(NamingTestCase):
         old_basename = basename.replace("PATTERN", old_var)
         new_basename = basename.replace("PATTERN", new_var)
 
+        new_filepath = os.path.join(
+            self.case_dir,
+            self.build_path("s1_r1", "psychopy", new_basename, self.is_raw),
+        )
+
         naming_info = re.escape(
-            f"File {new_basename} does not match expected identifier format"
+            f"File {new_filepath} does not match expected identifier format"
         )
         missing_info = re.escape(f"Expected file {old_basename} not found")
         extra_info = re.escape(f"Unexpected file {new_basename} found")
@@ -132,8 +138,12 @@ class MissingSubjectNumberTestCase(NamingTestCase):
         old_basename = basename.replace("PATTERN", old_sub)
         new_basename = basename.replace("PATTERN", new_sub)
 
+        new_path = os.path.join(
+            self.case_dir, self.build_path("s1_r1", "eeg", new_basename, self.is_raw)
+        )
+
         naming_info = re.escape(
-            f"File {new_basename} does not match expected identifier format"
+            f"File {new_path} does not match expected identifier format"
         )
         missing_info = re.escape(f"Expected file {old_basename} not found")
         extra_info = re.escape(f"Unexpected file {new_basename} found")
@@ -180,6 +190,10 @@ class InvalidSubjectNumberTestCase(NamingTestCase):
         new_sub = "303"
         old_basename = basename.replace("PATTERN", old_sub)
         new_basename = basename.replace("PATTERN", new_sub)
+
+        new_path = os.path.join(
+            self.case_dir, self.build_path("s1_r1", "eeg", new_basename, self.is_raw)
+        )
 
         naming_info = f"Subject number {new_sub} not an allowed subject value" + r".*"
         misplaced_info = (
@@ -396,8 +410,13 @@ class MissingSessionSuffixTestCase(NamingTestCase):
         old_basename = basename.replace("PATTERN", old_suffix)
         new_basename = basename.replace("PATTERN", new_suffix)
 
+        new_path = os.path.join(
+            self.case_dir,
+            self.build_path("s1_r1", "psychopy", new_basename, self.is_raw),
+        )
+
         naming_info = re.escape(
-            f"File {new_basename} does not match expected identifier format"
+            f"File {new_path} does not match expected identifier format"
         )
         missing_info = re.escape(f"Expected file {old_basename} not found")
         extra_info = re.escape(f"Unexpected file {new_basename} found")
@@ -446,8 +465,13 @@ class MissingRunSuffixTestCase(NamingTestCase):
         old_basename = basename.replace("PATTERN", old_suffix)
         new_basename = basename.replace("PATTERN", new_suffix)
 
+        new_path = os.path.join(
+            self.case_dir,
+            self.build_path("s1_r1", "psychopy", new_basename, self.is_raw),
+        )
+
         naming_info = re.escape(
-            f"File {new_basename} does not match expected identifier format"
+            f"File {new_path} does not match expected identifier format"
         )
         missing_info = re.escape(f"Expected file {old_basename} not found")
         extra_info = re.escape(f"Unexpected file {new_basename} found")
@@ -496,8 +520,13 @@ class MissingEventSuffixTestCase(NamingTestCase):
         old_basename = basename.replace("PATTERN", old_suffix)
         new_basename = basename.replace("PATTERN", new_suffix)
 
+        new_path = os.path.join(
+            self.case_dir,
+            self.build_path("s1_r1", "psychopy", new_basename, self.is_raw),
+        )
+
         naming_info = re.escape(
-            f"File {new_basename} does not match expected identifier format"
+            f"File {new_path} does not match expected identifier format"
         )
         missing_info = re.escape(f"Expected file {old_basename} not found")
         extra_info = re.escape(f"Unexpected file {new_basename} found")
@@ -595,8 +624,13 @@ class MissingExtensionTestCase(NamingTestCase):
         old_basename = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1.csv"
         new_basename = old_basename.replace(".csv", "")
 
+        new_path = os.path.join(
+            self.case_dir,
+            self.build_path("s1_r1", "psychopy", new_basename, self.is_raw),
+        )
+
         naming_info = re.escape(
-            f"File {new_basename} does not match expected identifier format"
+            f"File {new_path} does not match expected identifier format"
         )
         missing_info = re.escape(f"Expected file {old_basename} not found")
         extra_info = re.escape(f"Unexpected file {new_basename} found")
