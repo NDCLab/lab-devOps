@@ -1585,7 +1585,7 @@ def allowed_val(allowed_vals, value):
     return allowed
 
 
-def get_naming_errors(logger, dataset, filename, has_deviation=False):
+def get_naming_errors(logger, dataset, filepath, has_deviation=False):
     """
     Check if a filename meets the naming conventions for a data file.
 
