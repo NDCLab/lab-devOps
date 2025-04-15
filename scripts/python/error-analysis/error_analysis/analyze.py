@@ -30,6 +30,8 @@ def preprocess_rp1_df(df: pd.DataFrame):
 def main(processed_dir: str, recall_dir: str):
     recall_subs = os.listdir(recall_dir)
 
+    rp1_data = []
+
     for sub in recall_subs:
         recall_sub_dir = os.path.join(recall_dir, sub)
         sub_files = os.listdir(recall_sub_dir)
@@ -41,16 +43,90 @@ def main(processed_dir: str, recall_dir: str):
             print(f"Could not find recall period 1 Excel file for {sub}, skipping")
             continue
         rp_1_df = pd.read_excel(os.path.join(recall_sub_dir, rp_1_file))
-        # Preprocess parsed .xlsx columns -> "tp" (target passage), "tp2", and "os" (original speech)
+        # Preprocess parsed .xlsx columns
+        # -> "tp" (target passage), "tp2" (may be NaN), and "os" (original speech)
         rp_1_df = preprocess_rp1_df(rp_1_df)
-        print(rp_1_df)
+        rp_1_df.map(lambda x: x.strip() if pd.notnull(x) else "")
+        # Drop rows where TP is NaN (repeats)
+        rp_1_df = rp_1_df[~rp_1_df["tp"].isna()]
 
-        # print(f"Recalled passage: [passage_name]")
-        # print(f"Errors/disfluencies/total: X/Y/Z")
-        # print(f"Errors/disfluencies/total per syllable: A/B/C")
-        # print(f"Errors/disfluencies/total per word: D/E/F")
+        # Get the subject's data dir
+        sub_data_dir = os.path.join(processed_dir, sub)
+        if not os.path.isdir(sub_data_dir):
+            print(f"Could not find processed data for {sub}, skipping")
+            continue
+
+        print(f"Participant: {sub}")
+        hline = "-" * 50
+        for _, row in rp_1_df.iterrows():
+            print(hline)
+            print(f"Original speech: {row["os"]}")
+            passages = tuple(
+                str(passage).lower().replace("gen_", "")
+                for passage in [row["tp"], row["tp2"]]
+                if pd.notnull(passage)  # if tp2=NaN, skip it
+            )
+            # Get the relevant processed file(s) for the matched passage(s)
+            matches = [
+                os.path.join(sub_data_dir, f)
+                for f in os.listdir(sub_data_dir)
+                if f.startswith(passages) and "all-cols" not in f
+            ]
+            if not matches:
+                print(
+                    f"Could not find any passages matching {", ".join(passages)} "
+                    + f"for {sub} "
+                    + f"(OS {row['os']}, TP {row['tp']}, TP2 {row['tp2']})"
+                    + ", skipping"
+                )
+                continue
+            # For each match, get:
+            # - Total number of errors
+            # - Total number of disfluencies
+            # - Total number of syllables
+            # - Total number of words
+            for match in matches:
+                match_df = pd.read_csv(match)
+                passage_name = os.path.splitext(os.path.basename(match))[0]
+                print(f"Recalled passage: {passage_name}")
+                # Get general stats
+                err_count = match_df["any-error"].sum()
+                dis_count = match_df["any-disfluency"].sum()
+                syll_count = len(match_df.index)
+                word_count = match_df["first-syll-word"].sum()
+                print(f"Errors/disfluencies: {err_count}/{dis_count}")
+                # Calculate per-syllable error/disfluency rates
+                err_per_syll = err_count / max(syll_count, 1)
+                dis_per_syll = dis_count / max(syll_count, 1)
+                print(
+                    f"Errors/disfluencies per syllable: {err_per_syll:.3f}/{dis_per_syll:.3f}"
+                )
+                # Calculate per-word error/disfluency rates
+                err_per_word = err_count / max(word_count, 1)
+                dis_per_word = dis_count / max(word_count, 1)
+                print(
+                    f"Errors/disfluencies per word: {err_per_word:.3f}/{dis_per_word:.3f}"
+                )
+                # Save to
+                rp1_data.append(
+                    {
+                        "participant": sub,
+                        "originalSpeech": row["os"],
+                        "matchedPassage": passage_name,
+                        "errorCount": int(err_count),
+                        "disfluencyCount": int(dis_count),
+                        "errorsPerSyllable": err_per_syll,
+                        "disfluenciesPerSyllable": dis_per_syll,
+                        "errorsPerWord": err_per_word,
+                        "disfluenciesPerWord": dis_per_word,
+                    }
+                )
 
         # Processing for recall period 2
+
+    all_rp1_df = pd.DataFrame(rp1_data)
+    all_rp1_df.to_csv("rp1_data.csv", index=False)
+    print("Saved tabular data for RP 1!")
 
 
 # Run as python __file__ /home/nwelch/Documents/error-coding/data/processed_passages /home/nwelch/Documents/prelims-read
