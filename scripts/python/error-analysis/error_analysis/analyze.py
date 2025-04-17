@@ -58,69 +58,78 @@ def main(processed_dir: str, recall_dir: str):
 
         print(f"Participant: {sub}")
         hline = "-" * 50
+        # Get all subject files
+        all_sub_passages = [f for f in os.listdir(sub_data_dir) if "all-cols" not in f]
+        all_recalled = tuple()
         for _, row in rp_1_df.iterrows():
+            if "hammer" in row["tp"]:  # sample passage
+                continue
             print(hline)
             print(f"Original speech: {row["os"]}")
-            passages = tuple(
+            recalled_passages = tuple(
                 str(passage).lower().replace("gen_", "")
                 for passage in [row["tp"], row["tp2"]]
                 if pd.notnull(passage)  # if tp2=NaN, skip it
             )
             # Get the relevant processed file(s) for the matched passage(s)
-            matches = [
-                os.path.join(sub_data_dir, f)
-                for f in os.listdir(sub_data_dir)
-                if f.startswith(passages) and "all-cols" not in f
-            ]
-            if not matches:
+            if any(f.startswith(recalled_passages) for f in all_sub_passages):
+                all_recalled += recalled_passages
+            else:
                 print(
-                    f"Could not find any passages matching {", ".join(passages)} "
+                    f"Could not find any passages matching {", ".join(recalled_passages)} "
                     + f"for {sub} "
                     + f"(OS {row['os']}, TP {row['tp']}, TP2 {row['tp2']})"
                     + ", skipping"
                 )
                 continue
-            # For each match, get:
-            # - Total number of errors
-            # - Total number of disfluencies
-            # - Total number of syllables
-            # - Total number of words
-            for match in matches:
-                match_df = pd.read_csv(match)
-                passage_name = os.path.splitext(os.path.basename(match))[0]
-                print(f"Recalled passage: {passage_name}")
-                # Get general stats
-                err_count = match_df["any-error"].sum()
-                dis_count = match_df["any-disfluency"].sum()
-                syll_count = len(match_df.index)
-                word_count = match_df["first-syll-word"].sum()
-                print(f"Errors/disfluencies: {err_count}/{dis_count}")
-                # Calculate per-syllable error/disfluency rates
-                err_per_syll = err_count / max(syll_count, 1)
-                dis_per_syll = dis_count / max(syll_count, 1)
-                print(
-                    f"Errors/disfluencies per syllable: {err_per_syll:.3f}/{dis_per_syll:.3f}"
-                )
-                # Calculate per-word error/disfluency rates
-                err_per_word = err_count / max(word_count, 1)
-                dis_per_word = dis_count / max(word_count, 1)
-                print(
-                    f"Errors/disfluencies per word: {err_per_word:.3f}/{dis_per_word:.3f}"
-                )
-                # Save to
-                rp1_data.append(
-                    {
-                        "participant": sub,
-                        "originalSpeech": row["os"],
-                        "matchedPassage": passage_name,
-                        "errorCount": int(err_count),
-                        "disfluencyCount": int(dis_count),
-                        "errorsPerSyllable": err_per_syll,
-                        "disfluenciesPerSyllable": dis_per_syll,
-                        "errorsPerWord": err_per_word,
-                        "disfluenciesPerWord": dis_per_word,
-                    }
-                )
+
+        # For each of the participant's passages, get:
+        # - Total number of errors
+        # - Total number of disfluencies
+        # - Total number of syllables
+        # - Total number of words
+        # Report this information next to participant info and note
+        #   whether they recalled the passage.
+        for filename in all_sub_passages:
+            path = os.path.join(sub_data_dir, filename)
+            match_df = pd.read_csv(path)
+            passage_name = os.path.splitext(os.path.basename(path))[0]
+            print(
+                f"Passage: {passage_name}" + " (recalled)"
+                if passage_name.startswith(all_recalled)
+                else ""
+            )
+            # Get general stats
+            err_count = match_df["any-error"].sum()
+            dis_count = match_df["any-disfluency"].sum()
+            syll_count = len(match_df.index)
+            word_count = match_df["first-syll-word"].sum()
+            print(f"Errors/disfluencies: {err_count}/{dis_count}")
+            # Calculate per-syllable error/disfluency rates
+            err_per_syll = err_count / max(syll_count, 1)
+            dis_per_syll = dis_count / max(syll_count, 1)
+            print(
+                f"Errors/disfluencies per syllable: {err_per_syll:.3f}/{dis_per_syll:.3f}"
+            )
+            # Calculate per-word error/disfluency rates
+            err_per_word = err_count / max(word_count, 1)
+            dis_per_word = dis_count / max(word_count, 1)
+            print(
+                f"Errors/disfluencies per word: {err_per_word:.3f}/{dis_per_word:.3f}"
+            )
+            rp1_data.append(
+                {
+                    "participant": sub,
+                    "passageName": passage_name,
+                    "recalled": 1 if passage_name.startswith(all_recalled) else 0,
+                    "errorCount": int(err_count),
+                    "disfluencyCount": int(dis_count),
+                    "errorsPerSyllable": err_per_syll,
+                    "disfluenciesPerSyllable": dis_per_syll,
+                    "errorsPerWord": err_per_word,
+                    "disfluenciesPerWord": dis_per_word,
+                }
+            )
 
         # Processing for recall period 2
 
