@@ -3,52 +3,68 @@
 
 # USAGE: bash new-project-lead.sh <user1>,<user2> <project>
 
-usage() { echo "Usage: bash $0 <user1>,<user2>,... <project>"; exit 0; }
+set -euo pipefail
+
+usage() {
+    echo "Usage: bash $0 <user1>,<user2>,... <project>"
+    exit 0
+}
 
 if [[ $# -ne 2 ]]; then usage; fi
 
-proj_leads=$1
-proj_leads=${proj_leads//,/ }
-project=$2
-DATA_PATH=/home/data/NDClab/datasets
-TOOL_PATH=/home/data/NDClab/tools
-ANA_PATH=/home/data/NDClab/analyses
+# Parse users and project name
+IFS=',' read -r -a proj_leads <<<"$1"
+project="$2"
+
+# Paths
+DATA_PATH="/home/data/NDClab/datasets"
+TOOL_PATH="/home/data/NDClab/tools"
+ANA_PATH="/home/data/NDClab/analyses"
 LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
 
-function verify_lead
-{
-    b_group=$(cat $LAB_USERS_TXT)
-    b_group=(${b_group//,/ })
-    for i in "${b_group[@]}"
-    do
-        if [ $i == $1 ]; then
-            echo "true" && return
+# Function to verify that a user is in the group
+verify_lead() {
+    local lead="$1"
+    IFS=',' read -r -a group_members <<<"$(cat "$LAB_USERS_TXT")"
+    for member in "${group_members[@]}"; do
+        if [[ "$member" == "$lead" ]]; then
+            return 0
         fi
     done
-    echo "false"
+    return 1
 }
 
-for proj_lead in ${proj_leads}; do
-  unset added
-  if [[ ! $(verify_lead $proj_lead) == "true" ]]; then
-    echo "User $proj_lead not found in hpc_gbuzzell group" && exit 1
-  fi
+# Main loop
+for proj_lead in "${proj_leads[@]}"; do
+    if ! verify_lead "$proj_lead"; then
+        echo "Error: User '$proj_lead' not found in HPC group." >&2
+        exit 1
+    fi
 
-  if [[ -d `realpath $project` ]]; then #full path provided
-    project=`realpath $project`
-    echo "granting $proj_lead read write access to $project"
-    setfacl -Rm d:u:$proj_lead:rwx,u:$proj_lead:rwx $project
-    added=true
-  else #search for project name in lab folders
-    for dir in $DATA_PATH $TOOL_PATH $ANA_PATH; do
-      for repo in $(ls $dir); do
-        if [[ $repo == $project ]]; then
-          echo "granting $proj_lead read write access to $(basename $dir)/$project"
-          setfacl -Rm d:u:$proj_lead:rwx,u:$proj_lead:rwx $dir/$project
-          added=true
-        fi
-      done
-    done
-  fi
-  if [[ $added == "" ]]; then echo "project $project not found, $proj_lead not added" && exit 2; fi
+    added=false
+
+    if [[ -d $(realpath "$project") ]]; then
+        # Full path was given
+        project_path=$(realpath "$project")
+        echo "Granting $proj_lead rwx access to $project_path"
+        setfacl -Rmd u:"$proj_lead":rwx "$project_path"
+        setfacl -Rm u:"$proj_lead":rwx "$project_path"
+        added=true
+    else
+        # Search for project by name
+        for dir in "$DATA_PATH" "$TOOL_PATH" "$ANA_PATH"; do
+            if [[ -d "$dir/$project" ]]; then
+                echo "Granting $proj_lead rwx access to $dir/$project"
+                setfacl -Rmd u:"$proj_lead":rwx "$dir/$project"
+                setfacl -Rm u:"$proj_lead":rwx "$dir/$project"
+                added=true
+                break
+            fi
+        done
+    fi
+
+    if [[ "$added" == false ]]; then
+        echo "Error: Project '$project' not found. '$proj_lead' was not added." >&2
+        exit 2
+    fi
 done
