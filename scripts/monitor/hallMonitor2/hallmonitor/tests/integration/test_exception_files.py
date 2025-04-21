@@ -510,3 +510,59 @@ class DeviationNoFilesToProcessNonEEG(ExceptionTestCase):
 
 def test_deviation_no_files_to_process_non_eeg(request):
     DeviationNoFilesToProcessNonEEG.run_test_case(request)
+
+
+class CombinationAllFilesHaveDeviation(ExceptionTestCase):
+    """
+    Test case for situations where all files associated with some combination identifier
+    have a deviation string. In the past, this caused an error where the combination
+    variable would not be recognized as present, and an exception would be raised.
+    """
+
+    case_name = "CombinationAllFilesHaveDeviation"
+    description = (
+        "Adds a 'deviation.txt' file to the folder "
+        + "and sets a deviation string for all other files."
+    )
+    conditions = [
+        "Datatype is a combination type" "Folder contains deviation.txt",
+        "All standard files have a deviation string",
+    ]
+    expected_output = (
+        "The identifier is correctly marked as present, and no errors are raised."
+    )
+
+    is_raw = False
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_s1_r1_e1"
+
+        # Add deviation string to all files for this identifier
+        all_identifier_paths = [
+            os.path.basename(path)
+            for path in modified_files.keys()
+            if identifier in path and ("raw" if self.is_raw else "checked") in path
+        ]
+        for filename in all_identifier_paths:
+            ext = os.path.splitext(filename)[1]
+            new_name = f"{identifier}_additional-data-information{ext}"
+            ok = self.replace_file_name(modified_files, filename, new_name, self.is_raw)
+            if not ok:
+                raise ValueError(f"File name substitution failed for {filename}")
+
+        # Create deviation.txt file for this identifier
+        deviation_file = self.build_path(
+            "s1_r1", "psychopy", f"{identifier}_deviation.txt", self.is_raw
+        )
+        modified_files[deviation_file] = "Lorem ipsum"
+
+        return modified_files
+
+    def get_expected_errors(self):
+        return []
+
+
+def test_combination_all_files_have_deviation(request):
+    CombinationAllFilesHaveDeviation.run_test_case(request)
