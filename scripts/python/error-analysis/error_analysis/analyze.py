@@ -33,8 +33,19 @@ def main(processed_dir: str, recall_dir: str):
     rp1_data = []
 
     for sub in recall_subs:
+        print(f"Participant: {sub}")
+        # Save some useful variables
+        hline = "-" * 50
         recall_sub_dir = os.path.join(recall_dir, sub)
         sub_files = os.listdir(recall_sub_dir)
+        # Get the subject's data dir
+        sub_data_dir = os.path.join(processed_dir, sub)
+        if not os.path.isdir(sub_data_dir):
+            print(f"Could not find processed data for {sub}, skipping")
+            continue
+        # Get all subject files
+        all_sub_passages = [f for f in os.listdir(sub_data_dir) if "all-cols" not in f]
+
         # Processing for recall period 1
         try:
             pat = re.compile(re.escape(sub) + r"_recallperiod1excel.*\.xlsx")
@@ -50,16 +61,6 @@ def main(processed_dir: str, recall_dir: str):
         # Drop rows where TP is NaN (repeats)
         rp_1_df = rp_1_df[~rp_1_df["tp"].isna()]
 
-        # Get the subject's data dir
-        sub_data_dir = os.path.join(processed_dir, sub)
-        if not os.path.isdir(sub_data_dir):
-            print(f"Could not find processed data for {sub}, skipping")
-            continue
-
-        print(f"Participant: {sub}")
-        hline = "-" * 50
-        # Get all subject files
-        all_sub_passages = [f for f in os.listdir(sub_data_dir) if "all-cols" not in f]
         all_recalled = tuple()
         for _, row in rp_1_df.iterrows():
             if "hammer" in row["tp"]:  # sample passage
@@ -132,6 +133,26 @@ def main(processed_dir: str, recall_dir: str):
             )
 
         # Processing for recall period 2
+        try:
+            pat = re.compile(re.escape(sub) + r"_recallperiod2.*\.txt")
+            rp_1_file = [f for f in sub_files if pat.fullmatch(f)][0]
+        except IndexError:
+            print(f"Could not find recall period 2 text file for {sub}, skipping")
+            continue
+        with open(os.path.join(recall_sub_dir, rp_1_file), "r") as f:
+            recalled_phrases = f.readlines()
+
+        # Clean up recalled phrases a bit
+        recalled_phrases = [
+            re.sub(r"\s+", " ", re.sub(r"[^a-zA-Z ']", "", r.lower())).strip()
+            for r in recalled_phrases
+        ]
+
+        # Figure out which passage(s), if any, contain each phrase
+        recalled_passages = set()
+        for phrase in recalled_phrases:
+            for filename in all_sub_passages:
+                pass
 
     all_rp1_df = pd.DataFrame(rp1_data)
     all_rp1_df.to_csv("rp1_data.csv", index=False)
