@@ -27,6 +27,33 @@ def preprocess_rp1_df(df: pd.DataFrame):
     return df
 
 
+def find_all(main_str: str, sub_str: str):
+    """
+    Returns the indices of the "start points" of all occurrences
+    of the substring in the main string.
+    """
+    start_idx = 0
+    while True:
+        start_idx = main_str.find(sub_str, start_idx)
+        if start_idx == -1:  # no match found
+            return
+        yield start_idx
+        start_idx += len(sub_str)
+
+
+def extract_passage_name(passage_path: str) -> str:
+    """
+    Extracts the passage name from the path.
+    """
+    import re
+
+    base_name = os.path.basename(passage_path)
+    match = re.fullmatch(
+        r"sub-\d+_([a-zA-Z]+_\d+[a-zA-Z]+).*reconciled.*\.xlsx", base_name
+    )
+    return match.group(1) if match else ""
+
+
 def main(processed_dir: str, recall_dir: str):
     recall_subs = os.listdir(recall_dir)
 
@@ -44,7 +71,7 @@ def main(processed_dir: str, recall_dir: str):
             print(f"Could not find processed data for {sub}, skipping")
             continue
         # Get all subject files
-        all_sub_passages = [f for f in os.listdir(sub_data_dir) if "all-cols" not in f]
+        all_sub_passages = [f for f in os.listdir(sub_data_dir) if "all-cols" in f]
 
         # Processing for recall period 1
         try:
@@ -147,12 +174,37 @@ def main(processed_dir: str, recall_dir: str):
             re.sub(r"\s+", " ", re.sub(r"[^a-zA-Z ']", "", r.lower())).strip()
             for r in recalled_phrases
         ]
+        # Save only unique and non-empty phrases
+        recalled_phrases = list(set(rp for rp in recalled_phrases if rp))
 
         # Figure out which passage(s), if any, contain each phrase
-        recalled_passages = set()
+        phrase_recall_info = []
         for phrase in recalled_phrases:
+            phrase_dict = {"phrase": phrase, "occurrences": {}}
             for filename in all_sub_passages:
-                pass
+                path = os.path.join(sub_data_dir, filename)
+                passage_df = pd.read_csv(path)
+                # Order by syllable ID, keep only unique word IDs, extract words
+                passage_df = passage_df.sort_values(by=["SyllableID"]).drop_duplicates(
+                    subset="WordID", keep="first"
+                )
+                # Apply the same cleaning to the passage text
+                passage_text = " ".join(
+                    passage_df["CleanedWord"]
+                    .dropna()
+                    .str.lower()
+                    .str.replace(r"[^a-zA-Z ']", "", regex=True)
+                    .str.replace(r"\s+", " ", regex=True)
+                    .str.strip()
+                )
+                # Find all matches of the phrase in the text and save them
+                #   to a dict, indicating file name and starting index.
+                for start_idx in find_all(passage_text, phrase):
+                    if filename not in phrase_dict["occurrences"].keys():
+                        phrase_dict["occurrences"][filename] = []
+                    phrase_dict["occurrences"][filename].append(start_idx)
+
+            phrase_recall_info.append(phrase_dict)
 
     all_rp1_df = pd.DataFrame(rp1_data)
     all_rp1_df.to_csv("rp1_data.csv", index=False)
