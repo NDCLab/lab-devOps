@@ -196,12 +196,14 @@ def main(processed_dir: str, recall_dir: str):
                     passage_summary_stats[f"passage_raw_{dev_col}_count"] = len(
                         passage_df[passage_df[dev_col] != 0].index
                     )
-                    passage_summary_stats[f"passage_perWord_{dev_col}_count"] = len(
-                        passage_df[passage_df[dev_col] != 0].index
-                    ) / len(passage_df["WordID"].nunique())
-                    passage_summary_stats[f"passage_perSyllable_{dev_col}_count"] = len(
-                        passage_df[passage_df[dev_col] != 0].index
-                    ) / len(passage_df["SyllableID"].nunique())
+                    passage_summary_stats[f"passage_perWord_{dev_col}_count"] = (
+                        len(passage_df[passage_df[dev_col] != 0].index)
+                        / passage_df["WordID"].nunique()
+                    )
+                    passage_summary_stats[f"passage_perSyllable_{dev_col}_count"] = (
+                        len(passage_df[passage_df[dev_col] != 0].index)
+                        / passage_df["SyllableID"].nunique()
+                    )
                 # Also pull out the highest syllable ID possible
                 max_syll_id = passage_df["SyllableID"].astype(int).max()
                 # Apply the same cleaning to the passage text
