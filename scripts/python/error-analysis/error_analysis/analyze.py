@@ -180,9 +180,7 @@ def main(processed_dir: str, recall_dir: str):
         recalled_phrases = list(set(rp for rp in recalled_phrases if rp))
 
         # Figure out which passage(s), if any, contain each phrase
-        phrase_recall_info = []
         for phrase in recalled_phrases:
-            phrase_dict = {"phrase": phrase, "occurrences": {}}
             for filename in all_sub_passages:
                 path = os.path.join(sub_data_dir, filename)
                 passage_df = pd.read_csv(path)
@@ -191,7 +189,10 @@ def main(processed_dir: str, recall_dir: str):
                     subset="WordID", keep="first"
                 )
                 # Pull out some summary stats from the coded passage (will help later)
-                passage_summary_stats = {}
+                passage_summary_stats = {
+                    "participant": sub,
+                    "file": filename,
+                }
                 for dev_col in ["any-disfluency", "correction-syll", "any-error"]:
                     passage_summary_stats[f"passage_raw_{dev_col}_count"] = len(
                         passage_df[passage_df[dev_col] != 0].index
@@ -205,7 +206,7 @@ def main(processed_dir: str, recall_dir: str):
                         / passage_df["SyllableID"].nunique()
                     )
                 # Also pull out the highest syllable ID possible
-                max_syll_id = passage_df["SyllableID"].astype(int).max()
+                max_syll_id = passage_df["SyllableID"].dropna().astype(int).max()
                 # Apply the same cleaning to the passage text
                 cleaned_words = (
                     passage_df["CleanedWord"]
@@ -230,7 +231,7 @@ def main(processed_dir: str, recall_dir: str):
                 n_occurrences = len(start_indices)
                 for start_idx in start_indices:
                     # Pull in passage-wide stats that we calculated earlier
-                    occurrence_info = passage_summary_stats
+                    occurrence_info = passage_summary_stats.copy()
                     occurrence_info = {
                         "phrase": phrase,
                         "file": filename,
@@ -256,11 +257,22 @@ def main(processed_dir: str, recall_dir: str):
                     phrase_entries = passage_df[
                         passage_df["SyllableID"].between(first_syll_idx, last_syll_idx)
                     ]
-                    for dev_type in ["disfluency", "correction", "error"]:
+                    for dev_col in ["any-disfluency", "correction-syll", "any-error"]:
                         # Raw
+                        occurrence_info[f"phrase_raw_{dev_col}_count"] = len(
+                            phrase_entries[phrase_entries[dev_col] != 0].index
+                        )
                         # Per-word
+                        occurrence_info[f"phrase_perWord_{dev_col}_count"] = (
+                            len(phrase_entries[phrase_entries[dev_col] != 0].index)
+                            / phrase_entries["WordID"].nunique()
+                        )
                         # Per-syllable
-                        pass
+                        occurrence_info[f"phrase_perSyllable_{dev_col}_count"] = (
+                            len(phrase_entries[phrase_entries[dev_col] != 0].index)
+                            / phrase_entries["SyllableID"].nunique()
+                        )
+
                     # Get number of deviations within 5 syllables of phrase
                     five_syll_entries = passage_df[
                         passage_df["SyllableID"].between(
@@ -268,15 +280,30 @@ def main(processed_dir: str, recall_dir: str):
                             min(last_syll_idx + 5, max_syll_id),
                         )
                     ]
-                    for dev_type in ["disfluency", "correction", "error"]:
+                    for dev_col in ["any-disfluency", "correction-syll", "any-error"]:
                         # Raw
+                        occurrence_info[f"withinFiveSylls_raw_{dev_col}_count"] = len(
+                            five_syll_entries[five_syll_entries[dev_col] != 0].index
+                        )
                         # Per-word
+                        occurrence_info[f"withinFiveSylls_perWord_{dev_col}_count"] = (
+                            len(
+                                five_syll_entries[five_syll_entries[dev_col] != 0].index
+                            )
+                            / five_syll_entries["WordID"].nunique()
+                        )
                         # Per-syllable
-                        pass
+                        occurrence_info[
+                            f"withinFiveSylls_perSyllable_{dev_col}_count"
+                        ] = (
+                            len(
+                                five_syll_entries[five_syll_entries[dev_col] != 0].index
+                            )
+                            / five_syll_entries["SyllableID"].nunique()
+                        )
+
                     # Save occurrence_info to our running list
                     rp2_data.append(occurrence_info)
-
-            phrase_recall_info.append(phrase_dict)
 
     all_rp1_df = pd.DataFrame(rp1_data)
     all_rp1_df.to_csv("rp1_data.csv", index=False)
