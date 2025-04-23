@@ -2,6 +2,7 @@ import os
 import re
 import sys
 
+import numpy as np
 import pandas as pd
 
 
@@ -58,6 +59,7 @@ def main(processed_dir: str, recall_dir: str):
     recall_subs = os.listdir(recall_dir)
 
     rp1_data = []
+    rp2_data = []
 
     for sub in recall_subs:
         print(f"Participant: {sub}")
@@ -188,27 +190,99 @@ def main(processed_dir: str, recall_dir: str):
                 passage_df = passage_df.sort_values(by=["SyllableID"]).drop_duplicates(
                     subset="WordID", keep="first"
                 )
+                # Pull out some summary stats from the coded passage (will help later)
+                passage_summary_stats = {}
+                for dev_col in ["any-disfluency", "correction-syll", "any-error"]:
+                    passage_summary_stats[f"passage_raw_{dev_col}_count"] = len(
+                        passage_df[passage_df[dev_col] != 0].index
+                    )
+                    passage_summary_stats[f"passage_perWord_{dev_col}_count"] = len(
+                        passage_df[passage_df[dev_col] != 0].index
+                    ) / len(passage_df["WordID"].nunique())
+                    passage_summary_stats[f"passage_perSyllable_{dev_col}_count"] = len(
+                        passage_df[passage_df[dev_col] != 0].index
+                    ) / len(passage_df["SyllableID"].nunique())
+                # Also pull out the highest syllable ID possible
+                max_syll_id = passage_df["SyllableID"].astype(int).max()
                 # Apply the same cleaning to the passage text
-                passage_text = " ".join(
+                cleaned_words = (
                     passage_df["CleanedWord"]
                     .dropna()
                     .str.lower()
                     .str.replace(r"[^a-zA-Z ']", "", regex=True)
                     .str.replace(r"\s+", " ", regex=True)
                     .str.strip()
+                    .replace("", np.nan)
+                    .dropna()
                 )
+                passage_text = " ".join(cleaned_words)
                 # Find all matches of the phrase in the text and save them
-                #   to a dict, indicating file name and starting index.
-                for start_idx in find_all(passage_text, phrase):
-                    if filename not in phrase_dict["occurrences"].keys():
-                        phrase_dict["occurrences"][filename] = []
-                    phrase_dict["occurrences"][filename].append(start_idx)
+                start_indices = list(find_all(passage_text, phrase))
+                # Use the start index to reverse-engineer the start & end points
+                # (word index) of each occurrence, then extract data.
+                # For our purposes, this is:
+                #   - Number of disfluencies/corrections/errors (deviations) within the phrase (raw, per-word, and per-syllable)
+                #   - Num. of deviations within 5 syllables of the phrase (before & after) (raw, per-word, and per-syllable)
+                #   - Num. of deviations in the passage that the phrase appears in
+                #   - Num. of times the phrase appears in this passage & all passages
+                n_occurrences = len(start_indices)
+                for start_idx in start_indices:
+                    # Pull in passage-wide stats that we calculated earlier
+                    occurrence_info = passage_summary_stats
+                    occurrence_info = {
+                        "phrase": phrase,
+                        "file": filename,
+                        "phrase_passage_count": n_occurrences,
+                    }
+                    # Calculate start word index by counting the number of spaces
+                    # in the substring up to (but not including) the start index
+                    # TODO: Fix this, currently prone to off-by-one errors (not acceptable in our case)
+                    start_word_idx = passage_text.count(" ", 0, start_idx)
+                    # Calculate end word index by adding the number of spaces in
+                    # the phrase to be found to the start word index
+                    end_word_idx = start_word_idx + phrase.count(" ")
+
+                    # Get the index of the first and last sylllables in our phrase
+                    first_syll_idx = passage_df[
+                        passage_df["WordID"] == start_word_idx
+                    ].iloc[0]["SyllableID"]
+                    last_syll_idx = passage_df[
+                        passage_df["WordID"] == end_word_idx
+                    ].iloc[-1]["SyllableID"]
+
+                    # Get number of deviations in the phrase
+                    phrase_entries = passage_df[
+                        passage_df["SyllableID"].between(first_syll_idx, last_syll_idx)
+                    ]
+                    for dev_type in ["disfluency", "correction", "error"]:
+                        # Raw
+                        # Per-word
+                        # Per-syllable
+                        pass
+                    # Get number of deviations within 5 syllables of phrase
+                    five_syll_entries = passage_df[
+                        passage_df["SyllableID"].between(
+                            max(0, first_syll_idx - 5),
+                            min(last_syll_idx + 5, max_syll_id),
+                        )
+                    ]
+                    for dev_type in ["disfluency", "correction", "error"]:
+                        # Raw
+                        # Per-word
+                        # Per-syllable
+                        pass
+                    # Save occurrence_info to our running list
+                    rp2_data.append(occurrence_info)
 
             phrase_recall_info.append(phrase_dict)
 
     all_rp1_df = pd.DataFrame(rp1_data)
     all_rp1_df.to_csv("rp1_data.csv", index=False)
     print("Saved tabular data for RP 1!")
+
+    all_rp2_df = pd.DataFrame(rp2_data)
+    all_rp2_df.to_csv("rp2_data.csv", index=False)
+    print("Saved tabular data for RP 2!")
 
 
 # Run as python __file__ /home/nwelch/Documents/error-coding/data/processed_passages /home/nwelch/Documents/prelims-read
