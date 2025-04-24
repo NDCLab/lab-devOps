@@ -232,14 +232,14 @@ def main(processed_dir: str, recall_dir: str):
                 for start_idx in start_indices:
                     # Pull in passage-wide stats that we calculated earlier
                     occurrence_info = passage_summary_stats.copy()
-                    occurrence_info = {
-                        "phrase": phrase,
-                        "file": filename,
-                        "phrase_passage_count": n_occurrences,
-                    }
+                    occurrence_info.update(
+                        {
+                            "phrase": phrase,
+                            "phrase_passage_count": n_occurrences,
+                        }
+                    )
                     # Calculate start word index by counting the number of spaces
                     # in the substring up to (but not including) the start index
-                    # TODO: Fix this, currently prone to off-by-one errors (not acceptable in our case)
                     start_word_idx = passage_text.count(" ", 0, start_idx)
                     # Calculate end word index by adding the number of spaces in
                     # the phrase to be found to the start word index
@@ -253,10 +253,15 @@ def main(processed_dir: str, recall_dir: str):
                         passage_df["WordID"] == end_word_idx
                     ].iloc[-1]["SyllableID"]
 
-                    # Get number of deviations in the phrase
+                    # Pull out the phrase
                     phrase_entries = passage_df[
                         passage_df["SyllableID"].between(first_syll_idx, last_syll_idx)
                     ]
+                    # Save our identified phrase
+                    occurrence_info["actualPhrase"] = " ".join(
+                        phrase_entries["CleanedWord"]
+                    )
+                    # Get number of deviations in the phrase
                     for dev_col in ["any-disfluency", "correction-syll", "any-error"]:
                         # Raw
                         occurrence_info[f"phrase_raw_{dev_col}_count"] = len(
@@ -273,13 +278,18 @@ def main(processed_dir: str, recall_dir: str):
                             / phrase_entries["SyllableID"].nunique()
                         )
 
-                    # Get number of deviations within 5 syllables of phrase
+                    # Look (at most) five syllables to the left and right of our phrase
                     five_syll_entries = passage_df[
                         passage_df["SyllableID"].between(
                             max(0, first_syll_idx - 5),
                             min(last_syll_idx + 5, max_syll_id),
                         )
                     ]
+                    # Save extended phrase window
+                    occurrence_info["actualExtendedPhrase"] = " ".join(
+                        five_syll_entries["CleanedWord"]
+                    )
+                    # Get number of deviations within 5 syllables of phrase
                     for dev_col in ["any-disfluency", "correction-syll", "any-error"]:
                         # Raw
                         occurrence_info[f"withinFiveSylls_raw_{dev_col}_count"] = len(
