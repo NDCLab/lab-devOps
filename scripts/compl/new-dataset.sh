@@ -2,10 +2,7 @@
 # Adds everyone to new repo (except sourcedata and derivatives)
 
 # USAGE: new-dataset.sh <new-repo>
-usage() {
-    echo "Usage: bash new-dataset.sh <new-repo> ]"
-    exit 0
-}
+usage() { echo "Usage: bash new-dataset.sh <new-repo> ]"; exit 0; }
 
 if [[ $# -ne 1 ]]; then usage; fi
 
@@ -20,30 +17,26 @@ b_group=$(cat $LAB_USERS_TXT)
 b_group=(${b_group//,/ })
 
 if [[ -d $repo ]]; then
-    for user in ${b_group[@]}; do
-        setfacl -Rmd u:"$user":r-x "$repo"
-        setfacl -Rm u:"$user":r-x "$repo"
+      for user in ${b_group[@]}; do
+        setfacl -Rm u:$user:r-x,d:u:$user:r-x "$repo"
         for priv in "sourcedata" "derivatives"; do
-            if [[ -d $repo/$priv ]]; then
-                setfacl -Rmd u:"$user":--- "$repo"/$priv
-                setfacl -Rm u:"$user":--- "$repo"/$priv
-            fi
+          if [[ -d $repo/$priv ]]; then
+            setfacl -Rm u:$user:---,d:u:$user:--- $repo/$priv
+          fi
         done
-    done
+      done
 
 else
-    for DIR in $dpath $apath $tpath; do
-        if [[ "$DIR" == "$repo" ]]; then
-            for user in ${b_group[@]}; do
-                setfacl -Rmd u:"$user":r-x "$DIR"/"$repo"
-                setfacl -Rm u:"$user":r-x "$DIR"/"$repo"
-                for priv in "sourcedata" "derivatives"; do
-                    if [[ -d $DIR/$repo/$priv ]]; then
-                        setfacl -Rmd u:"$user":--- "$DIR"/"$repo"/$priv
-                        setfacl -Rm u:"$user":--- "$DIR"/"$repo"/$priv
-                    fi
-                done
-            done
-        fi
-    done
+  for DIR in $dpath $apath $tpath; do
+    if [[ "$DIR" == "$repo" ]]; then
+      for user in ${b_group[@]}; do
+        setfacl -Rm u:$user:r-x,d:u:$user:r-x $DIR/$repo
+        for priv in "sourcedata" "derivatives"; do
+          if [[ -d $DIR/$repo/$priv ]]; then
+            setfacl -Rm u:$user:---,d:u:$user:--- $DIR/$repo/$priv
+          fi
+        done
+      done
+    fi
+  done
 fi
