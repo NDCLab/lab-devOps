@@ -1459,7 +1459,6 @@ def clean_empty_dirs(basedir):
 
     Raises:
         FileNotFoundError: If basedir does not exist.
-        subprocess.CalledProcessError: If the `find` command fails to execute.
     """
     if not os.path.isdir(basedir):
         raise FileNotFoundError(f"Directory {basedir} does not exist")
