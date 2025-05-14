@@ -1464,16 +1464,16 @@ def clean_empty_dirs(basedir):
     if not os.path.isdir(basedir):
         raise FileNotFoundError(f"Directory {basedir} does not exist")
 
-    try:
-        proc = subprocess.run(
-            ["find", basedir, "-depth", "-empty", "-type", "d", "-delete", "-print"],
-            stdout=subprocess.PIPE,
-            check=True,
-        )
-        dirs = [line for line in proc.stdout.decode().splitlines() if line]
-        return len(dirs)
-    except subprocess.CalledProcessError as err:
-        raise RuntimeError("find command returned error") from err
+    n_removed = 0
+    for root, dirs, files in os.walk(basedir, topdown=False):
+        # Skip root; only remove subdirectories
+        if root == basedir:
+            continue
+        if not dirs and not files:
+            os.rmdir(root)
+            n_removed += 1
+
+    return n_removed
 
 
 def get_visit_pairs(datadict: pd.DataFrame):
