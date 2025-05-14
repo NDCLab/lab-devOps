@@ -711,11 +711,8 @@ def qa_validation(logger: logging.Logger, dataset: str):
     write_qa_tracker(dataset, qa_df)
 
     # recursively clean up empty directories in pending-qa/
-    try:
-        n_dirs = clean_empty_dirs(pending_qa_dir)
-        logger.info("Cleaned up %d empty directories in pending-qa/", n_dirs)
-    except subprocess.CalledProcessError as err:
-        logger.error("Error cleaning up empty directories: %s", err)
+    n_dirs = clean_empty_dirs(pending_qa_dir)
+    logger.info("Cleaned up %d empty directories in pending-qa/", n_dirs)
 
     logger.info("QA check done!")
 
