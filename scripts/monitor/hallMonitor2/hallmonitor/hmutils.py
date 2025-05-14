@@ -3,7 +3,6 @@ import datetime
 import logging
 import os
 import re
-import subprocess
 from copy import copy
 from dataclasses import dataclass
 from functools import lru_cache, wraps
