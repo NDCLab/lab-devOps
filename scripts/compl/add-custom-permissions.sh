@@ -35,11 +35,11 @@ done
 
 for ID in ${users[@]}; do
   for dir in ${read_dirs[@]}; do
-    setfacl -Rm d:u:$ID:r-x,u:$ID:r-x $dir
     echo "Giving $ID r-x access to $dir"
+    find "$dir" -type d -exec setfacl -m "u:$ID:rx,d:u:$ID:rx,m:rx" {} +
   done
   for dir in ${write_dirs[@]}; do
-    setfacl -Rm d:u:$ID:rwx,u:$ID:rwx $dir
     echo "Giving $ID rwx access to $dir"
+    find "$dir" -type d -exec setfacl -m "u:$ID:rwx,d:u:$ID:rwx,m:rwx" {} +
   done
 done
