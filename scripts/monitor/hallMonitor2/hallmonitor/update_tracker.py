@@ -653,17 +653,14 @@ def main(
                     continue
 
         for index, row in rc_df.iterrows():
-            if (isinstance(index, float) or isinstance(index, int)) and not math.isnan(
-                index
-            ):
-                id = int(row.name)
-            else:
+            if pd.isna(index):
                 logger.info(
-                    "Skipping NaN value in %s: %s",
-                    str(all_redcap_paths[expected_rc]),
-                    str(index),
+                    "Skipping NaN value in %s", str(all_redcap_paths[expected_rc])
                 )
                 continue
+
+            id = int(row.name)
+
             if child:
                 # FIXME magic numbers
                 child_id_match = re.search(study_no + r"[089](\d{4})", str(id))
