@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import logging
+import subprocess
 import os
 import re
 from copy import copy
@@ -1993,3 +1994,19 @@ def get_new_redcaps(basedir):
             newest_files.append(newest_file)
 
     return sorted(newest_files)
+
+
+def rsync_copy(src: str, dest: str):
+    """
+    Copies files or directories from the source path to the destination path using the `rsync` command.
+
+    Args:
+        src (str): The source path to copy from. No normalization is applied; if a directory without a trailing
+            slash is passed, the directory will be copied, and directories with a trailing slash will
+            have their contents copied instead. It is the responsibility of the caller to ensure correct use.
+        dest (str): The destination path to copy to.
+
+    Raises:
+        subprocess.CalledProcessError: If the `rsync` command fails.
+    """
+    subprocess.check_call(["rsync", "-r", "--acls", "--xattrs", src, dest])

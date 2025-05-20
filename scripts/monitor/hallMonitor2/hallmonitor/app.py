@@ -21,6 +21,7 @@ from hallmonitor.hmutils import (
     RAW_SUBDIR,
     ColorfulFormatter,
     Identifier,
+    rsync_copy,
     SharedTimestamp,
     clean_empty_dirs,
     datadict_has_changes,
@@ -675,7 +676,7 @@ def qa_validation(logger: logging.Logger, dataset: str):
         dest_path = os.path.abspath(dest_path)
         os.makedirs(dest_path, exist_ok=True)
         try:
-            subprocess.run(["cp", "-uR", identifier_dir, dest_path], check=True)
+            rsync_copy(identifier_dir.removesuffix("/"), dest_path)
             logger.debug("Copied ID %s to %s, or no update was needed", id, dest_path)
         except subprocess.CalledProcessError as err:
             logger.error("Could not copy file(s) for %s to %s (%s)", id, dest_path, err)
@@ -827,7 +828,7 @@ def main(args: Namespace):
             rc_base = os.path.basename(rc_file)
             rc_out = os.path.join(rc_dir, rc_base)
             try:
-                subprocess.check_call(["cp", "-u", rc_file, rc_out])
+                rsync_copy(rc_file, rc_out)
             except subprocess.CalledProcessError as err:
                 logger.error(
                     "Could not move REDCap %s to %s (%s)", rc_base, rc_out, err

@@ -214,9 +214,11 @@ class TestCase(ABC):
             for dtype in datatypes:
                 dtype_dir = os.path.join(raw_data_dir, ses_run, dtype)
                 os.makedirs(dtype_dir)
-                src_path = os.path.join(checked_data_dir, ses_run, dtype)
+                src_path = os.path.join(checked_data_dir, ses_run, dtype, "")
                 dest_path = os.path.join(dtype_dir, f"sub-{self.sub_id}")
-                subprocess.check_call(["cp", "-r", src_path, dest_path])
+                subprocess.check_call(
+                    ["rsync", "-r", "--acls", "--xattrs", src_path, dest_path]
+                )
 
         # -- set up sourcedata/pending-qa/ directory --
 
