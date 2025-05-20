@@ -602,6 +602,10 @@ def main(
     logger.debug("Finished initial REDCap matching, proceeding to update tracker")
 
     for expected_rc in redcheck_columns.keys():
+        if expected_rc not in all_rc_dfs.keys():
+            logger.error("Could not find %s in all_rc_dfs, skipping", expected_rc)
+            continue
+
         logger.debug("Updating tracker for %s", expected_rc)
         rc_df = all_rc_dfs[expected_rc]
         rc_subjects = []
