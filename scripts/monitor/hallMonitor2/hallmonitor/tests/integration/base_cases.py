@@ -224,17 +224,7 @@ class TestCase(ABC):
                 src_path = os.path.join(checked_data_dir, ses_run, dtype, "")
                 dest_path = os.path.join(dtype_dir, f"sub-{self.sub_id}")
                 subprocess.check_call(
-                    [
-                        "rsync",
-                        "-rt",  # recurse, preserve times
-                        "--no-perms",  # don’t chmod
-                        "--no-owner",  # don’t chown
-                        "--no-group",  # don’t chgrp
-                        "--no-acls",  # don’t copy ACL entries
-                        "--no-xattrs",  # don’t copy extended attrs
-                        src_path,
-                        dest_path,
-                    ]
+                    ["rsync", "-rt", "--omit-dir-times", src_path, dest_path]
                 )
 
         # -- set up sourcedata/pending-qa/ directory --
