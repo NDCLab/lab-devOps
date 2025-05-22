@@ -71,6 +71,13 @@ class TestCase(ABC):
         test_case = cls(tmp_path)
         dest_dir = os.path.join(str(persist_dir), test_case.case_name)
 
+        # Print custom metadata for pytest-html
+        print("------------- Test Info -------------")
+        print("Description:", cls.description)
+        print("Conditions:", ", ".join(cls.conditions))
+        print("Expected Output:", cls.expected_output)
+        print("Begin Test")
+
         test_case.generate()
         if persist_dir:
             TestCase.persist_files(test_case.case_dir, dest_dir)
