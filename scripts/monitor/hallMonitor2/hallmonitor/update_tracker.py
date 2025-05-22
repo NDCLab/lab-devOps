@@ -269,7 +269,7 @@ def fill_status_data_columns(dataset: str, tracker_df: pd.DataFrame):
                 matching_col_data = (rc_df[matching_col].astype(int) == 2).astype(int)
                 # update tracker dataframe with matching column data
                 tracker_df.loc[
-                    tracker_df.index.intersection(rc_df.index),
+                    tracker_df.index.intersection(rc_df.index).unique(),
                     row["variable"] + "_" + suffix,
                 ] = matching_col_data
 
