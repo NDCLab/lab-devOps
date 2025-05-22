@@ -2009,16 +2009,4 @@ def rsync_copy(src: str, dest: str):
     Raises:
         subprocess.CalledProcessError: If the `rsync` command fails.
     """
-    subprocess.check_call(
-        [
-            "rsync",
-            "-rt",  # recurse, preserve times
-            "--no-perms",  # don’t chmod
-            "--no-owner",  # don’t chown
-            "--no-group",  # don’t chgrp
-            "--no-acls",  # don’t copy ACL entries
-            "--no-xattrs",  # don’t copy extended attrs
-            src,
-            dest,
-        ]
-    )
+    subprocess.check_call(["rsync", "-rt", "--omit-dir-times", src, dest])
