@@ -265,13 +265,16 @@ def fill_status_data_columns(dataset: str, tracker_df: pd.DataFrame):
                 matching_col = matching_cols[0]
                 # set index to the provenance id column
                 rc_df = rc_df.set_index(prov_id)
+                # deduplicate index
+                if rc_df.index.duplicated().any():
+                    rc_df = rc_df.groupby(rc_df.index).first()
                 # get matching column data and convert to int
-                matching_col_data = (rc_df[matching_col].astype(int) == 2).astype(int)
+                rc_df[matching_col] = (rc_df[matching_col].astype(int) == 2).astype(int)
                 # update tracker dataframe with matching column data
-                tracker_df.loc[
-                    tracker_df.index.intersection(rc_df.index).unique(),
-                    row["variable"] + "_" + suffix,
-                ] = matching_col_data
+                shared_sub_ids = tracker_df.index.intersection(rc_df.index)
+                tracker_df.loc[shared_sub_ids, row["variable"] + "_" + suffix] = (
+                    rc_df.loc[shared_sub_ids, matching_col].values
+                )
 
     for _, row in data_var_rows.iterrows():
         prov = str(row["provenance"])
@@ -572,7 +575,7 @@ def main(
             duped_subs = set(remote_df[rc_id_col]) & set(rc_df[rc_id_col])
             if duped_subs:
                 logger.error(
-                    "The following subjects are in the remote-only and in-person REDCaps: %s",
+                    f"The following subjects are in the remote-only and in-person REDCaps for {expected_rc}: %s",
                     ", ".join(str(sub) for sub in duped_subs),
                 )
                 successful_update = False

@@ -919,6 +919,7 @@ def main(args: Namespace):
         ]
         sr_redcaps += universal_redcaps
         try:
+            logger.info(f"Updating tracker for {ses}{run}")
             success = update_tracker.main(
                 dataset,
                 sr_redcaps,
