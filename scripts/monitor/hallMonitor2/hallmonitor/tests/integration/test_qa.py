@@ -605,3 +605,63 @@ class QAChecklistUniqueIdentifierDeviationStringTestCase(
 
 def test_qa_checklist_unique_identifier_deviation_string(request):
     QAChecklistUniqueIdentifierDeviationStringTestCase.run_test_case(request)
+
+
+class QAChecklistRemovesDeletedFilesTestCase(QATestCase):
+    case_name = "QAChecklistRemovesDeletedFilesTestCase"
+    description = (
+        "If all files for an identifier are removed from `pending-qa/`, the QA "
+        "checklist must drop the corresponding rows on the next run."
+    )
+    conditions = [
+        "Subject 3000215 session 1 has two EEG triplets with deviation.txt in "
+        "`pending-qa/` and fails raw checks.",
+        "Data monitor deletes those triplets from `pending-qa/` after marking them "
+        "as needing reupload.",
+    ]
+    expected_output = (
+        "No rows for 3000215 session 1 remain in the refreshed QA checklist; "
+        "`pending-qa/` is empty for that identifier."
+    )
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+        return modified_files
+
+    def validate(self):
+        # Save some useful variables
+        qa_path = self.build_path("s1_r1", "eeg", "", True).replace("raw", "pending-qa")
+        filepaths = self.get_paths(self.case_dir)
+        identifier = f"sub-{self.sub_id}_all_eeg_s1_r1_e1"
+
+        # Run preliminary QA validation
+        if error := self.run_qa_validation():
+            raise AssertionError(f"Unexpected error occurred: {error}")
+
+        # Check that the identifier is in pending-qa/ and the QA checklist to begin with
+        assert any(str(path).startswith(qa_path) for path in filepaths)
+        qa_df_before = self.get_qa_checklist()
+        assert qa_df_before is not None
+        assert (qa_df_before["identifier"] == identifier).any()
+
+        # Introduce error in sourcedata/raw/ after QA checks (remove .eeg file)
+        target_file = self.build_path(
+            "s1_r1", "eeg", identifier + ".eeg", True
+        ).replace("raw", "pending-qa")
+        os.remove(os.path.join(self.case_dir, target_file))
+
+        # Run second QA validation
+        if error := self.run_qa_validation():
+            raise AssertionError(f"Unexpected error occurred: {error}")
+
+        qa_df = self.get_qa_checklist()
+        assert qa_df is not None
+        # Make sure we have removed the identifier from the QA checklist
+        assert not (qa_df["identifier"] == identifier).any()
+
+        # Check that we have removed all of the identifier's files from pending-qa
+        assert not any(str(path).startswith(qa_path) for path in filepaths)
+
+
+def test_qa_checklist_removes_deleted_files(request):
+    QAChecklistRemovesDeletedFilesTestCase.run_test_case(request)

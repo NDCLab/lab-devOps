@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Optional
 
 import pandas as pd
 import pytest
@@ -987,6 +988,19 @@ class TestCase(ABC):
             )
         except Exception as err:
             raise RuntimeError("update_tracker exited with error") from err
+
+    def get_qa_checklist(self) -> Optional[pd.DataFrame]:
+        qa_csv_path = os.path.join(
+            self.case_dir,
+            "sourcedata",
+            "pending-qa",
+            "qa-checklist.csv",
+        )
+
+        if not os.path.exists(qa_csv_path):
+            return None
+
+        return pd.read_csv(qa_csv_path)
 
     @abstractmethod
     def validate(self):
