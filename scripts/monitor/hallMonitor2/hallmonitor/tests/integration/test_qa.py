@@ -629,30 +629,33 @@ class QAChecklistRemovesDeletedFilesTestCase(QATestCase):
         return modified_files
 
     def validate(self):
+        # Import pipeline
+        from hallmonitor.app import main as hm_main
+
+        hm_args = self.get_standard_args()
+        hm_args.raw_only = True
+
         # Save some useful variables
         qa_path = self.build_path("s1_r1", "eeg", "", True).replace("raw", "pending-qa")
-        filepaths = self.get_paths(self.case_dir)
         identifier = f"sub-{self.sub_id}_all_eeg_s1_r1_e1"
 
-        # Run preliminary QA validation
-        if error := self.run_qa_validation():
-            raise AssertionError(f"Unexpected error occurred: {error}")
+        # Run pipeline for the first time
+        hm_main(hm_args)
 
         # Check that the identifier is in pending-qa/ and the QA checklist to begin with
-        assert any(str(path).startswith(qa_path) for path in filepaths)
+        assert any(
+            str(path).startswith(qa_path) for path in self.get_paths(self.case_dir)
+        )
         qa_df_before = self.get_qa_checklist()
         assert qa_df_before is not None
         assert (qa_df_before["identifier"] == identifier).any()
 
-        # Introduce error in sourcedata/raw/ after QA checks (remove .eeg file)
-        target_file = self.build_path(
-            "s1_r1", "eeg", identifier + ".eeg", True
-        ).replace("raw", "pending-qa")
+        # Introduce error in sourcedata/raw/ after first run (remove .eeg file)
+        target_file = self.build_path("s1_r1", "eeg", identifier + ".eeg", True)
         os.remove(os.path.join(self.case_dir, target_file))
 
-        # Run second QA validation
-        if error := self.run_qa_validation():
-            raise AssertionError(f"Unexpected error occurred: {error}")
+        # Run pipeline for the second time
+        hm_main(hm_args)
 
         qa_df = self.get_qa_checklist()
         assert qa_df is not None
@@ -660,7 +663,9 @@ class QAChecklistRemovesDeletedFilesTestCase(QATestCase):
         assert not (qa_df["identifier"] == identifier).any()
 
         # Check that we have removed all of the identifier's files from pending-qa
-        assert not any(str(path).startswith(qa_path) for path in filepaths)
+        assert not any(
+            str(path).startswith(qa_path) for path in self.get_paths(self.case_dir)
+        )
 
 
 def test_qa_checklist_removes_deleted_files(request):
