@@ -610,6 +610,27 @@ def qa_validation(logger: logging.Logger, dataset: str):
 
     record_df = get_file_record(dataset)
     qa_df = get_qa_checklist(dataset)
+    pending_df = get_pending_files(dataset)
+
+    # remove failed identifiers from the QA checklist
+    failed_ids = pending_df[~pending_df["passRaw"]]["identifier"]
+    qa_df = qa_df[~qa_df["identifier"].isin(failed_ids)]
+    # remove failed identifiers from pending-qa/
+    for failed_id in failed_ids:
+        id_dir = (
+            Identifier.from_str(failed_id)
+            .to_dir(dataset, True)
+            .replace("raw", "pending-qa")
+        )
+        try:
+            subprocess.run(["rm", "-rf", id_dir], check=True)
+            logger.info("Removed failed identifier %s from pending-qa/", failed_id)
+        except subprocess.CalledProcessError as err:
+            logger.error(
+                "Could not remove failed identifier %s from pending-qa/ (%s)",
+                failed_id,
+                err,
+            )
 
     # get fully-verified identifiers
     # group by "identifier" and keep only groups where all "qa" and "localMove" values are truthy
@@ -662,7 +683,6 @@ def qa_validation(logger: logging.Logger, dataset: str):
         logger.error("Could not write out file record: %s", err)
 
     # get new raw-validated identifiers
-    pending_df = get_pending_files(dataset)
     pending_ids = pending_df[pending_df["passRaw"]]
     new_qa = pending_ids[~pending_ids["identifier"].isin(record_df["identifier"])]
 
