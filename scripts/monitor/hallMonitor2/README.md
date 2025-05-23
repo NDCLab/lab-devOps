@@ -46,6 +46,12 @@ To run `hallmonitor` from within a Singularity container, simply execute:
 singularity run build/image_name.sif dataset [OPTIONS]
 ```
 
+## Testing
+
+To run the test suite locally, execute `./test.sh` from the root `hallMonitor2` directory. This will run all tests and generate an HTML report in the `reports/` directory.
+
+The script will also attempt to open the report automatically in your default browser. If that doesn't work, you can manually open the report by pasting the full file path (e.g., `/home/ndc/reports/test-20250520_153000.html`) into your browser’s address bar.
+
 ## Usage
 
 To use the `hallmonitor` module, you need to ensure that the module is installed and accessible from your Python environment. You can achieve this by installing the module using `pip` and then running the script from any directory.

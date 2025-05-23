@@ -21,6 +21,7 @@ from hallmonitor.hmutils import (
     RAW_SUBDIR,
     ColorfulFormatter,
     Identifier,
+    rsync_copy,
     SharedTimestamp,
     clean_empty_dirs,
     datadict_has_changes,
@@ -695,7 +696,7 @@ def qa_validation(logger: logging.Logger, dataset: str):
         dest_path = os.path.abspath(dest_path)
         os.makedirs(dest_path, exist_ok=True)
         try:
-            subprocess.run(["cp", "-uR", identifier_dir, dest_path], check=True)
+            rsync_copy(identifier_dir.removesuffix("/"), dest_path)
             logger.debug("Copied ID %s to %s, or no update was needed", id, dest_path)
         except subprocess.CalledProcessError as err:
             logger.error("Could not copy file(s) for %s to %s (%s)", id, dest_path, err)
@@ -731,11 +732,8 @@ def qa_validation(logger: logging.Logger, dataset: str):
     write_qa_tracker(dataset, qa_df)
 
     # recursively clean up empty directories in pending-qa/
-    try:
-        n_dirs = clean_empty_dirs(pending_qa_dir)
-        logger.info("Cleaned up %d empty directories in pending-qa/", n_dirs)
-    except subprocess.CalledProcessError as err:
-        logger.error("Error cleaning up empty directories: %s", err)
+    n_dirs = clean_empty_dirs(pending_qa_dir)
+    logger.info("Cleaned up %d empty directories in pending-qa/", n_dirs)
 
     logger.info("QA check done!")
 
@@ -850,7 +848,7 @@ def main(args: Namespace):
             rc_base = os.path.basename(rc_file)
             rc_out = os.path.join(rc_dir, rc_base)
             try:
-                subprocess.check_call(["cp", "-u", rc_file, rc_out])
+                rsync_copy(rc_file, rc_out)
             except subprocess.CalledProcessError as err:
                 logger.error(
                     "Could not move REDCap %s to %s (%s)", rc_base, rc_out, err
@@ -941,6 +939,7 @@ def main(args: Namespace):
         ]
         sr_redcaps += universal_redcaps
         try:
+            logger.info(f"Updating tracker for {ses}{run}")
             success = update_tracker.main(
                 dataset,
                 sr_redcaps,

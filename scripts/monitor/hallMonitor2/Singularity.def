@@ -13,6 +13,10 @@ From: python:3.13-slim
 %post
     export DEBIAN_FRONTEND=noninteractive
 
+    # Install rsync utility
+    apt-get update && \
+        apt-get -y install rsync
+
     # Configure the timezone to America/New_York
     ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
     echo "America/New_York" > /etc/timezone

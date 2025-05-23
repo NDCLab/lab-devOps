@@ -4,3 +4,6 @@
 
 # Singularity container build directory
 build/
+
+# Tests
+reports/

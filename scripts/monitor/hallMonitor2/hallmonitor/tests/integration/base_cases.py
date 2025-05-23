@@ -72,6 +72,13 @@ class TestCase(ABC):
         test_case = cls(tmp_path)
         dest_dir = os.path.join(str(persist_dir), test_case.case_name)
 
+        # Print custom metadata for pytest-html
+        print("------------- Test Info -------------")
+        print("Description:", cls.description)
+        print("Conditions:", ", ".join(cls.conditions))
+        print("Expected Output:", cls.expected_output)
+        print("Begin Test")
+
         test_case.generate()
         if persist_dir:
             TestCase.persist_files(test_case.case_dir, dest_dir)
@@ -215,9 +222,11 @@ class TestCase(ABC):
             for dtype in datatypes:
                 dtype_dir = os.path.join(raw_data_dir, ses_run, dtype)
                 os.makedirs(dtype_dir)
-                src_path = os.path.join(checked_data_dir, ses_run, dtype)
+                src_path = os.path.join(checked_data_dir, ses_run, dtype, "")
                 dest_path = os.path.join(dtype_dir, f"sub-{self.sub_id}")
-                subprocess.check_call(["cp", "-r", src_path, dest_path])
+                subprocess.check_call(
+                    ["rsync", "-rt", "--omit-dir-times", src_path, dest_path]
+                )
 
         # -- set up sourcedata/pending-qa/ directory --
 
