@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import logging
 import os
 
 from syllable_analysis.error_analysis import summarize
@@ -49,6 +50,8 @@ def main(
     output_parentdir: str,
     accepted_subjects: list[str],
 ):
+    logging.info("Starting processing")
+
     # 0. Set up directories
     if not os.path.isdir(output_parentdir):
         raise FileNotFoundError(output_parentdir + " is not a directory.")
