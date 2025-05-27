@@ -309,6 +309,8 @@ def summarize_word_matches(scaffold_dir: str, output_file: str) -> None:
             hyphenated_df["word"] = [
                 word for words in hyphenated_split for word in words
             ]
+        else:
+            hyphenated_df = pd.DataFrame()
 
         # Split and expand apostrophe words while preserving other columns
         apostrophe_rows = scaffold_df[apostrophe_mask].copy()
@@ -320,6 +322,8 @@ def summarize_word_matches(scaffold_dir: str, output_file: str) -> None:
             apostrophe_df["word"] = [
                 word for words in apostrophe_split for word in words
             ]
+        else:
+            apostrophe_df = pd.DataFrame()
 
         # Keep words that had neither hyphens nor apostrophes
         clean_df = scaffold_df[~(hyphenated_mask | apostrophe_mask)].copy()
