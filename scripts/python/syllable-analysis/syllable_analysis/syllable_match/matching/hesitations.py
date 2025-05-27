@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 
 from ..resources import get_word_freq
@@ -7,7 +9,7 @@ def match_hesitations(df: pd.DataFrame) -> None:
     """
     Matches hesitations in the DataFrame.
     """
-    print("Matching hesitations...")
+    logging.info("Matching hesitations...")
 
     # Loop over hesitations
     for index, hesitation_start in df[df["hesitation-start"] == 1].iterrows():
@@ -22,7 +24,7 @@ def match_hesitations(df: pd.DataFrame) -> None:
             # Remove syllables matched on the previous iteration
             & (df["comparison-hesitation-start"] != 1)
         ]
-        print(f"Size of candidate_df: {len(candidate_df)}")
+        logging.info(f"Size of candidate_df: {len(candidate_df)}")
 
         # Extract the next syllable (the end of the hesitation)
         hesitation_end = df.iloc[index + 1]
@@ -34,7 +36,7 @@ def match_hesitations(df: pd.DataFrame) -> None:
                 new_syllable_pair = (candidate_df.iloc[i], candidate_df.iloc[i + 1])
                 potential_syllables.append(new_syllable_pair)
                 i += 1  # Skip the next syllable
-        print(f"Size of potential_syllables: {len(potential_syllables)}")
+        logging.info(f"Size of potential_syllables: {len(potential_syllables)}")
         # Find candidate syllables that match perfectly on:
         #   first-syll-word, last-syll-word, word-before-period,
         #   word-after-period, word-before-comma, and word-after-comma
@@ -48,7 +50,7 @@ def match_hesitations(df: pd.DataFrame) -> None:
             and (syll_a["word-before-comma"] == hesitation_start["word-before-comma"])
             and (syll_a["word-after-comma"] == hesitation_start["word-after-comma"])
         ]
-        print(
+        logging.info(
             f"Size of potential_syllables after first filter: {len(potential_syllables)}"
         )
         # Of these potential matches, identify which potential-syllables-to-match have an N+1
@@ -63,7 +65,7 @@ def match_hesitations(df: pd.DataFrame) -> None:
             and (syll_b["word-before-period"] == hesitation_end["word-before-period"])
             and (syll_b["word-after-period"] == hesitation_end["word-after-period"])
         ]
-        print(
+        logging.info(
             f"Size of potential_syllables after second filter: {len(potential_syllables)}"
         )
         # If no syllable pairs at all match the target hesitation start/end pair,
@@ -72,7 +74,7 @@ def match_hesitations(df: pd.DataFrame) -> None:
             df.at[index, "hesitation-start-matched"] = 0
             df.at[index + 1, "hesitation-end-matched"] = 0
             if index > 1:
-                print(
+                logging.info(
                     "Previous syllable info:\t"
                     + ", ".join(
                         [
@@ -81,7 +83,7 @@ def match_hesitations(df: pd.DataFrame) -> None:
                         ]
                     )
                 )
-            print(
+            logging.info(
                 "Syllable info:\t"
                 + ", ".join(
                     [
@@ -91,7 +93,7 @@ def match_hesitations(df: pd.DataFrame) -> None:
                 )
             )
             if index < len(df) - 2:
-                print(
+                logging.info(
                     "Next syllable info:\t"
                     + ", ".join(
                         [
@@ -158,7 +160,7 @@ def match_hesitations(df: pd.DataFrame) -> None:
         df.loc[
             [best_freq_diff_idx, best_freq_diff_idx + 1], "comparison-hesitation-idx"
         ] = hesitation_start["hesitation-idx"]
-        print(
+        logging.info(
             f"Matched {hesitation_start['syllable_id']} to {df.at[best_freq_diff_idx, 'syllable_id']}"
         )
 
@@ -169,7 +171,7 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
     """
     Matches hesitations in the DataFrame (alternate version; matching constraints are more lax).
     """
-    print("Matching hesitations...")
+    logging.info("Matching hesitations...")
 
     # Loop over hesitations
     for index, hesitation_start in df[df["hesitation-start"] == 1].iterrows():
@@ -184,7 +186,7 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
             # Remove syllables matched on the previous iteration
             & (df["comparison-hesitation-start"] != 1)
         ]
-        print(f"Size of candidate_df: {len(candidate_df)}")
+        logging.info(f"Size of candidate_df: {len(candidate_df)}")
 
         # Extract the next syllable (the end of the hesitation)
         hesitation_end = df.iloc[index + 1]
@@ -207,7 +209,7 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
                 new_syllable_pair = (candidate_df.iloc[i], candidate_df.iloc[i + 1])
                 potential_syllables.append(new_syllable_pair)
                 i += 1  # Skip the next syllable
-        print(f"Size of potential_syllables: {len(potential_syllables)}")
+        logging.info(f"Size of potential_syllables: {len(potential_syllables)}")
 
         # Find candidate syllables that match perfectly on:
         #
@@ -259,7 +261,7 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
                 or (syll_a["first-syll-word"] == hesitation_start["first-syll-word"])
             )
         ]
-        print(
+        logging.info(
             f"Size of potential_syllables after first filter: {len(potential_syllables)}"
         )
 
@@ -307,7 +309,7 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
                 or (syll_b["first-syll-word"] == hesitation_end["first-syll-word"])
             )
         ]
-        print(
+        logging.info(
             f"Size of potential_syllables after second filter: {len(potential_syllables)}"
         )
         # If no syllable pairs at all match the target hesitation start/end pair,
@@ -316,7 +318,7 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
             df.at[index, "hesitation-start-matched"] = 0
             df.at[index + 1, "hesitation-end-matched"] = 0
             if index > 1:
-                print(
+                logging.info(
                     "Previous syllable info:\t"
                     + ", ".join(
                         [
@@ -325,7 +327,7 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
                         ]
                     )
                 )
-            print(
+            logging.info(
                 "Syllable info:\t"
                 + ", ".join(
                     [
@@ -335,7 +337,7 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
                 )
             )
             if index < len(df) - 2:
-                print(
+                logging.info(
                     "Next syllable info:\t"
                     + ", ".join(
                         [
@@ -402,7 +404,7 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
         df.loc[
             [best_freq_diff_idx, best_freq_diff_idx + 1], "comparison-hesitation-idx"
         ] = hesitation_start["hesitation-idx"]
-        print(
+        logging.info(
             f"Matched {hesitation_start['syllable_id']} to {df.at[best_freq_diff_idx, 'syllable_id']}"
         )
 

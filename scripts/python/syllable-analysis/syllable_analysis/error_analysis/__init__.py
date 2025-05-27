@@ -1,3 +1,4 @@
+import logging
 import os
 
 import pandas as pd
@@ -9,13 +10,17 @@ def summarize(processed_passages_dir: str, output_dir: str):
     # Calculate summary statistics for each participant
     all_stats = []
     for participant_id in os.listdir(processed_passages_dir):
-        print(f"Processing participant {participant_id}")
+        logging.info(f"Processing participant {participant_id}")
         participant_stats = []
-        for passage_name in os.listdir(os.path.join(processed_passages_dir, participant_id)):
+        for passage_name in os.listdir(
+            os.path.join(processed_passages_dir, participant_id)
+        ):
             if not passage_name.endswith("_all-cols.csv"):
                 continue
 
-            df = pd.read_csv(os.path.join(processed_passages_dir, participant_id, passage_name))
+            df = pd.read_csv(
+                os.path.join(processed_passages_dir, participant_id, passage_name)
+            )
             passage_stats = get_sheet_stats(
                 df, os.path.splitext(passage_name)[0].removesuffix("_all-cols")
             )

@@ -1,3 +1,4 @@
+import logging
 import os
 import string
 from functools import lru_cache
@@ -36,13 +37,13 @@ def load_word_frequencies():
         df["word"] = df["word"].str.lower()
         return df
     except FileNotFoundError:
-        print(f"Error: The file {tsv_path} was not found.")
+        logging.error(f"Error: The file {tsv_path} was not found.")
         return None
     except pd.errors.EmptyDataError:
-        print(f"Error: The file {tsv_path} is empty.")
+        logging.error(f"Error: The file {tsv_path} is empty.")
         return None
     except pd.errors.ParserError:
-        print(f"Error: The file {tsv_path} could not be parsed.")
+        logging.error(f"Error: The file {tsv_path} could not be parsed.")
         return None
 
 

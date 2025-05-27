@@ -1,3 +1,4 @@
+import logging
 import os
 from collections import defaultdict
 
@@ -32,16 +33,16 @@ def process_subject_data(
     sub_dfs = defaultdict(dict)
 
     # Loop over each participant
-    print("Step 2: Processing participants...")
+    logging.info("Step 2: Processing participants...")
     all_participants = get_participants(input_dir, accepted_subjects)
     for participant_idx, participant_dir in enumerate(all_participants):
-        print(
+        logging.info(
             f"Processing participant {os.path.basename(participant_dir)} ({participant_idx+1}/{len(all_participants)})"
         )
         # Loop over each passage for the participant
         participant_passages = get_passages(participant_dir)
         for passage_idx, passage_path in enumerate(participant_passages):
-            print(
+            logging.info(
                 f"Processing passage {os.path.basename(passage_path)} ({passage_idx+1}/{len(participant_passages)})"
             )
             # Load the corresponding scaffold
