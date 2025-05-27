@@ -1,3 +1,4 @@
+import logging
 import os
 import string
 from typing import Any
@@ -187,7 +188,7 @@ def get_sheet_stats(df: pd.DataFrame, passage_name: str) -> dict[str, Any]:
         idx_col = f"{error_type}-idx"
         total_errors = df[df[idx_col].notna()][idx_col].nunique()
         if total_errors == 0:
-            print(f'No "{error_type}" errors found in {passage_name}')
+            logging.warning(f'No "{error_type}" errors found in {passage_name}')
             # Store empty values for all relevant columns
             sheet_data[f"{error_type}-full-match_Count"] = None
             sheet_data[f"{error_type}-start-match-only_Count"] = None

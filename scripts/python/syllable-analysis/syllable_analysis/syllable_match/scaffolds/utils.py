@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 
@@ -69,7 +70,7 @@ def main(data_dir: str):
             continue
 
         else:
-            print(f"Skipping {filepath}, unknown extension {ext}")
+            logging.warning(f"Skipping {filepath}, unknown extension {ext}")
             continue
 
         passage_name = os.path.splitext(basename)[0]

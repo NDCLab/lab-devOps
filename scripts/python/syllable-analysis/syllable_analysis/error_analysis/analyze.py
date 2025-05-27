@@ -2,6 +2,7 @@ import datetime
 import os
 import re
 
+import logging
 import numpy as np
 import pandas as pd
 
@@ -58,7 +59,7 @@ def analyze_recall_periods(input_dir: str, output_dir: str):
     rp2_data = []
 
     for sub in recall_subs:
-        print(f"Participant: {sub}")
+        logging.info(f"Participant: {sub}")
         # Save some useful variables
         hline = "-" * 50
         recall_sub_dir = os.path.join(input_dir, sub)
@@ -66,7 +67,7 @@ def analyze_recall_periods(input_dir: str, output_dir: str):
         # Get the subject's data dir
         sub_data_dir = os.path.join(output_dir, "processed_passages", sub)
         if not os.path.isdir(sub_data_dir):
-            print(f"Could not find processed data for {sub}, skipping")
+            logging.warning(f"Could not find processed data for {sub}, skipping")
             continue
         # Get all subject files
         all_sub_passages = [
@@ -80,7 +81,9 @@ def analyze_recall_periods(input_dir: str, output_dir: str):
             pat = re.compile(re.escape(sub) + r"_recallperiod1excel.*\.xlsx")
             rp_1_file = [f for f in sub_files if pat.fullmatch(f)][0]
         except IndexError:
-            print(f"Could not find recall period 1 Excel file for {sub}, skipping")
+            logging.info(
+                f"Could not find recall period 1 Excel file for {sub}, skipping"
+            )
             continue
         rp_1_df = pd.read_excel(os.path.join(recall_sub_dir, rp_1_file))
         # Preprocess parsed .xlsx columns
@@ -94,8 +97,8 @@ def analyze_recall_periods(input_dir: str, output_dir: str):
         for _, row in rp_1_df.iterrows():
             if "hammer" in row["tp"]:  # sample passage
                 continue
-            print(hline)
-            print(f"Original speech: {row["os"]}")
+            logging.info(hline)
+            logging.info(f"Original speech: {row["os"]}")
             recalled_passages = tuple(
                 str(passage).lower().replace("gen_", "")
                 for passage in [row["tp"], row["tp2"]]
@@ -105,7 +108,7 @@ def analyze_recall_periods(input_dir: str, output_dir: str):
             if any(f.startswith(recalled_passages) for f in all_sub_passages):
                 all_recalled += recalled_passages
             else:
-                print(
+                logging.info(
                     f"Could not find any passages matching {", ".join(recalled_passages)} "
                     + f"for {sub} "
                     + f"(OS {row['os']}, TP {row['tp']}, TP2 {row['tp2']})"
@@ -124,7 +127,7 @@ def analyze_recall_periods(input_dir: str, output_dir: str):
             path = os.path.join(sub_data_dir, filename)
             match_df = pd.read_csv(path)
             passage_name = os.path.splitext(os.path.basename(path))[0]
-            print(
+            logging.info(
                 f"Passage: {passage_name}" + " (recalled)"
                 if passage_name.startswith(all_recalled)
                 else ""
@@ -134,17 +137,17 @@ def analyze_recall_periods(input_dir: str, output_dir: str):
             dis_count = match_df["any-disfluency"].sum()
             syll_count = len(match_df.index)
             word_count = match_df["first-syll-word"].sum()
-            print(f"Errors/disfluencies: {err_count}/{dis_count}")
+            logging.info(f"Errors/disfluencies: {err_count}/{dis_count}")
             # Calculate per-syllable error/disfluency rates
             err_per_syll = err_count / max(syll_count, 1)
             dis_per_syll = dis_count / max(syll_count, 1)
-            print(
+            logging.info(
                 f"Errors/disfluencies per syllable: {err_per_syll:.3f}/{dis_per_syll:.3f}"
             )
             # Calculate per-word error/disfluency rates
             err_per_word = err_count / max(word_count, 1)
             dis_per_word = dis_count / max(word_count, 1)
-            print(
+            logging.info(
                 f"Errors/disfluencies per word: {err_per_word:.3f}/{dis_per_word:.3f}"
             )
             rp1_data.append(
@@ -166,7 +169,9 @@ def analyze_recall_periods(input_dir: str, output_dir: str):
             pat = re.compile(re.escape(sub) + r"_recallperiod2.*\.txt")
             rp_1_file = [f for f in sub_files if pat.fullmatch(f)][0]
         except IndexError:
-            print(f"Could not find recall period 2 text file for {sub}, skipping")
+            logging.info(
+                f"Could not find recall period 2 text file for {sub}, skipping"
+            )
             continue
         with open(os.path.join(recall_sub_dir, rp_1_file), "r") as f:
             recalled_phrases = f.readlines()
