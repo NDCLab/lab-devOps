@@ -21,6 +21,25 @@ From: python:3.13-slim
     cd /app
     pip install --no-cache-dir --root-user-action=ignore .
 
+    # Download required NLTK resources via Python execution
+    export NLTK_DATA=/usr/local/share/nltk_data
+    mkdir -p "$NLTK_DATA"
+    python -c "
+import nltk
+import ssl
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+nltk.download('wordnet', download_dir='$NLTK_DATA', quiet=False)
+nltk.download('averaged_perceptron_tagger_eng', download_dir='$NLTK_DATA', quiet=False)
+"
+    # Verify downloads worked
+    ls -la "$NLTK_DATA"
+    find "$NLTK_DATA" -name "*.zip" -o -name "wordnet*" -o -name "*perceptron*"
+
     # Remove pip cache to save space
     rm -rf /root/.cache/pip
 
@@ -30,6 +49,7 @@ From: python:3.13-slim
 
 %environment
     export PYTHONNOUSERSITE=1
+    export NLTK_DATA=/usr/local/share/nltk_data
 
 %runscript
     exec python -m syllable_analysis "$@"
