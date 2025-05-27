@@ -2,7 +2,6 @@ import os
 from collections import defaultdict
 
 import pandas as pd
-from tqdm import tqdm
 
 from syllable_analysis.utils import (
     create_output_directory,
@@ -34,15 +33,17 @@ def process_subject_data(
 
     # Loop over each participant
     print("Step 2: Processing participants...")
-    for participant_dir in tqdm(
-        get_participants(input_dir, accepted_subjects),
-    ):
-        print(f"Processing participant {os.path.basename(participant_dir)}")
+    all_participants = get_participants(input_dir, accepted_subjects)
+    for participant_idx, participant_dir in enumerate(all_participants):
+        print(
+            f"Processing participant {os.path.basename(participant_dir)} ({participant_idx+1}/{len(all_participants)})"
+        )
         # Loop over each passage for the participant
-        for passage_path in tqdm(
-            get_passages(participant_dir), desc="Processing passages", leave=False
-        ):
-            print(f"Processing passage {os.path.basename(passage_path)}")
+        participant_passages = get_passages(participant_dir)
+        for passage_idx, passage_path in enumerate(participant_passages):
+            print(
+                f"Processing passage {os.path.basename(passage_path)} ({passage_idx+1}/{len(participant_passages)})"
+            )
             # Load the corresponding scaffold
             passage_name = extract_passage_name(passage_path)
             if not passage_name:

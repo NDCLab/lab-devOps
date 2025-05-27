@@ -2,13 +2,9 @@ import os
 import string
 from functools import lru_cache
 
-import nltk
 import pandas as pd
-
-nltk.download("wordnet")
 from nltk.stem import WordNetLemmatizer
 from nltk.stem.lancaster import LancasterStemmer
-
 
 wnl = WordNetLemmatizer()
 stemmer = LancasterStemmer()

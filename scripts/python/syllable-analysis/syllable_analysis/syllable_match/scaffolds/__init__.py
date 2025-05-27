@@ -1,8 +1,6 @@
 import os
 import tempfile
 
-from tqdm import tqdm
-
 from ..models import FeatureExtractor
 from .constructor import ScaffoldConstructor
 from .utils import convert_xlsx_to_csv_string, extract_words_and_syllables
@@ -11,7 +9,7 @@ from .utils import convert_xlsx_to_csv_string, extract_words_and_syllables
 def create_scaffolds(
     template_paths: list[str], scaffold_dir: str, extractors: list[FeatureExtractor]
 ):
-    for template_path in tqdm(template_paths):
+    for template_path in template_paths:
         # Extract the passage name from the template path
         passage_name = os.path.splitext(os.path.basename(template_path))[0]
 
