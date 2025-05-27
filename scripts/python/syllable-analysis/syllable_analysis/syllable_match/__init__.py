@@ -47,7 +47,7 @@ def process_subject_data(
             # Load the corresponding scaffold
             passage_name = extract_passage_name(passage_path)
             if not passage_name:
-                raise ValueError(f"Improperly named file {passage_name}")
+                raise ValueError(f"Improperly named file {passage_path}")
             scaffold_df = load_scaffold(scaffold_dir, passage_name)
 
             # Load the passage data
