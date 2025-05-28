@@ -906,9 +906,8 @@ class TestCase(ABC):
 
         pending_df = pd.DataFrame(pending)
         # 'datetime' and 'user' columns do not matter for verifying output
-        cols_to_drop = ["datetime", "user"]
-        if all(c in pending_df.columns for c in cols_to_drop):
-            pending_df.drop(columns=cols_to_drop, inplace=True)
+        cols_to_drop = pending_df.columns.intersection(["datetime", "user"])
+        pending_df.drop(columns=cols_to_drop, inplace=True)
 
         return pending_df
 
