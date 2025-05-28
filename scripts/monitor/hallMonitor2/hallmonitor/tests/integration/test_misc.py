@@ -699,3 +699,112 @@ class PurgeInaccurateFileRecordEntriesTestCase(TestCase):
 
 def test_purge_inaccurate_file_record_entries(request):
     PurgeInaccurateFileRecordEntriesTestCase.run_test_case(request)
+
+
+class SuppressMissingIdentifierPresentInPendingQATestCase(MiscellaneousTestCase):
+    case_name = "SuppressMissingIdentifierPresentInPendingQATestCase"
+    description = (
+        "Ensures that when --suppress-missing-pending-qa is enabled, an "
+        "identifier absent from the checked list but present in the pending-qa "
+        "list does **not** raise a 'missing identifier' error."
+    )
+    conditions = [
+        "--suppress-missing-pending-qa flag is ON",
+        "Identifier is absent from checked identifiers",
+        "Identifier is present in pending-qa list",
+    ]
+    expected_output = "No error is raised for missing identifier."
+
+    is_raw = False
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        # Remove identifier from checked/...
+        checked_path = self.build_path("s1_r1", "eeg", "", self.is_raw)
+        modified_files = {
+            relpath: contents
+            for relpath, contents in modified_files.items()
+            if not relpath.startswith(checked_path)
+        }
+
+        # ...and create it in pending-qa/
+        pending_qa_path = self.build_path("s1_r1", "eeg", "no-data.txt", True)
+        pending_qa_path = pending_qa_path.replace("raw", "pending-qa")
+        modified_files[pending_qa_path] = "Dummy data"
+
+        return modified_files
+
+    def get_expected_errors(self):
+        return []
+
+    def validate(self):
+        # Override validate() to pass the suppress_missing_pending_qa=True option
+        pending_df = self.run_validate_data(
+            is_raw=self.is_raw, suppress_missing_pending_qa=True
+        )
+        if self.is_raw:
+            errors_df = pending_df[~pending_df["passRaw"]]
+        else:
+            errors_df = pending_df
+        self.compare_errors(errors_df)
+
+
+def test_suppress_missing_identifier_present_in_pending_qa(request):
+    SuppressMissingIdentifierPresentInPendingQATestCase.run_test_case(request)
+
+
+class RaiseMissingIdentifierAbsentFromPendingQATestCase(MiscellaneousTestCase):
+    case_name = "RaiseMissingIdentifierAbsentFromPendingQATestCase"
+    description = (
+        "When --suppress-missing-pending-qa is enabled and an identifier is "
+        "absent from both the checked list and the pending-qa list, the "
+        "pipeline should still raise the standard 'missing identifier' error."
+    )
+    conditions = [
+        "--suppress-missing-pending-qa flag is ON",
+        "Identifier is not present in checked identifiers",
+        "Identifier is not present in pending-qa",
+    ]
+    expected_output = "Missing identifier error is raised for the absent identifier."
+
+    is_raw = False
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        # Remove file from checked/, do not place in pending-qa
+        checked_path = self.build_path("s1_r1", "eeg", "", self.is_raw)
+        modified_files = {
+            relpath: contents
+            for relpath, contents in modified_files.items()
+            if not relpath.startswith(checked_path)
+        }
+
+        return modified_files
+
+    def get_expected_errors(self):
+        missing = os.path.join(
+            self.case_dir, self.build_path("s1_r1", "eeg", "", self.is_raw)
+        )
+        missing_info = (
+            f"Missing identifier (should be at {missing}, folder is not present)"
+        )
+        errors = [ExpectedError("Missing identifier", re.escape(missing_info))]
+
+        return errors
+
+    def validate(self):
+        # Override validate() to pass the suppress_missing_pending_qa=True option
+        pending_df = self.run_validate_data(
+            is_raw=self.is_raw, suppress_missing_pending_qa=True
+        )
+        if self.is_raw:
+            errors_df = pending_df[~pending_df["passRaw"]]
+        else:
+            errors_df = pending_df
+        self.compare_errors(errors_df)
+
+
+def test_raise_missing_identifier_absent_from_pending_qa(request):
+    RaiseMissingIdentifierAbsentFromPendingQATestCase.run_test_case(request)

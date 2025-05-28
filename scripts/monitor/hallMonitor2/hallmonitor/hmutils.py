@@ -439,6 +439,13 @@ def get_args():
         type=str,
         help="file path for logger output (defaults to timestamped file in data-monitoring/logs/).",
     )
+    parser.add_argument(
+        "--suppress-missing-pending-qa",
+        action="store_true",
+        help="skip “missing identifier” errors when an identifier is absent from checked but present "
+        + "in pending-qa. An error is raised only if the identifier is missing from both lists, "
+        + "letting mid-pipeline runs proceed without noise.",
+    )
 
     limit_data_validation = parser.add_mutually_exclusive_group()
     limit_data_validation.add_argument(
