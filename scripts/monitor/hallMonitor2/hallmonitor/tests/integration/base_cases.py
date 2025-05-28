@@ -879,6 +879,7 @@ class TestCase(ABC):
             quiet = False
             replace = None
             map = None
+            suppress_missing_pending_qa = False
 
         return MockNamespace()
 
@@ -902,6 +903,9 @@ class TestCase(ABC):
             use_legacy_exceptions=kwargs.get("use_legacy_exceptions", False),
             is_raw=kwargs.get("is_raw", False),
             ignore_before_date=kwargs.get("ignore_before_date", None),
+            suppress_missing_pending_qa=kwargs.get(
+                "suppress_missing_pending_qa", False
+            ),
         )
 
         pending_df = pd.DataFrame(pending)

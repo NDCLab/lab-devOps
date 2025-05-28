@@ -62,6 +62,7 @@ def validate_data(
     dataset: str,
     use_legacy_exceptions: bool = False,
     ignore_before_date: datetime.date = None,
+    suppress_missing_pending_qa: bool = False,
     is_raw: bool = True,
 ):
     """
@@ -113,6 +114,13 @@ def validate_data(
 
     # raise errors for missing identifiers without a no-data.txt
     for id in missing_ids:
+        # if appropriate option is set, skip "missing" errors when identifier is in pending-qa
+        if suppress_missing_pending_qa and os.path.isdir(
+            id.to_dir(dataset, True).replace("raw", "pending-qa")
+        ):
+            logger.debug(f'"Missing" identifier {id} found in pending-qa, no error')
+            continue
+
         id.is_missing = True  # included in detailed stringification
         missing_id_dir = id.to_dir(dataset, is_raw=is_raw)
 
@@ -510,12 +518,18 @@ def checked_data_validation(
     dataset: str,
     use_legacy_exceptions=False,
     ignore_before_date: datetime.date = None,
+    suppress_missing_pending_qa: bool = False,
 ):
     logger.info("Starting checked data validation...")
 
     # perform data validation for checked directory
     pending = validate_data(
-        logger, dataset, use_legacy_exceptions, ignore_before_date, is_raw=False
+        logger,
+        dataset,
+        use_legacy_exceptions,
+        ignore_before_date,
+        suppress_missing_pending_qa,
+        is_raw=False,
     )
 
     logger.info("Checked data validation complete, found %d errors", len(pending))
@@ -875,6 +889,9 @@ def main(args: Namespace):
     if ignore_before is not None:
         logger.debug("Ignoring files modified before %s", ignore_before)
 
+    suppress_missing_pending_qa = args.suppress_missing_pending_qa
+    logger.debug(f"suppress_missing_pending_qa={suppress_missing_pending_qa}")
+
     # purge inaccurate records from the validated file record
     record_df = get_file_record(dataset)
     validated_ids = [Identifier.from_str(id) for id in record_df["identifier"].unique()]
@@ -893,9 +910,21 @@ def main(args: Namespace):
         raw_data_validation(logger, dataset, use_legacy_exceptions, ignore_before)
     elif args.checked_only:
         logger.info("Only running data validation for sourcedata/checked/")
-        checked_data_validation(logger, dataset, use_legacy_exceptions, ignore_before)
+        checked_data_validation(
+            logger,
+            dataset,
+            use_legacy_exceptions,
+            ignore_before,
+            suppress_missing_pending_qa,
+        )
     else:
-        checked_data_validation(logger, dataset, use_legacy_exceptions, ignore_before)
+        checked_data_validation(
+            logger,
+            dataset,
+            use_legacy_exceptions,
+            ignore_before,
+            suppress_missing_pending_qa,
+        )
         raw_data_validation(logger, dataset, use_legacy_exceptions, ignore_before)
 
     if args.no_qa:
