@@ -31,7 +31,7 @@ def summarize(processed_passages_dir: str, output_dir: str):
         all_stats.extend(participant_stats)
 
         participant_dir = os.path.join(output_dir, "processed_passages", participant_id)
-        os.makedirs(participant_dir)
+        os.makedirs(participant_dir, exist_ok=True)
 
         participant_stats_df = pd.DataFrame(participant_stats)
         participant_stats_df.to_csv(
