@@ -78,6 +78,8 @@ def main(
     # 4. Process recall data
     analyze_recall_periods(input_dir, output_subdir)
 
+    logging.info("Done!")
+
 
 if __name__ == "__main__":
     args = get_args()
