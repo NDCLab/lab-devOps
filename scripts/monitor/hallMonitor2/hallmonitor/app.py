@@ -1,5 +1,3 @@
-#!/bin/python3
-
 import datetime
 import glob
 import logging
@@ -7,6 +5,7 @@ import os
 import re
 import subprocess
 from argparse import Namespace
+from getpass import getuser
 
 import pandas as pd
 
@@ -21,7 +20,6 @@ from hallmonitor.hmutils import (
     RAW_SUBDIR,
     ColorfulFormatter,
     Identifier,
-    rsync_copy,
     SharedTimestamp,
     clean_empty_dirs,
     datadict_has_changes,
@@ -50,6 +48,7 @@ from hallmonitor.hmutils import (
     new_pending_df,
     new_qa_record,
     new_validation_record,
+    rsync_copy,
     write_file_record,
     write_pending_errors,
     write_pending_files,
@@ -799,7 +798,7 @@ def main(args: Namespace):
         console_handler.setFormatter(console_formatter)
         logger.addHandler(console_handler)
 
-    logger.info("Logging initialized at %s", get_timestamp())
+    logger.info("Logging initialized at %s (run by %s)", get_timestamp(), getuser())
 
     # rename redcap columns
 
