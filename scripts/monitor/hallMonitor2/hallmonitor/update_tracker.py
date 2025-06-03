@@ -22,14 +22,6 @@ ENGLISH_LANGCODE = 1
 SPANISH_LANGCODE = 2
 
 
-class c:
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
-
-
 def get_redcap_columns(datadict_df: pd.DataFrame, session: str):
     """Obtains column mappings for all Redcap columns from the data dictionary.
 
