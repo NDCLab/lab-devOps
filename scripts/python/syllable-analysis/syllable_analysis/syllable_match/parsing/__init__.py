@@ -1,3 +1,4 @@
+import logging
 import re
 import string
 
@@ -228,6 +229,7 @@ def match_syllable_to_word(word_list, syllable_list) -> tuple[list[str], list[in
     syllable_queue = syllable_list.copy()
 
     for word_index, word in enumerate(word_list):
+        logging.debug(f"Word: {word}")
         # Track how many characters of this word we've covered
         current_length = 0
         word_length = len(word)
@@ -237,6 +239,7 @@ def match_syllable_to_word(word_list, syllable_list) -> tuple[list[str], list[in
             # Take the next syllable from the queue
             syllable = syllable_queue.pop(0)
             current_length += len(syllable)
+            logging.debug(f"Syllable: {syllable}")
 
             # Assign that syllable to this word
             matching_words.append(word)
