@@ -9,7 +9,7 @@ from syllable_analysis.scaffolds import build_scaffolds
 from syllable_analysis.syllable_match import process_subject_data
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def get_args():
