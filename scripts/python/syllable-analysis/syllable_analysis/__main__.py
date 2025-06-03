@@ -9,6 +9,9 @@ from syllable_analysis.scaffolds import build_scaffolds
 from syllable_analysis.syllable_match import process_subject_data
 
 
+logging.basicConfig(level=logging.INFO)
+
+
 def get_args():
     parser = argparse.ArgumentParser(
         description="Process subject data for READ analysis."
