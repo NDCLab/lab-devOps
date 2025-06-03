@@ -799,8 +799,7 @@ def main(args: Namespace):
         console_handler.setFormatter(console_formatter)
         logger.addHandler(console_handler)
 
-    logger.info("Logging initialized")
-    logger.debug("%s", get_timestamp())
+    logger.info("Logging initialized at %s", get_timestamp())
 
     # rename redcap columns
 
