@@ -97,8 +97,8 @@ def analyze_recall_periods(input_dir: str, output_dir: str):
         for _, row in rp_1_df.iterrows():
             if "hammer" in row["tp"]:  # sample passage
                 continue
-            logging.info(hline)
-            logging.info(f"Original speech: {row["os"]}")
+            logging.debug(hline)
+            logging.debug(f"Original speech: {row["os"]}")
             recalled_passages = tuple(
                 str(passage).lower().replace("gen_", "")
                 for passage in [row["tp"], row["tp2"]]
@@ -141,13 +141,13 @@ def analyze_recall_periods(input_dir: str, output_dir: str):
             # Calculate per-syllable error/disfluency rates
             err_per_syll = err_count / max(syll_count, 1)
             dis_per_syll = dis_count / max(syll_count, 1)
-            logging.info(
+            logging.debug(
                 f"Errors/disfluencies per syllable: {err_per_syll:.3f}/{dis_per_syll:.3f}"
             )
             # Calculate per-word error/disfluency rates
             err_per_word = err_count / max(word_count, 1)
             dis_per_word = dis_count / max(word_count, 1)
-            logging.info(
+            logging.debug(
                 f"Errors/disfluencies per word: {err_per_word:.3f}/{dis_per_word:.3f}"
             )
             rp1_data.append(
