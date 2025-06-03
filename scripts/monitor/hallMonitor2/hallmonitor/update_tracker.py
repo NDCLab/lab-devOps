@@ -451,6 +451,8 @@ def main(
 
     dd_df = get_datadict(dataset)
     redcheck_columns, allowed_duplicate_columns = get_redcap_columns(dd_df, session)
+    # "Welcome" survey is needed across multiple projects, so we ignore it
+    allowed_duplicate_columns.append(f"welcome_{session}_e1_complete")
     logger.debug(
         "Redcheck columns: %s",
         ", ".join(f"{k} ({v})" for k, v in redcheck_columns.items()),
