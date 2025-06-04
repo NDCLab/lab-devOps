@@ -3,6 +3,7 @@ import math
 import os
 import re
 import sys
+from getpass import getuser
 from collections import defaultdict
 
 import pandas as pd
@@ -10,12 +11,32 @@ import pandas as pd
 from hallmonitor.hmutils import (
     REMOTE_REDCAP_PREFIX,
     Identifier,
+    SharedTimestamp,
     get_allowed_suffixes,
     get_datadict,
+    get_timestamp,
     get_expected_combination_rows,
     get_new_redcaps,
     get_variable_datatype,
+    write_pending_errors,
 )
+
+
+def log_tracker_error(logger: logging.Logger, dataset: str, suffix: str, error: str):
+    error_info = {
+        "datetime": get_timestamp(),
+        "user": getuser(),
+        "identifier": "",
+        "subject": "",
+        "dataType": "REDCap",
+        "encrypted": False,
+        "suffix": suffix,
+        "errorType": "Tracker update error",
+        "errorDetails": error,
+    }
+    write_pending_errors(dataset, pd.DataFrame([error_info]), SharedTimestamp())
+    logger.error(error)
+
 
 COMPLETED_SUFFIX = "_complete"
 ENGLISH_LANGCODE = 1
@@ -498,14 +519,20 @@ def main(
         )
         logger.debug("Found %d matching RC(s)", len(matching_rcs))
         if len(matching_rcs) == 0:
-            logger.error("Could not find a file matching %s", expected_rc)
+            log_tracker_error(
+                logger,
+                dataset,
+                session,
+                f"Could not find a file matching {expected_rc}",
+            )
             successful_update = False
             continue
         elif len(matching_rcs) > 1:
-            logger.error(
-                'Multiple REDCaps found with name "%s" specified in datadict: %s',
-                expected_rc,
-                ", ".join(matching_rcs),
+            log_tracker_error(
+                logger,
+                dataset,
+                session,
+                f'Multiple REDCaps found with name "{expected_rc}" specified in datadict: {', '.join(matching_rcs)}',
             )
             successful_update = False
             continue
@@ -536,7 +563,12 @@ def main(
             break
 
         if not present:
-            logger.error('Can\'t find redcap "%s" specified in datadict', expected_rc)
+            log_tracker_error(
+                logger,
+                dataset,
+                session,
+                f'Can\'t find redcap "{expected_rc}" specified in datadict',
+            )
             successful_update = False
             continue
 
@@ -556,7 +588,12 @@ def main(
         rc_cols = rc_df.columns
         col_matches = rc_cols[rc_cols.str.startswith(id_col)]
         if col_matches.empty:  # column match not found, raise an error
-            logger.error("Column %s not found for RedCAP %s", id_col, redcap_path)
+            log_tracker_error(
+                logger,
+                dataset,
+                session,
+                f"Column {id_col} not found for RedCAP {redcap_path}",
+            )
             successful_update = False
             continue
         logger.debug("Found column matches %s", ", ".join(col_matches))
@@ -568,9 +605,12 @@ def main(
             # ...ensure that each subject is only in one redcap or the other, then...
             duped_subs = set(remote_df[rc_id_col]) & set(rc_df[rc_id_col])
             if duped_subs:
-                logger.error(
-                    f"The following subjects are in the remote-only and in-person REDCaps for {expected_rc}: %s",
-                    ", ".join(str(sub) for sub in duped_subs),
+                log_tracker_error(
+                    logger,
+                    dataset,
+                    session,
+                    f"The following subjects are in the remote-only and in-person REDCaps for {expected_rc}: "
+                    + ", ".join(str(sub) for sub in duped_subs),
                 )
                 successful_update = False
                 continue
@@ -589,10 +629,11 @@ def main(
             for rc_col in vals.keys():
                 if vals[rc_col] > 1:
                     dupes.append(rc_col)
-            logger.error(
-                "Duplicate columns found in redcap %s: %s",
-                redcap_path,
-                ", ".join(dupes),
+            log_tracker_error(
+                logger,
+                dataset,
+                session,
+                f"Duplicate columns found in redcap {redcap_path}: " + ", ".join(dupes),
             )
             return False
 
@@ -600,7 +641,12 @@ def main(
 
     for expected_rc in redcheck_columns.keys():
         if expected_rc not in all_rc_dfs.keys():
-            logger.error("Could not find %s in all_rc_dfs, skipping", expected_rc)
+            log_tracker_error(
+                logger,
+                dataset,
+                session,
+                f"Could not find {expected_rc} in all_rc_dfs, skipping",
+            )
             continue
 
         logger.debug("Updating tracker for %s", expected_rc)
@@ -642,16 +688,23 @@ def main(
                     if key in other_rc_df.columns:
                         other_rcs.append(redcap)
                 if len(other_rcs) >= 1:
-                    logger.error(
-                        'Can\'t find "%s" in %s redcap, but found in %s redcaps',
-                        key,
-                        expected_rc,
-                        ", ".join(other_rcs),
+                    log_tracker_error(
+                        logger,
+                        dataset,
+                        session,
+                        f'Can\'t find "{key}" in {expected_rc} redcap, but found in '
+                        + ", ".join(other_rcs)
+                        + " redcaps",
                     )
                     successful_update = False
                     continue
                 else:
-                    logger.error('Can\'t find "%s" in %s redcap', key, expected_rc)
+                    log_tracker_error(
+                        logger,
+                        dataset,
+                        session,
+                        f'Can\'t find "{key}" in {expected_rc} redcap',
+                    )
                     successful_update = False
                     continue
 
@@ -757,7 +810,7 @@ def main(
                 + redcaps_of_duplicates[i]
                 + "; Exiting."
             )
-        logger.error(errmsg)
+        log_tracker_error(logger, dataset, session, errmsg)
         successful_update = False
 
     # update central tracker with a 1 for each fully-verified identifier
@@ -772,8 +825,13 @@ def main(
 
     invalid_ids = id_df[~id_df["id"].isin(tracker_df.index)]["id"]
     if not invalid_ids.empty:
-        logger.error(
-            f"Invalid ID(s) found: {', '.join(map(str, invalid_ids.unique()))}, skipping"
+        log_tracker_error(
+            logger,
+            dataset,
+            session,
+            "Invalid ID(s) found: "
+            + ", ".join(map(str, invalid_ids.unique()))
+            + ", skipping",
         )
         id_df = id_df[~id_df["id"].isin(invalid_ids)]
 
