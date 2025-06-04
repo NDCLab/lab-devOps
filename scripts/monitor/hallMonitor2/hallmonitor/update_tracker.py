@@ -444,7 +444,7 @@ def main(
     dd_df = get_datadict(dataset)
     redcheck_columns, allowed_duplicate_columns = get_redcap_columns(dd_df, session)
     # "Welcome" survey is needed across multiple projects, so we ignore it
-    allowed_duplicate_columns.append(f"welcome_{session}_e1_complete")
+    allowed_duplicate_columns.append(f"welcome_{session}_e1{COMPLETED_SUFFIX}")
     logger.debug(
         "Redcheck columns: %s",
         ", ".join(f"{k} ({v})" for k, v in redcheck_columns.items()),
@@ -629,7 +629,9 @@ def main(
             if str(key).startswith(("consent", "assent", "id_column")):
                 continue
             if (
-                not re.match(r"^.*es(?:_[a-zA-Z])?_s\d+_r\d+_e\d+_complete", key)
+                not re.match(
+                    r"^.*es(?:_[a-zA-Z])?_s\d+_r\d+_e\d+" + COMPLETED_SUFFIX, key
+                )
                 and key not in all_rc_dfs[expected_rc].columns
             ):
                 other_rcs = []
