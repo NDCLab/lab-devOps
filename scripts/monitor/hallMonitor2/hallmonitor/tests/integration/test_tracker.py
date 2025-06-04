@@ -530,12 +530,11 @@ class DuplicateREDCapColumnsTestCase(TrackerTestCase):
         assert mock_error.call_count == 3, mock_error._calls_repr()
 
         error_re = re.compile(r".*[Dd]uplicate column.*")
-        col_re = re.compile(re.escape(self.duped_col))
 
         for call in mock_error.call_args_list:
             args = list(map(str, call.args))
             error_matches = any(error_re.match(arg) for arg in args)
-            col_matches = any(col_re.match(arg) for arg in args)
+            col_matches = any(self.duped_col in arg for arg in args)
 
             assert error_matches and col_matches, f"Unexpected error: {call.args}"
 
