@@ -572,6 +572,14 @@ class SharedTimestamp:
     This class is critical to ensure that the timestamp portion of pending-files
     and pending-errors CSVs are identical.
 
+    Example use:
+    ```
+    ts1 = SharedTimestamp()
+    ts2 = SharedTimestamp()
+    assert ts1 == ts2 # True; both refer to the same timestamp
+    assert ts1 is ts2 # True; both refer to the same object in memory
+    ```
+
     Attributes:
         _ts (str): A class-level attribute to store the shared timestamp.
 
