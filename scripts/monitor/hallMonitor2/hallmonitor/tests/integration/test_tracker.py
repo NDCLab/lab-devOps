@@ -533,7 +533,7 @@ class DuplicateREDCapColumnsTestCase(TrackerTestCase):
         col_re = re.compile(re.escape(self.duped_col))
 
         for call in mock_error.call_args_list:
-            args = map(str, call.args)
+            args = list(map(str, call.args))
             error_matches = any(error_re.match(arg) for arg in args)
             col_matches = any(col_re.match(arg) for arg in args)
 
@@ -588,13 +588,10 @@ class MissingREDCapColumnTestCase(TrackerTestCase):
 
         assert mock_error.call_count >= 1, mock_error._calls_repr()
 
-        removed_col_re = re.compile(re.escape(self.removed_col))
-        col_re = re.compile(re.escape("bbschild"))
-
         for call in mock_error.call_args_list:
-            args = map(str, call.args)
-            removed_matches = any(removed_col_re.search(arg) for arg in args)
-            col_matches = any(col_re.search(arg) for arg in args)
+            args = list(map(str, call.args))
+            removed_matches = any(self.removed_col in arg for arg in args)
+            col_matches = any("bbschild" in arg for arg in args)
 
             assert removed_matches and col_matches, f"Unexpected error: {call.args}"
 
