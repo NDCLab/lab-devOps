@@ -662,9 +662,9 @@ class RelocatedREDCapColumnTestCase(TrackerTestCase):
         args = list(map(str, mock_error.call_args_list[0].args))
 
         for pat in keyword_pats:
-            assert any(
-                pat.search(arg.lower()) for arg in args
-            ), f"Did not find keyword: {pat.pattern}"
+            assert any(pat.search(arg.lower()) for arg in args), (
+                f"Did not find keyword: {pat.pattern}"
+            )
 
 
 def test_relocated_redcap_column(request):
@@ -725,9 +725,9 @@ class RemoteAndInPersonREDCapTestCase(TrackerTestCase):
         args = list(map(str, mock_error.call_args_list[0].args))
 
         for pat in keyword_pats:
-            assert any(
-                pat.search(arg.lower()) for arg in args
-            ), f"Did not find keyword: {pat.pattern}"
+            assert any(pat.search(arg.lower()) for arg in args), (
+                f"Did not find keyword: {pat.pattern}"
+            )
 
 
 def test_remote_and_in_person_redcap(request):

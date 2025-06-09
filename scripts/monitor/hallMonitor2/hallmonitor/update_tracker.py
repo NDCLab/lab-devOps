@@ -3,8 +3,8 @@ import math
 import os
 import re
 import sys
-from getpass import getuser
 from collections import defaultdict
+from getpass import getuser
 
 import pandas as pd
 
@@ -14,9 +14,9 @@ from hallmonitor.hmutils import (
     SharedTimestamp,
     get_allowed_suffixes,
     get_datadict,
-    get_timestamp,
     get_expected_combination_rows,
     get_new_redcaps,
+    get_timestamp,
     get_variable_datatype,
     write_pending_errors,
 )
@@ -532,7 +532,7 @@ def main(
                 logger,
                 dataset,
                 session,
-                f'Multiple REDCaps found with name "{expected_rc}" specified in datadict: {', '.join(matching_rcs)}',
+                f'Multiple REDCaps found with name "{expected_rc}" specified in datadict: {", ".join(matching_rcs)}',
             )
             successful_update = False
             continue

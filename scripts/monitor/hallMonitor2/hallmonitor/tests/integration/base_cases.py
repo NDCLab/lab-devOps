@@ -1105,7 +1105,7 @@ class ValidationTestCase(TestCase):
                 for error in expected_errors
             )
             if not is_expected:
-                extra.append(f'{row["errorType"]}: {row["errorDetails"]}')
+                extra.append(f"{row['errorType']}: {row['errorDetails']}")
 
         # Log extra errors
         logging.debug(f"Extra errors: {extra}")

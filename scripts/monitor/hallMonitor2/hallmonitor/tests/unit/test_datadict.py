@@ -3,6 +3,7 @@ from unittest import mock
 
 import pandas as pd
 import pytest
+
 from hallmonitor.hmutils import datadict_has_changes, get_datadict
 
 

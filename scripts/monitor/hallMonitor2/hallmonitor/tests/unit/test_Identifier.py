@@ -3,6 +3,7 @@ import re
 from unittest import mock
 
 import pytest
+
 from hallmonitor.hmutils import Identifier
 
 IDENTIFIER_RE = (

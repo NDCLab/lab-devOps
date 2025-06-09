@@ -381,6 +381,6 @@ def test_multiple_filename_participant_mismatches(
     errors = get_psychopy_errors(mock_logger, dataset, files)
     assert len(errors) == 1
     assert (
-        f"ID value(s) [{", ".join(mismatched_ids)}] in csvfile different from ID in filename ({id_num})"
+        f"ID value(s) [{', '.join(mismatched_ids)}] in csvfile different from ID in filename ({id_num})"
         in errors[0]["message"]
     )

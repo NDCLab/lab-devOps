@@ -3,6 +3,7 @@ from unittest import mock
 
 import pandas as pd
 import pytest
+
 from hallmonitor.hmutils import (
     FILE_RECORD_COLS,
     get_file_record,
