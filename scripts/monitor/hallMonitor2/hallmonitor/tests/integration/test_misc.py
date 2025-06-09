@@ -115,21 +115,15 @@ class ExtraFilesInFolderTestCase(MiscellaneousTestCase):
     def get_expected_errors(self):
         identifier = f"sub-{self.sub_id}_arrow-alert-v1-1_psychopy_PATTERN"
         new_suffix = "s1_r1_e2"
-        old_suffix = "s1_r1_e1"
 
         naming_info = re.escape(f"Suffix {new_suffix} not in allowed suffixes") + r".*"
-        unexpected_info = (
-            re.escape(f"Unexpected file {identifier.replace('PATTERN', old_suffix)}")
-            + r"\..+ found"
+        unexpected_info = re.escape(
+            f"Unexpected file {identifier.replace('PATTERN', new_suffix)}.csv found"
         )
-        missing_info = (
-            re.escape(f"Expected file {identifier.replace('PATTERN', new_suffix)}")
-            + r"\..+ not found"
-        )
+
         errors = [
             ExpectedError("Naming error", naming_info),
-            ExpectedError("Unexpected file", unexpected_info, 3),
-            ExpectedError("Missing file", missing_info, 2),
+            ExpectedError("Unexpected file", unexpected_info),
         ]
 
         return errors
