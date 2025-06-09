@@ -357,19 +357,17 @@ class InvalidEventSuffixTestCase(NamingTestCase):
         new_suffix = "s1_r1_e3"
 
         naming_info = f"Suffix {new_suffix} not in allowed suffixes" + r".*"
-        missing_info = (
-            re.escape(f"Expected file {identifier.replace('PATTERN', new_suffix) }")
-            + r"\..+ not found"
+        missing_info = re.escape(
+            f"Expected file {identifier.replace('PATTERN', old_suffix)}.eeg not found"
         )
-        extra_info = (
-            re.escape(f"Unexpected file {identifier.replace("PATTERN", old_suffix)}")
-            + r"\..+ found"
+        extra_info = re.escape(
+            f"Unexpected file {identifier.replace('PATTERN', new_suffix)}.eeg found"
         )
 
         errors = [
             ExpectedError("Naming error", naming_info),
-            ExpectedError("Missing file", missing_info, 2),
-            ExpectedError("Unexpected file", extra_info, 2),
+            ExpectedError("Missing file", missing_info),
+            ExpectedError("Unexpected file", extra_info),
         ]
 
         return errors
@@ -578,10 +576,10 @@ class InvalidExtensionTestCase(NamingTestCase):
             + r".*"
         )
         missing_info = re.escape(
-            f"Expected file {basename.replace("PATTERN", old_ext)} not found"
+            f"Expected file {basename.replace('PATTERN', old_ext)} not found"
         )
         extra_info = re.escape(
-            f"Unexpected file {basename.replace("PATTERN", new_ext)} found"
+            f"Unexpected file {basename.replace('PATTERN', new_ext)} found"
         )
 
         errors = [
