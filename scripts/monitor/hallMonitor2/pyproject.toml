@@ -4,7 +4,7 @@ version = "0.5.0"
 description = ""
 authors = [{ name = "Nolan Welch", email = "nolanwelch@outlook.com" }]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "pandas (>=2.2.3,<3.0.0)",
     "packaging (>=24.2,<25.0)",
@@ -25,3 +25,4 @@ mock = "^5.1.0"
 pluggy = "^1.5.0"
 pytest = "^8.3.4"
 pytest-cov = "^6.0.0"
+pre-commit = "^4.2.0"
