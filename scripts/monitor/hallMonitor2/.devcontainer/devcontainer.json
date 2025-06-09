@@ -1,0 +1,43 @@
+{
+  "name": "hallMonitor-2",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12",
+  "containerEnv": {
+    "TZ": "America/New_York"
+  },
+  "runArgs": [
+    "--privileged"
+  ],
+  "features": {
+    // Nice-to-have features
+    "ghcr.io/devcontainers/features/common-utils": {},
+    // Needed for Pylance
+    "ghcr.io/devcontainers/features/node:1": {},
+    // Needed for build
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.13"
+    },
+    "ghcr.io/devcontainers-extra/features/poetry:2": {},
+    "ghcr.io/jungaretti/features/make:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "tamasfe.even-better-toml",
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "foxundermoon.shell-format",
+        "timonwong.shellcheck"
+      ],
+      "settings": {
+        "dev.containers.copyGitConfig": true,
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
+        "[python]": {
+          "editor.tabSize": 4
+        },
+        "python.defaultInterpreterPath": "./.venv/bin/python"
+      }
+    }
+  },
+  "postCreateCommand": "./post-create.sh"
+}
