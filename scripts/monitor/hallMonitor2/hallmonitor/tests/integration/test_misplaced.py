@@ -134,7 +134,7 @@ class FolderSubjectMismatchTestCase(MisplacedFileTestCase):
         return modified_files
 
     def get_expected_errors(self):
-        old_basename = f"sub-{self.sub_id }_all_eeg_s1_r1_e1.eeg"
+        old_basename = f"sub-{self.sub_id}_all_eeg_s1_r1_e1.eeg"
         new_basename = f"sub-{self.sub_id + 1}_all_eeg_s1_r1_e1.eeg"
 
         misplaced_info = re.escape(

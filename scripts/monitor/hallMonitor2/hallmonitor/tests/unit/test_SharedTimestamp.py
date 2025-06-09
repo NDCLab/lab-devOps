@@ -2,6 +2,7 @@ import datetime
 from unittest import mock
 
 import pytest
+
 from hallmonitor.hmutils import DT_FORMAT, SharedTimestamp, get_timestamp
 
 

@@ -2,6 +2,7 @@ import os
 from unittest import mock
 
 import pytest
+
 from hallmonitor.hmutils import get_eeg_errors
 
 

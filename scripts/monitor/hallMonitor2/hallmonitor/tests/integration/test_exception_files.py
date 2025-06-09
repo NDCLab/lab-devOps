@@ -525,7 +525,8 @@ class CombinationAllFilesHaveDeviation(ExceptionTestCase):
         + "and sets a deviation string for all other files."
     )
     conditions = [
-        "Datatype is a combination type" "Folder contains deviation.txt",
+        "Datatype is a combination type",
+        "Folder contains deviation.txt",
         "All standard files have a deviation string",
     ]
     expected_output = (
