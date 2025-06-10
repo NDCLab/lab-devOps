@@ -630,11 +630,14 @@ def qa_validation(logger: logging.Logger, dataset: str):
     qa_df = qa_df[~qa_df["identifier"].isin(failed_ids)]
     # remove failed identifiers from pending-qa/
     for failed_id in failed_ids:
-        id_dir = (
-            Identifier.from_str(failed_id)
-            .to_dir(dataset, True)
-            .replace("raw", "pending-qa")
-        )
+        try:
+            id_dir = (
+                Identifier.from_str(failed_id)
+                .to_dir(dataset, True)
+                .replace("raw", "pending-qa")
+            )
+        except ValueError:  # "Unknown Identifier" can be ignored
+            continue
         try:
             subprocess.run(["rm", "-rf", id_dir], check=True)
             logger.info("Removed failed identifier %s from pending-qa/", failed_id)
