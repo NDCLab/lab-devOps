@@ -802,3 +802,92 @@ class RaiseMissingIdentifierAbsentFromPendingQATestCase(MiscellaneousTestCase):
 
 def test_raise_missing_identifier_absent_from_pending_qa(request):
     RaiseMissingIdentifierAbsentFromPendingQATestCase.run_test_case(request)
+
+
+class DirectoryErrorsTestCase(MiscellaneousTestCase):
+    """
+    Test case for directory containing misnamed files that cannot be linked to identifier.
+    """
+
+    case_name = "DirectoryErrorsTestCase"
+    description = "Creates misnamed files in directory that cannot be definitively linked to the identifier."
+    conditions = [
+        "Directory contains files with naming errors",
+        "Files cannot be matched to identifier",
+    ]
+    expected_output = "Error is raised indicating directory contains problematic files."
+
+    is_raw = True
+
+    def modify(self, base_files):
+        modified_files = base_files.copy()
+
+        identifier = f"sub-{self.sub_id}_all_digi_s1_r1_e1"
+
+        # Remove any existing files matching our test pattern
+        modified_files = {
+            relpath: contents
+            for relpath, contents in modified_files.items()
+            if identifier not in relpath
+        }
+
+        # Add a correctly-named deviation file for the identifier
+        deviation_file = self.build_path(
+            "s1_r1", "digi", f"{identifier}_deviation.txt", self.is_raw
+        )
+        modified_files[deviation_file] = "Files to process: NA"
+
+        # Add misnamed files that should trigger naming errors
+        # These files are missing the "_all_digi" part, so they won't match the identifier
+        misnamed_file1 = f"sub-{self.sub_id}_s1_r1_e1_scan1.zip.gpg"
+        misnamed_file2 = f"sub-{self.sub_id}_s1_r1_e1_scan5.zip.gpg"
+
+        misnamed_path1 = self.build_path("s1_r1", "digi", misnamed_file1, self.is_raw)
+        misnamed_path2 = self.build_path("s1_r1", "digi", misnamed_file2, self.is_raw)
+
+        modified_files[misnamed_path1] = "Junk data A"
+        modified_files[misnamed_path2] = "Junk data B"
+
+        return modified_files
+
+    def get_expected_errors(self):
+        misnamed_path1 = os.path.join(
+            self.case_dir,
+            self.build_path(
+                "s1_r1",
+                "digi",
+                f"sub-{self.sub_id}_s1_r1_e1_scan1.zip.gpg",
+                self.is_raw,
+            ),
+        )
+        misnamed_path2 = os.path.join(
+            self.case_dir,
+            self.build_path(
+                "s1_r1",
+                "digi",
+                f"sub-{self.sub_id}_s1_r1_e1_scan5.zip.gpg",
+                self.is_raw,
+            ),
+        )
+
+        naming_info1 = re.escape(
+            f"File {misnamed_path1} does not match expected identifier format"
+        )
+        naming_info2 = re.escape(
+            f"File {misnamed_path2} does not match expected identifier format"
+        )
+        dir_error_info = "Directory contains files with errors that could not be definitively linked to this identifier"
+
+        errors = [
+            ExpectedError("Naming error", naming_info1),
+            ExpectedError("Naming error", naming_info2),
+            ExpectedError(
+                "Directory contains problematic files", re.escape(dir_error_info)
+            ),
+        ]
+
+        return errors
+
+
+def test_directory_errors(request):
+    DirectoryErrorsTestCase.run_test_case(request)

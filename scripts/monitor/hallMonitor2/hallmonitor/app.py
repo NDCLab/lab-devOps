@@ -218,6 +218,8 @@ def validate_data(
         if id_dir not in logged_missing_ids:
             logged_missing_ids[id_dir] = set()
 
+        directory_has_errors = False
+
         # get files for identifier
         try:
             datatype = get_variable_datatype(dataset, id.variable)
@@ -259,6 +261,7 @@ def validate_data(
                         f"Found empty file {file}",
                     )
                 )
+                directory_has_errors = True
 
         # --- check naming conventions ---
 
@@ -301,6 +304,7 @@ def validate_data(
                     "Both deviation and no-data files present for identifier",
                 )
             )
+            directory_has_errors = True
 
         # for EEG datatype, first line of deviation file must contain the text "files to process"
         if has_deviation and get_variable_datatype(dataset, id.variable) == "eeg":
@@ -317,6 +321,7 @@ def validate_data(
                         f'First line of deviation file is "{first_line}", should contain "files to process"',
                     )
                 )
+                directory_has_errors = True
 
         # construct list of missing identifiers that should be in this directory
         dir_missing_ids = [
@@ -342,6 +347,7 @@ def validate_data(
                         f"Found issue.txt in {os.path.dirname(file_path)}",
                     )
                 )
+                directory_has_errors = True
                 continue
 
             naming_errors = get_naming_errors(logger, dataset, file_path, has_deviation)
@@ -353,11 +359,14 @@ def validate_data(
                     file_path,
                 )
                 misnamed_files.append(file_name)
+                directory_has_errors = True
 
         logger.debug("Found %d misnamed file(s)", len(misnamed_files))
         for file in misnamed_files:
             err_type = "Improper file name"
             err_msg = f"Found file with improper name: {os.path.basename(file)} (in {os.path.dirname(file)})"
+            if not has_deviation:
+                directory_has_errors = True
 
             # log missing identifiers once for this directory and error type
             if err_type not in logged_missing_ids[id_dir]:
@@ -391,6 +400,7 @@ def validate_data(
                 correct_dir = os.path.realpath(file_id.to_dir(dataset, is_raw=is_raw))
             except ValueError:
                 logger.debug("File %s contains bad variable name", base_name)
+                directory_has_errors = True
                 continue
             logger.debug("Correct directory for file %s is %s", base_name, correct_dir)
 
@@ -406,6 +416,7 @@ def validate_data(
                     f"Found file in wrong directory: {os.path.basename(file)} found in {id_dir}",
                 )
                 pending.append(err)
+                directory_has_errors = True
 
                 # log missing identifiers once for this directory and error type
                 if err_type not in logged_missing_ids[id_dir]:
@@ -415,6 +426,8 @@ def validate_data(
                     logged_missing_ids[id_dir].add(err_type)
 
         logger.debug("Found %d misplaced file(s)", n_misplaced)
+        if n_misplaced:
+            directory_has_errors = True
 
         # --- check file presence & count ---
 
@@ -439,6 +452,7 @@ def validate_data(
                         "deviation.txt cannot signify only 1 file; use no-data.txt.",
                     )
                 )
+                directory_has_errors = True
         else:  # normal case
             expected_files = [
                 os.path.basename(file) for file in get_expected_files(dataset, id)
@@ -464,8 +478,11 @@ def validate_data(
                         f"Expected file {file} not found",
                     )
                 )
+                directory_has_errors = True
                 n_missing += 1
         logger.debug("Found %d missing file(s)", n_missing)
+        if n_missing > 0 and not has_deviation:
+            directory_has_errors = True
 
         # check for unexpected file presence
         n_unexpected = 0
@@ -480,8 +497,11 @@ def validate_data(
                         f"Unexpected file {file} found",
                     )
                 )
+                directory_has_errors = True
                 n_unexpected += 1
         logger.debug("Found %d unexpected file(s)", n_unexpected)
+        if n_unexpected > 0 and not has_deviation:
+            directory_has_errors = True
 
         # --- special data checks ---
 
@@ -501,11 +521,24 @@ def validate_data(
 
         if is_raw:  # only log pass rows for raw data
             # check if this identifier has any errors
-            if not any(
+            identifier_has_errors = any(
                 not p["passRaw"] and p["identifier"] == str(id) for p in pending
-            ):
-                pending.append(new_pass_record(dataset, id))
-                logger.debug("Identifier %s had no errors", str(id))
+            )
+            if not identifier_has_errors:
+                # Check if there were directory-level errors that couldn't be attributed to this identifier
+                if directory_has_errors:
+                    pending.append(
+                        new_error_record(
+                            logger,
+                            dataset,
+                            id,
+                            "Directory contains problematic files",
+                            "Directory contains files with errors that could not be definitively linked to this identifier",
+                        )
+                    )
+                else:
+                    pending.append(new_pass_record(dataset, id))
+                    logger.debug("Identifier %s had no errors", str(id))
 
         continue  # go to next present identifier
 

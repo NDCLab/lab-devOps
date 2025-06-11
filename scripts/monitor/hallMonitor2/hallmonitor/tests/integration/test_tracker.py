@@ -421,18 +421,18 @@ def test_bbs_data_zero_incorrect_data(request):
     BBSDataZeroIncorrectDataTestCase.run_test_case(request)
 
 
-class BBSDataOneDeviationFileTestCase(TrackerTestCase):
+class BBSDataZeroDeviationFileTestCase(TrackerTestCase):
     """"""
 
     case_name = "BBSDataOneDeviationFileTestCase"
     description = (
-        "Ensures that bbs_data_s1_r1_e1 is 1 when a deviation.txt file is present."
+        "Ensures that bbs_data_s1_r1_e1 is 0 even when a deviation.txt file is present."
     )
     conditions = [
         "Deviation.txt file present in psychopy folder for s1_r1_e1",
         "Data is in an incorrect state",
     ]
-    expected_output = "update_tracker runs without issues, and bbs_data_s1_r1_e1 is 1."
+    expected_output = "update_tracker runs without issues, and bbs_data_s1_r1_e1 is 0."
 
     def modify(self, base_files):
         modified_files = base_files.copy()
@@ -474,13 +474,13 @@ class BBSDataOneDeviationFileTestCase(TrackerTestCase):
         sub_row = tracker_df[tracker_df["id"].astype(int) == self.sub_id].iloc[0]
 
         # we should have no problems with any session due to the deviation.txt file
-        assert sub_row["bbs_data_s1_r1_e1"] == 1
+        assert sub_row["bbs_data_s1_r1_e1"] == 0
         assert sub_row["bbs_data_s2_r1_e1"] == 1
         assert sub_row["bbs_data_s3_r1_e1"] == 1
 
 
 def test_bbs_data_one_deviation_file(request):
-    BBSDataOneDeviationFileTestCase.run_test_case(request)
+    BBSDataZeroDeviationFileTestCase.run_test_case(request)
 
 
 class DuplicateREDCapColumnsTestCase(TrackerTestCase):
