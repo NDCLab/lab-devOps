@@ -473,7 +473,7 @@ class BBSDataZeroDeviationFileTestCase(TrackerTestCase):
 
         sub_row = tracker_df[tracker_df["id"].astype(int) == self.sub_id].iloc[0]
 
-        # we should have no problems with any session due to the deviation.txt file
+        # we should have an error with session 1 despite the deviation.txt file
         assert sub_row["bbs_data_s1_r1_e1"] == 0
         assert sub_row["bbs_data_s2_r1_e1"] == 1
         assert sub_row["bbs_data_s3_r1_e1"] == 1
