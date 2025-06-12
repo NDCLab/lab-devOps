@@ -110,7 +110,7 @@ def get_redcaps(datadict_df, redcaps, ndar_json, other_sessions=False):
                 )
                 present = True
             elif expected_rc in os.path.basename(redcap.lower()) and present:
-                sys.error(
+                sys.exit(
                     "Error: multiple redcaps found with name specified in datadict, "
                     + redcap_path
                     + " and "
