@@ -168,9 +168,9 @@ def map_race(
         if sum == 1:
             for col in race_cols:
                 if rc_df.loc[id, col] == 1:
-                    race_num = re.match(
-                        "^demo(es)?_[de]_race_s[0-9]+_r[0-9]+_e[0-9]+_+([0-9]+)$", col
-                    ).group(2)
+                    race_num = re.fullmatch(
+                        r"demo(?:es)?_[de]_race_s\d+_r\d+_e\d+_+(?P<race>\d+)", col
+                    ).group("race")
                     # TODO this needs to be drawn from the JSON
                     race = race_dict[race_num]
                     ndar_df.loc[child_id, col_name] = race
