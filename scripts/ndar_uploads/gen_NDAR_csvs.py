@@ -417,6 +417,7 @@ def map_vals(ndar_df, ndar_col, ndar_csv, ndar_json, sre, parent=False):
                 ]["mapping"]["missing"]
                 continue
             if "mapping_formula" in ndar_json[ndar_csv]["req_columns"][ndar_col].keys():
+                x = int(rc_df.loc[id, rc_column]) # mapping formula uses "x" as variable
                 val = eval(
                     ndar_json[ndar_csv]["req_columns"][ndar_col]["mapping_formula"]
                 )
