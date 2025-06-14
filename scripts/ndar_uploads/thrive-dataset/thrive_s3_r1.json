@@ -1,0 +1,1097 @@
+{
+    "all": {
+        "all_columns": ["src_subject_id", "interview_date", "interview_age", "sex"],
+        "req_columns": {
+            "src_subject_id": {
+                "rc_variable": "infosht18m_s2_r1_e1_complete",
+                "redcap": "iqsparent",
+                "sessionless": "true",
+                "parent": "true"
+            },
+            "interview_date": {
+                "rc_variable": "infosht18m_s2_r1_e1_timestamp",
+                "redcap": "iqsparent",
+                "sessionless": "true",
+                "parent": "true"
+            },
+            "interview_age": {
+                "rc_variable": "infosht_dob",
+                "redcap": "iqsparent",
+                "mapping": "custom",
+                "parent": "true"
+            },
+            "sex": {
+                "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                "redcap": "iqsparents1r1",
+                "different_session": "true",
+                "sessionless": "true",
+                "mapping": {
+                    "1": "M",
+                    "2": "F",
+                    "3": "O"
+                },
+                "parent": "true"
+            }
+        }
+    },
+    "ndar_subject01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "race", "ethnic_group", "phenotype", "phenotype_description", "twins_study", "sibling_study", "family_study", "family_user_def_id", "subjectkey_mother", "src_mother_id", "subjectkey_father", "src_father_id", "subjectkey_sibling1", "src_sibling1_id", "sibling_type1", "subjectkey_sibling2", "src_sibling2_id", "sibling_type2", "subjectkey_sibling3", "src_sibling3_id", "sibling_type3", "subjectkey_sibling4", "src_sibling4_id", "sibling_type4", "zygosity", "sample_taken", "sample_id_original", "sample_description", "biorepository_name", "sample_id_biorepository", "patient_id_biorepository", "cell_id_original", "cell_id_biorepository", "agre_subject_id", "sfari_subject_id", "cpea_site", "cpea_id", "blood_id", "adi_dx", "ados_dx", "agp_family_id", "agp_subject_id", "site", "comments_misc", "week", "study", "reg_edu", "reg_mother_edu", "ca243", "ccc2english", "primary_language", "physiological_responses_type", "reg_father_edu", "employ_status", "bkgrnd_med", "demo_logfinc", "demo_wt_n_nr", "demo_stratum", "grade", "service_specialed", "asisped", "brain_injury", "trt_grp", "version_form", "visit", "reason_nint", "reason_nint_other", "liv_sit", "height_met", "weight_met", "bmi", "q013", "medchng", "capacity", "blood_1", "blood_2", "country", "country_origin", "demo_6", "year_mta", "chronic_ticdisorder_motor", "chronic_ticdisorder_vocal", "chronicticdisorder_combined", "provisional_ticdisorder", "transient_ticdisorder", "tic_disorder_nos", "p53i3", "ticsxcur", "ticdxoverride", "ocddiagnoisid", "ocddiagnois", "hxocdage", "ocsxcur", "ocdxoverride", "trichid", "trichage", "trichsxcur", "adhd_combined", "adhd_predom_inattent", "adhd_predom_hyperimpul", "grantnum", "adhd_subclinical", "ksads_adhd_age", "adhdsxcur", "adhddxoverride", "flag_atypical", "flag_psychosis", "flag_pdd_asd", "flag_other_neurolog", "flag_congenital_anom", "flag_genetic_chromosomal", "dxsmrysubmitted", "flag_other_psych", "flag_other_medical", "flag_other_desc", "othergeneticstudy", "othergeneticstudydescr", "subsiteid", "evaluated", "evaldate", "multibirthid", "tourettes_disorder", "sample", "race_other", "respond", "date_confirmed_phenotype", "pos_years", "position1", "timepoint_label", "trt_grp_desc", "longform_id", "src_sibling6_id", "sibling_type6", "subjectkey_sibling7", "src_sibling7_id", "sibling_type7", "subjectkey_sibling8", "src_sibling8_id", "sibling_type8", "subjectkey_sibling9", "src_sibling9_id", "sibling_type9", "subjectkey_sibling10", "src_sibling10_id", "sibling_type10", "subjectkey_sibling5", "src_sibling5_id", "sibling_type5", "subjectkey_sibling6", "subjectkey_femalecaregiver", "subjectkey_malecaregiver", "src_femalecaregiver_id", "src_malecaregiver_id", "ref_child_id", "child_subjectkey", "screen_randomization", "fetal_age", "fetal_age_type", "studyphase", "gender_identity", "demo_sex_tgender", "teen_subject_id", "trtarm"],
+        "req_columns": {
+            "race": {
+                "rc_variable": "demo_d_race_s1_r1_e1",
+                "redcap": "iqsparents1r1",
+                "sessionless": "true",
+                "mapping": "custom",
+                "parent": "true"
+            },
+            "phenotype": {
+                "default": "NA"
+            },
+            "phenotype_description": {
+                "default": "NA"
+            },
+            "twins_study": {
+                "default": "No"
+            },
+            "sibling_study": {
+                "default": "No"
+            },
+            "family_study": {
+                "default": "No"
+            },
+            "sample_taken": {
+                "default": "No"
+            },
+            "ca243": {
+                "rc_variable": "physinfo_hand",
+                "redcap": "bbschild"
+            },
+            "gender_identity": {
+                "rc_variable": "identitya_gender",
+                "redcap": "bbschild",
+                "mapping": {
+                    "missing": "9"
+                }
+            },
+            "timepoint_label": {
+                "mapping": "custom"
+            }
+        }
+    },
+    "pds01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "respond", "pds_1", "pds_2", "pds_3", "pds_4", "pds_5", "pds_6", "pds_7", "pds_boy_rs", "pds_girl_rs", "respondent_other_specify", "pds_7_pv", "pds_9_pv", "pds_pv_boy_tanner", "pds_pv_girl_tanner", "pds_8_pv", "pds_cv_6_girl", "dsmvers", "pstatus", "site", "trt_grp", "days_baseline", "etype", "respond_detail_oth_spec", "relationship", "pds5", "pds6g", "pds6gyr", "pds6gmo", "pds6g_d", "pds_n", "pds_sum", "pds_ave", "visit", "visday", "pds_7b_pv", "imputation", "labsample29", "pufe_008t", "pufe_005at", "pufe_005bt", "pufe_005ct", "height_std", "weight_std", "comments_misc", "pds_pr_stage", "q19_a3", "visit_num", "accult_select_language", "pds_f6_y_dk", "menstrualcycle2_y_dk", "menstrualcycle3_y", "usingbc", "menstrualcycle5_y", "menstrualcycle6_y", "pds_q7", "pds_q9", "pds_q10", "neuro_q8_height_cm", "q19_a1a", "q19_a1b", "neuro_q10_weight_kg", "anthroweight1lb", "aut_prebasic_health", "pds_height_now_1", "timept", "pubertyg_19", "gynecological_hist_6", "menstrualcycle4_y", "menstrualcycle2_y", "scq_24_a", "midihist_029a", "midihist_030a", "cirsg_13_endocrine_condn", "hypoage", "hyperage", "menstrualcycle1_y", "pubertyg_15", "pubertyb_18", "pubertyg_20", "pubertyb_17", "pds_2b", "pds_2_1b", "pds_2_2b", "pds_5b", "mhx016b", "resp_source", "comqother", "fmc2_d", "pregnant", "visit_year", "pdsm_1", "pdsm_2", "pdsm_3", "pdsm_4", "pdsm_5", "pdsm_6", "pdsf_1", "pdsf_2", "pdsf_3", "pdsf_4", "pdsf_5", "pdsf_6", "pdsf_7", "teen_timepoint", "pds_wetdream", "pds_wetdreamage", "pds_firstbra", "ampscz_missing", "ampscz_missing_spec", "ampscz_entry_date", "chrpds_pds_4_p", "sex_choice"],
+        "req_columns": {
+            "respond": {
+                "default": 3
+            },
+            "pds_1": {
+                "rc_variable": "pds_i1",
+                "redcap": "iqschild",
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds_2": {
+                "rc_variable": "pds_i2",
+                "redcap": "iqschild",
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds_3": {
+                "rc_variable": "pds_i3",
+                "redcap": "iqschild",
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds_6": {
+                "rc_variable": "pds_i4",
+                "redcap": "iqschild",
+                "conditional_column": {
+                    "redcap": "iqsparents1r1",
+                    "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                    "different_session": "true",
+                    "sessionless": "true"
+                },
+                "conditional_column_mapping": {
+                    "1": "-99",
+                    "3": "-99"
+                },
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds_7": {
+                "rc_variable": "pds_i5",
+                "redcap": "iqschild",
+                "conditional_column":  {
+                    "redcap": "iqsparents1r1",
+                    "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                    "different_session": "true",
+                    "sessionless": "true"
+                },
+                "conditional_column_mapping": {
+                    "1": "-99",
+                    "3": "-99"
+                },
+                "mapping": {
+                    "0": "1",
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds6gyr": {
+                "rc_variable": "pds_i6",
+                "redcap": "iqschild",
+                "conditional_column":  {
+                    "redcap": "iqsparents1r1",
+                    "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                    "different_session": "true",
+                    "sessionless": "true"
+                },
+                "conditional_column_mapping": {
+                    "1": "-300",
+                    "3": "-300"
+                },
+                "mapping": {
+                    "missing": "-900"
+                }
+            },
+            "pds_4": {
+                "rc_variable": "pds_i7",
+                "redcap": "iqschild",
+                "conditional_column": {
+                    "redcap": "iqsparents1r1",
+                    "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                    "different_session": "true",
+                    "sessionless": "true"
+                },
+                "conditional_column_mapping": {
+                    "2": "-99",
+                    "3": "-99"
+                },
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            },
+            "pds_5": {
+                "rc_variable": "pds_i8",
+                "redcap": "iqschild",
+                "conditional_column": {
+                    "redcap": "iqsparents1r1",
+                    "rc_variable": "demo_d_sexbirth_s1_r1_e1",
+                    "different_session": "true",
+                    "sessionless": "true"
+                },
+                "conditional_column_mapping": {
+                    "2": "-99",
+                    "3": "-99"
+                },
+                "mapping": {
+                    "NA": "5",
+                    "missing": "88"
+                }
+            }
+        }
+    },
+    "bfnes01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "bfnes_1", "bfnes_2", "bfnes_3", "bfnes_4", "bfnes_5", "bfnes_6", "bfnes_7", "bfnes_8", "bfnes_score", "visit", "study_condition", "bfpnes_2", "bfpnes_3", "bfpnes_4", "bfpnes_5", "bfpnes_7", "bfpnes_8", "bfpnes_9", "bfpnes_10", "bfpnes_11", "bfpnes_13", "bfpnes_14", "bfpnes_15", "bfpnes_16", "bfpnes_17", "bfpnes_18", "bfpnes_19", "bfpnes_20", "bfpnes_21", "timept", "bfnes4", "bfnes7"],
+        "req_columns": {
+            "bfnes_1": {
+                "rc_variable": "bfne_b_i1",
+                "redcap": "iqschild"
+            },
+            "bfnes_2": {
+                "rc_variable": "bfne_b_i3",
+                "redcap": "iqschild"
+            },
+            "bfnes_3": {
+                "rc_variable": "bfne_b_i5",
+                "redcap": "iqschild"
+            },
+            "bfnes_4": {
+                "rc_variable": "bfne_b_i6",
+                "redcap": "iqschild"
+            },
+            "bfnes_5": {
+                "rc_variable": "bfne_b_i8",
+                "redcap": "iqschild"
+            },
+            "bfnes_6": {
+                "rc_variable": "bfne_b_i9",
+                "redcap": "iqschild"
+            },
+            "bfnes_7": {
+                "rc_variable": "bfne_b_i11",
+                "redcap": "iqschild"
+            },
+            "bfnes_8": {
+                "rc_variable": "bfne_b_i11",
+                "redcap": "iqschild"
+            },
+            "bfnes_score": {
+                "computed": "sum",
+                "redcap": "iqschild",
+                "components": ["bfne_b_i1", "bfne_b_i3", "bfne_b_i5", "bfne_b_i6", "bfne_b_i8", "bfne_b_i9", "bfne_b_i11", "bfne_b_i12"],
+                "missing": "999"
+            }
+        }
+    },
+    "spai_c01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "c_spai1", "c_spai2", "c_spai3", "c_spai4", "c_spai5", "c_spai6", "c_spai7", "c_spai8", "c_spai9a", "c_spai9b", "c_spai9c", "c_spai10a", "c_spai10b", "c_spai10c", "c_spai11a", "c_spai11b", "c_spai11c", "c_spai12a", "c_spai12b", "c_spai12c", "c_spai13a", "c_spai13b", "c_spai13c", "c_spai14a", "c_spai14b", "c_spai14c", "c_spai15a", "c_spai15b", "c_spai15c", "c_spai16a", "c_spai16b", "c_spai16c", "c_spai17a", "c_spai17b", "c_spai17c", "c_spai18a", "c_spai18b", "c_spai18c", "c_spai19a", "c_spai19b", "c_spai19c", "c_spai20a", "c_spai20b", "c_spai20c", "c_spai21a", "c_spai21b", "c_spai21c", "c_spai21d", "c_spai22", "c_spai23", "c_spai24a", "c_spai24b", "c_spai24c", "c_spai25a", "c_spai25b", "c_spai25c", "c_spai25d", "c_spai25e", "c_spai26a", "c_spai26b", "c_spai26c", "c_spai26d", "c_spai26e", "c_spaitot", "visit"],
+        "req_columns": {
+            "c_spai3": {
+                "rc_variable": "spaic_i3",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai4": {
+                "rc_variable": "spaic_i4",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai10a": {
+                "rc_variable": "spaic_i12",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai10b": {
+                "rc_variable": "spaic_i13",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai10c": {
+                "rc_variable": "spaic_i14",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai11a": {
+                "rc_variable": "spaic_i15",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai11b": {
+                "rc_variable": "spaic_i16",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai11c": {
+                "rc_variable": "spaic_i17",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai12a": {
+                "rc_variable": "spaic_i18",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai12b": {
+                "rc_variable": "spaic_i19",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai12c": {
+                "rc_variable": "spaic_i20",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai13a": {
+                "rc_variable": "spaic_i21",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai13b": {
+                "rc_variable": "spaic_i22",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai13c": {
+                "rc_variable": "spaic_i23",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai14a": {
+                "rc_variable": "spaic_i24",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai14b": {
+                "rc_variable": "spaic_i25",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai14c": {
+                "rc_variable": "spaic_i26",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai15a": {
+                "rc_variable": "spaic_i27",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai15b": {
+                "rc_variable": "spaic_i28",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai15c": {
+                "rc_variable": "spaic_i29",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai16a": {
+                "rc_variable": "spaic_i30",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai16b": {
+                "rc_variable": "spaic_i31",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai16c": {
+                "rc_variable": "spaic_i32",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai17a": {
+                "rc_variable": "spaic_i33",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai17b": {
+                "rc_variable": "spaic_i34",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai17c": {
+                "rc_variable": "spaic_i35",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "c_spai23": {
+                "rc_variable": "spaic_i50",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            }
+        }
+    },
+    "ediscs01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "ut_1", "ut_1_reason", "ut_1_k_text", "ut_2", "ut_2_reason", "ut_2_k_text", "ut_3", "ut_3_reason", "ut_3_k_text", "ut_4", "ut_4_reason", "ut_4_k_text", "ut_5", "ut_5_reason", "ut_5_k_text", "ut_6", "ut_6_reason", "ut_6_k_text", "ut_7", "ut_7_reason", "ut_7_k_text", "ut_8", "ut_8_reason", "ut_8_k_text", "ut_9", "ut_9_reason", "ut_9_k_text", "toteds", "edso1", "edso2", "version_form", "timepoint_label", "condition_c", "eds_short_respect", "eds_short_service", "eds_short_smart", "eds_short_afraid", "eds_short_threatened", "eds_short_score", "eds_sf_respect", "eds_sf_service", "eds_sf_smart", "eds_sf_afraid", "eds_sf_threatened", "eds_sf_totalscore", "edss_6", "ut_8_life", "ut_9_life", "ut_1_3mo", "ut_2_3mo", "ut_3_3mo", "ut_4_3mo", "ut_5_3mo", "ut_6_3mo", "ut_7_3mo", "ut_8_3mo", "ut_9_3mo", "ut_3mo_reason01", "ut_3mo_reason02", "ut_3mo_reason03", "ut_3mo_reason04", "ut_3mo_reason05", "ut_3mo_reason06", "ut_3mo_reason06sp", "ut_3mo_reason07", "ut_resil01", "ut_1_life", "ut_resil02", "ut_resil03", "ut_resil04", "ut_resil05", "ut_resil06", "ut_resil07", "incident01", "incident02", "incident03", "incident04", "ut_2_life", "incident05", "incident06", "incident07", "incident08", "incident09", "incident10", "reason01", "reason02", "reason03", "reason04", "ut_3_life", "reason05", "reason06", "reason06a", "reason07", "resil01", "resil02", "resil03", "resil04", "resil05", "resil06", "ut_4_life", "resil07", "resil07_sp", "resil08", "discrim01", "discrim02", "discrim03", "discrim04", "discrim05", "discrim06", "discrim07", "ut_5_life", "discrim08", "ut_6_life", "ut_7_life", "eds10_08", "eds10_09", "eds10_10", "eds10_11", "eds10_12", "eds10_13", "eds10_14", "eds10_01", "eds10_02", "eds10_03", "eds10_04", "eds10_05", "eds10_06", "eds10_07", "eds_a_less_courtesy_fu___8", "eds_a_worse_fu___14", "eds_a_insulted_fu___1", "eds_a_insulted_fu___2", "eds_a_insulted_fu___3", "eds_a_insulted_fu___4", "eds_a_insulted_fu___5", "eds_a_insulted_fu___6", "eds_a_insulted_fu___7", "eds_a_insulted_fu___8", "eds_a_insulted_fu___9", "eds_a_less_courtesy_fu___9", "eds_a_insulted_fu___10", "eds_a_insulted_fu___11", "eds_a_insulted_fu___12", "eds_a_insulted_fu___13", "eds_a_insulted_fu___14", "eds_a_threatened_fu___1", "eds_a_threatened_fu___2", "eds_a_threatened_fu___3", "eds_a_threatened_fu___4", "eds_a_threatened_fu___5", "eds_a_less_courtesy_fu___10", "eds_a_threatened_fu___6", "eds_a_threatened_fu___7", "eds_a_threatened_fu___8", "eds_a_threatened_fu___9", "eds_a_threatened_fu___10", "eds_a_threatened_fu___11", "eds_a_threatened_fu___12", "eds_a_threatened_fu___13", "eds_a_threatened_fu___14", "eds_a_followed", "eds_a_less_courtesy_fu___11", "eds_a_followed_fu___1", "eds_a_followed_fu___2", "eds_a_followed_fu___3", "eds_a_followed_fu___4", "eds_a_followed_fu___5", "eds_a_followed_fu___6", "eds_a_followed_fu___7", "eds_a_followed_fu___8", "eds_a_followed_fu___9", "eds_a_followed_fu___10", "eds_a_less_courtesy_fu___12", "eds_a_followed_fu___11", "eds_a_followed_fu___12", "eds_a_followed_fu___13", "eds_a_followed_fu___14", "eds_a_followed_other", "eds_a_less_courtesy_fu___13", "eds_a_less_courtesy_fu___14", "eds_a_less_respect_fu___1", "eds_a_less_respect_fu___2", "eds_a_less_respect_fu___3", "eds_a_less_respect_fu___4", "eds_a_less_respect_fu___5", "eds_a_less_respect_fu___6", "eds_a_less_respect_fu___7", "eds_a_less_respect_fu___8", "eds_a_less_respect_fu___9", "eds_a_less_respect_fu___10", "eds_a_less_respect_fu___11", "eds_a_less_respect_fu___12", "eds_a_less_respect_fu___13", "eds_a_less_courtesy_fu___1", "eds_a_less_respect_fu___14", "eds_a_poorer_service_fu___1", "eds_a_poorer_service_fu___2", "eds_a_poorer_service_fu___3", "eds_a_poorer_service_fu___4", "eds_a_poorer_service_fu___5", "eds_a_poorer_service_fu___6", "eds_a_poorer_service_fu___7", "eds_a_poorer_service_fu___8", "eds_a_poorer_service_fu___9", "eds_a_less_courtesy_fu___2", "eds_a_poorer_service_fu___10", "eds_a_poorer_service_fu___11", "eds_a_poorer_service_fu___12", "eds_a_poorer_service_fu___13", "eds_a_poorer_service_fu___14", "eds_a_not_smart_fu___1", "eds_a_not_smart_fu___2", "eds_a_not_smart_fu___3", "eds_a_not_smart_fu___4", "eds_a_not_smart_fu___5", "eds_a_less_courtesy_fu___3", "eds_a_not_smart_fu___6", "eds_a_not_smart_fu___7", "eds_a_not_smart_fu___8", "eds_a_not_smart_fu___9", "eds_a_not_smart_fu___10", "eds_a_not_smart_fu___11", "eds_a_not_smart_fu___12", "eds_a_not_smart_fu___13", "eds_a_not_smart_fu___14", "eds_a_afraid_fu___1", "eds_a_less_courtesy_fu___4", "eds_a_afraid_fu___2", "eds_a_afraid_fu___3", "eds_a_afraid_fu___4", "eds_a_afraid_fu___5", "eds_a_afraid_fu___6", "eds_a_afraid_fu___7", "eds_a_afraid_fu___8", "eds_a_afraid_fu___9", "eds_a_afraid_fu___10", "eds_a_afraid_fu___11", "eds_a_less_courtesy_fu___5", "eds_a_afraid_fu___12", "eds_a_afraid_fu___13", "eds_a_afraid_fu___14", "eds_a_dishonest_fu___1", "eds_a_dishonest_fu___2", "eds_a_dishonest_fu___3", "eds_a_dishonest_fu___4", "eds_a_dishonest_fu___5", "eds_a_dishonest_fu___6", "eds_a_dishonest_fu___7", "eds_a_less_courtesy_fu___6", "eds_a_dishonest_fu___8", "eds_a_dishonest_fu___9", "eds_a_dishonest_fu___10", "eds_a_dishonest_fu___11", "eds_a_dishonest_fu___12", "eds_a_dishonest_fu___13", "eds_a_dishonest_fu___14", "eds_a_worse_fu___1", "eds_a_worse_fu___2", "eds_a_worse_fu___3", "eds_a_less_courtesy_fu___7", "eds_a_worse_fu___4", "eds_a_worse_fu___5", "eds_a_worse_fu___6", "eds_a_worse_fu___7", "eds_a_worse_fu___8", "eds_a_worse_fu___9", "eds_a_worse_fu___10", "eds_a_worse_fu___11", "eds_a_worse_fu___12", "eds_a_worse_fu___13", "barnes_edi08", "barnes_edi09", "barnes_edi01", "barnes_edi02", "barnes_edi03", "barnes_edi04", "barnes_edi05", "barnes_edi06", "barnes_edi07", "eds10_99", "barnes_edi_total"],
+        "req_columns": {
+            "eds_short_respect": {
+                "rc_variable": "edshvsc_i1",
+                "redcap": "iqschild"
+            },
+            "eds_short_service": {
+                "rc_variable": "edshvsc_i2",
+                "redcap": "iqschild"
+            },
+            "eds_short_smart": {
+                "rc_variable": "edshvsc_i3",
+                "redcap": "iqschild"
+            },
+            "eds_short_afraid": {
+                "rc_variable": "edshvsc_i4",
+                "redcap": "iqschild"
+            },
+            "eds_short_threatened": {
+                "rc_variable": "edshvsc_i5",
+                "redcap": "iqschild"
+            }
+        }
+    },
+    "peq_r01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "comments_misc", "by_you_1", "to_you_1", "by_you_2", "to_you_2", "by_you_3", "to_you_3", "by_you_4", "to_you_4", "by_you_5", "to_you_5", "by_you_6", "to_you_6", "by_you_7", "to_you_7", "by_you_8", "to_you_8", "by_you_9", "to_you_9", "by_you_10", "to_you_10", "by_you_11", "to_you_11", "by_you_12", "to_you_12", "by_you_13", "to_you_13", "by_you_14", "to_you_14", "by_you_15", "to_you_15", "by_you_16", "to_you_16", "by_you_17", "to_you_17", "by_you_18", "to_you_18", "version_form", "timept", "pvq_8", "pvq_1", "pvq_2", "pvq_3", "pvq_4", "pvq_5", "pvq_6", "pvq_7", "pe_8", "pe_9", "pe_10", "pe_11", "pe_12", "pe_13", "pe_14", "pe_15", "pe_16", "pe_17", "pe_18", "peq_victim_sum", "peq_bully_sum", "pe_victim_mean", "pe_bully_mean", "pe_1", "pe_2", "pe_3", "pe_4", "pe_5", "pe_6", "pe_7", "peqr_4", "peqr_9", "peqr_11", "peqr_12"],
+        "req_columns": {
+            "to_you_2": {
+                "rc_variable": "rpeq_i1",
+                "redcap": "iqschild"
+            },
+            "to_you_12": {
+                "rc_variable": "rpeq_i2",
+                "redcap": "iqschild"
+            },
+            "to_you_16": {
+                "rc_variable": "rpeq_i3",
+                "redcap": "iqschild"
+            },
+            "to_you_1": {
+                "rc_variable": "rpeq_i4",
+                "redcap": "iqschild"
+            },
+            "to_you_7": {
+                "rc_variable": "rpeq_i5",
+                "redcap": "iqschild"
+            },
+            "to_you_8": {
+                "rc_variable": "rpeq_i6",
+                "redcap": "iqschild"
+            },
+            "to_you_5": {
+                "rc_variable": "rpeq_i7",
+                "redcap": "iqschild"
+            },
+            "to_you_11": {
+                "rc_variable": "rpeq_i8",
+                "redcap": "iqschild"
+            },
+            "to_you_14": {
+                "rc_variable": "rpeq_i9",
+                "redcap": "iqschild"
+            },
+            "to_you_3": {
+                "rc_variable": "rpeq_i10",
+                "redcap": "iqschild"
+            },
+            "to_you_6": {
+                "rc_variable": "rpeq_i11",
+                "redcap": "iqschild"
+            },
+            "to_you_10": {
+                "rc_variable": "rpeq_i12",
+                "redcap": "iqschild"
+            },
+            "to_you_15": {
+                "rc_variable": "rpeq_i13",
+                "redcap": "iqschild"
+            },
+            "to_you_18": {
+                "rc_variable": "rpeq_i14",
+                "redcap": "iqschild"
+            }
+        }
+    },
+    "via01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "via_spec", "via01", "via02", "via03", "via04", "via05", "via06", "via07", "via08", "via09", "via10", "via11", "via12", "via13", "via14", "via15", "via16", "via17", "via18", "via19", "via20", "via_her", "via_main", "timepoint_label"],
+        "req_columns": {
+            "via_spec": {
+                "rc_variable": "via_which",
+                "redcap": "bbschild"
+            },
+            "via01": {
+                "rc_variable": "via_i1",
+                "redcap": "bbschild"
+            },
+            "via02": {
+                "rc_variable": "via_i2",
+                "redcap": "bbschild"
+            },
+            "via05": {
+                "rc_variable": "via_i3",
+                "redcap": "bbschild"
+            },
+            "via06": {
+                "rc_variable": "via_i16",
+                "redcap": "bbschild"
+            },
+            "via07": {
+                "rc_variable": "via_i4",
+                "redcap": "bbschild"
+            },
+            "via08": {
+                "rc_variable": "via_i5",
+                "redcap": "bbschild"
+            },
+            "via09": {
+                "rc_variable": "via_i6",
+                "redcap": "bbschild"
+            },
+            "via10": {
+                "rc_variable": "via_i7",
+                "redcap": "bbschild"
+            },
+            "via11": {
+                "rc_variable": "via_i8",
+                "redcap": "bbschild"
+            },
+            "via12": {
+                "rc_variable": "via_i9",
+                "redcap": "bbschild"
+            },
+            "via13": {
+                "rc_variable": "via_i10",
+                "redcap": "bbschild"
+            },
+            "via14": {
+                "rc_variable": "via_i11",
+                "redcap": "bbschild"
+            },
+            "via15": {
+                "rc_variable": "via_i12",
+                "redcap": "bbschild"
+            },
+            "via16": {
+                "rc_variable": "via_i13",
+                "redcap": "bbschild"
+            },
+            "via19": {
+                "rc_variable": "via_i14",
+                "redcap": "bbschild"
+            },
+            "via20": {
+                "rc_variable": "via_i15",
+                "redcap": "bbschild"
+            }
+        }
+    },
+    "cde_rcadsyouth01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_age", "interview_date", "sex", "rcads_y01", "rcads_y02", "rcads_y03", "rcads_y04", "rcads_y05", "rcads_y06", "rcads_y07", "rcads_y08", "rcads_y09", "rcads_y10", "rcads_y11", "rcads_y12", "rcads_y13", "rcads_y14", "rcads_y15", "rcads_y16", "rcads_y17", "rcads_y18", "rcads_y19", "rcads_y20", "rcads_y21", "rcads_y22", "rcads_y23", "rcads_y24", "rcads_y25", "rcads_y26"],
+        "req_columns": {
+            "rcads_y01": {
+                "rc_variable": "rcads_i1",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y02": {
+                "rc_variable": "rcads_i2",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y03": {
+                "rc_variable": "rcads_i3",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y04": {
+                "rc_variable": "rcads_i4",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y05": {
+                "rc_variable": "rcads_i5",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y06": {
+                "rc_variable": "rcads_i6",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y07": {
+                "rc_variable": "rcads_i7",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y08": {
+                "rc_variable": "rcads_i8",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y09": {
+                "rc_variable": "rcads_i9",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y10": {
+                "rc_variable": "rcads_i10",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y11": {
+                "rc_variable": "rcads_i11",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y12": {
+                "rc_variable": "rcads_i12",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y13": {
+                "rc_variable": "rcads_i13",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y14": {
+                "rc_variable": "rcads_i14",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y15": {
+                "rc_variable": "rcads_i15",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y16": {
+                "rc_variable": "rcads_i16",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y17": {
+                "rc_variable": "rcads_i17",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y18": {
+                "rc_variable": "rcads_i18",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y19": {
+                "rc_variable": "rcads_i19",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y20": {
+                "rc_variable": "rcads_i20",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y21": {
+                "rc_variable": "rcads_i21",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y22": {
+                "rc_variable": "rcads_i22",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y23": {
+                "rc_variable": "rcads_i23",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y24": {
+                "rc_variable": "rcads_i24",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y25": {
+                "rc_variable": "rcads_i25",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                },
+                "mapping_formula": "x + 1"
+            },
+            "rcads_y26": {
+                "redcap": "iqschild",
+                "default": "1"
+            }
+        }
+    },
+    "cde_dsm5crossyouth01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_age", "interview_date", "sex", "dsm_cross_ch1", "dsm_cross_ch2", "dsm_cross_ch3", "dsm_cross_ch4", "dsm_cross_ch5", "dsm_cross_ch6", "dsm_cross_ch7", "dsm_cross_ch8", "dsm_cross_ch9", "dsm_cross_ch10", "dsm_cross_ch11", "dsm_cross_ch12", "dsm_cross_ch13", "dsm_cross_ch14", "dsm_cross_ch15", "dsm_cross_ch16", "dsm_cross_ch17", "dsm_cross_ch18", "dsm_cross_ch19", "dsm_cross_ch20", "dsm_cross_ch21", "dsm_cross_ch22", "dsm_cross_ch23", "dsm_cross_ch24", "dsm_cross_ch25", "dsm_cross_ch26"],
+        "req_columns": {
+            "dsm_cross_ch1": {
+                "rc_variable": "dsmxc_i1",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch2": {
+                "rc_variable": "dsmxc_i2",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch3": {
+                "rc_variable": "dsmxc_i3",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch4": {
+                "rc_variable": "dsmxc_i4",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch5": {
+                "rc_variable": "dsmxc_i5",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch6": {
+                "rc_variable": "dsmxc_i6",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch7": {
+                "rc_variable": "dsmxc_i7",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch8": {
+                "rc_variable": "dsmxc_i8",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch9": {
+                "rc_variable": "dsmxc_i9",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch10": {
+                "rc_variable": "dsmxc_i10",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch11": {
+                "rc_variable": "dsmxc_i11",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch12": {
+                "rc_variable": "dsmxc_i12",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch13": {
+                "rc_variable": "dsmxc_i13",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch14": {
+                "rc_variable": "dsmxc_i14",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch15": {
+                "rc_variable": "dsmxc_i15",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch16": {
+                "rc_variable": "dsmxc_i16",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch17": {
+                "rc_variable": "dsmxc_i17",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch18": {
+                "rc_variable": "dsmxc_i18",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch19": {
+                "rc_variable": "dsmxc_i19",
+                "redcap": "iqschild",
+                "mapping": {
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch20": {
+                "rc_variable": "dsmxc_i20",
+                "redcap": "iqschild",
+                "mapping": {
+                    "0": "2",
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch21": {
+                "rc_variable": "dsmxc_i21",
+                "redcap": "iqschild",
+                "mapping": {
+                    "0": "2",
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch22": {
+                "rc_variable": "dsmxc_i22",
+                "redcap": "iqschild",
+                "mapping": {
+                    "0": "2",
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch23": {
+                "rc_variable": "dsmxc_i23",
+                "redcap": "iqschild",
+                "mapping": {
+                    "0": "2",
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch24": {
+                "rc_variable": "dsmxc_i24",
+                "redcap": "iqschild",
+                "mapping": {
+                    "0": "2",
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch25": {
+                "rc_variable": "dsmxc_i25",
+                "redcap": "iqschild",
+                "mapping": {
+                    "0": "2",
+                    "missing": "-9"
+                }
+            },
+            "dsm_cross_ch26": {
+                "redcap": "iqschild",
+                "default": "1"
+            }
+        }
+    },
+    "adis_v01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_age", "interview_date", "sex", "relationship", "pd_pdx", "pd_ir", "pd_pcsr", "pdago_pdx", "pdago_ir", "pdago_pcsr", "agorpdx", "agor_ir", "agorpcsr", "sp_pdx", "sp_ir", "sp_pcsr", "sad_pdx", "sad_ir", "sad_pcsr", "sm_pdx", "sm_ir", "sm_pcsr", "gad_pdx", "gad_ir", "gad_pcsr", "ocd_pdx", "ocd_ir", "ocd_pcsr", "bdd_pdx", "bdd_pcsr", "sph_pdx1", "phobtype1", "sph_ir1", "sph_pcsr1", "sph_pdx2", "phobtype2", "sph_pcsr2", "sph_pdx3", "phobtype3", "sph_ir3", "sph_pcsr3", "sph_pdx4", "phobtype4", "sph_ir4", "sph_pcsr", "sph_pdx5", "phobtype5", "sph_ir5", "sph_pcsr5", "sph_pdx6", "phobtype6", "sph_ir6", "sph_pcsr6", "sph_pdx7", "phobtype7", "sph_ir7", "sph_pcsr7", "sph_pdx8", "phobtype8", "sph_ir8", "sph_pcsr8", "sph_pdx9", "phobtype9", "sph_ir9", "sph_pcsr9", "sph_pdx10", "phobtype10", "sph_ir10", "sph_pcsr10", "ptsdpdx", "ptsdir", "ptsdpcsr", "asd_pdx", "asd_pcsr", "mdd_pdx", "mdd_ir", "mdd_pcsr", "dys_pdx", "dys_ir", "dys_pcsr", "pdd_pdx", "pdd_ir", "pdd_pcsr", "dmddd_pdx", "dmddd_ir", "dmdd_pcsr", "bip_pdx", "bip_ir", "bip_pcsr", "adhdpdx", "adhdtype", "adhdnos_pcsr", "adhdpcsr", "cd_pdx", "cd_ir", "cd_pcsr", "odd_pdx", "odd_ir", "odd_pcsr", "tic_pdx", "tictype", "tic_ir", "tic_pcsr", "enurpdx", "enurir", "enurpcsr", "medhx_encopresis", "encopresis_ir", "encopresis_csr", "cfmh_othr_pddnos", "asd_ir", "asd_csr", "panremsleepdx", "panremsleeptype", "panremsleeprating", "panremsleepcsr", "ctd_pdx", "ctd_pcsr", "illanx_pdx", "illanx_pcsr", "ssd_pdx", "ssd_pcsr", "aud_pdx", "aud_pcsr", "subus_pdx", "subus_ir", "sub_pcsr", "hoardingro", "habitsro", "eatingro", "adhdro", "mutismro", "dissociativero", "psychoticro", "harmothersro", "subabro", "illnessro", "somatro", "sizro", "mentalrro", "learndoro", "pddro", "comdx1", "comdx1csr", "comdx2", "comdx2csr", "comdx3", "comdx3csr", "comdx4", "comdx4csr", "comdx5", "comdx5csr", "comdx6", "comdx6csr", "comdx7", "comdx7csr", "comdx8", "comdx8csr", "comdx9", "comdx9csr", "comdx10", "comdx10csr", "comdx11", "comdx11csr", "comdx12", "comdx12csr", "primary_dx_sev", "hoarding_dx", "hoarding_severity", "ttm_dx", "ttm_severity", "skin_picking_dx", "skin_picking_severity", "bipolar_i_dx", "bipolar_i_severity", "bipolar_ii_dx", "bipolar_ii_severity", "pmdd_dx", "pmdd_severity", "adjustment_do_dx", "adjustment_do_severity", "schizophreniform_dx", "schizophreniform_severity", "schizophrenia_dx", "schizophrenia_severity", "schizoaffective_dx", "schizoaffective_severity", "delusional_do_dx", "delusional_do_severity", "anorexia_dx", "anorexia_severity", "bulimia_dx", "bulimia_severity", "binge_eating_dx", "binge_eating_severity", "avoidant_restrictive_dx", "avoidant_restrictive_severity", "sub_use_disorder2_sev1", "sub_use_disorder3_sev1", "tourettes_dx", "tourettes_severity", "motor_vocal_tic_dx", "motor_vocal_tic_severity", "provisional_tic_dx", "provisional_tic_severity", "sub_med_induced_dx", "sub_med_induced_sev", "dis_due_to_medical_dx", "dis_due_to_medical_sev", "other_spec_disorder_dx", "other_spec_disorder_sev", "other_specified_disorder_dx2", "other_spec_disorder_severity2", "unspecified_disorder_dx", "unspecified_disorder_severity", "cannabis_use_disorder", "cannabis_use_disorder_severity", "ocd_severity", "bdd_severity", "social_anxiety_severity", "panic_severity", "agoraphobia_severity", "gad_severity", "specific_phobia_severity", "separation_anxiety_severity", "dysthymic_severity", "mdd_severity", "cyclothymic_severity", "acute_stress_severity", "ptsd_severity", "somatic_sx_severity", "illness_anxiety_severity", "sub_use_disorder1_sev", "adhd_severity", "prim_dx", "visit", "yad1y", "asia1sev", "yad2y", "asia2sev", "p57i7", "sleep_sev", "gad_exc_score", "gad_uncon_score", "gad_phy_score", "mdd_total_score", "pdd_total_score", "gad_severity_rate", "mdd_severity_rate", "pdd_severity_rate", "persist_dd_severity_rate"],
+        "req_columns": {
+            "pd_pdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "pdago_pdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "agorpdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "sp_pdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "sad_pdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "gad_pdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "ocd_pdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "sph_pdx1": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "sph_pdx2": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "sph_pdx3": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "sph_pdx4": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "sph_pdx5": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "sph_pdx6": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "sph_pdx7": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "sph_pdx8": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "ptsdpdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "mdd_pdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "adhdpdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            },
+            "odd_pdx": {
+                "redcap": "iqsclinician",
+                "mapping": "custom"
+            }
+        }
+    },
+    "lsps01": {
+        "all_columns": ["subjectkey", "src_subject_id", "interview_date", "interview_age", "sex", "dayscons", "visit", "certcode", "phonpubf", "phonpuba", "partgrf", "partgra", "eatpubf", "eatpuba", "drinpubf", "drinpuba", "talkaf", "talkaa", "acttalkf", "acttalka", "gopartyf", "gopartya", "workobsf", "workobsa", "writobsf", "writobsa", "callnewf", "callnewa", "talknewf", "talknewa", "meetstrf", "meetstra", "urinpubf", "urinpuba", "entroomf", "entrooma", "centattf", "centatta", "speakf", "speaka", "testf", "testa", "expressf", "expressa", "lookeyef", "lookeyea", "reportf", "reporta", "pickupf", "pickupa", "returnf", "returna", "partyf", "partya", "resistf", "resista", "filmedf", "filmeda", "lspstot", "site", "convsf", "convsa", "askqf", "askqa", "ansqf", "ansqa", "readolf", "realola", "tellf", "tella", "perff", "perfa", "clubf", "cluba", "meetf", "meeta", "permf", "perma", "aasocial_anx", "aasocial_avo", "aaperform_anx", "aaperform_avo", "totalanx", "totalav", "version_form", "askqs", "askqas", "timepoint_label"],
+        "req_columns": {
+            "totalanx": {
+                "redcap": "iqsclinician",
+                "computed": "sum",
+                "missing": "-9",
+                "components": ["lsascl_i1", "lsascl_i3", "lsascl_i5", "lsascl_i7", "lsascl_i9", "lsascl_i11", "lsascl_i13", "lsascl_i15", "lsascl_i17", "lsascl_i19", "lsascl_i21", "lsascl_i23", "lsascl_i25", "lsascl_i27", "lsascl_i29", "lsascl_i31", "lsascl_i33", "lsascl_i35", "lsascl_i37", "lsascl_i39", "lsascl_i41", "lsascl_i43", "lsascl_i45", "lsascl_i47"]
+            },
+            "totalav": {
+                "redcap": "iqsclinician",
+                "computed": "sum",
+                "missing": "-9",
+                "components": ["lsascl_i2", "lsascl_i4", "lsascl_i6", "lsascl_i8", "lsascl_i10", "lsascl_i12", "lsascl_i14", "lsascl_i16", "lsascl_i18", "lsascl_i20", "lsascl_i22", "lsascl_i24", "lsascl_i26", "lsascl_i28", "lsascl_i30", "lsascl_i32", "lsascl_i34", "lsascl_i36", "lsascl_i38", "lsascl_i40", "lsascl_i42", "lsascl_i44", "lsascl_i46", "lsascl_i48"]
+            }
+        }
+    }
+}
+
