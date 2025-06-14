@@ -3,13 +3,13 @@
         "all_columns": ["src_subject_id", "interview_date", "interview_age", "sex"],
         "req_columns": {
             "src_subject_id": {
-                "rc_variable": "infosht18m_s2_r1_e1_complete",
+                "rc_variable": "infosht18m_s3_r1_e1_complete",
                 "redcap": "iqsparent",
                 "sessionless": "true",
                 "parent": "true"
             },
             "interview_date": {
-                "rc_variable": "infosht18m_s2_r1_e1_timestamp",
+                "rc_variable": "infosht18m_s3_r1_e1_timestamp",
                 "redcap": "iqsparent",
                 "sessionless": "true",
                 "parent": "true"
