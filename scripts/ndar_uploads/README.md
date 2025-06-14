@@ -20,6 +20,11 @@ python3 /home/data/NDClab/tools/lab-devOps/scripts/ndar_uploads/gen_NDAR_csvs.py
 ```
 
 ```bash
+# Thrive S3
+python3 /home/data/NDClab/tools/lab-devOps/scripts/ndar_uploads/gen_NDAR_csvs.py /home/data/NDClab/datasets/thrive-dataset/sourcedata/checked/redcap/ /home/data/NDClab/datasets/thrive-dataset/data-monitoring/data-dictionary/central-tracker_datadict.csv /home/data/NDClab/tools/lab-devOps/scripts/ndar_uploads/thrive-dataset/thrive_s3_r1.json s3_r1_e1 /home/data/NDClab/tools/lab-devOps/scripts/ndar_uploads/thrive-dataset/s3_r1 /home/data/NDClab/datasets/thrive-dataset/sourcedata/checked/redcap/Thriveiqsparents1r1_DATA_2024-07-12_1200.csv
+```
+
+```bash
 # Read S1
 python3 /home/data/NDClab/tools/lab-devOps/scripts/ndar_uploads/gen_NDAR_csvs.py /home/data/NDClab/datasets/read-study1-dataset/sourcedata/checked/redcap/ /home/data/NDClab/datasets/read-study1-dataset/data-monitoring/data-dictionary/central-tracker_datadict.csv /home/data/NDClab/tools/lab-devOps/scripts/ndar_uploads/read-study1-dataset/read-study1_s1_r1.json s1_r1_e1 /home/data/NDClab/tools/lab-devOps/scripts/ndar_uploads/read-study1-dataset/s1_r1
 ```
