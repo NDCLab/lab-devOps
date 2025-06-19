@@ -30,7 +30,7 @@ def extract_word_context(df: pd.DataFrame, word_id: int, n: int) -> list[str]:
 
     # Generate a list of legal words surrounding (and including) the target word
     context = [
-        str(df[df["WordID"] == wid]["word"][0])
+        str(df[df["WordID"] == wid]["word"].iloc[0])
         for wid in range(word_id - n, word_id + n + 1)
         if wid in set(df["WordID"])
     ]
@@ -76,7 +76,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                     match_idx = syll_row[match_col]
                     if pd.isna(match_idx):
                         continue
-                    match_row = passage_df[passage_df["syllable_id"] == match_idx][0]
+                    match_row = passage_df[passage_df["syllable_id"] == match_idx].iloc[0]
                     match_word_id = int(match_row["word_id"])
                     match_syll = str(match_row["syllable"])
                     # Mark syllable in match context
