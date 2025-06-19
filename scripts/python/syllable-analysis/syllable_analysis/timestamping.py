@@ -78,31 +78,33 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
 
                 # If we matched this syllable, record match data
                 for err_type in ["hesitation", "high-error", "low-error"]:
-                    match_col = f"comparison-{err_type}-idx"
-                    match_idx = syll_row[match_col]
-                    if pd.isna(match_idx):
-                        continue
-                    logging.debug(f"Processing match for {err_type}")
-                    match_row = passage_df[passage_df["syllable_id"] == match_idx].iloc[
-                        0
+                    error_idx = syll_row[f"{err_type}-idx"]
+                    comparison_df = passage_df[
+                        passage_df[f"comparison-{err_type}-idx"] == error_idx
                     ]
-                    match_word_id = int(match_row["word_id"])
-                    match_syll = str(match_row["syllable"])
-                    # Mark syllable in match context
-                    match_context = extract_word_context(passage_df, match_word_id, 2)
-                    match_context[2] = match_context[2].replace(
-                        match_syll, f"[{match_syll}]", 1
-                    )
-                    # Record the match data + the target syllable data
-                    match_data = target_data.copy()
-                    match_data.update(
-                        {
-                            "match_syllable_id": match_idx,
-                            "match_syllable": match_row["cleaned_syllable"],
-                            "match_context": " ".join(match_context),
-                        }
-                    )
-                    timestamp_data.append(match_data)
+                    if comparison_df.empty:
+                        continue
+                    for _, match_row in comparison_df.iterrows():
+                        logging.debug(f"Processing match for {err_type}")
+                        match_word_id = int(match_row["WordID"])
+                        match_syll = str(match_row["syllable"])
+                        # Mark syllable in match context
+                        match_context = extract_word_context(
+                            passage_df, match_word_id, 2
+                        )
+                        match_context[2] = match_context[2].replace(
+                            match_syll, f"[{match_syll}]", 1
+                        )
+                        # Record the match data + the target syllable data
+                        match_data = target_data.copy()
+                        match_data.update(
+                            {
+                                "match_syllable_id": match_row["syllable_id"],
+                                "match_syllable": match_row["cleaned_syllable"],
+                                "match_context": " ".join(match_context),
+                            }
+                        )
+                        timestamp_data.append(match_data)
 
             timestamp_df = pd.DataFrame(timestamp_data)
             # Add new timestamp columns
@@ -110,5 +112,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
             timestamp_df["timestamp_matched"] = pd.Series()
 
             timestamp_df.to_csv(
-                os.path.join(sub_timestamp_dir, passage.replace("_all-cols", ""))
+                os.path.join(
+                    sub_timestamp_dir, passage.replace("_all-cols", ""), index=False
+                )
             )
