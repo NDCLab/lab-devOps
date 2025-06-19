@@ -1,24 +1,21 @@
 import os
-import re
 
 import pandas as pd
 
 
-def extract_word_context(df: pd.DataFrame, word_id: str, n: int) -> list[str]:
+def extract_word_context(df: pd.DataFrame, word_id: int, n: int) -> list[str]:
     """Extracts the context words surrounding a target word in a DataFrame.
     Given a DataFrame containing words and their unique IDs, this function retrieves the words
-    within a window of size `n` before and after the specified `word_id`, including the target word
-    itself. The function assumes that `word_id` follows the pattern 'prefix_number', and constructs
-    the context window accordingly.
+    within a window of size `n` before and after the specified `word_id`, including the target word itself.
 
     Args:
-        df (pd.DataFrame): DataFrame containing at least 'word_id' and 'word' columns.
-        word_id (str): The unique identifier of the target word (e.g., 'cars_11g_word1').
+        df (pd.DataFrame): DataFrame containing at least 'WordID' and 'word' columns.
+        word_id (int): The unique identifier of the target word.
         n (int): The number of words to include before and after the target word.
 
     Raises:
         ValueError: If `n` is not greater than 0.
-        ValueError: If `word_id` does not match the expected pattern.
+        ValueError: If `word_id` does not exist.
 
     Returns:
         list[str]: A list of words in the context window, including the target word.
@@ -28,19 +25,14 @@ def extract_word_context(df: pd.DataFrame, word_id: str, n: int) -> list[str]:
     if n <= 0:
         raise ValueError("n must be greater than 0")
 
-    id_match = re.match(r"(\w+_\d+\w_word)(\d+)", word_id)
-    if id_match is None:
+    if word_id not in set(df["WordID"]):
         raise ValueError(f"Invalid word_id: {word_id}")
 
-    id_prefix = str(id_match.group(1))
-    word_idx = int(id_match.group(2))
-    # Generate a list of word indices surrounding (and including) the target word
-    local_words = [f"{id_prefix}{idx}" for idx in range(word_idx - n, word_idx + n + 1)]
-    # Grab legal words
+    # Generate a list of legal words surrounding (and including) the target word
     context = [
-        str(df.loc[lambda df: df["word_id"] == wid]["word"][0])
-        for wid in local_words
-        if wid in set(df["word_id"])
+        str(df.loc[lambda df: df["WordID"] == wid]["word"][0])
+        for wid in range(word_id - n, word_id + n + 1)
+        if wid in set(df["WordID"])
     ]
 
     return context
@@ -65,13 +57,19 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
             timestamp_data = []
             for idx in error_idxs:
                 syll_row = passage_df.loc[lambda df: df["syllable_id" == idx]][0]
-                word_id = syll_row["word_id"]
+                word_id = int(syll_row["WordID"])
+                target_syll = str(syll_row["syllable"])
+                # Mark syllable in word context
+                word_context = extract_word_context(passage_df, word_id, 2)
+                word_context[2] = word_context[2].replace(
+                    target_syll, f"[{target_syll}]", 1
+                )
                 # Gather the base data for this syllable
                 target_data = {
                     "syllable_id": idx,
                     "syllable": syll_row["cleaned_syllable"],
                     # Take two words before and after the target word
-                    "context": " ".join(extract_word_context(passage_df, word_id, 2)),
+                    "context": " ".join(word_context),
                 }
 
                 # If we matched this syllable, record match data
@@ -83,16 +81,20 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                     match_row = passage_df.loc[
                         lambda df: df["syllable_id" == match_idx]
                     ][0]
-                    match_word_id = match_row["word_id"]
+                    match_word_id = int(match_row["word_id"])
+                    match_syll = str(match_row["syllable"])
+                    # Mark syllable in match context
+                    match_context = extract_word_context(passage_df, match_word_id, 2)
+                    match_context[2] = match_context[2].replace(
+                        match_syll, f"[{match_syll}]", 1
+                    )
                     # Record the match data + the target syllable data
                     match_data = target_data.copy()
                     match_data.update(
                         {
                             "match_syllable_id": match_idx,
                             "match_syllable": match_row["cleaned_syllable"],
-                            "match_context": " ".join(
-                                extract_word_context(passage_df, match_word_id, 2)
-                            ),
+                            "match_context": " ".join(match_context),
                         }
                     )
                     timestamp_data.append(match_data)
