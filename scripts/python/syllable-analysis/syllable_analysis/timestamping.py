@@ -51,7 +51,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
 
         sub_dir = os.path.join(processed_passages_dir, participant_id)
         for passage in os.listdir(sub_dir):
-            if "all-cols" not in passage:
+            if "all-cols" not in passage or "lock" in passage:
                 continue
             logging.debug(f"Processing passage {passage}")
             passage_df = pd.read_csv(os.path.join(sub_dir, passage))
