@@ -112,7 +112,6 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
             timestamp_df["timestamp_matched"] = pd.Series()
 
             timestamp_df.to_csv(
-                os.path.join(
-                    sub_timestamp_dir, passage.replace("_all-cols", ""), index=False
-                )
+                os.path.join(sub_timestamp_dir, passage.replace("_all-cols", "")),
+                index=False,
             )
