@@ -32,6 +32,12 @@ def get_args():
         help="The parent directory to contain results. "
         + "This script's data will be placed in a timestamped subdirectory.",
     )
+    parser.add_argument(
+        "-t",
+        "--timestamp-only",
+        action="store_true",
+        help="Only generate the timestamp sheets (using the most recent run)",
+    )
 
     # Add accepted_subjects as an optional argument
     parser.add_argument(
@@ -52,12 +58,22 @@ def main(
     coding_template_dir: str,
     output_parentdir: str,
     accepted_subjects: list[str],
+    timestamp_only: bool,
 ):
     logging.info("Starting processing")
 
     # 0. Set up directories
     if not os.path.isdir(output_parentdir):
         raise FileNotFoundError(output_parentdir + " is not a directory.")
+
+    if timestamp_only:
+        # Get most recent run
+        most_recent_run = sorted(os.listdir(output_parentdir), reverse=True)[0]
+        output_subdir = os.path.join(output_parentdir, most_recent_run)
+        create_timestamping_sheets(
+            os.path.join(output_subdir, "processed_passages"), output_subdir
+        )
+        return
 
     dt_now = datetime.datetime.now().strftime("%Y%m%d_%H%M-data")
     output_subdir = os.path.join(output_parentdir, dt_now)
@@ -93,4 +109,5 @@ if __name__ == "__main__":
         args.coding_template_dir,
         args.output_dir,
         args.accepted_subjects,
+        args.timestamp_only,
     )
