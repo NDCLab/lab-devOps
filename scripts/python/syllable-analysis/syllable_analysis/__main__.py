@@ -36,7 +36,13 @@ def get_args():
         "-t",
         "--timestamp-only",
         action="store_true",
-        help="Only generate the timestamp sheets (using the most recent run)",
+        help="Only generate the timestamp sheets (using the most recent run).",
+    )
+    parser.add_argument(
+        "-o",
+        "--old-matching",
+        action="store_true",
+        help='Use the "old" syllable match algorithm.',
     )
 
     # Add accepted_subjects as an optional argument
@@ -59,6 +65,7 @@ def main(
     output_parentdir: str,
     accepted_subjects: list[str],
     timestamp_only: bool,
+    old_matching_algorithm: bool,
 ):
     logging.info("Starting processing")
 
@@ -85,7 +92,11 @@ def main(
 
     # 2. Process subject data
     process_subject_data(
-        input_dir, scaffold_dir, output_subdir, accepted_subjects or None
+        input_dir,
+        scaffold_dir,
+        output_subdir,
+        accepted_subjects or None,
+        old_matching_algorithm,
     )
 
     # 3. Extract summary statistics from subject data
@@ -110,4 +121,5 @@ if __name__ == "__main__":
         args.output_dir,
         args.accepted_subjects,
         args.timestamp_only,
+        args.old_matching,
     )

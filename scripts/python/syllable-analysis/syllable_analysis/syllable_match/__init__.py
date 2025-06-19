@@ -16,7 +16,9 @@ from .fields import DEFAULT_FIELDS
 from .labels import label_duplications, label_errors, label_hesitations
 from .matching import (
     match_duplications,
+    match_errors,
     match_errors_alt,
+    match_hesitations,
     match_hesitations_alt,
 )
 from .parsing import get_raw_df, preprocess_fields
@@ -27,6 +29,7 @@ def process_subject_data(
     scaffold_dir: str,
     output_dir: str,
     accepted_subjects: list[str] = None,
+    use_old_matching_algorithm: bool = False,
 ):
     # Dictionary to store scaffold dataframes for each participant
     # Format: {participant_id: {passage_name: dataframe}}
@@ -67,13 +70,19 @@ def process_subject_data(
             label_hesitations(passage_df)
 
             # Hesitation matching loop
-            match_hesitations_alt(passage_df)
+            if use_old_matching_algorithm:
+                match_hesitations(passage_df)
+            else:
+                match_hesitations_alt(passage_df)
 
             # Error labeling loop
             label_errors(passage_df)
 
             # Error matching loop
-            match_errors_alt(passage_df)
+            if use_old_matching_algorithm:
+                match_errors(passage_df)
+            else:
+                match_errors_alt(passage_df)
 
             # Duplication labeling loop
             label_duplications(passage_df)
