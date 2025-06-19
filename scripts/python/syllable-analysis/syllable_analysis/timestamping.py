@@ -52,11 +52,9 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
             if "all-cols" not in passage:
                 continue
             passage_df = pd.read_csv(os.path.join(sub_dir, passage))
-            error_idxs = passage_df[passage_df["any-deviation"] == 1]["syllable_id"]
 
             timestamp_data = []
-            for idx in error_idxs:
-                syll_row = passage_df[passage_df["syllable_id"] == idx][0]
+            for _, syll_row in passage_df[passage_df["any-deviation"] == 1].iterrows():
                 word_id = int(syll_row["WordID"])
                 target_syll = str(syll_row["syllable"])
                 # Mark syllable in word context
@@ -66,7 +64,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                 )
                 # Gather the base data for this syllable
                 target_data = {
-                    "syllable_id": idx,
+                    "syllable_id": syll_row["syllable_id"],
                     "syllable": syll_row["cleaned_syllable"],
                     # Take two words before and after the target word
                     "context": " ".join(word_context),
