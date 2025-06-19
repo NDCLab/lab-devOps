@@ -40,12 +40,12 @@ def extract_word_context(df: pd.DataFrame, word_id: int, n: int) -> list[str]:
 
 def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
     timestamp_dir = os.path.join(output_dir, "timestamp")
-    os.makedirs(timestamp_dir)
+    os.makedirs(timestamp_dir, exist_ok=True)
 
     for participant_id in os.listdir(processed_passages_dir):
         # Prepare output location
         sub_timestamp_dir = os.path.join(timestamp_dir, participant_id)
-        os.makedirs(sub_timestamp_dir)
+        os.makedirs(sub_timestamp_dir, exist_ok=True)
 
         sub_dir = os.path.join(processed_passages_dir, participant_id)
         for passage in os.listdir(sub_dir):
