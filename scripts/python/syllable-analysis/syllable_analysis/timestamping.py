@@ -60,7 +60,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
             if "all-cols" not in passage:
                 continue
             passage_df = pd.read_csv(os.path.join(sub_dir, passage))
-            error_idxs = passage_df[passage_df["any_deviation"] == 1]["syllable_id"]
+            error_idxs = passage_df[passage_df["any-deviation"] == 1]["syllable_id"]
 
             timestamp_data = []
             for idx in error_idxs:
