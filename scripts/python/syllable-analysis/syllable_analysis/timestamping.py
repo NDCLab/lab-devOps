@@ -1,3 +1,4 @@
+import logging
 import os
 
 import pandas as pd
@@ -43,6 +44,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
     os.makedirs(timestamp_dir, exist_ok=True)
 
     for participant_id in os.listdir(processed_passages_dir):
+        logging.info(f"Creating timestamp templates for {participant_id}")
         # Prepare output location
         sub_timestamp_dir = os.path.join(timestamp_dir, participant_id)
         os.makedirs(sub_timestamp_dir, exist_ok=True)
@@ -51,12 +53,16 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
         for passage in os.listdir(sub_dir):
             if "all-cols" not in passage:
                 continue
+            logging.debug(f"Processing passage {passage}")
             passage_df = pd.read_csv(os.path.join(sub_dir, passage))
 
+            deviation_df = passage_df[passage_df["any-deviation"] == 1]
+            logging.debug(f"Found {len(deviation_df.index)} row(s) with deviation")
             timestamp_data = []
-            for _, syll_row in passage_df[passage_df["any-deviation"] == 1].iterrows():
+            for _, syll_row in deviation_df.iterrows():
                 word_id = int(syll_row["WordID"])
                 target_syll = str(syll_row["syllable"])
+                logging.debug(f'Processing syllable "{target_syll}"')
                 # Mark syllable in word context
                 word_context = extract_word_context(passage_df, word_id, 2)
                 word_context[2] = word_context[2].replace(
@@ -76,7 +82,10 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                     match_idx = syll_row[match_col]
                     if pd.isna(match_idx):
                         continue
-                    match_row = passage_df[passage_df["syllable_id"] == match_idx].iloc[0]
+                    logging.debug(f"Processing match for {err_type}")
+                    match_row = passage_df[passage_df["syllable_id"] == match_idx].iloc[
+                        0
+                    ]
                     match_word_id = int(match_row["word_id"])
                     match_syll = str(match_row["syllable"])
                     # Mark syllable in match context
