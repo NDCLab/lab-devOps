@@ -56,7 +56,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
 
             timestamp_data = []
             for idx in error_idxs:
-                syll_row = passage_df.loc[lambda df: df["syllable_id" == idx]][0]
+                syll_row = passage_df.loc[lambda df: df["syllable_id"] == idx][0]
                 word_id = int(syll_row["WordID"])
                 target_syll = str(syll_row["syllable"])
                 # Mark syllable in word context
@@ -79,7 +79,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                     if pd.isna(match_idx):
                         continue
                     match_row = passage_df.loc[
-                        lambda df: df["syllable_id" == match_idx]
+                        lambda df: df["syllable_id"] == match_idx
                     ][0]
                     match_word_id = int(match_row["word_id"])
                     match_syll = str(match_row["syllable"])
