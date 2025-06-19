@@ -7,7 +7,7 @@ from syllable_analysis.error_analysis import summarize
 from syllable_analysis.error_analysis.analyze import analyze_recall_periods
 from syllable_analysis.scaffolds import build_scaffolds
 from syllable_analysis.syllable_match import process_subject_data
-
+from syllable_analysis.timestamping import create_timestamping_sheets
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -77,6 +77,11 @@ def main(
 
     # 4. Process recall data
     analyze_recall_periods(input_dir, output_subdir)
+
+    # 5. Create syllable timestamping sheets
+    create_timestamping_sheets(
+        os.path.join(output_subdir, "processed_passages"), output_subdir
+    )
 
     logging.info("Done!")
 
