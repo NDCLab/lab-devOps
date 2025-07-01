@@ -103,12 +103,13 @@ def get_redcaps(datadict_df, redcaps, ndar_json, other_sessions=False):
     for expected_rc in rcs_to_look_for:
         present = False
         for redcap in redcaps:
-            if expected_rc in os.path.basename(redcap.lower()) and not present:
-                redcap_path = redcap
-                redcaps_dict[expected_rc] = pd.read_csv(
-                    redcap_path, index_col="record_id"
-                )
+            if expected_rc in os.path.basename(redcap.lower()):
+                # We already know that our REDCaps are legal after data monitoring; we'll just
+                # join the ones that share a name (in the case of remote-only & in-person REDCaps)
                 present = True
+                prev_df = redcaps_dict.get(expected_rc, pd.DataFrame())
+                new_df = pd.read_csv(redcap, index_col="record_id")
+                redcaps_dict[expected_rc] = pd.concat([prev_df, new_df])
                 
         if not present:
             sys.exit(
