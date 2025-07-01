@@ -83,7 +83,7 @@ def get_redcaps(datadict_df, redcaps, ndar_json, other_sessions=False):
                 idx = prov.index("file:")
                 rc_filename = prov[idx + 1].strip('";,')
                 if rc_filename not in redcaps_dict.keys():
-                    redcaps_dict[rc_filename] = {}
+                    redcaps_dict[rc_filename] = pd.DataFrame()
             else:
                 continue
         rcs_to_look_for = redcaps_dict.keys()
