@@ -55,60 +55,61 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
             logging.debug(f"Processing passage {passage}")
             passage_df = pd.read_csv(os.path.join(sub_dir, passage))
 
-            deviation_df = passage_df[passage_df["any-deviation"] == 1]
-            logging.debug(f"Found {len(deviation_df.index)} row(s) with deviation")
-            timestamp_data = []
-            for _, syll_row in deviation_df.iterrows():
-                word_id = int(syll_row["WordID"])
-                target_syll = str(syll_row["syllable"])
-                logging.debug(f'Processing syllable "{target_syll}"')
-                # Mark syllable in word context
-                word_context = extract_word_context(passage_df, word_id, 2)
-                word_context[2] = word_context[2].replace(
-                    target_syll, f"[{target_syll}]", 1
-                )
-                # Gather the base data for this syllable
-                target_data = {
-                    "syllable_id": syll_row["syllable_id"],
-                    "syllable": syll_row["cleaned_syllable"],
-                    # Take two words before and after the target word
-                    "context": " ".join(word_context),
+            timestamp_rows = []
+            for _, row in passage_df.iterrows():
+                row_data = {
+                    "SyllableID": row["SyllableID"],
+                    "Syllable": row["Syllable"],
                 }
 
-                # If we matched this syllable, record match data
-                for err_type in ["hesitation", "high-error", "low-error"]:
-                    error_idx = syll_row[f"{err_type}-idx"]
-                    comparison_df = passage_df[
-                        passage_df[f"comparison-{err_type}-idx"] == error_idx
-                    ]
-                    if comparison_df.empty:
-                        continue
-                    for _, match_row in comparison_df.iterrows():
-                        logging.debug(f"Processing match for {err_type}")
-                        match_word_id = int(match_row["WordID"])
-                        match_syll = str(match_row["syllable"])
-                        # Mark syllable in match context
-                        match_context = extract_word_context(
-                            passage_df, match_word_id, 2
-                        )
-                        match_context[2] = match_context[2].replace(
-                            match_syll, f"[{match_syll}]", 1
-                        )
-                        # Record the match data + the target syllable data
-                        match_data = target_data.copy()
-                        match_data.update(
-                            {
-                                "match_syllable_id": match_row["syllable_id"],
-                                "match_syllable": match_row["cleaned_syllable"],
-                                "match_context": " ".join(match_context),
-                            }
-                        )
-                        timestamp_data.append(match_data)
+                # Figure out what kind of deviation (if any) this row has,
+                # or if it has been matched as a comparison syllable.
+                row_types = []
+                # Deviation types
+                if row["hesitation-disfluency"]:
+                    row_types.append("hesitation")
+                elif row["high-error"] or row["low-error"]:
+                    row_types.append("error")
+                # Comparison types
+                elif row["comparison-hesitation-idx"]:
+                    row_types.append("comparison (hesitation)")
+                elif (
+                    row["comparison-high-error-idx"] or row["comparison-low-error-idx"]
+                ):
+                    row_types.append("comparison (error)")
+                else:
+                    timestamp_rows.append(row_data)
+                    continue
 
-            timestamp_df = pd.DataFrame(timestamp_data)
-            # Add new timestamp columns
-            timestamp_df["timestamp_target"] = pd.Series()
-            timestamp_df["timestamp_matched"] = pd.Series()
+                row_data["RowTypes"] = ", ".join(row_types)
+                # We will add one row per "type" (deviation/comparison),
+                # so we mark duplicated rows as such.
+                row_data["Duplicate"] = "X" if len(row_types) > 1 else ""
+
+                # Mark for timestamping according to deviation type
+                for row_type in row_types:
+                    if "hesitation" in row_type:
+                        # NB: For hesitations, we mark the coda (offset) of the "start" syllable and
+                        # the attack (onset) of the "end" syllable (capturing the hesitation itself).
+                        if row["hesitation-start"]:
+                            row_data["MarkLocation"] = "offset"
+                            timestamp_rows.append(row_data)
+                        if row["hesitation-end"]:
+                            row_data["MarkLocation"] = "onset"
+                            timestamp_rows.append(row_data)
+
+                    elif "error" in row_type:
+                        # NB: For errors, we mark the attack of the "start" syllable
+                        # and the coda of the "end" syllable. This may be the same syllable.
+                        if row["high-error-start"] or row["low-error-start"]:
+                            row_data["MarkLocation"] = "onset"
+                            timestamp_rows.append(row_data)
+                        if row["high-error-end"] or row["low-error-end"]:
+                            row_data["MarkLocation"] = "offset"
+                            timestamp_rows.append(row_data)
+
+            timestamp_df = pd.DataFrame(timestamp_rows)
+            timestamp_df["Timestamp"] = pd.Series()
 
             timestamp_df.to_csv(
                 os.path.join(sub_timestamp_dir, passage.replace("_all-cols", "")),
