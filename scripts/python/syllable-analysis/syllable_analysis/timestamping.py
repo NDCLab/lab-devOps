@@ -20,7 +20,6 @@ def extract_word_context(df: pd.DataFrame, word_id: int, n: int) -> list[str]:
 
     Returns:
         list[str]: A list of words in the context window, including the target word.
-        Only words present in the DataFrame are included.
 
     """
     if n <= 0:
