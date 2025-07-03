@@ -535,8 +535,8 @@ def get_relevant_redcaps(redcap_dir: str, sre: str) -> list[str]:
     ]
 
     # Get REDCaps that match on the passed sub/ses
-    ses, run = sre[0], sre[1]
-    sr_pat = re.compile(rf".*{ses}({run})?_DATA.*")
+    ses = sre[0]
+    sr_pat = re.compile(rf".*{ses}.*_DATA.*")
     sr_redcaps = [rc for rc in all_redcaps if sr_pat.fullmatch(os.path.basename(rc))]
 
     # Join universal REDCaps and sub/ses-specific REDCaps
