@@ -221,7 +221,7 @@ def map_vals(ndar_df, ndar_col, ndar_csv, ndar_json, sre, parent=False):
     for id in ndar_df.index:
         if parent:
             id = int(str(id)[0:2] + "8" + str(id)[3:])  # will IDs always be XX8XXXX?
-            col_re = re.match("^([a-zA-Z0-9]+)_(.*)$", rc_column)
+            col_re = re.match(r"^([a-zA-Z\d]+)_(.*)$", rc_column)
             rc_column_es = col_re.group(1) + "es_" + col_re.group(2)
         else:
             rc_column_es = math.nan
@@ -493,20 +493,18 @@ def save_csv(ndar_csv, ndar_df):
     f = open("tmpfile.csv", "r")
     csvstring = f.read()
     f.close()
-    # with open(os.path.join(out_path, ndar_csv + '_incomplete.csv'), 'w') as f:
     with open(
         os.path.join(out_path, ndar_csv + "_" + sre + "_incomplete.csv"), "w"
     ) as f:
         f.write(ndar_csv[0:-2] + ",01" + "," * (len(df.columns) - 2) + "\n")
         f.write(csvstring)
-    f.close()
     os.remove("tmpfile.csv")
 
 
 class Column:
     def __init__(self, col):
         self.col = col
-        col_re = re.match("^([a-zA-Z0-9]+)(_.*)?$", col)
+        col_re = re.match(r"^([a-zA-Z\d]+)(_.*)?$", col)
         if not col_re:
             raise ValueError(
                 "column " + col + " does not fit column naming conventions."
@@ -567,7 +565,6 @@ if __name__ == "__main__":
     df_dd = pd.read_csv(df_dd)
     with open(ndar_json, "r") as json_file:
         ndar_json = json.load(json_file)
-    json_file.close()
 
     redcaps_dict = get_redcaps(df_dd, redcaps, ndar_json)  # dataframes of each redcap
     if (

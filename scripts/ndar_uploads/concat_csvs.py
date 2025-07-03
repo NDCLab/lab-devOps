@@ -1,7 +1,7 @@
 import os
-from os.path import basename, join, isdir
-import sys
 import re
+import sys
+from os.path import isdir, join
 
 ### combines identically-named .csv files in multiple folders (up to sX_rX_eX) into single .csv files for NIH uploads
 ###
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     file_dict = {}
     for filename_base in unique_files.keys():
         first_file = True
-        with open(join(out_path, filename_base + "_combined_incomplete.csv"), "w") as o:
+        with open(join(out_path, filename_base + "_combined_incomplete.csv"), "w") as f:
             for file in unique_files[filename_base]:
                 with open(file, "r") as file_dict[i]:
                     lines = file_dict[i].readlines()
@@ -51,7 +51,5 @@ if __name__ == "__main__":
                     else:
                         lines_to_write = range(2, len(lines))
                     for j in lines_to_write:
-                        o.write(lines[j])
-                file_dict[i].close()
+                        f.write(lines[j])
         print("wrote out " + join(out_path, filename_base + "_combined_incomplete.csv"))
-        o.close()
