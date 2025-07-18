@@ -66,15 +66,16 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                 # or if it has been matched as a comparison syllable.
                 row_types = []
                 # Deviation types
-                if row["hesitation-disfluency"]:
+                if row["hesitation-disfluency"] == 1:
                     row_types.append("hesitation")
-                elif row["high-error"] or row["low-error"]:
+                elif row["high-error"] == 1 or row["low-error"] == 1:
                     row_types.append("error")
                 # Comparison types
-                elif row["comparison-hesitation-idx"]:
+                elif row["comparison-hesitation-idx"] == 1:
                     row_types.append("comparison (hesitation)")
                 elif (
-                    row["comparison-high-error-idx"] or row["comparison-low-error-idx"]
+                    row["comparison-high-error-idx"] == 1
+                    or row["comparison-low-error-idx"] == 1
                 ):
                     row_types.append("comparison (error)")
                 else:
