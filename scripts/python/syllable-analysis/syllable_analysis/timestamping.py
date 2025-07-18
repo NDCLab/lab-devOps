@@ -68,7 +68,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                 # Deviation types
                 if row["hesitation-disfluency"] == 1:
                     row_types.append("hesitation")
-                elif row["high-error"] == 1 or row["low-error"] == 1:
+                elif row["any-error"] == 1:
                     row_types.append("error")
                 # Comparison types
                 elif row["comparison-hesitation-idx"] == 1:
