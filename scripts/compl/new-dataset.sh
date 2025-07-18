@@ -16,12 +16,15 @@ apath="/home/data/NDClab/analyses"
 tpath="/home/data/NDClab/tools"
 LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
 
+GROUP_NAME="hpc_gbuzzell"
+
 b_group=$(cat $LAB_USERS_TXT)
 b_group=(${b_group//,/ })
 
 if [[ -d $repo ]]; then
   for user in ${b_group[@]}; do
     setfacl -Rm u:$user:r-x,d:u:$user:r-x "$repo"
+    setfacl -Rm d:group:"$GROUP_NAME":rw-,group:"$GROUP_NAME":rwx "$repo"
     for priv in "sourcedata" "derivatives"; do
       if [[ -d $repo/$priv ]]; then
         setfacl -Rm u:$user:---,d:u:$user:--- $repo/$priv
@@ -34,6 +37,7 @@ else
     if [[ "$DIR" == "$repo" ]]; then
       for user in ${b_group[@]}; do
         setfacl -Rm u:$user:r-x,d:u:$user:r-x $DIR/$repo
+        setfacl -Rm d:group:"$GROUP_NAME":rw-,group:"$GROUP_NAME":rwx "$DIR/$repo"
         for priv in "sourcedata" "derivatives"; do
           if [[ -d $DIR/$repo/$priv ]]; then
             setfacl -Rm u:$user:--- $DIR/$repo/$priv
