@@ -89,10 +89,6 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                 logging.debug(
                     f"Syllable {row_data['SyllableID']} has types {row_data['RowTypes']}"
                 )
-                # We will add one row per "type" (deviation/comparison),
-                # so we mark duplicated rows as such.
-                row_data["Duplicate"] = "X" if len(row_types) > 1 else ""
-
                 # Mark for timestamping according to deviation type
                 for row_type in row_types:
                     if "hesitation" in row_type:
@@ -116,6 +112,14 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                             timestamp_rows.append(row_data)
 
             timestamp_df = pd.DataFrame(timestamp_rows)
+            # We will add one row per "type" (deviation/comparison),
+            # so we mark duplicated rows as such.
+            timestamp_df["Duplicate"] = timestamp_df.apply(
+                lambda row: "X"
+                if timestamp_df["SyllableID"].value_counts()[row["SyllableID"]] > 1
+                else "",
+                axis=1,
+            )
             timestamp_df["Timestamp"] = pd.Series()
 
             timestamp_df.to_csv(
