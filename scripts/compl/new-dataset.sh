@@ -24,7 +24,7 @@ b_group=(${b_group//,/ })
 if [[ -d $repo ]]; then
   for user in ${b_group[@]}; do
     setfacl -Rm u:$user:r-x,d:u:$user:r-x "$repo"
-    setfacl -Rm d:group:"$GROUP_NAME":rw-,group:"$GROUP_NAME":rwx "$repo"
+    setfacl -Rm d:group:"$GROUP_NAME":rwx,group:"$GROUP_NAME":rwx "$repo"
     for priv in "sourcedata" "derivatives"; do
       if [[ -d $repo/$priv ]]; then
         setfacl -Rm u:$user:---,d:u:$user:--- $repo/$priv
@@ -37,7 +37,7 @@ else
     if [[ "$DIR" == "$repo" ]]; then
       for user in ${b_group[@]}; do
         setfacl -Rm u:$user:r-x,d:u:$user:r-x $DIR/$repo
-        setfacl -Rm d:group:"$GROUP_NAME":rw-,group:"$GROUP_NAME":rwx "$DIR/$repo"
+        setfacl -Rm d:group:"$GROUP_NAME":rwx,group:"$GROUP_NAME":rwx "$DIR/$repo"
         for priv in "sourcedata" "derivatives"; do
           if [[ -d $DIR/$repo/$priv ]]; then
             setfacl -Rm u:$user:--- $DIR/$repo/$priv
