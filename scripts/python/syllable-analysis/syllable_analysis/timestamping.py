@@ -68,17 +68,17 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                 # Deviation types
                 if row["hesitation-disfluency"] == 1:
                     row_types.append("hesitation")
-                elif row["any-error"] == 1:
+                if row["any-error"] == 1:
                     row_types.append("error")
                 # Comparison types
-                elif row["comparison-hesitation-idx"] == 1:
+                if not pd.isna(row["comparison-hesitation-idx"]):
                     row_types.append("comparison (hesitation)")
-                elif (
-                    row["comparison-high-error-idx"] == 1
-                    or row["comparison-low-error-idx"] == 1
-                ):
+                if pd.notna(
+                    [row["comparison-high-error-idx"], row["comparison-low-error-idx"]]
+                ).any():
                     row_types.append("comparison (error)")
-                else:
+                # No deviation or comparison; just a correctly produced syllable
+                if not row_types:
                     timestamp_rows.append(row_data)
                     logging.debug(
                         f"Syllable {row_data['SyllableID']} is not deviation or comparison"
