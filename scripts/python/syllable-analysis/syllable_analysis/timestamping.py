@@ -81,13 +81,13 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                 else:
                     timestamp_rows.append(row_data)
                     logging.debug(
-                        f"Syllable {row_data["SyllableID"]} is not deviation or comparison"
+                        f"Syllable {row_data['SyllableID']} is not deviation or comparison"
                     )
                     continue
 
                 row_data["RowTypes"] = ", ".join(row_types)
                 logging.debug(
-                    f"Syllable {row_data["SyllableID"]} has types {row_data["RowTypes"]}"
+                    f"Syllable {row_data['SyllableID']} has types {row_data['RowTypes']}"
                 )
                 # We will add one row per "type" (deviation/comparison),
                 # so we mark duplicated rows as such.
