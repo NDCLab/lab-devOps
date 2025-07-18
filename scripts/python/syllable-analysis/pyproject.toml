@@ -1,6 +1,6 @@
 [project]
 name = "syllable-analysis"
-version = "0.3.3"
+version = "0.3.4"
 description = ""
 authors = [
     {name = "Nolan Welch",email = "nolanwelch@outlook.com"}
