@@ -2,11 +2,11 @@
 # Sets rwx access bits on a directory for the given user
 
 usage() {
-echo "Usage: bash give-write-perms.sh <directory>"
+echo "Usage: bash give-write-perms.sh <directory> <user>"
   exit 1
 }
 
-if [[ $# -ne 1 ]]; then usage; fi
+if [[ $# -ne 2 ]]; then usage; fi
 
 DATASET="$1"
 USER="$2"
