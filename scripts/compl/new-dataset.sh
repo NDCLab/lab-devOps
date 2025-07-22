@@ -3,8 +3,8 @@
 
 # USAGE: new-dataset.sh <new-repo>
 usage() {
-  echo "Usage: bash new-dataset.sh <new-repo> ]"
-  exit 0
+  echo "Usage: bash new-dataset.sh <new-repo>"
+  exit 1
 }
 
 if [[ $# -ne 1 ]]; then usage; fi
