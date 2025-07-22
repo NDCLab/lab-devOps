@@ -18,10 +18,10 @@ LAB_USERS_TXT="/home/data/NDClab/tools/lab-devOps/scripts/configs/group.txt"
 function verify_lead
 {
     b_group=$(cat $LAB_USERS_TXT)
-    b_group=(${b_group//,/ })
+    IFS=',' read -ra b_group <<< "$b_group"
     for i in "${b_group[@]}"
     do
-        if [ $i == $1 ]; then
+        if [ "$i" == "$1" ]; then
             echo "true" && return
         fi
     done
@@ -30,21 +30,21 @@ function verify_lead
 
 for proj_lead in ${proj_leads}; do
   unset added
-  if [[ ! $(verify_lead $proj_lead) == "true" ]]; then
+  if [[ ! $(verify_lead "$proj_lead") == "true" ]]; then
     echo "User $proj_lead not found in hpc_gbuzzell group" && exit 1
   fi
 
-  if [[ -d `realpath $project` ]]; then #full path provided
-    project=`realpath $project`
+  if [[ -d $(realpath "$project") ]]; then #full path provided
+    project=$(realpath "$project")
     echo "granting $proj_lead read write access to $project"
-    setfacl -Rm d:u:$proj_lead:rwx,u:$proj_lead:rwx $project
+    setfacl -Rm d:u:"$proj_lead":rwx,u:"$proj_lead":rwx "$project"
     added=true
   else #search for project name in lab folders
     for dir in $DATA_PATH $TOOL_PATH $ANA_PATH; do
-      for repo in $(ls $dir); do
-        if [[ $repo == $project ]]; then
-          echo "granting $proj_lead read write access to $(basename $dir)/$project"
-          setfacl -Rm d:u:$proj_lead:rwx,u:$proj_lead:rwx $dir/$project
+      for repo in "$dir"/*/; do
+        if [[ $repo == "$project" ]]; then
+          echo "granting $proj_lead read write access to $(basename "$dir")/$project"
+          setfacl -Rm d:u:"$proj_lead":rwx,u:"$proj_lead":rwx "$dir"/"$project"
           added=true
         fi
       done
