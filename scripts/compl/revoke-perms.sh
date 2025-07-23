@@ -4,11 +4,11 @@
 # permissions (r-x everywhere except sourcedata/ and derivatives/).
 
 usage() {
-  echo "Usage: bash revoke-perms.sh <directory>"
+  echo "Usage: bash revoke-perms.sh <directory> <user>"
   exit 1
 }
 
-if [[ $# -ne 1 ]]; then usage; fi
+if [[ $# -ne 2 ]]; then usage; fi
 
 DIR="$1"
 USER="$2"
