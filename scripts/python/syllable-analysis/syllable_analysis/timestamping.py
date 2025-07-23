@@ -52,7 +52,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
         for passage in os.listdir(sub_dir):
             if "all-cols" not in passage or "lock" in passage:
                 continue
-            logging.debug(f"Processing passage {passage}")
+            logging.debug(f"Processing passage {passage} for {participant_id}")
             passage_df = pd.read_csv(os.path.join(sub_dir, passage))
 
             timestamp_rows = []
@@ -79,7 +79,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                     row_types.append("comparison (error)")
                 # No deviation or comparison; just a correctly produced syllable
                 if not row_types:
-                    timestamp_rows.append(row_data)
+                    timestamp_rows.append(row_data.copy())
                     logging.debug(
                         f"Syllable {row_data['SyllableID']} is not deviation or comparison"
                     )
@@ -96,20 +96,20 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                         # the attack (onset) of the "end" syllable (capturing the hesitation itself).
                         if row["hesitation-start"]:
                             row_data["MarkLocation"] = "offset"
-                            timestamp_rows.append(row_data)
+                            timestamp_rows.append(row_data.copy())
                         if row["hesitation-end"]:
                             row_data["MarkLocation"] = "onset"
-                            timestamp_rows.append(row_data)
+                            timestamp_rows.append(row_data.copy())
 
                     elif "error" in row_type:
                         # NB: For errors, we mark the attack of the "start" syllable
                         # and the coda of the "end" syllable. This may be the same syllable.
                         if row["high-error-start"] or row["low-error-start"]:
                             row_data["MarkLocation"] = "onset"
-                            timestamp_rows.append(row_data)
+                            timestamp_rows.append(row_data.copy())
                         if row["high-error-end"] or row["low-error-end"]:
                             row_data["MarkLocation"] = "offset"
-                            timestamp_rows.append(row_data)
+                            timestamp_rows.append(row_data.copy())
 
             timestamp_df = pd.DataFrame(timestamp_rows)
             # We will add one row per "type" (deviation/comparison),
