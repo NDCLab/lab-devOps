@@ -211,6 +211,21 @@ def preprocess_fields(raw_df: pd.DataFrame) -> None:
     raw_df["hesitation-disfluency-before"] = hesitation_before
     raw_df["hesitation-disfluency-after"] = hesitation_after
 
+    # Mark duplication disfluency
+    raw_df["duplication"] = (
+        raw_df["Disfluency_DuplicationRepetitionSyllable"].astype(bool)
+        | raw_df["Disfluency_DuplicationRepetitionWord"].astype(bool)
+        | raw_df["Disfluency_DuplicationRepetitionPhrase"].astype(bool)
+    ).astype(int)
+    duplication_before, duplication_after = compute_window_indicator(
+        raw_df["duplication"], 7
+    )
+    raw_df["duplication-before"] = duplication_before
+    raw_df["duplication-after"] = duplication_after
+    # Mark specific duplication types
+    raw_df["duplication-word"] = raw_df["Disfluency_DuplicationRepetitionWord"]
+    raw_df["duplication-phrase"] = raw_df["Disfluency_DuplicationRepetitionPhrase"]
+
 
 def match_syllable_to_word(word_list, syllable_list) -> tuple[list[str], list[int]]:
     """
