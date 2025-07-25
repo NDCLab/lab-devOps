@@ -16,6 +16,7 @@ from .fields import DEFAULT_FIELDS
 from .labels import label_duplications, label_errors, label_hesitations
 from .matching import (
     match_duplications,
+    match_duplications_alt,
     match_errors,
     match_errors_alt,
     match_hesitations,
@@ -88,7 +89,10 @@ def process_subject_data(
             label_duplications(passage_df)
 
             # Duplication matching loop
-            match_duplications(passage_df)
+            if use_old_matching_algorithm:
+                match_duplications(passage_df)
+            else:
+                match_duplications_alt(passage_df)
 
             sub_dfs[os.path.basename(participant_dir)][passage_name] = passage_df
 
