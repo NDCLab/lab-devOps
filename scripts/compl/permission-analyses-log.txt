@@ -1,0 +1,1350 @@
+ACL for /home/data/NDClab/analyses/autism-go-academy:
+# file: home/data/NDClab/analyses/autism-go-academy
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/memory-for-error-alpha:
+# file: home/data/NDClab/analyses/memory-for-error-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/memory-for-error-mini:
+# file: home/data/NDClab/analyses/memory-for-error-mini
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/mind-reading:
+# file: home/data/NDClab/analyses/mind-reading
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/post-error-ddm:
+# file: home/data/NDClab/analyses/post-error-ddm
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:ostib001:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:ostib001:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/putt-putt-miss:
+# file: home/data/NDClab/analyses/putt-putt-miss
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/readAloud-valence-alpha:
+# file: home/data/NDClab/analyses/readAloud-valence-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/readAloud-valence-beta:
+# file: home/data/NDClab/analyses/readAloud-valence-beta
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/read-study1:
+# file: home/data/NDClab/analyses/read-study1
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:medinaam:rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:medinaam:rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/social-ern-meta:
+# file: home/data/NDClab/analyses/social-ern-meta
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/social-flanker-eeg-alpha:
+# file: home/data/NDClab/analyses/social-flanker-eeg-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/tfpca-tutorial:
+# file: home/data/NDClab/analyses/tfpca-tutorial
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/thrive-theta-ddm:
+# file: home/data/NDClab/analyses/thrive-theta-ddm
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/vmpfc-dev:
+# file: home/data/NDClab/analyses/vmpfc-dev
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/autism-go-academy:
+# file: home/data/NDClab/analyses/autism-go-academy
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/memory-for-error-alpha:
+# file: home/data/NDClab/analyses/memory-for-error-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/memory-for-error-mini:
+# file: home/data/NDClab/analyses/memory-for-error-mini
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/mind-reading:
+# file: home/data/NDClab/analyses/mind-reading
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/post-error-ddm:
+# file: home/data/NDClab/analyses/post-error-ddm
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:ostib001:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:ostib001:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/putt-putt-miss:
+# file: home/data/NDClab/analyses/putt-putt-miss
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/readAloud-valence-alpha:
+# file: home/data/NDClab/analyses/readAloud-valence-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/readAloud-valence-beta:
+# file: home/data/NDClab/analyses/readAloud-valence-beta
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/read-study1:
+# file: home/data/NDClab/analyses/read-study1
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:medinaam:rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:medinaam:rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/social-ern-meta:
+# file: home/data/NDClab/analyses/social-ern-meta
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/social-flanker-eeg-alpha:
+# file: home/data/NDClab/analyses/social-flanker-eeg-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/tfpca-tutorial:
+# file: home/data/NDClab/analyses/tfpca-tutorial
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/thrive-theta-ddm:
+# file: home/data/NDClab/analyses/thrive-theta-ddm
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:nwelch:r-x
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:nwelch:r-x
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/vmpfc-dev:
+# file: home/data/NDClab/analyses/vmpfc-dev
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/autism-go-academy:
+# file: home/data/NDClab/analyses/autism-go-academy
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/memory-for-error-alpha:
+# file: home/data/NDClab/analyses/memory-for-error-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/memory-for-error-mini:
+# file: home/data/NDClab/analyses/memory-for-error-mini
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/mind-reading:
+# file: home/data/NDClab/analyses/mind-reading
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/post-error-ddm:
+# file: home/data/NDClab/analyses/post-error-ddm
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:ostib001:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:ostib001:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/putt-putt-miss:
+# file: home/data/NDClab/analyses/putt-putt-miss
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/readAloud-valence-alpha:
+# file: home/data/NDClab/analyses/readAloud-valence-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/readAloud-valence-beta:
+# file: home/data/NDClab/analyses/readAloud-valence-beta
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/read-study1:
+# file: home/data/NDClab/analyses/read-study1
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:medinaam:rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:medinaam:rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/social-ern-meta:
+# file: home/data/NDClab/analyses/social-ern-meta
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/social-flanker-eeg-alpha:
+# file: home/data/NDClab/analyses/social-flanker-eeg-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/tfpca-tutorial:
+# file: home/data/NDClab/analyses/tfpca-tutorial
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/thrive-theta-ddm:
+# file: home/data/NDClab/analyses/thrive-theta-ddm
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:nwelch:r-x
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:nwelch:r-x
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/vmpfc-dev:
+# file: home/data/NDClab/analyses/vmpfc-dev
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/autism-go-academy:
+# file: home/data/NDClab/analyses/autism-go-academy
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/memory-for-error-alpha:
+# file: home/data/NDClab/analyses/memory-for-error-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/memory-for-error-mini:
+# file: home/data/NDClab/analyses/memory-for-error-mini
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/mind-reading:
+# file: home/data/NDClab/analyses/mind-reading
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/post-error-ddm:
+# file: home/data/NDClab/analyses/post-error-ddm
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:ostib001:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:ostib001:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/putt-putt-miss:
+# file: home/data/NDClab/analyses/putt-putt-miss
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/readAloud-valence-alpha:
+# file: home/data/NDClab/analyses/readAloud-valence-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/readAloud-valence-beta:
+# file: home/data/NDClab/analyses/readAloud-valence-beta
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/read-study1:
+# file: home/data/NDClab/analyses/read-study1
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:medinaam:rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:medinaam:rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/social-ern-meta:
+# file: home/data/NDClab/analyses/social-ern-meta
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/social-flanker-eeg-alpha:
+# file: home/data/NDClab/analyses/social-flanker-eeg-alpha
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/tfpca-tutorial:
+# file: home/data/NDClab/analyses/tfpca-tutorial
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/thrive-theta-ddm:
+# file: home/data/NDClab/analyses/thrive-theta-ddm
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:nwelch:r-x
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:nwelch:r-x
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/analyses/vmpfc-dev:
+# file: home/data/NDClab/analyses/vmpfc-dev
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+

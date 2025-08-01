@@ -1,0 +1,1028 @@
+ACL for /home/data/NDClab/datasets/abmt-r01-dataset:
+# file: home/data/NDClab/datasets/abmt-r01-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:ostib001:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:ostib001:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/ai-ark-dataset:
+# file: home/data/NDClab/datasets/ai-ark-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/backup-read-study2-dataset:
+# file: home/data/NDClab/datasets/backup-read-study2-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/backup-thrive-dataset:
+# file: home/data/NDClab/datasets/backup-thrive-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/bug-testing-dataset:
+# file: home/data/NDClab/datasets/bug-testing-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/capp-dataset:
+# file: home/data/NDClab/datasets/capp-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:ostib001:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:ostib001:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/casper-dataset:
+# file: home/data/NDClab/datasets/casper-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:ostib001:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:ostib001:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/cmi-dataset:
+# file: home/data/NDClab/datasets/cmi-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/diverse-hair-eeg-dataset:
+# file: home/data/NDClab/datasets/diverse-hair-eeg-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:ostib001:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:ostib001:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/emote-dataset:
+# file: home/data/NDClab/datasets/emote-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:ostib001:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:ostib001:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/erp-core-flanker-dataset:
+# file: home/data/NDClab/datasets/erp-core-flanker-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/ft-flanker-dataset:
+# file: home/data/NDClab/datasets/ft-flanker-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/memory-for-error-dataset:
+# file: home/data/NDClab/datasets/memory-for-error-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/mfe-c-face-dataset:
+# file: home/data/NDClab/datasets/mfe-c-face-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/mfe-c-object-dataset:
+# file: home/data/NDClab/datasets/mfe-c-object-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/mfe-d-dataset:
+# file: home/data/NDClab/datasets/mfe-d-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/mfe-e-dataset:
+# file: home/data/NDClab/datasets/mfe-e-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/mfe-feedback-dataset:
+# file: home/data/NDClab/datasets/mfe-feedback-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:marvazqu:rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:marvazqu:rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/mfe-jr-dataset:
+# file: home/data/NDClab/datasets/mfe-jr-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:anagarci:rwx
+user:mabrady:rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:anagarci:rwx
+default:user:mabrady:rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/mfe-nonSoc-dataset:
+# file: home/data/NDClab/datasets/mfe-nonSoc-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/mfe-online-dataset:
+# file: home/data/NDClab/datasets/mfe-online-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/mia-pilot-dataset:
+# file: home/data/NDClab/datasets/mia-pilot-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/missing-link-dataset:
+# file: home/data/NDClab/datasets/missing-link-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/nyu-slow-flanker-dataset:
+# file: home/data/NDClab/datasets/nyu-slow-flanker-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/oops-faces-dataset:
+# file: home/data/NDClab/datasets/oops-faces-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:emsanche:rwx
+user:mabonill:rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:emart459:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:emsanche:rwx
+default:user:mabonill:rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:emart459:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/putt-putt-dataset:
+# file: home/data/NDClab/datasets/putt-putt-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/readAloud-valence-dataset:
+# file: home/data/NDClab/datasets/readAloud-valence-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/read-study1-dataset:
+# file: home/data/NDClab/datasets/read-study1-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:medinaam:rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:medinaam:rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/read-study2-dataset:
+# file: home/data/NDClab/datasets/read-study2-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:medinaam:rwx
+user:kavaldiv:rwx
+user:mabrady:rwx
+user:gmari028:rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+user:fzaki001:rwx
+user:lcruz142:rwx
+user:deecheva:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:medinaam:rwx
+default:user:kavaldiv:rwx
+default:user:mabrady:rwx
+default:user:gmari028:rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:user:fzaki001:rwx
+default:user:lcruz142:rwx
+default:user:deecheva:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/rwe-dataset:
+# file: home/data/NDClab/datasets/rwe-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/rwe-eeg-dataset:
+# file: home/data/NDClab/datasets/rwe-eeg-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/soccer-dataset:
+# file: home/data/NDClab/datasets/soccer-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+user:fzaki001:rwx
+user:mbuch:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:user:fzaki001:rwx
+default:user:mbuch:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/social-context-beta-dataset:
+# file: home/data/NDClab/datasets/social-context-beta-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/social-context-dataset:
+# file: home/data/NDClab/datasets/social-context-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/social-context-gamma-dataset:
+# file: home/data/NDClab/datasets/social-context-gamma-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/social-flanker-eeg-dataset:
+# file: home/data/NDClab/datasets/social-flanker-eeg-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/test-donotuse-dataset:
+# file: home/data/NDClab/datasets/test-donotuse-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/thrive-dataset:
+# file: home/data/NDClab/datasets/thrive-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:anagarci:rwx
+user:kavaldiv:rwx
+user:mabrady:rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:ostib001:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+user:fzaki001:rwx
+user:lcruz142:rwx
+user:msuar242:rwx
+user:deecheva:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:anagarci:rwx
+default:user:kavaldiv:rwx
+default:user:mabrady:rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:ostib001:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:user:fzaki001:rwx
+default:user:lcruz142:rwx
+default:user:msuar242:rwx
+default:user:deecheva:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/tmp-testing-dataset:
+# file: home/data/NDClab/datasets/tmp-testing-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/umd-tots-dataset:
+# file: home/data/NDClab/datasets/umd-tots-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/weill-nest-dataset:
+# file: home/data/NDClab/datasets/weill-nest-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:khoss005:rwx
+user:gbuzzell:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:khoss005:rwx
+default:user:gbuzzell:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
+ACL for /home/data/NDClab/datasets/working-memory-error-dataset:
+# file: home/data/NDClab/datasets/working-memory-error-dataset
+# owner: fzaki001
+# group: hpc_gbuzzell
+# flags: -s-
+user::rwx
+user:globusbksvc:rwx
+user:gbuzzell:rwx
+user:llaplace:rwx
+user:fzaki001:rwx
+group::r-x
+group:hpc_gbuzzell:r-x
+mask::rwx
+other::---
+default:user::rwx
+default:user:globusbksvc:rwx
+default:user:gbuzzell:rwx
+default:user:llaplace:rwx
+default:user:fzaki001:rwx
+default:group::r-x
+default:group:hpc_gbuzzell:r-x
+default:mask::rwx
+default:other::---
+
+
