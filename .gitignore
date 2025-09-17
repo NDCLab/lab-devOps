@@ -5,6 +5,7 @@
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+.cache-3
 Thumbs.db
 scripts/MADE_pipeline_standard/eeg_preprocessing
 scripts/MADE_pipeline_standard/eeg_timing_test
