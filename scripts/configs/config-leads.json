@@ -24,6 +24,7 @@
     "missing-link-dataset": "ndclab",
     "rwe-dataset": "ndclab",
     "rwe-eeg-dataset": "ndclab",
+    "read-study2-alpha": "cknowlto",
     "read-study2-dataset": "cknowlto",
     "readAloud-valence-dataset": "ndclab",
     "social-flanker-eeg-dataset": "apoly003",
