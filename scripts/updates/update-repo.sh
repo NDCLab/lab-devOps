@@ -6,7 +6,7 @@ DATA_PATH="/home/data/NDClab/datasets"
 ANA_PATH="/home/data/NDClab/analyses"
 IGNORED_REPOS="rwe-dataset social-context-dataset social-context-beta-dataset social-context-gamma-dataset autism-go-academy missing-link-dataset mind-reading bug-testing-dataset"
 ### temporarily adding post-error-ddm, pepper to archived repos
-IGNORED_REPOS+=" post-error-ddm pepper-pipeline"
+IGNORED_REPOS+=" post-error-ddm pepper-pipeline backup-read-study2-dataset"
 ###
 LOG_PATH="/home/data/NDClab/other/logs/repo-updates"
 LAB_MGR=$(grep "lab-manager" $TOOL_PATH/lab-devOps/scripts/configs/config-leads.json | cut -d":" -f2 | tr -d '"",')
