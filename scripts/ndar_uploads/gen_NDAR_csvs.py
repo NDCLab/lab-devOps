@@ -4,7 +4,6 @@ import os
 import re
 import sys
 from datetime import datetime
-
 import numpy as np
 import pandas as pd
 
@@ -67,39 +66,27 @@ def get_new_redcaps(basedir):
     return sorted(newest_files)
 
 
-def get_redcaps(datadict_df, redcaps, ndar_json, other_sessions=False):
+def get_redcaps(datadict_df, redcaps, ndar_json):
     df = datadict_df
     redcaps_dict = {}
-    if not other_sessions:
-        for _, row in df.iterrows():
-            if row["dataType"] not in [
-                "consent",
-                "assent",
-                "redcap_data",
-            ]:  # just redcap data
-                continue
-            prov = row["provenance"].split(" ")
-            if "file:" in prov and "variable:" in prov:
-                idx = prov.index("file:")
-                rc_filename = prov[idx + 1].strip('";,')
-                if rc_filename not in redcaps_dict.keys():
-                    redcaps_dict[rc_filename] = pd.DataFrame()
-            else:
-                continue
-        rcs_to_look_for = redcaps_dict.keys()
-    else:
-        redcaps_from_other_sessions = []
-        for out_csv in ndar_json.keys():
-            for col in ndar_json[out_csv]["req_columns"]:
-                if (
-                    "different_session" in ndar_json[out_csv]["req_columns"][col].keys()
-                    and ndar_json[out_csv]["req_columns"][col]["redcap"]
-                    not in redcaps_from_other_sessions
-                ):
-                    redcaps_from_other_sessions.append(
-                        ndar_json[out_csv]["req_columns"][col]["redcap"]
-                    )
-        rcs_to_look_for = redcaps_from_other_sessions
+    for _, row in df.iterrows():
+        if row["dataType"] not in [
+            "consent",
+            "assent",
+            "redcap_data",
+        ]:  # just redcap data
+            continue
+        prov = row["provenance"].split(" ")
+        if "file:" in prov and "variable:" in prov:
+            idx = prov.index("file:")
+            rc_filename = prov[idx + 1].strip('";,')
+            if rc_filename not in redcaps_dict.keys():
+                redcaps_dict[rc_filename] = pd.DataFrame()
+        else:
+            continue
+    rcs_to_look_for = redcaps_dict.keys()
+
+
     for expected_rc in rcs_to_look_for:
         present = False
         for redcap in redcaps:
@@ -118,6 +105,72 @@ def get_redcaps(datadict_df, redcaps, ndar_json, other_sessions=False):
                 + ", exiting."
             )
     return redcaps_dict
+
+def diff_month(d1, d2):
+    month = 1
+    if d1.day < d2.day:
+        month = 1
+    else:
+        month = 0
+    return (d1.year - d2.year) * 12 + d1.month - d2.month - month
+
+def get_age(old_interview_date, interview_date):
+    date_format = "%m/%d/%Y"
+    dob = datetime.strptime(old_interview_date, date_format)
+    interview_dt = datetime.strptime(interview_date, date_format)
+    age_in_months = diff_month(interview_dt, dob)
+    return age_in_months
+
+
+def map_interview_age(ndar_df,redcaps_dict, ndar_json, sub_variable_json=None):
+
+    rc = ndar_json["redcap"] # where age is stored
+    print(redcaps_dict.keys())
+    rc_df = redcaps_dict[ndar_json["redcap"]]
+    rc_variable = ndar_json["rc_variable"]
+    rc_variable = Column(rc_variable).col
+    rc_variable_es = Column(rc_variable).coles
+
+    sub_rc_df = None # where sub variable interview date is stored
+    sub_rc_variable = None
+    sub_rc_variable_es = None
+
+    if sub_variable_json is not None:
+        sub_rc = sub_variable_json["redcap"]
+        sub_rc_variable = sub_variable_json["rc_variable"]
+        sub_rc_variable = Column(sub_rc_variable).col
+        sub_rc_variable_es = Column(sub_rc_variable).coles
+        rc_df = redcaps_dict[rc]
+        if rc==sub_rc:
+            sub_rc_df = rc_df
+        else:
+            sub_rc_df = redcaps_dict[sub_rc]
+    
+    for id in rc_df.index:
+        child_id = int(str(id)[0:2] + "0" + str(id)[3:])
+        interview_age = rc_df.loc[id, rc_variable]
+        if pd.isna(interview_age) and rc_variable_es in rc_df.columns:
+            interview_age = rc_df.loc[id, rc_variable_es]
+        if not pd.isna(interview_age):
+            interview_age = int(interview_age)
+        if sub_rc_df is not None:
+            old_interview_date = sub_rc_df.loc[id, sub_rc_variable]
+            if pd.isna(old_interview_date) and sub_rc_variable_es in sub_rc_df.columns:
+                old_interview_date = sub_rc_df.loc[id, sub_rc_variable_es]
+            if pd.isna(old_interview_date):
+                continue
+            if child_id not in ndar_df.index:
+                continue
+            current_date = ndar_df.loc[child_id, "interview_date"]
+            old_interview_date = old_interview_date.split(" ")[0]
+            old_interview_date = datetime.strptime(old_interview_date, "%Y-%m-%d").strftime("%m/%d/%Y")
+            current_date_fixed = current_date
+            months_after = get_age(old_interview_date, current_date_fixed)
+            interview_age += months_after
+
+        ndar_df.loc[child_id, "interview_age"] = interview_age          
+
+    
 
 
 def map_race(
@@ -517,13 +570,17 @@ class Column:
         return self.col
 
 
-def get_relevant_redcaps(redcap_dir: str, sre: str) -> list[str]:
+
+def get_relevant_redcaps(redcap_dir: str, sre: str, ndar_json: dict) -> list[str]:
     """
     Get only the REDCaps that are relevant to a given sub/ses/run.
 
     Returns a list of full paths to REDCap files.
     """
     all_redcaps = get_new_redcaps(redcap_dir)
+    # only take in from checked dir
+    allowed_dir = "checked"
+    all_redcaps = [rc for rc in all_redcaps if allowed_dir in rc]
 
     sre = sre.split("_")
     assert len(sre) == 3
@@ -544,6 +601,58 @@ def get_relevant_redcaps(redcap_dir: str, sre: str) -> list[str]:
 
     return redcaps
 
+def get_redcaps_from_other_sessions(ndar_json: dict) -> list[str]:
+    """
+    Get the REDCaps that are relevant to other sessions.
+
+    Returns a list of full paths to REDCap files.
+    """
+    # appends redcaps from other sessions specified in the json
+    other_redcaps = []
+    for out_csv in ndar_json.keys():
+        for col in ndar_json[out_csv]["req_columns"]:
+            if (
+                "different_session" in ndar_json[out_csv]["req_columns"][col].keys()
+            ):
+                different_session_redcap = ndar_json[out_csv]["req_columns"][col]["redcap"]
+                other_redcaps.append(different_session_redcap)
+            if "child_variable" in ndar_json[out_csv]["req_columns"][col].keys():
+                child_variable_json = ndar_json[out_csv]["req_columns"][col]["child_variable"]
+                different_session_redcap = child_variable_json["redcap"]
+                other_redcaps.append(different_session_redcap)
+    other_redcaps = list(set(other_redcaps))
+    return other_redcaps
+def get_other_session_redcaps(redcap_dir: str, ndar_json: dict, redcaps_dict: dict) -> list[str]:
+    """
+    Get the REDCaps that are relevant to other sessions.    
+    Returns a list of full paths to REDCap files.
+    """
+    all_redcaps = get_new_redcaps(redcap_dir)
+    # only take in from checked dir
+    allowed_dir = "checked"
+    all_redcaps = [rc for rc in all_redcaps if allowed_dir in rc]
+    other_expected_rcs = get_redcaps_from_other_sessions(ndar_json)
+    other_redcaps = all_redcaps
+
+    if len(other_redcaps) == 0:
+        return redcaps_dict
+    for expected_rc in other_expected_rcs:
+        present = False
+        for redcap in other_redcaps:
+            if expected_rc in os.path.basename(redcap.lower()):
+                present = True
+                prev_df = redcaps_dict.get(expected_rc, pd.DataFrame())
+                new_df = pd.read_csv(redcap, index_col="record_id")
+                redcaps_dict[expected_rc] = pd.concat([prev_df, new_df])
+                
+        if not present:
+            sys.exit(
+                "Error: can't find redcap specified in datadict "
+                + expected_rc
+                + ", exiting."
+            )
+    return redcaps_dict
+
 
 if __name__ == "__main__":
     redcap_dir = sys.argv[
@@ -558,7 +667,7 @@ if __name__ == "__main__":
             6
         ]  # full filenames of any redcaps needed that aren't from the session from "sre" (comma-seperated)
 
-    redcaps = get_relevant_redcaps(redcap_dir, sre)
+    redcaps = get_relevant_redcaps(redcap_dir, sre, ndar_json)
 
     if not os.path.isdir(out_path):
         os.mkdir(out_path)
@@ -567,25 +676,8 @@ if __name__ == "__main__":
         ndar_json = json.load(json_file)
 
     redcaps_dict = get_redcaps(df_dd, redcaps, ndar_json)  # dataframes of each redcap
-    if (
-        "redcaps_other_sessions" in locals()
-        and redcaps_other_sessions.lower() != "none"
-    ):
-        redcaps_other_sessions = redcaps_other_sessions.split(",")
-        redcaps_dict_other_sessions = get_redcaps(
-            df_dd, redcaps_other_sessions, ndar_json, other_sessions=True
-        )
-        if (
-            len(
-                set(redcaps_dict.keys()).intersection(
-                    set(redcaps_dict_other_sessions.keys())
-                )
-            )
-            != 0
-        ):
-            sys.exit("error......")
-        else:
-            redcaps_dict.update(redcaps_dict_other_sessions)
+    redcaps_dict = get_other_session_redcaps(redcap_dir, ndar_json, redcaps_dict) # dataframes of each redcap including other sessions
+
 
     if (
         "src_subject_id" in ndar_json["all"]["req_columns"].keys()
@@ -619,6 +711,7 @@ if __name__ == "__main__":
     for ndar_csv in ndar_json.keys():
         if ndar_csv == "all":
             continue
+        print(f"Generating {ndar_csv} for {sre}...")
         ndar_columns = ndar_json[ndar_csv]["all_columns"]
         df = pd.DataFrame(columns=ndar_columns, index=ids)
         if ndar_csv == "adis_v01":
@@ -626,13 +719,21 @@ if __name__ == "__main__":
         for col in ndar_json["all"]["req_columns"].keys():
             if col == "interview_date":
                 rc = ndar_json["all"]["req_columns"]["interview_date"]["redcap"]
-                rc_col = ndar_json["all"]["req_columns"]["interview_date"][
-                    "rc_variable"
-                ]
+                rc_col = ndar_json["all"]["req_columns"]["interview_date"]["rc_variable"]
                 map_interview_date(df, ndar_json, sre, rc, rc_col)
                 continue
             if col == "interview_age":
-                df.loc[:, col] = ""  # just ignore for now
+                ndar_json_date = ndar_json["all"]["req_columns"]["interview_age"]
+                date_rc = ndar_json_date["redcap"]
+                date_rc_col = ndar_json_date["rc_variable"]
+                if "child_variable" in ndar_json_date.keys():
+                    child_variable_json = ndar_json_date["child_variable"]
+                    child_rc = child_variable_json["redcap"]
+                    child_rc_col = child_variable_json["rc_variable"]
+                    map_interview_age(df,redcaps_dict, ndar_json_date,child_variable_json)
+                else:
+                    map_interview_age(df,redcaps_dict, ndar_json_date)
+
                 continue
             if col == "src_subject_id":
                 df.loc[:, col] = ids
@@ -690,3 +791,4 @@ if __name__ == "__main__":
                 parent_col = True
             map_vals(df, col, ndar_csv, ndar_json, sre, parent=parent_col)
         save_csv(ndar_csv, df)
+        print(f"Finished {ndar_csv}.\n")

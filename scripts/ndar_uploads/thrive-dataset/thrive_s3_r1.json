@@ -15,10 +15,15 @@
                 "parent": "true"
             },
             "interview_age": {
-                "rc_variable": "infosht_dob",
-                "redcap": "iqsparent",
+                "rc_variable": "infosht_agemos_s1_r1_e1",
+                "redcap": "iqsparents1r1",
                 "mapping": "custom",
-                "parent": "true"
+                "different_session": "true",
+                "parent": "true",
+                "child_variable" : {
+                "rc_variable": "infosht_s1_r1_e1_timestamp",
+                "redcap": "iqsparents1r1"
+                 }
             },
             "sex": {
                 "rc_variable": "demo_d_sexbirth_s1_r1_e1",
