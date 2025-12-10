@@ -167,8 +167,8 @@ def map_interview_age(ndar_df,redcaps_dict, ndar_json, sub_variable_json=None):
             current_date_fixed = current_date
             months_after = get_age(old_interview_date, current_date_fixed)
             interview_age += months_after
-
-        ndar_df.loc[child_id, "interview_age"] = interview_age          
+        if child_id in ndar_df.index:
+            ndar_df.loc[child_id, "interview_age"] = interview_age          
 
     
 
@@ -204,6 +204,7 @@ def map_race(
     for col in rc_df.columns:
         if col.startswith(race_col_base.col) or col.startswith(race_col_base.coles):
             race_cols.append(col)
+
     for child_id in ndar_df.index:
         if parent:
             id = int(str(child_id)[0:2] + "8" + str(child_id)[3:])
@@ -707,7 +708,6 @@ if __name__ == "__main__":
         ids = [
             int(str(id)[0:2] + "0" + str(id)[3:]) for id in complete_infosht_ids
         ]  # quick fix to parent ids -> child ids
-
     for ndar_csv in ndar_json.keys():
         if ndar_csv == "all":
             continue
