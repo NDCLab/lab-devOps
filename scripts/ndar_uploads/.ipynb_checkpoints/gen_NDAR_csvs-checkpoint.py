@@ -4,6 +4,7 @@ import os
 import re
 import sys
 from datetime import datetime
+
 import numpy as np
 import pandas as pd
 
@@ -86,7 +87,6 @@ def get_redcaps(datadict_df, redcaps, ndar_json):
             continue
     rcs_to_look_for = redcaps_dict.keys()
 
-
     for expected_rc in rcs_to_look_for:
         present = False
         for redcap in redcaps:
@@ -96,6 +96,11 @@ def get_redcaps(datadict_df, redcaps, ndar_json):
                 present = True
                 prev_df = redcaps_dict.get(expected_rc, pd.DataFrame())
                 new_df = pd.read_csv(redcap, index_col="record_id")
+                overlap = set(prev_df.index).intersection(set(new_df.index))
+                if overlap:
+                    raise ValueError(
+                    f"Error: Found overlapping record_ids in {expected_rc} between previous and new dataframes: {overlap} for {redcap}"
+                    )                
                 redcaps_dict[expected_rc] = pd.concat([prev_df, new_df])
                 
         if not present:
@@ -125,7 +130,6 @@ def get_age(old_interview_date, interview_date):
 def map_interview_age(ndar_df,redcaps_dict, ndar_json, sub_variable_json=None):
 
     rc = ndar_json["redcap"] # where age is stored
-    print(redcaps_dict.keys())
     rc_df = redcaps_dict[ndar_json["redcap"]]
     rc_variable = ndar_json["rc_variable"]
     rc_variable = Column(rc_variable).col
@@ -158,6 +162,7 @@ def map_interview_age(ndar_df,redcaps_dict, ndar_json, sub_variable_json=None):
             if pd.isna(old_interview_date) and sub_rc_variable_es in sub_rc_df.columns:
                 old_interview_date = sub_rc_df.loc[id, sub_rc_variable_es]
             if pd.isna(old_interview_date):
+                # print(f"No date string for ID {id}, skipping.")
                 continue
             if child_id not in ndar_df.index:
                 continue
@@ -167,7 +172,6 @@ def map_interview_age(ndar_df,redcaps_dict, ndar_json, sub_variable_json=None):
             current_date_fixed = current_date
             months_after = get_age(old_interview_date, current_date_fixed)
             interview_age += months_after
-
         ndar_df.loc[child_id, "interview_age"] = interview_age          
 
     
@@ -204,9 +208,6 @@ def map_race(
     for col in rc_df.columns:
         if col.startswith(race_col_base.col) or col.startswith(race_col_base.coles):
             race_cols.append(col)
-    print(f"Mapping race for {len(ndar_df.index)} participants...")
-    print(f"Number of columns to check: {len(race_cols)}")
-    print(f"Race_col base is: {race_col_base.col}")
     for child_id in ndar_df.index:
         if parent:
             id = int(str(child_id)[0:2] + "8" + str(child_id)[3:])
@@ -246,6 +247,7 @@ def map_interview_date(ndar_df, ndar_json, sre, rc, rc_col):
             date_string = date_string.split(" ")[0]
             date_obj = datetime.strptime(date_string, "%Y-%m-%d")
             val = date_obj.strftime("%m/%d/%Y")
+            # print(f"Interview Date: Mapping interview date for child ID {child_id}")
             ndar_df.loc[child_id, "interview_date"] = val
         else:
             continue
@@ -497,7 +499,8 @@ def map_vals(ndar_df, ndar_col, ndar_csv, ndar_json, sre, parent=False):
 def map_adis(
     ndar_df, ndar_col, ndar_csv, ndar_json, sre, all_columns=False, parent=False
 ):
-    rc_df = redcaps_dict[ndar_json[ndar_csv]["req_columns"]["pd_pdx"]["redcap"]]
+    rc_name = ndar_json[ndar_csv]["req_columns"]["pd_pdx"]["redcap"]
+    rc_df = redcaps_dict[rc_name]
     diagnoses_dict = {
         "0": "None",
         "1": "sad_pdx",
@@ -580,11 +583,11 @@ def get_relevant_redcaps(redcap_dir: str, sre: str, ndar_json: dict) -> list[str
 
     Returns a list of full paths to REDCap files.
     """
+
     all_redcaps = get_new_redcaps(redcap_dir)
     # only take in from checked dir
     allowed_dir = "checked"
     all_redcaps = [rc for rc in all_redcaps if allowed_dir in rc]
-
     sre = sre.split("_")
     assert len(sre) == 3
 
@@ -593,7 +596,6 @@ def get_relevant_redcaps(redcap_dir: str, sre: str, ndar_json: dict) -> list[str
     universal_redcaps = [
         rc for rc in all_redcaps if not rc_pat.fullmatch(os.path.basename(rc))
     ]
-
     # Get REDCaps that match on the passed sub/ses
     ses = sre[0]
     sr_pat = re.compile(rf".*{ses}.*_DATA.*")
@@ -601,6 +603,9 @@ def get_relevant_redcaps(redcap_dir: str, sre: str, ndar_json: dict) -> list[str
 
     # Join universal REDCaps and sub/ses-specific REDCaps
     redcaps = universal_redcaps + sr_redcaps
+    redcaps = list(set(redcaps))
+
+
 
     return redcaps
 
@@ -636,8 +641,10 @@ def get_other_session_redcaps(redcap_dir: str, ndar_json: dict, redcaps_dict: di
     all_redcaps = [rc for rc in all_redcaps if allowed_dir in rc]
     other_expected_rcs = get_redcaps_from_other_sessions(ndar_json)
     other_redcaps = all_redcaps
+    #other_redcaps = [rc for rc in all_redcaps if os.path.basename(rc).lower() in other_expected_rcs]
 
     if len(other_redcaps) == 0:
+        print("No other session REDCaps found.")
         return redcaps_dict
     for expected_rc in other_expected_rcs:
         present = False
@@ -646,6 +653,11 @@ def get_other_session_redcaps(redcap_dir: str, ndar_json: dict, redcaps_dict: di
                 present = True
                 prev_df = redcaps_dict.get(expected_rc, pd.DataFrame())
                 new_df = pd.read_csv(redcap, index_col="record_id")
+                overlap = set(prev_df.index).intersection(set(new_df.index))
+                if overlap:
+                    raise ValueError(
+                    f"Error: Found overlapping record_ids in {expected_rc} between previous and new dataframes: {overlap} for {redcap}"
+                    )                
                 redcaps_dict[expected_rc] = pd.concat([prev_df, new_df])
                 
         if not present:
@@ -669,8 +681,8 @@ if __name__ == "__main__":
         redcaps_other_sessions = sys.argv[
             6
         ]  # full filenames of any redcaps needed that aren't from the session from "sre" (comma-seperated)
-
-    redcaps = get_relevant_redcaps(redcap_dir, sre, ndar_json)
+    checked_redcap_dir = os.path.join(redcap_dir,'sourcedata','checked', 'redcap')
+    redcaps = get_relevant_redcaps(checked_redcap_dir, sre, ndar_json)
 
     if not os.path.isdir(out_path):
         os.mkdir(out_path)

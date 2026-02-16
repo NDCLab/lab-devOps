@@ -2,10 +2,12 @@
 #SBATCH --nodes=1                # node count
 #SBATCH --ntasks=4               # total number of tasks across all nodes
 #SBATCH --cpus-per-task=1        # CPUS to use when using data parallelization
-#SBATCH --time=10:00:00          # total run time limit (HH:MM:SS)
+#SBATCH --time=100:00:00          # total run time limit (HH:MM:SS)
 #SBATCH --mem-per-cpu=7GB
 #SBATCH --account=iacc_gbuzzell
 #SBATCH --partition=highmem1
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=roprasad@fiu.edu
 #SBATCH --qos=highmem1
 #SBATCH --output=%x-%j.out
 
@@ -21,12 +23,12 @@ if [[ -z "$dset" ]]
 fi
 if [[ -z "$current_submission" ]]
   then
-  current_submission="nov-2025-submission"
+  current_submission="jan-2026-submission"
 fi
 
 module load singularity-3.8.7
 
-output=$(singularity exec -e $PYIMG bash -c "python3 new_ndar_submission.py $dset $current_submission")
+output=$(singularity exec -e --bind /home/data/NDClab $PYIMG bash -c "python3 $pyfile $dset $current_submission")
 
 # Directory to search for folders
 search_directory="/home/data/NDClab/datasets/$dset/data-monitoring/ndar/$current_submission/eeg"
