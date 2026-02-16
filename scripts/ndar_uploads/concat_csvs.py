@@ -28,6 +28,7 @@ if __name__ == "__main__":
         sys.exit('No unique files ending in "sX_rX_eX_incomplete.csv" seen in folders')
     for i in range(1, len(folders)):
         folder = folders[i]
+        print(folder)
         files = os.listdir(folder)
         files_in_folder = []
         for file in files:
