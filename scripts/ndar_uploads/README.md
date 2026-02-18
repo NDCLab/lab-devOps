@@ -5,7 +5,8 @@ These scripts should generate a series of output CSV files that can be uploaded 
 ## Steps
 1. Use `gen_NDAR_csvs.py` to generate NDAR CSV files for each session of your dataset, using the appropriate REDCap data and mapping configuration.
 2. After generating the CSV files for all sessions, use `copy_zip_eeg_parallel2.sub` to copy and zip the EEG and create the template csv files for the EEG upload to NDAR. (**Note: new_ndar_submission.py is the base file but copy_zip_eeg_parallel2.sub utilizes the HPC for parallel processing and is more efficient for large datasets)**.
-3. Finally, use `concat_csvs.py` to copy key columns from the session-specific CSV files generated in step 1 and combine into the eeg csv files created in step 2, which can then be uploaded to NDAR.
+3. Use `concat_csvs.py` CSV files with the same name across all session folders into single combined CSVs for upload to NDAR. This ensures that all relevant data from each session is included in the final combined CSVs for submission.
+4. Finally,
 
 ## Gen_NDAR_csvs.py  Overview
 Required arguments are the dataset's redcap directory and a JSON file containing information on mapping the Redcap columns to the output CSVs.
@@ -72,9 +73,24 @@ python3 concat_csvs.py <folder1,folder2,folder3,...> <output_folder>
 - `<folder1,folder2,folder3,...>`: Comma-separated list of input folders containing the session CSVs to combine.
 - `<output_folder>`: Directory where the combined CSVs will be writte, looks for csv that ends with "_incomplete.csv"
 
+## update_eeg_ndar.py Overview
+This script updates an NDAR EEG submission CSV file by filling in missing demographic fields (`interview_date`, `interview_age`, `sex`) using information from one or more REDCap-derived NDAR CSVs. It matches subjects by `src_subject_id` and `timepoint_label` (session).
+```bash
+python update_eeg_ndar.py <eeg_file_path> <ndar_submissions>
+```
+### Command Line Arguments
+- `<eeg_file_path>`: Path to the NDAR EEG submission CSV file to update (e.g., `eeg_sub_files01.csv`)
+- `<ndar_submissions>`: Comma-separated list of NDAR CSV files (from REDCap) to use as reference for demographic data (e.g., `demographics_s1_r1_e1_incomplete.csv,demographics_s2_r1_e1_incomplete.csv`)
+
 
 ## Example Commands
-### EEG CSV Generation
+### Generating NDAR Redcaps CSVs
+Example command:
+```bash
+python3 gen_NDAR_csvs.py /home/data/NDClab/datasets/thrive-dataset /home/data/NDClab/datasets/thrive-dataset/data-monitoring/data-dictionary/central-tracker_datadict.csv thrive-dataset/thrive_s1_r1.json s1_r1_e1 thrive-dataset/s1_r1
+```
+
+### EEG Copying and Zipping
 ```bash
 sbatch copy_zip_eeg_parallel2.sub thrive-dataset jan-2026-submission
 ``` 
@@ -82,6 +98,12 @@ sbatch copy_zip_eeg_parallel2.sub thrive-dataset jan-2026-submission
 ```bash
 python3 concat_csvs.py thrive/dataset/s1_r1_e1,s2_r1_e1,s3_r1_e1 ../eeg/ndar/
 ```
+### EEG CSV Updating
+```bash
+python update_eeg_ndar.py eeg_sub_files01.csv demographics_s1_r1_e1_incomplete.csv,demographics_s2_r1_e1_incomplete.csv
+```
+
+
 
 ### Thrive Dataset
 Example command:
