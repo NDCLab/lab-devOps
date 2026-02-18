@@ -49,16 +49,6 @@ instrument2,ProjectB,Sheet2,False
 - **INSTRUMENTS_DATADICT_PATH**: Folder containing instrument data dictionaries (CSV format).
 - **ALLMEASURES_PATH**: CSV file mapping instrument names to their data dictionaries.
 
-## Main Functions
-- `save_dfs_to_xlsx`: Saves a dictionary of DataFrames to an Excel file, each as a separate sheet.
-- `get_cols`: Extracts columns from a data file matching an instrument prefix or name.
-- `find_files_with_prefix`: Finds a data dictionary file for an instrument.
-- `getInstumentDataDict`: Gets the path to an instrument's data dictionary.
-- `get_instrument_cols`: Gets all column names for an instrument using its data dictionary.
-- `get_scrdDF`: Gets the REDCap project name for an instrument.
-- `get_latest_file`: Finds the latest SCRD data file for a project.
-- `data_sharing`: Main logic for extracting, merging, and saving data.
-- `verbose_log`/`formattedPrint`: Handles color-coded and verbose logging.
 
 ## Example Command
 ```bash
@@ -67,10 +57,6 @@ python dataSharing.py --name dataset_name --input example_datadict.csv --output 
 ```bash
 python dataSharing.py --name thrive-dataset --output output.xlsx --verbose --vars=infosht,bfnep_b,infosht_agemos_s1_r1_e1
 ```
-
-## Requirements
-- Python 3.7+
-- pandas
 
 
 
