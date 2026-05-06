@@ -1,0 +1,70 @@
+[
+    {
+    "report_id": "17390",
+    "project_name": "SEARCHER",
+    "report_name": "full_complete_iqs2",
+    "aggregation": [
+        {
+            "type": "year_month_grouping",
+            "date_time_col": "thriqs2_datetime",
+            "year_month": "(2025, 3)"
+        }
+    ]
+},
+{
+    "report_id": "17391",
+    "project_name": "SEARCHER",
+    "report_name": "partially_complete_iqs2",
+    "aggregation": [
+
+        ]
+
+},
+{
+    "report_id": "17422",
+    "project_name": "SEARCHER",
+    "report_name": "pending_scheduling_iqs2",
+    "aggregation": [
+        {
+            "type": "value_counts",
+            "column_suffix": "thriqs2_statuscheck"
+        }
+    ]
+
+    
+},
+{
+    "report_id": "17417",
+    "project_name": "SEARCHER",
+    "report_name": "future_scheduling_iqs2",
+    "aggregation": [
+        {
+            "type": "year_month_grouping",
+            "date_time_col": "thriqs2_datetime"
+        },
+        {
+            "type": "value_counts",
+            "column_suffix": "assessor"
+        }
+    ]
+},
+{
+    "report_id": "17422",
+    "project_name": "SEARCHER",
+    "report_name": "no_iqs2",
+    "aggregation": [
+        {
+            "type": "value_counts",
+            "column_suffix": "thriqs2_statuscheck"
+        }
+    ]
+},
+{
+    "report_id": "17392",
+    "project_name": "THRIVE_IQS_CLI_S2",
+    "report_name": "backlogged_participants",
+    "aggregation": [
+        
+    ]
+}
+]

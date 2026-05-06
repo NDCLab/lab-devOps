@@ -1,0 +1,66 @@
+[
+    {
+    "report_id": "17398",
+    "project_name": "SEARCHER",
+    "report_name": "BBS2_Fully_Complete",
+    "aggregation": [
+        {
+            "type": "year_month_grouping",
+            "date_time_col": "thriqs2_datetime",
+            "year_month": [2025, 3]
+        }
+    ]
+},
+{
+    "report_id": "17391",
+    "project_name": "SEARCHER",
+    "report_name": "BBS1_Partially_Complete",
+    "aggregation": [
+
+        ]
+
+},
+{
+    "report_id": "17425",
+    "project_name": "SEARCHER",
+    "report_name": "BBS2_Pending_Scheduling",
+    "aggregation": [
+        {
+            "type": "value_counts",
+            "column_suffix": "thrbbs2_statuscheck"
+        }
+    ]
+
+    
+},
+{
+    "report_id": "17426",
+    "project_name": "SEARCHER",
+    "report_name": "BBS2_Future_Scheduling",
+    "aggregation": [
+        {
+            "type": "year_month_grouping",
+            "date_time_col": "thrbbs2_datetime"
+        }
+    ]
+},
+{
+    "report_id": "17424",
+    "project_name": "SEARCHER",
+    "report_name": "BBS2_No_IQS2",
+    "aggregation": [
+        {
+            "type": "value_counts",
+            "column_suffix": "thrbbs2_statuscheck"
+        }
+    ]
+},
+{
+    "report_id": "17399",
+    "project_name": "THRIVE_BBS_S2_R1",
+    "report_name": "BBS 1 in-person",
+    "aggregation": [
+        
+    ]
+}
+]
