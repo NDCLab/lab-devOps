@@ -40,6 +40,8 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
             & (df["any-deviation-before"] == 0)
             & (df["any-deviation-after"] == 0)
             # Remove any syllables where the N+1 syllable does not also meet these criteria
+            # TODO: Check this?
+            # does not check if the net syllable is also a deviation? 
             & (df["any-deviation-after"].shift(-1) == 0)
             # Remove syllables matched on the previous iteration
             & (df[f"comparison-{marker_type}"] != 1)
@@ -65,6 +67,8 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
             & (syll_a["word-after-period"] == row["word-after-period"])
             & (syll_a["word-before-comma"] == row["word-before-comma"])
             & (syll_a["word-after-comma"] == row["word-after-comma"])
+            & (syll_a["word-before-carriage"] == row["word-before-carriage"])
+            & (syll_a["word-after-carriage"] == row["word-after-carriage"])
         ]
         logging.debug(
             f"Size of potential_syllables after first filter: {len(potential_syllables)}"
@@ -87,6 +91,8 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
                 & (syll_b["word-after-period"] == df.iloc[idx + 1]["word-after-period"])
                 & (syll_b["word-before-comma"] == df.iloc[idx + 1]["word-before-comma"])
                 & (syll_b["word-after-comma"] == df.iloc[idx + 1]["word-after-comma"])
+                & (syll_b["word-before-carriage"] == df.iloc[idx + 1]["word-before-carriage"])
+                & (syll_b["word-after-carriage"] == df.iloc[idx + 1]["word-after-carriage"])
             )
         ]
         logging.debug(
@@ -242,6 +248,8 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
             and (syll_a["word-after-period"] == row["word-after-period"])
             and (syll_a["word-before-comma"] == row["word-before-comma"])
             and (syll_a["word-after-comma"] == row["word-after-comma"])
+            and (syll_a["word-before-carriage"] == row["word-before-carriage"])
+            and (syll_a["word-after-carriage"] == row["word-after-carriage"])
         ]
         # Check conditional matches
         #
@@ -268,6 +276,14 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
             )
             and (
                 not syll_a["word-after-comma"]
+                or (syll_a["first-syll-word"] == row["first-syll-word"])
+            )
+            and (
+                not syll_a["word-before-carriage"]
+                or (syll_a["last-syll-word"] == row["last-syll-word"])
+            )
+            and (
+                not syll_a["word-after-carriage"]
                 or (syll_a["first-syll-word"] == row["first-syll-word"])
             )
         ]
@@ -304,6 +320,8 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
                     and (syll_b["word-after-period"] == next_row["word-after-period"])
                     and (syll_b["word-before-comma"] == next_row["word-before-comma"])
                     and (syll_b["word-after-comma"] == next_row["word-after-comma"])
+                    and (syll_b["word-before-carriage"] == next_row["word-before-carriage"])
+                    and (syll_b["word-after-carriage"] == next_row["word-after-carriage"])
                 )
             ]
             # Conditional matches
@@ -324,6 +342,14 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
                 )
                 and (
                     not syll_b["word-after-comma"]
+                    or (syll_b["first-syll-word"] == next_row["first-syll-word"])
+                )
+                and (
+                    not syll_b["word-before-carriage"]
+                    or (syll_b["last-syll-word"] == next_row["last-syll-word"])
+                )
+                and (
+                    not syll_b["word-after-carriage"]
                     or (syll_b["first-syll-word"] == next_row["first-syll-word"])
                 )
             ]

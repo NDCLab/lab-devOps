@@ -12,6 +12,8 @@ from .syllable_match.feature_extractors import (
     WordBeforePeriodExtractor,
     WordFrequencyExtractor,
     WordPOSExtractor,
+    WordBeforeCarriageExtractor,
+    WordAfterCarriageExtractor
 )
 from .syllable_match.scaffolds import create_scaffolds
 from .syllable_match.stats import summarize_word_matches
@@ -44,6 +46,8 @@ def get_scaffold_extractors() -> list[FeatureExtractor]:
         WordAfterCommaExtractor(),
         WordFrequencyExtractor(),
         WordPOSExtractor(),
+        WordBeforeCarriageExtractor(),
+        WordAfterCarriageExtractor(),
     ]
 
 

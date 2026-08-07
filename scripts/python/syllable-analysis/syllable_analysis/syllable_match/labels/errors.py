@@ -58,11 +58,12 @@ def label_errors(df: pd.DataFrame) -> None:
             # Mark whether an attempt was made to correct the error
             df.at[idx, "low-error-corrected"] = row["correction-syll"]
             # If prior syllable was a high error or a comparison or had an allowable disfluency...
-            if (idx > 0) and (
+            # TODO: does not mark it for the first syllable of a passage, even if it is a low error
+            if ((idx > 0) and (
                 (df.iloc[idx - 1]["high-error"] == 1)
                 or (df.iloc[idx - 1]["any-deviation"] == 0)
                 or (df.iloc[idx - 1]["allowable-disfluency"] == 1)
-            ):
+            )) or ((idx == 0)):
                 df.at[idx, "low-error-start"] = 1
                 low_error_idx += 1
                 df.at[idx, "low-error-idx"] = low_error_idx
@@ -81,12 +82,14 @@ def label_errors(df: pd.DataFrame) -> None:
             # If any attempt was made to correct the error...
             if row["correction-syll"] == 1:
                 df.at[idx, "high-error-corrected"] = 1
+            else:
+                df.at[idx, "high-error-corrected"] = 0
             # If prior syllable was a low error or a comparison or had an allowable disfluency...
-            if (idx > 0) and (
+            if ((idx > 0) and (
                 (df.iloc[idx - 1]["low-error"] == 1)
                 or (df.iloc[idx - 1]["any-deviation"] == 0)
                 or (df.iloc[idx - 1]["allowable-disfluency"] == 1)
-            ):
+            )) or ((idx == 0)):
                 df.at[idx, "high-error-start"] = 1
                 high_error_idx += 1
                 df.at[idx, "high-error-idx"] = high_error_idx
@@ -117,4 +120,11 @@ def label_errors(df: pd.DataFrame) -> None:
     )
     df["low-error-before"], df["low-error-after"] = compute_window_indicator(
         df["low-error"], 7
+    )
+
+    df["high-error-start-before"], df["high-error-start-after"] = compute_window_indicator(
+        df["high-error-start"], 7
+    )
+    df["low-error-start-before"], df["low-error-start-after"] = compute_window_indicator(
+        df["low-error-start"], 7
     )

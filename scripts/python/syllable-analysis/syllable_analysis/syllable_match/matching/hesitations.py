@@ -49,6 +49,8 @@ def match_hesitations(df: pd.DataFrame) -> None:
             and (syll_a["word-after-period"] == hesitation_start["word-after-period"])
             and (syll_a["word-before-comma"] == hesitation_start["word-before-comma"])
             and (syll_a["word-after-comma"] == hesitation_start["word-after-comma"])
+            and (syll_a["word-before-carriage"] == hesitation_start["word-before-carriage"])
+            and (syll_a["word-after-carriage"] == hesitation_start["word-after-carriage"])
         ]
         logging.debug(
             f"Size of potential_syllables after first filter: {len(potential_syllables)}"
@@ -64,6 +66,8 @@ def match_hesitations(df: pd.DataFrame) -> None:
             and (syll_b["last-syll-word"] == hesitation_end["last-syll-word"])
             and (syll_b["word-before-period"] == hesitation_end["word-before-period"])
             and (syll_b["word-after-period"] == hesitation_end["word-after-period"])
+            and (syll_b["word-before-comma"] == hesitation_end["word-before-comma"])
+            and (syll_b["word-after-comma"] == hesitation_end["word-after-comma"])
         ]
         logging.debug(
             f"Size of potential_syllables after second filter: {len(potential_syllables)}"
@@ -232,6 +236,8 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
             and (syll_a["word-after-period"] == hesitation_start["word-after-period"])
             and (syll_a["word-before-comma"] == hesitation_start["word-before-comma"])
             and (syll_a["word-after-comma"] == hesitation_start["word-after-comma"])
+            and (syll_b["word-before-carriage"] == hesitation_start["word-before-carriage"])
+            and (syll_b["word-after-carriage"] == hesitation_start["word-after-carriage"])
         ]
         # Check conditional matches
         #
@@ -260,6 +266,14 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
                 not syll_a["word-after-comma"]
                 or (syll_a["first-syll-word"] == hesitation_start["first-syll-word"])
             )
+            and (
+                not syll_b["word-before-carriage"]
+                or (syll_b["last-syll-word"] == hesitation_start["last-syll-word"])
+            )
+            and (
+                not syll_b["word-after-carriage"]
+                or (syll_b["first-syll-word"] == hesitation_start["first-syll-word"])
+            )
         ]
         logging.debug(
             f"Size of potential_syllables after first filter: {len(potential_syllables)}"
@@ -287,6 +301,8 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
             and (syll_b["word-after-period"] == hesitation_end["word-after-period"])
             and (syll_b["word-before-comma"] == hesitation_end["word-before-comma"])
             and (syll_b["word-after-comma"] == hesitation_end["word-after-comma"])
+            and (syll_b["word-before-carriage"] == hesitation_end["word-before-carriage"])
+            and (syll_b["word-after-carriage"] == hesitation_end["word-after-carriage"])
         ]
         # Conditional matches
         potential_syllables = [
@@ -306,6 +322,14 @@ def match_hesitations_alt(df: pd.DataFrame) -> None:
             )
             and (
                 not syll_b["word-after-comma"]
+                or (syll_b["first-syll-word"] == hesitation_end["first-syll-word"])
+            )
+            and (
+                not syll_b["word-before-carriage"]
+                or (syll_b["last-syll-word"] == hesitation_end["last-syll-word"])
+            )
+            and (
+                not syll_b["word-after-carriage"]
                 or (syll_b["first-syll-word"] == hesitation_end["first-syll-word"])
             )
         ]

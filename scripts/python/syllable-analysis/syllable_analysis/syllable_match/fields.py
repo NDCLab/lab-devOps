@@ -11,6 +11,8 @@ DEFAULT_FIELDS = [
     "word-after-period",
     "word-before-comma",
     "word-after-comma",
+    "word-before-carriage",
+    "word-after-carriage",
     "any-error",
     "any-error-before",
     "any-error-after",
