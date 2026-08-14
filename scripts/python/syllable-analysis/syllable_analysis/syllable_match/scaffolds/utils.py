@@ -45,6 +45,27 @@ def convert_xlsx_to_csv_string(filepath: str, sep: str = "\t"):
 
     return df_str
 
+def get_carriage_returns(file_path,total_length):
+    # check if result matches with syllables_list
+    # 1. Get the integer index position of the matching row
+    df = pd.read_excel(file_path, header=None)
+    row_pos = df.index.get_loc(
+        df[df.iloc[:, 1].str.contains("Carriage Return", na=False)].index[0]
+    )
+    if row_pos is None:
+        raise ValueError("No row containing 'Carriage Return' found in the second column.")
+
+    # 2. Get columns after the 2nd column (index 2 onwards) for that row
+    result = df.iloc[row_pos, 2:total_length+2]
+    
+
+    # make sure they're all integers
+    result = result.astype(int)
+    before_carriage_list = result.tolist()
+    after_carriage_list = result.shift(1, fill_value=0).tolist()
+
+    return before_carriage_list, after_carriage_list
+
 
 def main(data_dir: str):
     extractors = []
@@ -54,8 +75,10 @@ def main(data_dir: str):
     os.makedirs(out_dir, exist_ok=True)
 
     # second pass, build the scaffolds
+    print(f"Building scaffolds in {out_dir}...")
 
     for basename in os.listdir(data_dir):
+        print(f"Processing {basename}...")
         filepath = os.path.join(data_dir, basename)
 
         if os.path.isdir(filepath):
@@ -84,5 +107,16 @@ def main(data_dir: str):
         constructor.register_extractors(extractors)
 
         df = constructor.build()
+        total_length = len(df["syllable_id"])
+        before_carriage, after_carriage = get_carriage_returns(filepath, total_length)
+        df["word-before-carriage"] = before_carriage
+        df["word-after-carriage"] = after_carriage
+        df["word-before-carriage"] = df.groupby("word_id")["word-before-carriage"].transform("max")
+        df["word-after-carriage"] = df.groupby("word_id")["word-after-carriage"].transform("max")
+        print(f"Written carriage return information for {passage_name} to {out_dir}")
+        # check if columns are present in the dataframe
+        if "word-before-carriage" not in df.columns or "word-after-carriage" not in df.columns:
+            raise ValueError("Required columns are missing from the DataFrame.")
+
 
         df.to_csv(os.path.join(out_dir, f"{passage_name}-scaffold.csv"), index=False)

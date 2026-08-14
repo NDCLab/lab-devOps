@@ -88,7 +88,10 @@ def main(
 
     # 1. Build scaffolds
     scaffold_dir = os.path.join(output_subdir, "scaffolds")
+    logging.info(f"Building scaffolds in {scaffold_dir}...")
     build_scaffolds(coding_template_dir, scaffold_dir)
+    logging.info(f"Scaffolds built in {scaffold_dir}")
+    return 
 
     # 2. Process subject data
     process_subject_data(
