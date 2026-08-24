@@ -7,7 +7,9 @@ import pandas as pd
 from syllable_analysis.utils import compute_window_indicator
 
 
-def get_raw_df(filepath: str):
+
+
+def get_raw_df(filepath: str, words: list[str] = [], syllables: list[str] = [], word_ids: list[str] = []) -> pd.DataFrame:
     """
     Reads an Excel file and processes its content to create a raw DataFrame for further analysis.
 
@@ -20,6 +22,9 @@ def get_raw_df(filepath: str):
 
     Parameters:
         filepath (str): The path to the Excel file to be processed.
+        words (list[str]): A list of words to be used for matching with syllables.
+        syllables (list[str]): A list of syllables to be used for matching with words.
+        word_ids (list[str]): A list of word IDs to be used for matching with words.
 
     Returns:
         pd.DataFrame: A raw DataFrame containing the processed data with custom feature columns.
@@ -122,19 +127,27 @@ def get_raw_df(filepath: str):
         raw_data[colname] = syll_row.tolist()
 
     # parse out passage words and syllables
-    passage = " ".join(
-        c for c in other_cols.dropna().tolist() if "unnamed:" not in c.lower()
-    )
-    passage = re.sub(r"\s+", " ", passage)
-    passage = re.sub(r"(.+?)\.\d+", r"\1", passage)
-    passage_words = passage.split()
+    passage_words = []
+    passage_sylls = []
+    if words:
+        passage_words = words
+    else:
+        passage = " ".join(
+            c for c in other_cols.dropna().tolist() if "unnamed:" not in c.lower()
+        )
+        passage = re.sub(r"\s+", " ", passage)
+        passage = re.sub(r"(.+?)\.\d+", r"\1", passage)
+        passage_words = passage.split()
     cleaned_passage_words = [
         word.lower().replace("-", "").strip(string.punctuation)
         for word in passage_words
     ]
 
-    syll_row = df[df["Item"].astype(str).str.lower() == "target syllables"].iloc[0]
-    passage_sylls = syll_row[other_cols].dropna().astype(str).str.strip().tolist()
+    if syllables:
+        passage_sylls = syllables
+    else:
+        syll_row = df[df["Item"].astype(str).str.lower() == "target syllables"].iloc[0]
+        passage_sylls = syll_row[other_cols].dropna().astype(str).str.strip().tolist()
     cleaned_passage_sylls = [
         str(syll).lower().replace("-", "").strip(string.punctuation)
         for syll in passage_sylls
@@ -142,9 +155,14 @@ def get_raw_df(filepath: str):
 
     # Match up each syllable with the corresponding word
     raw_data["Syllable"] = passage_sylls
-    raw_data["CleanedWord"], raw_data["WordID"] = match_syllable_to_word(
-        cleaned_passage_words, cleaned_passage_sylls
-    )
+    if word_ids:
+        raw_data["WordID"] = word_ids
+        raw_data["CleanedWord"] = cleaned_passage_words
+    else:
+
+        raw_data["CleanedWord"], raw_data["WordID"] = match_syllable_to_word(
+            cleaned_passage_words, cleaned_passage_sylls
+        )
     raw_data["CleanedSyllable"] = cleaned_passage_sylls
     # assign sequential syllable IDs
     raw_data["SyllableID"] = list(range(len(cleaned_passage_sylls)))
@@ -248,9 +266,22 @@ def match_syllable_to_word(word_list, syllable_list) -> tuple[list[str], list[in
         # Track how many characters of this word we've covered
         current_length = 0
         word_length = len(word)
+        syllable_count = 0
 
         # Keep taking syllables until we've matched the entire word
         while current_length < word_length:
+            # check if the syllable matches the next part of the word
+            if not syllable_queue:
+                logging.warning(
+                    f"No more syllables to match for word '{word}' at index {word_index}."
+                )
+                break
+            word_segment = word[current_length : current_length + len(syllable_queue[0])]
+            if word_segment != syllable_queue[0]:
+                logging.warning(
+                    f"Syllable '{syllable_queue[0]}' does not match the expected segment '{word_segment}' of word '{word}' at index {word_index}."
+                )
+                
             # Take the next syllable from the queue
             syllable = syllable_queue.pop(0)
             current_length += len(syllable)
@@ -259,6 +290,7 @@ def match_syllable_to_word(word_list, syllable_list) -> tuple[list[str], list[in
             # Assign that syllable to this word
             matching_words.append(word)
             indices.append(word_index)
+            syllable_count += 1
 
         # At this point, current_length == word_length
 

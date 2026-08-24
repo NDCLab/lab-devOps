@@ -3,6 +3,7 @@ import os
 from collections import defaultdict
 
 import pandas as pd
+import re
 
 from syllable_analysis.utils import (
     create_output_directory,
@@ -54,9 +55,20 @@ def process_subject_data(
             if not passage_name:
                 raise ValueError(f"Improperly named file {passage_path}")
             scaffold_df = load_scaffold(scaffold_dir, passage_name)
+            scaffold_df.head()
+            syllables = scaffold_df["syllable"].tolist()
+            words = scaffold_df["word"].tolist()
+            word_ids = scaffold_df["word_id"].to_list()
+            try:
+                numbers = [int(re.search(r"word(\d+)$", w).group(1)) - 1 for w in word_ids if re.search(r"word(\d+)$", w)]
+            except AttributeError:
+                print("Error occurred while processing word_ids")
+            if len(words) != len(numbers):
+                print("Warning: Some word_ids did not match the expected pattern and were skipped.")
+
 
             # Load the passage data
-            passage_df = get_raw_df(passage_path)
+            passage_df = get_raw_df(passage_path,words,syllables,numbers)
             # Preprocess the passage data
             preprocess_fields(passage_df)
             # Combine the scaffold and passage data

@@ -64,6 +64,8 @@ def match_hesitations(df: pd.DataFrame) -> None:
             and (syll_b["last-syll-word"] == hesitation_end["last-syll-word"])
             and (syll_b["word-before-period"] == hesitation_end["word-before-period"])
             and (syll_b["word-after-period"] == hesitation_end["word-after-period"])
+            and (syll_b["word-before-comma"] == hesitation_end["word-before-comma"])
+            and (syll_b["word-after-comma"] == hesitation_end["word-after-comma"])
         ]
         logging.debug(
             f"Size of potential_syllables after second filter: {len(potential_syllables)}"

@@ -43,11 +43,12 @@ def get_scaffold_extractors() -> list[FeatureExtractor]:
         WordBeforeCommaExtractor(),
         WordAfterCommaExtractor(),
         WordFrequencyExtractor(),
-        WordPOSExtractor(),
+        WordPOSExtractor()
     ]
 
 
 def build_scaffolds(template_dir: str, output_dir: str):
+
     os.makedirs(output_dir, exist_ok=True)
     create_scaffolds(get_templates(template_dir), output_dir, get_scaffold_extractors())
     summarize_word_matches(

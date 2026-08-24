@@ -40,6 +40,8 @@ def match_error_type(df: pd.DataFrame, marker_type: str) -> None:
             & (df["any-deviation-before"] == 0)
             & (df["any-deviation-after"] == 0)
             # Remove any syllables where the N+1 syllable does not also meet these criteria
+            # TODO: Check this?
+            # does not check if the net syllable is also a deviation? 
             & (df["any-deviation-after"].shift(-1) == 0)
             # Remove syllables matched on the previous iteration
             & (df[f"comparison-{marker_type}"] != 1)
@@ -201,8 +203,23 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
     for idx, row in df.iterrows():
         if row[marker_type] != 1:
             continue
+
+        # cannot include cases where the syllable has been matched with a different error type for opposite side
+        base = extract_marker_type(marker_type)
+        current_idx = row[f"{base}-idx"]
+        start_c = f"comparison-{base}-start"
+        end_c = f"comparison-{base}-end"
+        idx_c = f"comparison-{base}-idx"
+        is_used = (df[start_c] == 1) | (df[end_c] == 1)
+        # a error can only contain one start or end syllable for each index,
+        # therefore we need to exclude any syllables that are already used by other syllables with the different index
+        # this is for the current marker type and the opposite marker type (start vs end)
+        conflicting = is_used & (df[idx_c] != current_idx)
+
+
         # Start by finding all syllables where any-deviation = 0
         #   AND any-deviation-before = 0 AND any-deviation-after = 0
+
         candidate_df = df[
             (df["any-deviation"] == 0)
             & (df["any-deviation-before"] == 0)
@@ -210,7 +227,7 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
             # Remove any syllables where the N+1 syllable does not also meet these criteria
             & (df["any-deviation-after"].shift(-1) == 0)
             # Remove syllables matched on the previous iteration
-            & (df[f"comparison-{marker_type}"] != 1)
+            & (~conflicting)
         ]
         logging.debug(f"Size of candidate_df: {len(candidate_df)}")
 
@@ -235,6 +252,10 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
         #   and if true, also match perfectly on: first-syll-word
         #
         # Check initial matches
+        # Syll A -> target syllable, Syll B -> next syllable
+        # We are matching the error syllable + next syllable to the potential-syllable-to-match + its next syllable
+        # matching a two-syllable window matching a two-syllable window
+        # essential for the frequency comparison isn't computed on a single syllable — it's computed on the pair.
         potential_syllables = [
             (syll_a, syll_b)
             for syll_a, syll_b in potential_syllables
@@ -331,7 +352,8 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
             f"Size of potential_syllables after second filter: {len(potential_syllables)}"
         )
         if not potential_syllables:
-            row[f"{marker_type}-matched"] = 0
+            #row[f"{marker_type}-matched"] = 0
+            df.at[idx, f"{marker_type}-matched"] = 0
             if idx > 0:
                 logging.debug(
                     "Previous syllable info:\t"
@@ -395,7 +417,7 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
                 best_freq_diff = freq_diff
                 best_freq_diff_idx = syll_a.name
 
-        logging.debug(f"Best freq diff: {best_freq_diff}")
+        logging.info(f"Best freq diff: {best_freq_diff}")
 
         # Mark the target syllable as matched
         df.at[idx, f"{marker_type}-matched"] = 1
@@ -404,9 +426,12 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
         df.at[best_freq_diff_idx, f"comparison-{marker_type}"] = 1
 
         # Indicate which error we've matched to
-        df.at[
-            best_freq_diff_idx, f"comparison-{extract_marker_type(marker_type)}-idx"
-        ] = row[f"{extract_marker_type(marker_type)}-idx"]
-        logging.debug(
-            f"Matched {row['syllable_id']} to {df.at[best_freq_diff_idx, 'syllable_id']}"
+        df.at[ best_freq_diff_idx, f"comparison-{extract_marker_type(marker_type)}-idx" ] = row[f"{extract_marker_type(marker_type)}-idx"]
+
+        
+
+
+        logging.info(
+            f"Matched {row['syllable_id']} to {df.at[best_freq_diff_idx, 'syllable_id']} for {marker_type} with idx {row[f'{extract_marker_type(marker_type)}-idx']}"
         )
+    

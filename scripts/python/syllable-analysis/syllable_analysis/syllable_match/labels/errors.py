@@ -2,6 +2,8 @@ import pandas as pd
 
 from syllable_analysis.utils import compute_window_indicator
 
+import pandas as pd
+
 
 def label_errors(df: pd.DataFrame) -> None:
     """
@@ -54,23 +56,28 @@ def label_errors(df: pd.DataFrame) -> None:
     high_error_idx = 0
     low_error_idx = 0
     for idx, row in df.iterrows():
+
         if row["low-error"] == 1:
             # Mark whether an attempt was made to correct the error
-            df.at[idx, "low-error-corrected"] = row["correction-syll"]
-            # If prior syllable was a high error or a comparison or had an allowable disfluency...
-            if (idx > 0) and (
+            if row["correction-syll"] == 1:
+                df.at[idx, "low-error-corrected"] = 1
+            else:
+                df.at[idx, "low-error-corrected"] = 0
+            # First determine if this is a continuation of a prior low error span or the start of a new one
+            if (idx > 0) and (df.iloc[idx - 1]["low-error"] == 1) and (df.iloc[idx - 1]["allowable-disfluency"] == 0):
+                # Copy the prior syllable's low error index
+                df.at[idx, "low-error-idx"] = df.iloc[idx - 1]["low-error-idx"]
+            # If the previous syllable was a high error, or has no deviations, or had an allowable disfluency, or if this is the first syllable...
+            # Then this syllable is the start of a new low error span
+            elif ((idx > 0) and (
                 (df.iloc[idx - 1]["high-error"] == 1)
                 or (df.iloc[idx - 1]["any-deviation"] == 0)
                 or (df.iloc[idx - 1]["allowable-disfluency"] == 1)
-            ):
+            )) or ((idx == 0)):
                 df.at[idx, "low-error-start"] = 1
                 low_error_idx += 1
                 df.at[idx, "low-error-idx"] = low_error_idx
-            # If prior syllable was a low error...
-            if (idx > 0) and (df.iloc[idx - 1]["low-error"] == 1):
-                # Copy the prior syllable's low error index
-                df.at[idx, "low-error-idx"] = df.iloc[idx - 1]["low-error-idx"]
-            # If syllable is marked as an allowable disfluency, or if next syllable is a comparison...
+            # If syllable is marked as an allowable disfluency, or if next syllable has no deviations...
             if (idx < len(df) - 1) and (
                 (row["allowable-disfluency"] == 1)
                 or (df.iloc[idx + 1]["any-deviation"] == 0)
@@ -81,18 +88,22 @@ def label_errors(df: pd.DataFrame) -> None:
             # If any attempt was made to correct the error...
             if row["correction-syll"] == 1:
                 df.at[idx, "high-error-corrected"] = 1
-            # If prior syllable was a low error or a comparison or had an allowable disfluency...
-            if (idx > 0) and (
+            else:
+                df.at[idx, "high-error-corrected"] = 0
+
+            # Determine if this is a continuation of a prior high error span or the start of a new one
+            if (idx > 0) and (df.iloc[idx - 1]["high-error"] == 1) and (df.iloc[idx - 1]["allowable-disfluency"] == 0):
+                df.at[idx, "high-error-idx"] = df.iloc[idx - 1]["high-error-idx"]
+            # If the previous syllable was a low error, or has no deviations, or had an allowable disfluency, or if this is the first syllable...
+            elif ((idx > 0) and (
                 (df.iloc[idx - 1]["low-error"] == 1)
                 or (df.iloc[idx - 1]["any-deviation"] == 0)
                 or (df.iloc[idx - 1]["allowable-disfluency"] == 1)
-            ):
+            )) or ((idx == 0)):
                 df.at[idx, "high-error-start"] = 1
                 high_error_idx += 1
                 df.at[idx, "high-error-idx"] = high_error_idx
-            # If prior syllable was a high error...
-            if (idx > 0) and (df.iloc[idx - 1]["high-error"] == 1):
-                df.at[idx, "high-error-idx"] = df.iloc[idx - 1]["high-error-idx"]
+
             # If syllable is marked as an allowable disfluency, or if next syllable is a comparison...
             if (idx < len(df) - 1) and (
                 (row["allowable-disfluency"] == 1)
@@ -110,6 +121,10 @@ def label_errors(df: pd.DataFrame) -> None:
             (idx == len(df) - 1) or (df.iloc[idx + 1]["low-error"] == 1)
         ):
             df.at[idx, "high-error-end"] = 1
+        if (row["low-error-start"] == 1) and (df.iloc[idx + 1]["allowable-disfluency"] == 1):
+            df.at[idx, "low-error-end"] = 1
+        if (row["high-error-start"] == 1) and (df.iloc[idx + 1]["allowable-disfluency"] == 1):
+            df.at[idx, "high-error-end"] = 1
 
     # Generate before/after indicators with a window size of 7
     df["high-error-before"], df["high-error-after"] = compute_window_indicator(
@@ -117,4 +132,11 @@ def label_errors(df: pd.DataFrame) -> None:
     )
     df["low-error-before"], df["low-error-after"] = compute_window_indicator(
         df["low-error"], 7
+    )
+
+    df["high-error-start-before"], df["high-error-start-after"] = compute_window_indicator(
+        df["high-error-start"], 7
+    )
+    df["low-error-start-before"], df["low-error-start-after"] = compute_window_indicator(
+        df["low-error-start"], 7
     )

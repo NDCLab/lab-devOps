@@ -11,12 +11,14 @@ def label_duplications(df: pd.DataFrame) -> None:
     and SyllInfo_LastPreCorrectionSyllable (row 25).
     """
     # Initialize duplication columns
-    df["duplication"] = 0
-    df["duplication-start"] = 0
-    df["duplication-end"] = 0
-    df["duplication-idx"] = 0
-    df["duplication-word"] = 0
-    df["duplication-phrase"] = 0
+    cols = [
+        "duplication",
+        "duplication-start",
+        "duplication-end",
+        "duplication-idx",
+    ]
+
+    df[cols] = df[cols].fillna(0)
 
     duplication_idx = 0
 

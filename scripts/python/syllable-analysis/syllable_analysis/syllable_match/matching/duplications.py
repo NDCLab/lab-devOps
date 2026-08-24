@@ -388,6 +388,7 @@ def match_duplications_alt(df: pd.DataFrame) -> None:
         df.at[best_freq_diff_idx, "comparison-duplication-start-idx"] = (
             duplication_start["duplication-idx"]
         )
+        df.at[best_freq_diff_idx, "comparison-duplication-idx"] = duplication_start["duplication-idx"]
 
     # Match duplication ends (similar relaxed logic)
     for index, duplication_end in df[df["duplication-end"] == 1].iterrows():
@@ -538,3 +539,4 @@ def match_duplications_alt(df: pd.DataFrame) -> None:
         df.at[best_freq_diff_idx, "comparison-duplication-end-idx"] = duplication_end[
             "duplication-idx"
         ]
+        df.at[best_freq_diff_idx, "comparison-duplication-idx"] = duplication_end["duplication-idx"]
