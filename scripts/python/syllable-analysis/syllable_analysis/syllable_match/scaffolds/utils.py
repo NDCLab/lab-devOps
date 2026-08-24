@@ -46,6 +46,7 @@ def convert_xlsx_to_csv_string(filepath: str, sep: str = "\t"):
     return df_str
 
 def get_carriage_returns(file_path,total_length):
+    """DEPRECEATED: NO LONGER IN USE"""
     # check if result matches with syllables_list
     # 1. Get the integer index position of the matching row
     df = pd.read_excel(file_path, header=None)
@@ -107,16 +108,6 @@ def main(data_dir: str):
         constructor.register_extractors(extractors)
 
         df = constructor.build()
-        total_length = len(df["syllable_id"])
-        before_carriage, after_carriage = get_carriage_returns(filepath, total_length)
-        df["word-before-carriage"] = before_carriage
-        df["word-after-carriage"] = after_carriage
-        df["word-before-carriage"] = df.groupby("word_id")["word-before-carriage"].transform("max")
-        df["word-after-carriage"] = df.groupby("word_id")["word-after-carriage"].transform("max")
-        print(f"Written carriage return information for {passage_name} to {out_dir}")
-        # check if columns are present in the dataframe
-        if "word-before-carriage" not in df.columns or "word-after-carriage" not in df.columns:
-            raise ValueError("Required columns are missing from the DataFrame.")
 
 
         df.to_csv(os.path.join(out_dir, f"{passage_name}-scaffold.csv"), index=False)

@@ -211,35 +211,3 @@ class WordPOSExtractor(FeatureExtractor):
                 pos = tag[1]
             all_tags.extend([pos] * len(entry.syllables))
         return all_tags
-
-class WordBeforeCarriageExtractor(FeatureExtractor):
-    """
-    Marks whether the previous word ends with a carriage return.
-    """
-    
-    feature_name = "word-before-carriage"
-
-    def extract(self, syllable_directory: list[SyllableEntry], feature_column: str) -> list[int]:
-        features = []
-        for entry in syllable_directory:
-            if entry.word.text.endswith("\r"):
-                features += [1] * len(entry.syllables)
-            else:
-                features += [0] * len(entry.syllables)
-        return features
-
-class WordAfterCarriageExtractor(FeatureExtractor):
-    """
-    Marks whether the word ends with a carriage return.
-    """
-    
-    feature_name = "word-after-carriage"
-
-    def extract(self, syllable_directory: list[SyllableEntry], feature_column: str) -> list[int]:
-        features = []
-        for entry in syllable_directory:
-            if entry.word.text.endswith("\r"):
-                features += [1] * len(entry.syllables)
-            else:
-                features += [0] * len(entry.syllables)
-        return features

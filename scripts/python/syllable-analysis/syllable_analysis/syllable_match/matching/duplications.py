@@ -47,8 +47,6 @@ def match_duplications(df: pd.DataFrame) -> None:
             and (syll_a["word-after-period"] == duplication_start["word-after-period"])
             and (syll_a["word-before-comma"] == duplication_start["word-before-comma"])
             and (syll_a["word-after-comma"] == duplication_start["word-after-comma"])
-            and (syll_a["word-before-carriage"] == duplication_start["word-before-carriage"])
-            and (syll_a["word-after-carriage"] == duplication_start["word-after-carriage"])
         ]
 
         # Filter for N+1 syllable matches
@@ -71,14 +69,6 @@ def match_duplications(df: pd.DataFrame) -> None:
             )
             and (
                 syll_b["word-after-comma"] == duplication_following["word-after-comma"]
-            )
-            and (
-                syll_b["word-before-carriage"]
-                == duplication_following["word-before-carriage"]
-            )
-            and (
-                syll_b["word-after-carriage"]
-                == duplication_following["word-after-carriage"]
             )
         ]
 
@@ -164,8 +154,6 @@ def match_duplications(df: pd.DataFrame) -> None:
             and (syll_a["word-after-period"] == duplication_end["word-after-period"])
             and (syll_a["word-before-comma"] == duplication_end["word-before-comma"])
             and (syll_a["word-after-comma"] == duplication_end["word-after-comma"])
-            and (syll_a["word-before-carriage"] == duplication_end["word-before-carriage"])
-            and (syll_a["word-after-carriage"] == duplication_end["word-after-carriage"])
         ]
 
         # Filter for N+1 syllable matches
@@ -188,14 +176,6 @@ def match_duplications(df: pd.DataFrame) -> None:
             )
             and (
                 syll_b["word-after-comma"] == duplication_following["word-after-comma"]
-            )
-            and (
-                syll_b["word-before-carriage"]
-                == duplication_following["word-before-carriage"]
-            )
-            and (
-                syll_b["word-after-carriage"]
-                == duplication_following["word-after-carriage"]
             )
         ]
 
@@ -289,8 +269,6 @@ def match_duplications_alt(df: pd.DataFrame) -> None:
             and (syll_a["word-after-period"] == duplication_start["word-after-period"])
             and (syll_a["word-before-comma"] == duplication_start["word-before-comma"])
             and (syll_a["word-after-comma"] == duplication_start["word-after-comma"])
-            and (syll_a["word-before-carriage"] == duplication_start["word-before-carriage"])
-            and (syll_a["word-after-carriage"] == duplication_start["word-after-carriage"])
         ]
 
         # Conditional matches using implication logic
@@ -313,14 +291,6 @@ def match_duplications_alt(df: pd.DataFrame) -> None:
                 not syll_a["word-after-comma"]
                 or (syll_a["first-syll-word"] == duplication_start["first-syll-word"])
             )
-            and (
-                not syll_a["word-before-carriage"]
-                or (syll_a["last-syll-word"] == duplication_start["last-syll-word"])
-            )
-            and (
-                not syll_a["word-after-carriage"]
-                or (syll_a["first-syll-word"] == duplication_start["first-syll-word"])
-            )
         ]
 
         # Filter for N+1 syllable matches
@@ -341,14 +311,6 @@ def match_duplications_alt(df: pd.DataFrame) -> None:
             )
             and (
                 syll_b["word-after-comma"] == duplication_following["word-after-comma"]
-            )
-            and (
-                syll_b["word-before-carriage"]
-                == duplication_following["word-before-carriage"]
-            )
-            and (
-                syll_b["word-after-carriage"]
-                == duplication_following["word-after-carriage"]
             )
         ]
 
@@ -373,17 +335,6 @@ def match_duplications_alt(df: pd.DataFrame) -> None:
             )
             and (
                 not syll_b["word-after-comma"]
-                or (
-                    syll_b["first-syll-word"]
-                    == duplication_following["first-syll-word"]
-                )
-            )
-            and (
-                not syll_b["word-before-carriage"]
-                or (syll_b["last-syll-word"] == duplication_following["last-syll-word"])
-            )
-            and (
-                not syll_b["word-after-carriage"]
                 or (
                     syll_b["first-syll-word"]
                     == duplication_following["first-syll-word"]
@@ -474,8 +425,6 @@ def match_duplications_alt(df: pd.DataFrame) -> None:
             and (syll_a["word-after-period"] == duplication_end["word-after-period"])
             and (syll_a["word-before-comma"] == duplication_end["word-before-comma"])
             and (syll_a["word-after-comma"] == duplication_end["word-after-comma"])
-            and (syll_a["word-before-carriage"] == duplication_end["word-before-carriage"])
-            and (syll_a["word-after-carriage"] == duplication_end["word-after-carriage"])
         ]
 
         potential_syllables = [
@@ -497,14 +446,6 @@ def match_duplications_alt(df: pd.DataFrame) -> None:
                 not syll_a["word-after-comma"]
                 or (syll_a["first-syll-word"] == duplication_end["first-syll-word"])
             )
-            and (
-                not syll_a["word-before-carriage"]
-                or (syll_a["last-syll-word"] == duplication_end["last-syll-word"])
-            )
-            and (
-                not syll_a["word-after-carriage"]
-                or (syll_a["first-syll-word"] == duplication_end["first-syll-word"])
-            )
         ]
 
         potential_syllables = [
@@ -524,14 +465,6 @@ def match_duplications_alt(df: pd.DataFrame) -> None:
             )
             and (
                 syll_b["word-after-comma"] == duplication_following["word-after-comma"]
-            )
-            and (
-                syll_b["word-before-carriage"]
-                == duplication_following["word-before-carriage"]
-            )
-            and (
-                syll_b["word-after-carriage"]
-                == duplication_following["word-after-carriage"]
             )
         ]
 
@@ -555,17 +488,6 @@ def match_duplications_alt(df: pd.DataFrame) -> None:
             )
             and (
                 not syll_b["word-after-comma"]
-                or (
-                    syll_b["first-syll-word"]
-                    == duplication_following["first-syll-word"]
-                )
-            )
-            and (
-                not syll_b["word-before-carriage"]
-                or (syll_b["last-syll-word"] == duplication_following["last-syll-word"])
-            )
-            and (
-                not syll_b["word-after-carriage"]
                 or (
                     syll_b["first-syll-word"]
                     == duplication_following["first-syll-word"]
