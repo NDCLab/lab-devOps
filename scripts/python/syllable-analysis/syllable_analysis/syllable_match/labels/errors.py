@@ -121,9 +121,9 @@ def label_errors(df: pd.DataFrame) -> None:
             (idx == len(df) - 1) or (df.iloc[idx + 1]["low-error"] == 1)
         ):
             df.at[idx, "high-error-end"] = 1
-        if (row["low-error-start"] == 1) and (df.iloc[idx + 1]["allowable-disfluency"] == 1):
+        if (row["low-error-start"] == 1) and (idx < len(df) - 1) and (df.iloc[idx + 1]["allowable-disfluency"] == 1):
             df.at[idx, "low-error-end"] = 1
-        if (row["high-error-start"] == 1) and (df.iloc[idx + 1]["allowable-disfluency"] == 1):
+        if (row["high-error-start"] == 1) and (idx < len(df) - 1) and (df.iloc[idx + 1]["allowable-disfluency"] == 1):
             df.at[idx, "high-error-end"] = 1
 
     # Generate before/after indicators with a window size of 7
