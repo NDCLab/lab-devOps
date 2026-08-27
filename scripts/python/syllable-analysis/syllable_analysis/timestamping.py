@@ -2,6 +2,7 @@ import logging
 import os
 import pandas as pd
 
+
 def set_error_syllable(row_data, passage_df, idx, idx_col, matched_col):
     """
     Sets the target syllable information in the row_data dictionary based on the provided index and columns.
@@ -10,8 +11,6 @@ def set_error_syllable(row_data, passage_df, idx, idx_col, matched_col):
     """
     if pd.isna(idx):
         logging.warning(f"Index is NaN for row {row_data['SyllableID']}, cannot set error syllable for idx_col {row_data['SyllableID']} and matched_col {matched_col}.")
-        row_data["TargetSyllableID"] = pd.NA
-        row_data["TargetSyllable"] = pd.NA
         return row_data
 
     error_row = passage_df[
@@ -20,8 +19,7 @@ def set_error_syllable(row_data, passage_df, idx, idx_col, matched_col):
     ]
 
     if len(error_row) == 1:
-        row_data["TargetSyllableID"] = error_row["SyllableID"].iloc[0]
-        row_data["TargetSyllable"] = error_row["Syllable"].iloc[0]
+        row_data["SubType"] = error_row["SubType"].iloc[0] if "SubType" in error_row.columns else ""
     else:
         logging.warning(f"For index {idx}, found {len(error_row)} for matched syllable {row_data['SyllableID']} ({row_data['Syllable']}) and matched_col {matched_col}. Cannot set TargetSyllableID. ")
     return row_data
@@ -72,14 +70,11 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
     "Error_WordStressError": "Word Stress Error",
     }
 
-    comparison_types = {
-        "hesitation": {"start": "offset", "end": "onset"},
-        "high-error": {"start": "onset", "end": "offset"},
-        "low-error": {"start": "onset", "end": "offset"},
-    }
+    comparison_types = { "hesitation", "high-error", "low-error"}
+    start_end = ["start", "end" ]
 
     for participant_id in os.listdir(processed_passages_dir):
-        logging.info(f"Creating timestamp templates for {participant_id} for timestamping")
+        logging.debug(f"Creating timestamp templates for {participant_id} for timestamping")
         # Prepare output location
         sub_timestamp_dir = os.path.join(timestamp_dir, participant_id)
         os.makedirs(sub_timestamp_dir, exist_ok=True)
@@ -93,6 +88,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
 
             timestamp_rows = []
             for _, row in passage_df.iterrows():
+                row
                 #print(f"Processing row: {row['SyllableID']}, {row['Syllable']}")
                 row_data = {
                     "SyllableID": row["SyllableID"],
@@ -102,7 +98,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                 # Figure out what kind of deviation (if any) this row has,
                 # or if it has been matched as a comparison syllable.
                 row_types = []
-                row_data["ErrorType"] = ""
+                row_data["SubType"] = ""
                 # Deviation types
                 if row["hesitation-start"] == 1 or row["hesitation-end"] == 1:
                     row_types.append("hesitation")
@@ -124,25 +120,28 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                     timestamp_rows.append(row_data.copy())
                     #logging.debug( f"Syllable {row_data['SyllableID']} is not deviation or comparison")
                     continue
-
-                #row_data["RowTypes"] = ", ".join(row_types)
-                #logging.debug(f"Syllable {row_data['SyllableID']} has types {row_data['RowTypes']}")
+                #row_data["Type"] = ", ".join(row_types)
+                #logging.debug(f"Syllable {row_data['SyllableID']} has types {row_data['Type']}")
                 # Mark for timestamping according to deviation type
                 for row_type in row_types:
                     #logging.debug(f"Processing syllable {row_data['SyllableID']} with types {row_type} and has {row_types}")
-                    row_data["RowTypes"] = row_type
-                    row_data["TargetSyllableID"] = pd.NA
-                    row_data["TargetSyllable"] = pd.NA
-                    row_data["ErrorType"] = ""
+                    row_data["SubType"] = ""
+                    row_data["Index"] = pd.NA
+                    row_data["StartEnd"] = pd.NA
+                    row_data["Disfluency"] = 0
+                    if row_type in comparison_types:
+                        row_data["Index"] = row[f"{row_type}-idx"]
+                        row_data["Disfluency"] = 1
 
                     if "hesitation" in row_type:
                         # NB: For hesitations, we mark the coda (offset) of the "start" syllable and
                         # the attack (onset) of the "end" syllable (capturing the hesitation itself).
+                        row_data["Type"] = "hesitation"
                         if row["hesitation-start"] == 1:
-                            row_data["MarkLocation"] = "offset"
+                            row_data["StartEnd"] = 1
                             timestamp_rows.append(row_data.copy())
                         if row["hesitation-end"] == 1:
-                            row_data["MarkLocation"] = "onset"
+                            row_data["StartEnd"] = 2
                             timestamp_rows.append(row_data.copy())
 
                     elif "error" in row_type:
@@ -154,27 +153,38 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                             if row[column] != 0
                         ]
 
-                        row_data["ErrorType"] = ", ".join(error_types)
-
+                        row_data["SubType"] = ", ".join(error_types)
+                        if "high-error" in row_type:
+                            row_data["Type"] = "high-error"
+                        elif "low-error" in row_type:
+                            row_data["Type"] = "low-error"
 
                         if row["high-error-start"] == 1 or row["low-error-start"] == 1:
-                            row_data["MarkLocation"] = "onset"
+                            row_data["StartEnd"] = 1
                             timestamp_rows.append(row_data.copy())
                         if row["high-error-end"] == 1 or row["low-error-end"] == 1:
-                            row_data["MarkLocation"] = "offset"
+                            row_data["StartEnd"] = 2
                             timestamp_rows.append(row_data.copy())
+                            
 
                     if "comparison" in row_type:
-                        for match_type, mark_locations in comparison_types.items():
+                        row_data["Disfluency"] = 0
+                        for match_type in comparison_types:
                             if match_type not in row_type:
                                 continue
                             idx = row[f"comparison-{match_type}-idx"]
-                            for pair, mark_location in mark_locations.items():
+                            row_data["Index"] = idx
+                            # logging.debug(f"Index for comparison {match_type}  in comparison-{match_type}-idx is {idx} for syllable {row_data['SyllableID']}")
+                            for pair in start_end:
                                 if row[f"comparison-{match_type}-{pair}"] != 1:
                                     continue
-
+                                if pair == "start":
+                                    # logging.debug(f"Setting StartEnd to 1 for comparison {match_type} for syllable {row_data['SyllableID']}")
+                                    row_data["StartEnd"] = 1
+                                elif pair == "end":
+                                    # logging.debug(f"Setting StartEnd to 2 for comparison {match_type} for syllable {row_data['SyllableID']}")
+                                    row_data["StartEnd"] = 2
                                 row_data = set_error_syllable(row_data,passage_df,idx,f"{match_type}-idx",f"{match_type}-{pair}-matched",)
-                                row_data["MarkLocation"] = mark_location
                                 timestamp_rows.append(row_data.copy())
 
 
