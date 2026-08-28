@@ -210,11 +210,11 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
         start_c = f"comparison-{base}-start"
         end_c = f"comparison-{base}-end"
         idx_c = f"comparison-{base}-idx"
-        is_used = (df[start_c] == 1) | (df[end_c] == 1)
+        
         # a error can only contain one start or end syllable for each index,
         # therefore we need to exclude any syllables that are already used by other syllables with the different index
         # this is for the current marker type and the opposite marker type (start vs end)
-        conflicting = is_used & (df[idx_c] != current_idx)
+        
 
 
         # Start by finding all syllables where any-deviation = 0
@@ -226,17 +226,21 @@ def match_error_type_alt(df: pd.DataFrame, marker_type: str) -> None:
             & (df["any-deviation-after"] == 0)
             # Remove any syllables where the N+1 syllable does not also meet these criteria
             & (df["any-deviation-after"].shift(-1) == 0)
-            # Remove syllables matched on the previous iteration
-            & (~conflicting)
         ]
         logging.debug(f"Size of candidate_df: {len(candidate_df)}")
-
+        is_used = (candidate_df[start_c] == 1) | (candidate_df[end_c] == 1)
+        conflicting = is_used & (candidate_df[idx_c] != current_idx)
+        conflicting_df = candidate_df[conflicting]
         # Build a list of tuples of adjacent syllables
-        potential_syllables = [
-            (candidate_df.iloc[i], candidate_df.iloc[i + 1])
-            for i in range(len(candidate_df) - 1)
-            if candidate_df.iloc[i + 1].name == candidate_df.iloc[i].name + 1
-        ]
+        potential_syllables = []
+
+        for i in range(len(candidate_df) - 1):
+            if candidate_df.iloc[i + 1].name == candidate_df.iloc[i].name + 1:
+                syll_a = candidate_df.iloc[i]
+                syll_b = candidate_df.iloc[i + 1]
+                if not conflicting_df.empty and syll_a.name in conflicting_df.index:
+                    continue
+                potential_syllables.append((syll_a, syll_b))
         logging.debug(f"Size of potential_syllables: {len(potential_syllables)}")
 
         # Find candidate syllables that match perfectly on:
