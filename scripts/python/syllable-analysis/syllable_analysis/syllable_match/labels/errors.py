@@ -77,10 +77,16 @@ def label_errors(df: pd.DataFrame) -> None:
                 df.at[idx, "low-error-start"] = 1
                 low_error_idx += 1
                 df.at[idx, "low-error-idx"] = low_error_idx
-            # If syllable is marked as an allowable disfluency, or if next syllable has no deviations...
+            # If syllable is marked as an allowable disfluency, or if next syllable has no deviations,
+            # or if this is a low-error-start and the next syllable is an allowable disfluency...
             if (idx < len(df) - 1) and (
                 (row["allowable-disfluency"] == 1)
                 or (df.iloc[idx + 1]["any-deviation"] == 0)
+                or (
+                    (df.at[idx, "low-error-start"] == 1)
+                    and (df.iloc[idx + 1]["allowable-disfluency"] == 1)
+                    and (df.iloc[idx + 1]["low-error"] == 0)
+                )
             ):
                 df.at[idx, "low-error-end"] = 1
 
@@ -108,6 +114,11 @@ def label_errors(df: pd.DataFrame) -> None:
             if (idx < len(df) - 1) and (
                 (row["allowable-disfluency"] == 1)
                 or (df.iloc[idx + 1]["any-deviation"] == 0)
+                or (
+                    (df.at[idx, "high-error-start"] == 1)
+                    and (df.iloc[idx + 1]["allowable-disfluency"] == 1)
+                    and (df.iloc[idx + 1]["high-error"] == 0)
+                )
             ):
                 df.at[idx, "high-error-end"] = 1
 
@@ -120,10 +131,6 @@ def label_errors(df: pd.DataFrame) -> None:
         if (row["high-error"] == 1) and (
             (idx == len(df) - 1) or (df.iloc[idx + 1]["low-error"] == 1)
         ):
-            df.at[idx, "high-error-end"] = 1
-        if (row["low-error-start"] == 1) and (idx < len(df) - 1) and (df.iloc[idx + 1]["allowable-disfluency"] == 1):
-            df.at[idx, "low-error-end"] = 1
-        if (row["high-error-start"] == 1) and (idx < len(df) - 1) and (df.iloc[idx + 1]["allowable-disfluency"] == 1):
             df.at[idx, "high-error-end"] = 1
 
     # Generate before/after indicators with a window size of 7
