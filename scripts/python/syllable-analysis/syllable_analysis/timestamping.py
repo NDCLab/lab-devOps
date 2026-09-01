@@ -2,7 +2,6 @@ import logging
 import os
 import pandas as pd
 
-
 # Subtype labels
 ERROR_TYPE_COLUMNS = {
     "Error_Misproduction": "Misproduction",
@@ -12,7 +11,6 @@ ERROR_TYPE_COLUMNS = {
     "Error_OmittedWord": "Omitted Word",
     "Error_WordStressError": "Word Stress Error",
 }
-
 
 def get_error_subtype(row, error_type_columns=ERROR_TYPE_COLUMNS):
     """Build the SubType string for a syllable from its Error_* flags.
@@ -92,8 +90,7 @@ def extract_word_context(df: pd.DataFrame, word_id: int, n: int) -> list[str]:
 
     return context
 
-
-# Column order for the final CSV
+# order
 COLUMN_ORDER = [
     "SyllableID",
     "Syllable",
@@ -126,11 +123,9 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
             logging.debug(f"Processing passage {passage} for {participant_id} for timestamping")
             passage_df = pd.read_csv(os.path.join(sub_dir, passage))
 
-            # Identify which deviation indices are matched
-            # Errors: an idx is "matched" when at least one of its start or
-            # end found a comparison.  Hesitations: start and end are always
-            # matched as a pair, so checking either boundary is sufficient.
-            # Deviations with no matched boundary are excluded entirely.
+            # Need to identify which sylls are matched.
+            # hesitations if matched by definition have the start and end matched
+            # but errors may be partially matched (e.g. only start or end)
             matched_idxs = {}
             for level in ("high-error", "low-error"):
                 matched = set()
@@ -145,7 +140,6 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                         )
                 matched_idxs[level] = matched
 
-            # Hesitations
             hes_col = "hesitation-start-matched"
             hes_idx_col = "hesitation-idx"
             if hes_col in passage_df.columns:
@@ -157,7 +151,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
             else:
                 matched_idxs["hesitation"] = set()
 
-            # Build timestamp rows
+            # Build rows
             timestamp_rows = []
             for _, row in passage_df.iterrows():
                 row_data = {
@@ -165,10 +159,8 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                     "Syllable": row["Syllable"],
                 }
 
-                # Classify what this syllable carries
                 row_types = []
 
-                # Deviation types
                 if row.get("hesitation-start") == 1 or row.get("hesitation-end") == 1:
                     row_types.append("hesitation")
                 if row.get("any-error") == 1:
@@ -177,7 +169,6 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                     elif row.get("low-error") == 1:
                         row_types.append("low-error")
 
-                # Comparison types
                 if pd.notna(row.get("comparison-hesitation-idx")):
                     row_types.append("comparison (hesitation)")
                 if pd.notna(row.get("comparison-high-error-idx")):
@@ -185,12 +176,13 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                 if pd.notna(row.get("comparison-low-error-idx")):
                     row_types.append("comparison (low-error)")
 
-                # Plain correct syllable — no deviation, no comparison
+                # no deviation, no comparison
                 if not row_types:
                     timestamp_rows.append(row_data.copy())
                     continue
 
                 # rows for each type on this syllable
+                rows_before = len(timestamp_rows)
                 for row_type in row_types:
                     # Reset per-type fields
                     row_data["Type"] = ""
@@ -199,14 +191,13 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                     row_data["StartEnd"] = pd.NA
                     row_data["Deviation"] = 0
 
-                    # DEVIATION rows (Deviation = 1)
+                    # Deviation rows (Error Hes / Deviation = 1)
                     if "comparison" not in row_type:
                         row_data["Deviation"] = 1
 
                         if row_type == "hesitation":
                             hes_idx = row.get("hesitation-idx", pd.NA)
 
-                            # Skip hesitations that were not matched
                             if pd.isna(hes_idx) or int(hes_idx) not in matched_idxs.get("hesitation", set()):
                                 continue
 
@@ -222,7 +213,6 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                         elif row_type in ("high-error", "low-error"):
                             error_idx = row.get(f"{row_type}-idx")
 
-                            # Skip errors whose idx has no matched boundary
                             if pd.isna(error_idx) or int(error_idx) not in matched_idxs.get(row_type, set()):
                                 continue
 
@@ -239,7 +229,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                                 row_data["StartEnd"] = 2
                                 timestamp_rows.append(row_data.copy())
 
-                    # COMPARISON rows (Deviation = 0)
+                    # Comaprsion rows (Deviation = 0)
                     else:
                         row_data["Deviation"] = 0
 
@@ -249,7 +239,6 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
 
                             idx = row.get(f"comparison-{match_type}-idx")
 
-                            # Skip comparisons for unmatched deviations
                             if pd.isna(idx) or int(idx) not in matched_idxs.get(match_type, set()):
                                 continue
 
@@ -262,7 +251,6 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
 
                                 row_data["StartEnd"] = 1 if pair == "start" else 2
 
-                                # SubType: mirror the matched error's subtypes
                                 if match_type in ("high-error", "low-error"):
                                     row_data["SubType"] = get_matched_error_subtype(
                                         passage_df,
@@ -275,11 +263,13 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                                     row_data["SubType"] = ""
 
                                 timestamp_rows.append(row_data.copy())
-
-            # Assemble DataFrame
+                if len(timestamp_rows) == rows_before:
+                    timestamp_rows.append({
+                        "SyllableID": row["SyllableID"],
+                        "Syllable": row["Syllable"],
+                })
             timestamp_df = pd.DataFrame(timestamp_rows)
 
-            # Mark syllables that appear more than once
             timestamp_df["Duplicate"] = timestamp_df.apply(
                 lambda r: (
                     "X"
@@ -288,11 +278,10 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                 ),
                 axis=1,
             )
-            timestamp_df["Timestamp"] = pd.Series()
 
+            timestamp_df["Timestamp"] = pd.Series()
             final_cols = [c for c in COLUMN_ORDER if c in timestamp_df.columns]
             timestamp_df = timestamp_df[final_cols]
-
             timestamp_df.to_csv(
                 os.path.join(
                     sub_timestamp_dir, passage.replace("_all-cols", "")
