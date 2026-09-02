@@ -5,6 +5,42 @@ from syllable_analysis.utils import compute_window_indicator
 import pandas as pd
 
 
+def label_subtype_errors(df: pd.DataFrame) -> None:
+    col_map = {
+        "Error_Misproduction": "any-misproduction",
+        "Error_OmittedSyllable": "any-syll-omission",
+        "Error_InsertedSyllable": "any-syll-insertion",
+        "Error_WordStressError": "any-word-stress",
+        "Error_InsertedWord": "any-word-insertion",
+        "Error_OmittedWord": "any-word-omission",
+
+
+    }
+
+    orig_cols = list(col_map.keys())
+    new_cols = list(col_map.values())
+
+    # Vectorized boolean matrix (same as before)
+    bool_errors = df[orig_cols] > 0
+
+    # transform("max") broadcasts the per-group max back to every row, aligned to df's index.
+    # No merge, no suffixes, no temp columns, no fillna needed.
+    high_flags = bool_errors.groupby(df["high-error-idx"]).transform("max")
+    low_flags  = bool_errors.groupby(df["low-error-idx"]).transform("max")
+
+    high_valid = (df["high-error-start"] == 1) | (df["high-error-end"] == 1)
+    low_valid  = (df["low-error-start"] == 1)  | (df["low-error-end"] == 1)
+
+
+    high_masked = high_flags.where(high_valid.fillna(False), False)
+    low_masked  = low_flags.where(low_valid.fillna(False), False)
+
+    result = (high_masked | low_masked).astype(int)
+    result.columns = new_cols
+
+    df[new_cols] = result
+
+
 def label_errors(df: pd.DataFrame) -> None:
     """
     Labels errors in the DataFrame.
@@ -147,3 +183,5 @@ def label_errors(df: pd.DataFrame) -> None:
     df["low-error-start-before"], df["low-error-start-after"] = compute_window_indicator(
         df["low-error-start"], 7
     )
+
+    label_subtype_errors(df)
