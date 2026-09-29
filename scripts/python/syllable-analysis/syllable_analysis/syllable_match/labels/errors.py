@@ -3,6 +3,60 @@ import pandas as pd
 from syllable_analysis.utils import compute_window_indicator
 
 import pandas as pd
+import logging
+
+def validate_error_boundaries(df: pd.DataFrame, name: str = "", strict: bool = False) -> list[str]:
+    """Check that every labeled error has exactly one start and one end.
+
+    For each level ("high-error", "low-error") this verifies:
+      1. No orphans: every error syllable has an idx (i.e. its run got a start).
+      2. Each idx has exactly one *-start and exactly one *-end.
+      3. The start is the first syllable of the run and the end is the last.
+
+    Problems are logged as warnings. Returns the list of problem strings, and
+    raises ValueError instead if strict=True.
+    """
+    problems = []
+    tag = f"[{name}] " if name else ""
+    sid = df["SyllableID"] if "SyllableID" in df.columns else pd.Series(df.index, index=df.index)
+
+    for level in ("high-error", "low-error"):
+        err = df[level].fillna(0) == 1
+        start = df[f"{level}-start"].fillna(0) == 1
+        end = df[f"{level}-end"].fillna(0) == 1
+        idx = df[f"{level}-idx"]
+
+        # 1. Orphaned error syllables (no idx means no start was ever assigned)
+        orphans = df.index[err & idx.isna()].tolist()
+        if orphans:
+            problems.append(f"{tag}{level}: error syllable(s) with no idx/start at rows {orphans}")
+
+        # 2 & 3. Per-idx checks
+        for i, run in df[err & idx.notna()].groupby(idx[err & idx.notna()].astype(int)):
+            rows = run.index
+            n_start, n_end = int(start[rows].sum()), int(end[rows].sum())
+            span = f"{level} idx {i} (rows {rows.min()}-{rows.max()}, SyllableID {sid[rows.min()]}-{sid[rows.max()]})"
+            if n_start != 1:
+                problems.append(f"{tag}{span}: expected 1 start, found {n_start}")
+            if n_end != 1:
+                problems.append(f"{tag}{span}: expected 1 end, found {n_end}")
+            if n_start == 1 and not start[rows.min()]:
+                problems.append(f"{tag}{span}: start is not on the first syllable of the run")
+            if n_end == 1 and not end[rows.max()]:
+                problems.append(f"{tag}{span}: end is not on the last syllable of the run")
+
+        # Stray flags on syllables that aren't errors of this level
+        stray = df.index[(start | end) & ~err].tolist()
+        if stray:
+            problems.append(f"{tag}{level}: start/end flag on non-error syllable(s) at rows {stray}")
+
+    for p in problems:
+        logging.warning(p)
+    if not problems:
+        logging.debug(f"{tag}error boundaries OK")
+    if problems and strict:
+        raise ValueError("Error boundary validation failed:\n" + "\n".join(problems))
+    return problems
 
 
 def label_subtype_errors(df: pd.DataFrame) -> None:
@@ -41,7 +95,7 @@ def label_subtype_errors(df: pd.DataFrame) -> None:
     df[new_cols] = result
 
 
-def label_errors(df: pd.DataFrame) -> None:
+def label_errors(df: pd.DataFrame, name: str = "") -> None:
     """
     Labels errors in the DataFrame.
     """
@@ -117,12 +171,7 @@ def label_errors(df: pd.DataFrame) -> None:
             # or if this is a low-error-start and the next syllable is an allowable disfluency...
             if (idx < len(df) - 1) and (
                 (row["allowable-disfluency"] == 1)
-                or (df.iloc[idx + 1]["any-deviation"] == 0)
-                or (
-                    (df.at[idx, "low-error-start"] == 1)
-                    and (df.iloc[idx + 1]["allowable-disfluency"] == 1)
-                    and (df.iloc[idx + 1]["low-error"] == 0)
-                )
+                or (df.iloc[idx + 1]["low-error"] == 0)
             ):
                 df.at[idx, "low-error-end"] = 1
 
@@ -149,25 +198,9 @@ def label_errors(df: pd.DataFrame) -> None:
             # If syllable is marked as an allowable disfluency, or if next syllable is a comparison...
             if (idx < len(df) - 1) and (
                 (row["allowable-disfluency"] == 1)
-                or (df.iloc[idx + 1]["any-deviation"] == 0)
-                or (
-                    (df.at[idx, "high-error-start"] == 1)
-                    and (df.iloc[idx + 1]["allowable-disfluency"] == 1)
-                    and (df.iloc[idx + 1]["high-error"] == 0)
-                )
+                or (df.iloc[idx + 1]["high-error"] == 0)
             ):
                 df.at[idx, "high-error-end"] = 1
-
-    for idx, row in df.iterrows():
-        # After marking high and low errors, check for endpoints
-        if (row["low-error"] == 1) and (
-            (idx == len(df) - 1) or (df.iloc[idx + 1]["high-error"] == 1)
-        ):
-            df.at[idx, "low-error-end"] = 1
-        if (row["high-error"] == 1) and (
-            (idx == len(df) - 1) or (df.iloc[idx + 1]["low-error"] == 1)
-        ):
-            df.at[idx, "high-error-end"] = 1
 
     # Generate before/after indicators with a window size of 7
     df["high-error-before"], df["high-error-after"] = compute_window_indicator(
@@ -185,3 +218,4 @@ def label_errors(df: pd.DataFrame) -> None:
     )
 
     label_subtype_errors(df)
+    validate_error_boundaries(df, name=name)
