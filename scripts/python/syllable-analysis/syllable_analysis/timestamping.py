@@ -104,6 +104,9 @@ COLUMN_ORDER = [
     "Deviation",
     "Duplicate",
     "Timestamp",
+    "PTT",
+    "Discrepancy",
+    "Incomplete"
 ]
 
 
@@ -191,6 +194,7 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                     continue
 
                 # rows for each type on this syllable
+                rows_before = len(timestamp_rows)
                 for row_type in row_types:
                     # Reset per-type fields
                     row_data["Type"] = ""
@@ -276,6 +280,13 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
 
                                 timestamp_rows.append(row_data.copy())
 
+                # If every type on this syllable was filtered out (unmatched),
+                # still emit a plain row so the syllable appears in the sheet.
+                if len(timestamp_rows) == rows_before:
+                    timestamp_rows.append({
+                        "SyllableID": row["SyllableID"],
+                        "Syllable": row["Syllable"],
+                    })
             # Assemble DataFrame
             timestamp_df = pd.DataFrame(timestamp_rows)
 
@@ -289,6 +300,9 @@ def create_timestamping_sheets(processed_passages_dir: str, output_dir: str):
                 axis=1,
             )
             timestamp_df["Timestamp"] = pd.Series()
+            timestamp_df["PTT"] = pd.Series()
+            timestamp_df["Discrepancy"] = pd.Series()
+            timestamp_df["Incomplete"] = pd.Series()
 
             final_cols = [c for c in COLUMN_ORDER if c in timestamp_df.columns]
             timestamp_df = timestamp_df[final_cols]
