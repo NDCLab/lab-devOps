@@ -67,8 +67,6 @@ def label_subtype_errors(df: pd.DataFrame) -> None:
         "Error_WordStressError": "any-word-stress",
         "Error_InsertedWord": "any-word-insertion",
         "Error_OmittedWord": "any-word-omission",
-
-
     }
 
     orig_cols = list(col_map.keys())
@@ -77,14 +75,23 @@ def label_subtype_errors(df: pd.DataFrame) -> None:
     # Vectorized boolean matrix (same as before)
     bool_errors = df[orig_cols] > 0
 
-    # transform("max") broadcasts the per-group max back to every row, aligned to df's index.
-    # No merge, no suffixes, no temp columns, no fillna needed.
-    high_flags = bool_errors.groupby(df["high-error-idx"]).transform("max")
-    low_flags  = bool_errors.groupby(df["low-error-idx"]).transform("max")
+    if "high-error-idx" in df.columns and df["high-error-idx"].notna().any():
+        high_flags = bool_errors.groupby(df["high-error-idx"]).transform("max")
+    else:
+        high_flags = pd.DataFrame(False, index=df.index, columns=orig_cols)
 
-    high_valid = (df["high-error-start"] == 1) | (df["high-error-end"] == 1)
-    low_valid  = (df["low-error-start"] == 1)  | (df["low-error-end"] == 1)
+    if "low-error-idx" in df.columns and df["low-error-idx"].notna().any():
+        low_flags  = bool_errors.groupby(df["low-error-idx"]).transform("max")
+    else:
+        low_flags = pd.DataFrame(False, index=df.index, columns=orig_cols)
 
+    high_start = df["high-error-start"] == 1 if "high-error-start" in df.columns else pd.Series(False, index=df.index)
+    high_end   = df["high-error-end"] == 1 if "high-error-end" in df.columns else pd.Series(False, index=df.index)
+    low_start  = df["low-error-start"] == 1 if "low-error-start" in df.columns else pd.Series(False, index=df.index)
+    low_end    = df["low-error-end"] == 1 if "low-error-end" in df.columns else pd.Series(False, index=df.index)
+
+    high_valid = high_start | high_end
+    low_valid  = low_start | low_end
 
     high_masked = high_flags.where(high_valid.fillna(False), False)
     low_masked  = low_flags.where(low_valid.fillna(False), False)
@@ -167,10 +174,11 @@ def label_errors(df: pd.DataFrame, name: str = "") -> None:
                 df.at[idx, "low-error-start"] = 1
                 low_error_idx += 1
                 df.at[idx, "low-error-idx"] = low_error_idx
-            # If syllable is marked as an allowable disfluency, or if next syllable has no deviations,
-            # or if this is a low-error-start and the next syllable is an allowable disfluency...
-            if (idx < len(df) - 1) and (
-                (row["allowable-disfluency"] == 1)
+            # If this is the last syllable in the passage, or the syllable is marked as an
+            # allowable disfluency, or the next syllable is not part of this same low error...
+            if (
+                (idx == len(df) - 1)
+                or (row["allowable-disfluency"] == 1)
                 or (df.iloc[idx + 1]["low-error"] == 0)
             ):
                 df.at[idx, "low-error-end"] = 1
@@ -195,9 +203,11 @@ def label_errors(df: pd.DataFrame, name: str = "") -> None:
                 high_error_idx += 1
                 df.at[idx, "high-error-idx"] = high_error_idx
 
-            # If syllable is marked as an allowable disfluency, or if next syllable is a comparison...
-            if (idx < len(df) - 1) and (
-                (row["allowable-disfluency"] == 1)
+            # If this is the last syllable in the passage, or the syllable is marked as an
+            # allowable disfluency, or the next syllable is not part of this same high error...
+            if (
+                (idx == len(df) - 1)
+                or (row["allowable-disfluency"] == 1)
                 or (df.iloc[idx + 1]["high-error"] == 0)
             ):
                 df.at[idx, "high-error-end"] = 1
